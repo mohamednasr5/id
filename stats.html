@@ -15,7 +15,6 @@
       --text-color: #2d3436;
       --danger-color: #ff4757;
       --success-color: #2ecc71;
-      --warning-color: #ffa502;
     }
 
     * { box-sizing: border-box; }
@@ -115,7 +114,7 @@
 
     /* الحاوية الرئيسية */
     .container {
-      max-width: 1200px;
+      max-width: 1300px;
       margin: 0 auto;
       background: var(--glass-bg);
       backdrop-filter: blur(10px);
@@ -152,7 +151,6 @@
 
     h2 { margin: 0; color: var(--primary-color); font-weight: 700; font-size: 1.5rem; }
 
-    /* أزرار التحكم */
     .btn {
       padding: 8px 20px;
       border-radius: 50px;
@@ -166,7 +164,6 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      text-decoration: none;
     }
     .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
     
@@ -292,15 +289,8 @@
         }
         .circles, .controls, .btn_back, #loginScreen, .btn { display: none !important; }
         .container {
-            box-shadow: none;
-            margin: 0;
-            width: 100%;
-            max-width: 100%;
-            padding: 10px;
-            backdrop-filter: none;
-            animation: none;
-            opacity: 1;
-            transform: none;
+            box-shadow: none; margin: 0; width: 100%; max-width: 100%;
+            padding: 10px; backdrop-filter: none; animation: none; opacity: 1; transform: none;
         }
         .table-wrapper { overflow: visible; box-shadow: none; }
         table { min-width: 100%; border: 1px solid #000; }
@@ -352,6 +342,7 @@
       <table id="statTable">
         <thead>
           <tr>
+            <th>م</th>
             <th>المكان</th>
             <th>العدد الكلي</th>
             <th>مكرر</th>
@@ -362,7 +353,7 @@
           </tr>
         </thead>
         <tbody id="tbody">
-          <tr><td colspan="7"><div class="loader"></div></td></tr>
+          <tr><td colspan="8"><div class="loader"></div></td></tr>
         </tbody>
       </table>
     </div>
@@ -394,7 +385,8 @@
       "الكفر 3 بجوار ملعب برشلونة","مقهي أبو سليمان","حي الزهراء"
     ];
 
-    // تحميل البيانات
+    window.exportData = []; // لتخزين البيانات لغرض التصدير
+
     window.loadData = async function(){
       try {
         const snapshot = await get(child(ref(db), 'users'));
@@ -412,6 +404,9 @@
           perPlace[key].reps[u.repName].push(u.time);
           perPlace[key].times.push(u.time);
         }
+
+        // حفظ البيانات عالمياً للاكسيل
+        window.allStats = perPlace;
 
         let tbody = '';
         places.forEach((place, i) => {
@@ -431,7 +426,7 @@
             .join("");
 
           tbody += `<tr>
-            <td style="font-weight:bold; color:var(--primary-color)">${place}</td>
+            <td><b>${i + 1}</b></td> <td style="font-weight:bold; color:var(--primary-color)">${place}</td>
             <td><span style="font-size:1.1em; font-weight:bold;">${p.count}</span></td>
             <td><span class="statdupl">${p.duplicates||0}</span></td>
             <td style="text-align:right; direction:rtl;">${repDetails||'-'}</td>
@@ -442,45 +437,50 @@
         });
         document.getElementById('tbody').innerHTML = tbody;
       } catch (e) {
-        document.getElementById('tbody').innerHTML = `<tr><td colspan="7" style="color:red">حدث خطأ أثناء تحميل البيانات</td></tr>`;
+        document.getElementById('tbody').innerHTML = `<tr><td colspan="8" style="color:red">حدث خطأ أثناء تحميل البيانات</td></tr>`;
         console.error(e);
       }
     };
 
-    // دالة التصفير (الحذف)
     window.resetData = async function() {
-        if(confirm("تحذير هام:\nهل أنت متأكد من رغبتك في تصفير العدادات وحذف جميع البيانات؟\nلا يمكن التراجع عن هذا الإجراء!")) {
+        if(confirm("تحذير هام:\nهل أنت متأكد من رغبتك في تصفير العدادات وحذف جميع البيانات؟")) {
             const userPass = prompt("للتأكيد، أدخل كلمة المرور مرة أخرى (251988):");
             if(userPass === "251988"){
                 try {
                     await remove(ref(db, 'users'));
-                    alert("تم حذف البيانات وتصفير العدادات بنجاح.");
+                    alert("تم حذف البيانات.");
                     location.reload();
                 } catch(e) {
-                    alert("حدث خطأ أثناء الحذف: " + e.message);
+                    alert("حدث خطأ: " + e.message);
                 }
             } else {
-                alert("كلمة المرور خاطئة، تم إلغاء العملية.");
+                alert("كلمة المرور خاطئة.");
             }
         }
     };
   </script>
 
   <script>
-    // Password Logic
+    const places = [
+      "المنزلة الجديدة 1","المنزلة الجديدة 2","بحر البلد شارع الكابتن",
+      "مدرسة عبد العال شلبياية","مصنع البصل","الكفر 1","الكفر 2 تحت السكة",
+      "سوق الجملة","الفداء","نقطة حمام الكيال","الحمزاوي","الجرن 1","الجرن 2",
+      "البر التاني حي السلام","حي الاعجام","العزبة منشية ناصر","الطويل",
+      "البر التاني 2 الهاويس","الفقاعي","بحر البلد 2","حي الجبانة",
+      "الكفر 3 بجوار ملعب برشلونة","مقهي أبو سليمان","حي الزهراء"
+    ];
+
     function checkPassword() {
         const pass = document.getElementById('passwordInput').value;
         if (pass === '251988') {
             document.getElementById('loginScreen').style.display = 'none';
-            const container = document.querySelector('.container');
-            container.classList.add('visible');
+            document.querySelector('.container').classList.add('visible');
             if(window.loadData) window.loadData();
         } else {
             document.getElementById('errorMsg').style.display = 'block';
         }
     }
 
-    // Modal Logic
     function showRepStat(name, count) {
         document.getElementById('modalRepName').innerText = name;
         document.getElementById('modalRepCount').innerText = count;
@@ -489,56 +489,96 @@
     function closeRepModal() { document.getElementById('repModal').style.display = 'none'; }
     window.onclick = function(event) { if (event.target == document.getElementById('repModal')) closeRepModal(); }
 
-    // Excel Export Logic
+    // منطق الإكسيل المتقدم (فرد المناديب وتلوين الأعمدة)
     function exportToExcel() {
-        // نجهز الجدول للتصدير
-        var table = document.getElementById("statTable");
-        var rows = [];
-        
-        // إضافة العناوين مع تلوين الخلفية
-        var header = [];
-        var ths = table.querySelectorAll("thead th");
-        for (var i = 0; i < ths.length; i++) {
-            header.push(`<th style="background-color:#4a90e2; color:#ffffff; border:1px solid #000; padding:10px;">${ths[i].innerText}</th>`);
-        }
-        rows.push(`<tr>${header.join("")}</tr>`);
+        if(!window.allStats) { alert("انتظر تحميل البيانات أولاً"); return; }
 
-        // إضافة البيانات مع تلوين الصفوف
-        var trs = table.querySelectorAll("tbody tr");
-        for (var i = 0; i < trs.length; i++) {
-            var cols = [];
-            var tds = trs[i].querySelectorAll("td");
-            var bgColor = (i % 2 === 0) ? "#ffffff" : "#f2f2f2"; // Zebra striping
-            
-            for (var j = 0; j < tds.length; j++) {
-                // تنظيف النص من HTML tags الزائدة للمناديب
-                let text = tds[j].innerText;
-                cols.push(`<td style="background-color:${bgColor}; border:1px solid #000; text-align:center; vertical-align:middle;">${text}</td>`);
+        // 1. حساب أقصى عدد للمناديب في مكان واحد لإنشاء الأعمدة
+        let maxReps = 0;
+        places.forEach(place => {
+            let p = window.allStats[place];
+            if(p && p.reps) {
+                let count = Object.keys(p.reps).length;
+                if(count > maxReps) maxReps = count;
             }
-            rows.push(`<tr>${cols.join("")}</tr>`);
-        }
+        });
 
-        // بناء ملف الـ Excel كـ HTML Table
-        var excelFile = `
+        // 2. بناء عناوين الجدول
+        let header = `
+            <th style="background:#4a90e2; color:white; border:1px solid #000;">م</th>
+            <th style="background:#4a90e2; color:white; border:1px solid #000;">المكان</th>
+            <th style="background:#4a90e2; color:white; border:1px solid #000;">العدد الكلي</th>
+            <th style="background:#4a90e2; color:white; border:1px solid #000;">مكرر</th>
+        `;
+        // إنشاء أعمدة المناديب ديناميكياً
+        for(let i=1; i<=maxReps; i++) {
+            header += `<th style="background:#4a90e2; color:white; border:1px solid #000;">مندوب ${i}</th>`;
+            header += `<th style="background:#4a90e2; color:white; border:1px solid #000;">عدد ${i}</th>`;
+        }
+        header += `
+            <th style="background:#4a90e2; color:white; border:1px solid #000;">أول إدخال</th>
+            <th style="background:#4a90e2; color:white; border:1px solid #000;">آخر إدخال</th>
+            <th style="background:#4a90e2; color:white; border:1px solid #000;">المدة</th>
+        `;
+
+        // 3. بناء الصفوف
+        let rows = '';
+        places.forEach((place, index) => {
+            let p = window.allStats[place] || {count:0, duplicates:0, reps:{}, times:[]};
+            let minTime = p.times.length ? new Date(Math.min(...p.times.map(t=>new Date(t)))).toLocaleTimeString('ar-EG') : '-';
+            let maxTime = p.times.length ? new Date(Math.max(...p.times.map(t=>new Date(t)))).toLocaleTimeString('ar-EG') : '-';
+            let diff = (minTime!='-' && maxTime!='-') ? ((new Date(Math.max(...p.times.map(t=>new Date(t)))) - new Date(Math.min(...p.times.map(t=>new Date(t)))))/60000) : null;
+            let duration = (diff!==null)? `${Math.floor(diff/60)}:${Math.floor(diff%60)}`:'-';
+
+            let bgColor = (index % 2 === 0) ? "#ffffff" : "#f9f9f9"; // Zebra
+
+            let row = `<tr>
+                <td style="background:${bgColor}; border:1px solid #000;">${index + 1}</td>
+                <td style="background:${bgColor}; border:1px solid #000;">${place}</td>
+                <td style="background:${bgColor}; border:1px solid #000;">${p.count}</td>
+                <td style="background:${bgColor}; border:1px solid #000;">${p.duplicates||0}</td>
+            `;
+
+            // تعبئة بيانات المناديب
+            let repEntries = Object.entries(p.reps); // [['name', [times]], ['name2', [times]]]
+            for(let i=0; i<maxReps; i++) {
+                if(i < repEntries.length) {
+                    let repName = repEntries[i][0];
+                    let repCount = repEntries[i][1].length;
+                    row += `<td style="background:${bgColor}; border:1px solid #000;">${repName}</td>`;
+                    // تلوين عمود الرقم بالأخضر
+                    row += `<td style="background:#dff0d8; color:#2e7d32; font-weight:bold; border:1px solid #000;">${repCount}</td>`;
+                } else {
+                    // خلايا فارغة إذا لم يوجد مندوب
+                    row += `<td style="background:${bgColor}; border:1px solid #000;">-</td>`;
+                    row += `<td style="background:${bgColor}; border:1px solid #000;">-</td>`;
+                }
+            }
+
+            row += `
+                <td style="background:${bgColor}; border:1px solid #000;">${minTime}</td>
+                <td style="background:${bgColor}; border:1px solid #000;">${maxTime}</td>
+                <td style="background:${bgColor}; border:1px solid #000;">${duration}</td>
+            </tr>`;
+            rows += row;
+        });
+
+        let excelFile = `
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
             <head>
                 <meta charset="UTF-8">
-                <style>
-                    table { border-collapse: collapse; width: 100%; }
-                    td, th { border: 1px solid #000000; }
-                </style>
+                <style>table { border-collapse: collapse; width: 100%; } td, th { text-align: center; vertical-align: middle; }</style>
             </head>
             <body dir="rtl">
-                <table>${rows.join("")}</table>
+                <table><thead><tr>${header}</tr></thead><tbody>${rows}</tbody></table>
             </body>
             </html>
         `;
 
-        // تحميل الملف
         var blob = new Blob([excelFile], { type: 'application/vnd.ms-excel' });
         var link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "Statistics_Report.xls";
+        link.download = "Detailed_Report.xls";
         link.click();
     }
   </script>
