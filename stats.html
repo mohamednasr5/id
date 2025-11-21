@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>إحصائيات الدخول - محمي</title>
+  <title>لوحة التحكم والإحصائيات</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
   <style>
@@ -13,8 +13,9 @@
       --glass-bg: rgba(255, 255, 255, 0.95);
       --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
       --text-color: #2d3436;
-      --table-head-bg: rgba(0, 114, 255, 0.1);
-      --table-hover: rgba(0, 114, 255, 0.05);
+      --danger-color: #ff4757;
+      --success-color: #2ecc71;
+      --warning-color: #ffa502;
     }
 
     * { box-sizing: border-box; }
@@ -125,7 +126,7 @@
       opacity: 0;
       transform: translateY(20px);
       transition: 0.8s ease;
-      display: none; /* مخفي افتراضياً حتى تسجيل الدخول */
+      display: none;
     }
 
     .container.visible {
@@ -140,28 +141,39 @@
       align-items: center;
       margin-bottom: 20px;
       flex-wrap: wrap;
-      gap: 15px;
+      gap: 10px;
+    }
+    
+    .controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
     }
 
-    h2 { margin: 0; color: var(--primary-color); font-weight: 700; }
+    h2 { margin: 0; color: var(--primary-color); font-weight: 700; font-size: 1.5rem; }
 
-    .btn_back {
-      background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
-      color: white;
-      padding: 10px 25px;
+    /* أزرار التحكم */
+    .btn {
+      padding: 8px 20px;
       border-radius: 50px;
       border: none;
-      font-size: 16px;
+      font-size: 14px;
       cursor: pointer;
       transition: 0.3s;
-      box-shadow: 0 4px 15px rgba(0, 114, 255, 0.3);
+      color: white;
+      font-family: 'Cairo', sans-serif;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
       text-decoration: none;
-      display: inline-block;
     }
-    .btn_back:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 114, 255, 0.4);
-    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+    
+    .btn-back { background: #7f8c8d; }
+    .btn-print { background: var(--primary-color); }
+    .btn-excel { background: var(--success-color); }
+    .btn-reset { background: var(--danger-color); }
 
     /* تنسيق الجدول */
     .table-wrapper {
@@ -185,18 +197,19 @@
     }
 
     th {
-      background: var(--table-head-bg);
+      background: rgba(0, 114, 255, 0.1);
       color: var(--primary-color);
       font-weight: 700;
       white-space: nowrap;
       position: sticky;
       top: 0;
+      border-bottom: 2px solid var(--primary-color);
     }
 
     tr:last-child td { border-bottom: none; }
-    tr:hover td { background: var(--table-hover); }
+    tr:hover td { background: rgba(0, 114, 255, 0.05); }
 
-    /* تنسيق بيانات المندوب القابلة للنقر */
+    /* تنسيق المندوب */
     .rep-tag {
         cursor: pointer;
         padding: 4px 8px;
@@ -221,10 +234,9 @@
       border-radius: 12px;
       font-size: 0.9em;
     }
-    
     .statdupl { color: #e74c3c; font-weight: bold; }
 
-    /* نافذة عرض رقم المندوب */
+    /* Modal */
     #repModal {
         position: fixed;
         top: 0; left: 0; width: 100%; height: 100%;
@@ -245,52 +257,57 @@
         width: 90%;
         max-width: 450px;
     }
-    @keyframes popIn {
-        0% { transform: scale(0.5); opacity: 0; }
-        100% { transform: scale(1); opacity: 1; }
-    }
+    @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     .close-modal {
         position: absolute;
-        top: 15px; left: 15px;
-        font-size: 24px;
-        cursor: pointer;
-        color: #aaa;
-        width: 30px; height: 30px;
-        line-height: 30px;
-        background: #eee;
-        border-radius: 50%;
+        top: 15px; left: 15px; font-size: 24px; cursor: pointer;
+        color: #aaa; width: 30px; height: 30px; line-height: 30px;
+        background: #eee; border-radius: 50%;
     }
-    .rep-name-title {
-        color: var(--primary-color);
-        margin-bottom: 10px;
-        font-size: 1.5rem;
-    }
-    .rep-subtitle {
-        color: #666;
-        font-size: 1.2rem;
-        margin: 0;
-    }
+    .rep-name-title { color: var(--primary-color); margin-bottom: 10px; font-size: 1.5rem; }
+    .rep-subtitle { color: #666; font-size: 1.2rem; margin: 0; }
     .big-number {
-        font-size: 6rem;
-        font-weight: 800;
+        font-size: 6rem; font-weight: 800;
         background: -webkit-linear-gradient(var(--secondary-color), var(--primary-color));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin: 10px 0;
-        line-height: 1;
+        margin: 10px 0; line-height: 1;
     }
 
     /* Spinner */
     .loader {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid var(--primary-color);
-      border-radius: 50%;
-      width: 40px; height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 50px auto;
+      border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color);
+      border-radius: 50%; width: 40px; height: 40px;
+      animation: spin 1s linear infinite; margin: 50px auto;
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+    /* تنسيق الطباعة */
+    @media print {
+        body {
+            background: white;
+            animation: none;
+            padding: 0;
+            color: black;
+        }
+        .circles, .controls, .btn_back, #loginScreen, .btn { display: none !important; }
+        .container {
+            box-shadow: none;
+            margin: 0;
+            width: 100%;
+            max-width: 100%;
+            padding: 10px;
+            backdrop-filter: none;
+            animation: none;
+            opacity: 1;
+            transform: none;
+        }
+        .table-wrapper { overflow: visible; box-shadow: none; }
+        table { min-width: 100%; border: 1px solid #000; }
+        th { background-color: #eee !important; color: #000 !important; border: 1px solid #000; }
+        td { border: 1px solid #000; color: #000; }
+        h2 { text-align: center; color: #000; text-decoration: underline; margin-bottom: 20px; }
+    }
   </style>
 </head>
 <body>
@@ -323,7 +340,12 @@
   <div class="container">
     <div class="header-row">
       <h2>إحصائيات الدخول</h2>
-      <button class="btn_back" onclick="location='DelegateApp_Pro.html'">عودة</button>
+      <div class="controls">
+        <button class="btn btn-print" onclick="window.print()">طباعة A4</button>
+        <button class="btn btn-excel" onclick="exportToExcel()">تصدير Excel</button>
+        <button class="btn btn-reset" onclick="resetData()">تصفير الإحصائيات</button>
+        <button class="btn btn-back" onclick="location='DelegateApp_Pro.html'">عودة</button>
+      </div>
     </div>
 
     <div class="table-wrapper">
@@ -332,11 +354,11 @@
           <tr>
             <th>المكان</th>
             <th>العدد الكلي</th>
-            <th>الأشخاص المكررين</th>
-            <th>تفاصيل المناديب (اضغط للاسم)</th>
+            <th>مكرر</th>
+            <th>تفاصيل المناديب</th>
             <th>أول إدخال</th>
             <th>آخر إدخال</th>
-            <th>المدة المستغرقة</th>
+            <th>المدة</th>
           </tr>
         </thead>
         <tbody id="tbody">
@@ -348,7 +370,7 @@
   
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, get, child, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
@@ -372,7 +394,7 @@
       "الكفر 3 بجوار ملعب برشلونة","مقهي أبو سليمان","حي الزهراء"
     ];
 
-    // وظيفة تحميل البيانات (يتم استدعاؤها بعد كلمة السر)
+    // تحميل البيانات
     window.loadData = async function(){
       try {
         const snapshot = await get(child(ref(db), 'users'));
@@ -391,7 +413,6 @@
           perPlace[key].times.push(u.time);
         }
 
-        // عرض الإحصائيات
         let tbody = '';
         places.forEach((place, i) => {
           let p = perPlace[place] || {count:0, duplicates:0, reps:{}, times:[]};
@@ -400,7 +421,6 @@
           let diff = (minTime!='-' && maxTime!='-') ? ((maxTime-minTime)/60000) : null;
           let duration = (diff!==null)? `${Math.floor(diff/60)} س و ${Math.floor(diff%60).toString().padStart(2,'0')} د`:'-';
           
-          // توليد قائمة المناديب مع خاصية الضغط
           let repDetails = Object.entries(p.reps)
             .map(([k,v]) => `
                 <div class="rep-tag" onclick="showRepStat('${k}', ${v.length})">
@@ -426,39 +446,100 @@
         console.error(e);
       }
     };
+
+    // دالة التصفير (الحذف)
+    window.resetData = async function() {
+        if(confirm("تحذير هام:\nهل أنت متأكد من رغبتك في تصفير العدادات وحذف جميع البيانات؟\nلا يمكن التراجع عن هذا الإجراء!")) {
+            const userPass = prompt("للتأكيد، أدخل كلمة المرور مرة أخرى (251988):");
+            if(userPass === "251988"){
+                try {
+                    await remove(ref(db, 'users'));
+                    alert("تم حذف البيانات وتصفير العدادات بنجاح.");
+                    location.reload();
+                } catch(e) {
+                    alert("حدث خطأ أثناء الحذف: " + e.message);
+                }
+            } else {
+                alert("كلمة المرور خاطئة، تم إلغاء العملية.");
+            }
+        }
+    };
   </script>
 
   <script>
-    // منطق كلمة المرور
+    // Password Logic
     function checkPassword() {
         const pass = document.getElementById('passwordInput').value;
         if (pass === '251988') {
             document.getElementById('loginScreen').style.display = 'none';
             const container = document.querySelector('.container');
             container.classList.add('visible');
-            // بدء تحميل البيانات فقط بعد كلمة السر الصحيحة
             if(window.loadData) window.loadData();
         } else {
             document.getElementById('errorMsg').style.display = 'block';
         }
     }
 
-    // منطق عرض نافذة المندوب
+    // Modal Logic
     function showRepStat(name, count) {
         document.getElementById('modalRepName').innerText = name;
         document.getElementById('modalRepCount').innerText = count;
         document.getElementById('repModal').style.display = 'flex';
     }
+    function closeRepModal() { document.getElementById('repModal').style.display = 'none'; }
+    window.onclick = function(event) { if (event.target == document.getElementById('repModal')) closeRepModal(); }
 
-    function closeRepModal() {
-        document.getElementById('repModal').style.display = 'none';
-    }
-
-    // إغلاق النافذة عند الضغط خارجها
-    window.onclick = function(event) {
-        if (event.target == document.getElementById('repModal')) {
-            closeRepModal();
+    // Excel Export Logic
+    function exportToExcel() {
+        // نجهز الجدول للتصدير
+        var table = document.getElementById("statTable");
+        var rows = [];
+        
+        // إضافة العناوين مع تلوين الخلفية
+        var header = [];
+        var ths = table.querySelectorAll("thead th");
+        for (var i = 0; i < ths.length; i++) {
+            header.push(`<th style="background-color:#4a90e2; color:#ffffff; border:1px solid #000; padding:10px;">${ths[i].innerText}</th>`);
         }
+        rows.push(`<tr>${header.join("")}</tr>`);
+
+        // إضافة البيانات مع تلوين الصفوف
+        var trs = table.querySelectorAll("tbody tr");
+        for (var i = 0; i < trs.length; i++) {
+            var cols = [];
+            var tds = trs[i].querySelectorAll("td");
+            var bgColor = (i % 2 === 0) ? "#ffffff" : "#f2f2f2"; // Zebra striping
+            
+            for (var j = 0; j < tds.length; j++) {
+                // تنظيف النص من HTML tags الزائدة للمناديب
+                let text = tds[j].innerText;
+                cols.push(`<td style="background-color:${bgColor}; border:1px solid #000; text-align:center; vertical-align:middle;">${text}</td>`);
+            }
+            rows.push(`<tr>${cols.join("")}</tr>`);
+        }
+
+        // بناء ملف الـ Excel كـ HTML Table
+        var excelFile = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    table { border-collapse: collapse; width: 100%; }
+                    td, th { border: 1px solid #000000; }
+                </style>
+            </head>
+            <body dir="rtl">
+                <table>${rows.join("")}</table>
+            </body>
+            </html>
+        `;
+
+        // تحميل الملف
+        var blob = new Blob([excelFile], { type: 'application/vnd.ms-excel' });
+        var link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "Statistics_Report.xls";
+        link.click();
     }
   </script>
 </body>
