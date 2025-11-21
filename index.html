@@ -2,9 +2,11 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>تسجيل دخول المندوب</title>
+  <title>تسجيل دخول المندوب - ماسح ذكي</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
+  <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+  
   <style>
     :root {
       --primary-color: #0072ff;
@@ -28,7 +30,7 @@
       background: var(--bg-gradient);
       background-size: 400% 400%;
       animation: gradientBG 15s ease infinite;
-      overflow: hidden;
+      overflow: hidden; /* لمنع السكرول مع الكاميرا */
       color: var(--text-color);
     }
 
@@ -38,27 +40,17 @@
       100% { background-position: 0% 50%; }
     }
 
-    .circles {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1;
-    }
-    .circles li {
-      position: absolute; display: block; list-style: none;
-      width: 20px; height: 20px; background: rgba(255, 255, 255, 0.2);
-      animation: animate 25s linear infinite; bottom: -150px; border-radius: 50%;
-    }
+    /* الخلفية المتحركة */
+    .circles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; margin: 0; padding: 0; }
+    .circles li { position: absolute; display: block; list-style: none; width: 20px; height: 20px; background: rgba(255, 255, 255, 0.2); animation: animate 25s linear infinite; bottom: -150px; border-radius: 50%; }
     .circles li:nth-child(1){ left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
     .circles li:nth-child(2){ left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
     .circles li:nth-child(3){ left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
     .circles li:nth-child(4){ left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
     .circles li:nth-child(5){ left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
-    @keyframes animate {
-      0%{ transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 0; }
-      100%{ transform: translateY(-1000px) rotate(720deg); opacity: 0; border-radius: 50%; }
-    }
+    @keyframes animate { 0%{ transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 0; } 100%{ transform: translateY(-1000px) rotate(720deg); opacity: 0; border-radius: 50%; } }
 
-    .container {
-      position: relative; z-index: 1; perspective: 1000px;
-    }
+    .container { position: relative; z-index: 1; perspective: 1000px; width: 100%; display: flex; justify-content: center; }
 
     .card {
       background: var(--glass-bg);
@@ -71,13 +63,9 @@
       animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
       transition: all 0.5s ease;
     }
-
     @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
-    h2 {
-      text-align: center; margin-bottom: 30px;
-      color: var(--primary-color); font-weight: 700; font-size: 24px; letter-spacing: -0.5px;
-    }
+    h2 { text-align: center; margin-bottom: 30px; color: var(--primary-color); font-weight: 700; font-size: 24px; }
 
     .input-group { position: relative; margin-bottom: 25px; }
 
@@ -93,16 +81,8 @@
       border-radius: 10px; font-family: 'Cairo', sans-serif;
       transition: 0.3s ease; color: #333;
     }
-
-    input:focus, input:not(:placeholder-shown) {
-      background: #fff; border-color: var(--secondary-color);
-      box-shadow: 0 0 15px rgba(0, 198, 255, 0.1);
-    }
-
-    input:focus ~ label, input:not(:placeholder-shown) ~ label {
-      top: 0; transform: translateY(-50%) scale(0.85);
-      background: #fff; color: var(--primary-color); font-weight: 600; border-radius: 5px;
-    }
+    input:focus, input:not(:placeholder-shown) { background: #fff; border-color: var(--secondary-color); box-shadow: 0 0 15px rgba(0, 198, 255, 0.1); }
+    input:focus ~ label, input:not(:placeholder-shown) ~ label { top: 0; transform: translateY(-50%) scale(0.85); background: #fff; color: var(--primary-color); font-weight: 600; border-radius: 5px; }
 
     .btn {
       background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
@@ -113,62 +93,94 @@
     }
     .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 114, 255, 0.4); }
     .btn:active { transform: translateY(1px); }
-
     .btn-secondary { background: linear-gradient(to right, #43cea2, #185a9d); margin-top: 15px; }
     .btn-danger { background: linear-gradient(to right, #ff416c, #ff4b2b); margin-top: 15px; }
 
-    .msg {
-      margin-top: 15px; text-align: center; font-size: 14px; font-weight: 600;
-      min-height: 20px; transition: 0.3s; padding: 10px; border-radius: 8px;
-    }
+    .msg { margin-top: 15px; text-align: center; font-size: 14px; font-weight: 600; min-height: 20px; transition: 0.3s; padding: 10px; border-radius: 8px; }
     .msg.error { color: var(--error-color); animation: shake 0.5s; }
     .msg.success { color: var(--success-color); }
 
-    /* --- ستايل المستطيل الأحمر المميز للتكرار --- */
     .duplicate-box {
-        background-color: #fff5f5;
-        border: 2px solid #ff0000;
-        color: #c0392b;
-        padding: 15px;
-        border-radius: 12px;
-        margin-top: 20px;
-        font-weight: bold;
-        box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
-        animation: pulseRed 0.8s infinite alternate;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+        background-color: #fff5f5; border: 2px solid #ff0000; color: #c0392b;
+        padding: 15px; border-radius: 12px; margin-top: 20px; font-weight: bold;
+        box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2); animation: pulseRed 0.8s infinite alternate;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
+    @keyframes pulseRed { from { border-color: #ff0000; } to { border-color: #ff6b6b; } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(10px); } 75% { transform: translateX(-10px); } }
 
-    @keyframes pulseRed {
-        from { border-color: #ff0000; box-shadow: 0 0 10px rgba(255, 0, 0, 0.3); }
-        to { border-color: #ff6b6b; box-shadow: 0 0 20px rgba(255, 0, 0, 0.6); }
+    /* --- زر الكاميرا --- */
+    .scan-btn {
+        position: absolute; left: 5px; top: 50%; transform: translateY(-50%);
+        background: none; border: none; cursor: pointer; font-size: 1.5rem;
+        color: var(--primary-color); padding: 5px; transition: 0.3s;
+        z-index: 10;
     }
+    .scan-btn:hover { transform: translateY(-50%) scale(1.1); color: var(--secondary-color); }
 
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(10px); }
-      75% { transform: translateX(-10px); }
+    /* --- نافذة الكاميرا (Overlay) --- */
+    #camera-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: #000; z-index: 9999; display: none;
+        flex-direction: column; align-items: center; justify-content: center;
     }
+    #camera-overlay.active { display: flex; }
+    
+    .camera-container { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+    video { width: 100%; height: 100%; object-fit: cover; }
+    
+    .scan-area {
+        position: absolute; width: 80%; height: 100px;
+        border: 2px solid #00c6ff; border-radius: 12px;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+        z-index: 10;
+    }
+    .scan-line {
+        width: 100%; height: 2px; background: #ef4444;
+        position: absolute; top: 50%;
+        animation: scanMove 2s infinite;
+    }
+    @keyframes scanMove { 0% { top: 10%; opacity: 0; } 50% { opacity: 1; } 100% { top: 90%; opacity: 0; } }
 
-    @media (max-width: 480px) {
-      .card { padding: 30px 20px; margin: 20px; width: 90%; }
-      h2 { font-size: 20px; }
+    .camera-controls {
+        position: absolute; bottom: 30px; z-index: 20; width: 100%;
+        display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
+    .close-camera {
+        background: #ef4444; color: white; border: none; padding: 10px 30px;
+        border-radius: 30px; font-weight: bold; cursor: pointer;
+    }
+    .scan-status { color: white; font-weight: bold; text-shadow: 0 2px 4px black; margin-bottom: 10px; direction: ltr; }
+    
+    canvas { display: none; }
     .hidden { display: none; }
     .fade-in { animation: fadeIn 0.5s forwards; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 480px) { .card { padding: 30px 20px; margin: 20px; width: 90%; } }
   </style>
 </head>
 <body>
 
   <audio id="errorSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+  <audio id="scanSound" src="https://actions.google.com/sounds/v1/science_fiction/scifi_laser.ogg" preload="auto"></audio>
 
   <ul class="circles">
     <li></li><li></li><li></li><li></li><li></li>
     <li></li><li></li><li></li><li></li><li></li>
   </ul>
+
+  <div id="camera-overlay">
+      <div class="camera-container">
+          <video id="video" autoplay playsinline muted></video>
+          <div class="scan-area"><div class="scan-line"></div></div>
+          <div class="camera-controls">
+              <div class="scan-status" id="scan-status-text">جاري البحث...</div>
+              <button class="close-camera" onclick="stopScanner()">إغلاق الكاميرا ❌</button>
+          </div>
+      </div>
+  </div>
+  <canvas id="canvas"></canvas>
 
   <div class="container">
     
@@ -191,8 +203,9 @@
       </div>
       
       <div class="input-group">
-        <input id="natID" type="number" autocomplete="off" placeholder=" " oninput="if(this.value.length>14)this.value=this.value.slice(0,14);">
-        <label for="natID">الرقم القومي (14 رقم)</label>
+        <input id="natID" type="text" autocomplete="off" placeholder=" " style="padding-left: 40px;">
+        <label for="natID">الرقم القومي / رقم المصنع</label>
+        <button class="scan-btn" onclick="startScanner()" title="مسح بالكاميرا">📷</button>
       </div>
       
       <button class="btn" onclick="addUser()">إضافة</button>
@@ -242,6 +255,7 @@
 
     let userPlace = null, userPlaceIdx = null, userID = null;
 
+    // --- منطق تسجيل الدخول ---
     window.login = function() {
       const msgDiv = document.getElementById('login-msg');
       msgDiv.textContent = ''; msgDiv.className = 'msg';
@@ -277,12 +291,13 @@
       }, 400);
     }
 
+    // --- منطق إضافة المستخدم (محدث) ---
     window.addUser = async function() {
       const btn = event.target;
       const originalText = btn.innerText;
       
       let name = document.getElementById('repName').value.trim();
-      let natid = document.getElementById('natID').value.trim();
+      let inputID = document.getElementById('natID').value.trim().toUpperCase(); // تحويل لحروف كبيرة للمقارنة
       const msg = document.getElementById('add-msg');
       msg.textContent = ''; msg.className = 'msg';
 
@@ -290,54 +305,64 @@
       if (name.length < 2) {
         msg.textContent = 'يرجى إدخال اسم المندوب'; msg.className += ' error'; return;
       }
-      if (!/^\d{14}$/.test(natid)) {
-        msg.textContent = 'يرجى إدخال الرقم القومي صحيح (14 رقمًا).'; msg.className += ' error'; return;
+      
+      // التحقق من الإدخال: إما 14 رقم (قومي) أو 7 خانات (مصنع)
+      const isNatID = /^\d{14}$/.test(inputID);
+      const isFactoryCode = /^[A-Z0-9]{7}$/.test(inputID);
+
+      if (!isNatID && !isFactoryCode) {
+        msg.textContent = 'يرجى إدخال رقم قومي صحيح (14 رقم) أو رقم مصنع (7 خانات).'; 
+        msg.className += ' error'; return;
       }
 
       btn.disabled = true; btn.innerText = 'جاري الإضافة...';
 
       try {
-        const snapshot = await get(child(ref(db), 'users/' + natid));
+        // نستخدم المدخل (سواء قومي أو مصنع) كمفتاح في قاعدة البيانات
+        // هذا يضمن عدم تكرار نفس القومي أو نفس رقم المصنع
+        const snapshot = await get(child(ref(db), 'users/' + inputID));
         
         if (snapshot.exists()) {
           // --- حالة وجود تكرار ---
           let data = snapshot.val();
           
-          // 1. تشغيل الصوت
           document.getElementById('errorSound').play().catch(e => console.log('Audio play blocked'));
 
-          // 2. إظهار الرسالة في المربع الأحمر المميز
-          msg.className = 'duplicate-box'; // كلاس جديد للستايل
+          msg.className = 'duplicate-box';
           msg.innerHTML = `
             <span>⚠️ تنبيه تكرار!</span>
             <div style="margin-top:5px; font-size:13px; color:#333;">
-             تم إدخال هذا الشخص من قبل في <br>
+             تم إدخال هذا الشخص (${isNatID ? 'قومي' : 'كود مصنع'}) من قبل في <br>
              <b style="color:#d32f2f; font-size:15px;">${data.place}</b> <br>
              بواسطة <b style="color:#d32f2f; font-size:15px;">${data.repName}</b>
             </div>
           `;
 
-          // 3. تسجيل المحاولة المكررة في قاعدة البيانات للإحصائيات
           const duplicateData = {
-             duplicatedID: natid,
+             duplicatedID: inputID,
              attemptByRep: name,
              attemptPlace: userPlace,
              originalRep: data.repName,
              originalPlace: data.place,
              timestamp: new Date().toISOString(),
-             status: "rejected"
+             status: "rejected",
+             type: isNatID ? "NationalID" : "FactoryCode"
           };
-          // إضافة السجل في قسم جديد اسمه duplicates
           await push(ref(db, 'duplicates'), duplicateData);
 
         } else {
           // --- حالة الإضافة الجديدة ---
           const now = new Date();
           let payload = {
-            natid, repName: name, place: userPlace, placeIdx: userPlaceIdx,
-            time: now.toISOString(), username: userID
+            idValue: inputID, // تخزين القيمة المدخلة
+            inputType: isNatID ? "NationalID" : "FactoryCode",
+            repName: name, 
+            place: userPlace, 
+            placeIdx: userPlaceIdx,
+            time: now.toISOString(), 
+            username: userID
           };
-          await set(ref(db, 'users/' + natid), payload);
+          await set(ref(db, 'users/' + inputID), payload);
           msg.className += ' success';
           msg.textContent = "تمت الإضافة بنجاح.";
           document.getElementById('natID').value = '';
@@ -353,7 +378,7 @@
       }
     }
 
-    // Stats Logic
+    // --- منطق الإحصائيات ---
     window.showStatsLogin = function() {
         document.getElementById('main-card').classList.add('hidden');
         const statsCard = document.getElementById('stats-auth-card');
@@ -383,6 +408,119 @@
             msg.textContent = 'كلمة المرور خاطئة!';
         }
     }
+  </script>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const overlay = document.getElementById('camera-overlay');
+    const statusText = document.getElementById('scan-status-text');
+    const natIdInput = document.getElementById('natID');
+    const scanSound = document.getElementById('scanSound');
+    
+    let isScanning = false;
+    let worker = null;
+
+    async function startScanner() {
+        // التحقق من المتصفح (HTTPS ضروري)
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+            alert('يجب تشغيل الموقع عبر HTTPS لاستخدام الكاميرا');
+            return;
+        }
+
+        overlay.classList.add('active');
+        statusText.textContent = "جاري تشغيل الكاميرا...";
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
+            });
+            video.srcObject = stream;
+            
+            // تهيئة Tesseract مرة واحدة
+            if(!worker) {
+                statusText.textContent = "جاري تحميل الذكاء الاصطناعي...";
+                worker = await Tesseract.createWorker('eng');
+                await worker.setParameters({
+                    tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', // حروف وأرقام فقط
+                });
+            }
+
+            statusText.textContent = "وجه الكاميرا نحو الرقم (قومي أو مصنع)";
+            isScanning = true;
+            requestAnimationFrame(scanLoop);
+
+        } catch (err) {
+            console.error(err);
+            alert("تعذر فتح الكاميرا. تأكد من الصلاحيات.");
+            stopScanner();
+        }
+    }
+
+    function stopScanner() {
+        isScanning = false;
+        overlay.classList.remove('active');
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(track => track.stop());
+            video.srcObject = null;
+        }
+    }
+
+    async function scanLoop() {
+        if (!isScanning) return;
+
+        const ctx = canvas.getContext('2d');
+        canvas.width = 400; 
+        canvas.height = 150; 
+        
+        // قص الصورة من منتصف الفيديو (محاكاة للمربع)
+        const sx = (video.videoWidth - canvas.width) / 2;
+        const sy = (video.videoHeight - canvas.height) / 2;
+        
+        // رسم الجزء الأوسط فقط للمعالجة (أسرع)
+        if(video.readyState === video.HAVE_ENOUGH_DATA){
+            ctx.drawImage(video, sx, sy, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+            
+            try {
+                const { data: { text } } = await worker.recognize(canvas);
+                
+                // تنظيف النص
+                const clean = text.replace(/[^A-Z0-9]/g, '');
+                
+                // 1. بحث عن رقم قومي (14 رقم)
+                const natMatch = clean.match(/\d{14}/);
+                
+                // 2. بحث عن رقم مصنع (7 خانات حروف وأرقام) - نمط عام
+                const factoryMatch = clean.match(/[A-Z0-9]{7}/);
+
+                if (natMatch) {
+                    foundCode(natMatch[0]);
+                } else if (factoryMatch) {
+                    foundCode(factoryMatch[0]);
+                } else {
+                    if(isScanning) requestAnimationFrame(scanLoop);
+                }
+            } catch (e) {
+                if(isScanning) requestAnimationFrame(scanLoop);
+            }
+        } else {
+            requestAnimationFrame(scanLoop);
+        }
+    }
+
+    function foundCode(code) {
+        scanSound.play().catch(e=>{});
+        navigator.vibrate(200); // اهتزاز
+        natIdInput.value = code;
+        stopScanner();
+        // وميض الحقل لتنبيه المستخدم
+        natIdInput.style.backgroundColor = "#e8f5e9";
+        setTimeout(() => natIdInput.style.backgroundColor = "", 1000);
+    }
+
+    // إتاحة الدوال للـ HTML
+    window.startScanner = startScanner;
+    window.stopScanner = stopScanner;
   </script>
 </body>
 </html>
