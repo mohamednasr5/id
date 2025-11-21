@@ -10,7 +10,7 @@
       --primary-color: #0072ff;
       --secondary-color: #00c6ff;
       --bg-gradient: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
-      --glass-bg: rgba(255, 255, 255, 0.9);
+      --glass-bg: rgba(255, 255, 255, 0.95);
       --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
       --input-bg: #f0f4f8;
       --text-color: #2d3436;
@@ -22,12 +22,9 @@
 
     body {
       font-family: 'Cairo', sans-serif;
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       background: var(--bg-gradient);
       background-size: 400% 400%;
       animation: gradientBG 15s ease infinite;
@@ -42,20 +39,12 @@
     }
 
     .circles {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      overflow: hidden;
-      z-index: -1;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1;
     }
     .circles li {
-      position: absolute;
-      display: block;
-      list-style: none;
-      width: 20px; height: 20px;
-      background: rgba(255, 255, 255, 0.2);
-      animation: animate 25s linear infinite;
-      bottom: -150px;
-      border-radius: 50%;
+      position: absolute; display: block; list-style: none;
+      width: 20px; height: 20px; background: rgba(255, 255, 255, 0.2);
+      animation: animate 25s linear infinite; bottom: -150px; border-radius: 50%;
     }
     .circles li:nth-child(1){ left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
     .circles li:nth-child(2){ left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
@@ -68,132 +57,94 @@
     }
 
     .container {
-      position: relative;
-      z-index: 1;
-      perspective: 1000px;
+      position: relative; z-index: 1; perspective: 1000px;
     }
 
     .card {
       background: var(--glass-bg);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-radius: 20px;
-      padding: 40px 30px;
-      width: 100%;
-      max-width: 400px;
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      border-radius: 20px; padding: 40px 30px;
+      width: 100%; max-width: 400px;
       box-shadow: var(--glass-shadow);
       border: 1px solid rgba(255, 255, 255, 0.18);
-      transform: translateY(20px);
-      opacity: 0;
+      transform: translateY(20px); opacity: 0;
       animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
       transition: all 0.5s ease;
     }
 
-    @keyframes fadeInUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
     h2 {
-      text-align: center;
-      margin-bottom: 30px;
-      color: var(--primary-color);
-      font-weight: 700;
-      font-size: 24px;
-      letter-spacing: -0.5px;
+      text-align: center; margin-bottom: 30px;
+      color: var(--primary-color); font-weight: 700; font-size: 24px; letter-spacing: -0.5px;
     }
 
-    .input-group {
-      position: relative;
-      margin-bottom: 25px;
-    }
+    .input-group { position: relative; margin-bottom: 25px; }
 
     .input-group label {
-      position: absolute;
-      top: 50%;
-      right: 15px;
-      transform: translateY(-50%);
-      font-size: 16px;
-      color: #999;
-      pointer-events: none;
-      transition: 0.3s ease all;
-      padding: 0 5px;
-      background: transparent;
+      position: absolute; top: 50%; right: 15px; transform: translateY(-50%);
+      font-size: 16px; color: #999; pointer-events: none;
+      transition: 0.3s ease all; padding: 0 5px; background: transparent;
     }
 
     input, select {
-      width: 100%;
-      padding: 12px 15px;
-      font-size: 16px;
-      background: var(--input-bg);
-      border: 2px solid transparent;
-      border-radius: 10px;
-      font-family: 'Cairo', sans-serif;
-      transition: 0.3s ease;
-      color: #333;
+      width: 100%; padding: 12px 15px; font-size: 16px;
+      background: var(--input-bg); border: 2px solid transparent;
+      border-radius: 10px; font-family: 'Cairo', sans-serif;
+      transition: 0.3s ease; color: #333;
     }
 
-    input:focus,
-    input:not(:placeholder-shown) {
-      background: #fff;
-      border-color: var(--secondary-color);
+    input:focus, input:not(:placeholder-shown) {
+      background: #fff; border-color: var(--secondary-color);
       box-shadow: 0 0 15px rgba(0, 198, 255, 0.1);
     }
 
-    input:focus ~ label,
-    input:not(:placeholder-shown) ~ label {
-      top: 0;
-      transform: translateY(-50%) scale(0.85);
-      background: #fff;
-      color: var(--primary-color);
-      font-weight: 600;
-      border-radius: 5px;
+    input:focus ~ label, input:not(:placeholder-shown) ~ label {
+      top: 0; transform: translateY(-50%) scale(0.85);
+      background: #fff; color: var(--primary-color); font-weight: 600; border-radius: 5px;
     }
 
     .btn {
       background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
-      color: white;
-      padding: 12px;
-      width: 100%;
-      border: none;
-      border-radius: 50px;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: 0.3s ease;
-      box-shadow: 0 5px 15px rgba(0, 114, 255, 0.3);
-      position: relative;
-      overflow: hidden;
+      color: white; padding: 12px; width: 100%; border: none;
+      border-radius: 50px; font-size: 18px; font-weight: 700; cursor: pointer;
+      transition: 0.3s ease; box-shadow: 0 5px 15px rgba(0, 114, 255, 0.3);
+      position: relative; overflow: hidden;
     }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 114, 255, 0.4); }
+    .btn:active { transform: translateY(1px); }
 
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0, 114, 255, 0.4);
-    }
-
-    .btn:active {
-      transform: translateY(1px);
-    }
-
-    .btn-secondary {
-      background: linear-gradient(to right, #43cea2, #185a9d);
-      margin-top: 15px;
-    }
-    
-    .btn-danger {
-        background: linear-gradient(to right, #ff416c, #ff4b2b);
-        margin-top: 15px;
-    }
+    .btn-secondary { background: linear-gradient(to right, #43cea2, #185a9d); margin-top: 15px; }
+    .btn-danger { background: linear-gradient(to right, #ff416c, #ff4b2b); margin-top: 15px; }
 
     .msg {
-      margin-top: 15px;
-      text-align: center;
-      font-size: 14px;
-      font-weight: 600;
-      min-height: 20px;
-      transition: 0.3s;
+      margin-top: 15px; text-align: center; font-size: 14px; font-weight: 600;
+      min-height: 20px; transition: 0.3s; padding: 10px; border-radius: 8px;
     }
     .msg.error { color: var(--error-color); animation: shake 0.5s; }
     .msg.success { color: var(--success-color); }
+
+    /* --- ستايل المستطيل الأحمر المميز للتكرار --- */
+    .duplicate-box {
+        background-color: #fff5f5;
+        border: 2px solid #ff0000;
+        color: #c0392b;
+        padding: 15px;
+        border-radius: 12px;
+        margin-top: 20px;
+        font-weight: bold;
+        box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
+        animation: pulseRed 0.8s infinite alternate;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @keyframes pulseRed {
+        from { border-color: #ff0000; box-shadow: 0 0 10px rgba(255, 0, 0, 0.3); }
+        to { border-color: #ff6b6b; box-shadow: 0 0 20px rgba(255, 0, 0, 0.6); }
+    }
 
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
@@ -202,21 +153,17 @@
     }
 
     @media (max-width: 480px) {
-      .card {
-        padding: 30px 20px;
-        margin: 20px;
-        width: 90%;
-      }
+      .card { padding: 30px 20px; margin: 20px; width: 90%; }
       h2 { font-size: 20px; }
     }
-
     .hidden { display: none; }
     .fade-in { animation: fadeIn 0.5s forwards; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
   </style>
 </head>
 <body>
+
+  <audio id="errorSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 
   <ul class="circles">
     <li></li><li></li><li></li><li></li><li></li>
@@ -227,15 +174,11 @@
     
     <div class="card" id="auth-card">
       <h2>تسجيل دخول المندوب</h2>
-      
       <div class="input-group">
         <input id="loginCode" type="number" placeholder=" ">
         <label for="loginCode">كود الدخول</label>
       </div>
-      
-      <button class="btn" onclick="login()">
-        <span>دخول</span>
-      </button>
+      <button class="btn" onclick="login()"><span>دخول</span></button>
       <div id="login-msg" class="msg"></div>
     </div>
 
@@ -260,12 +203,10 @@
     <div class="card hidden" id="stats-auth-card">
       <h2>صلاحية المدير</h2>
       <p style="text-align: center; color: #666; margin-bottom: 20px;">أدخل كلمة مرور الإحصائيات</p>
-      
       <div class="input-group">
         <input id="statsPass" type="password" placeholder=" ">
         <label for="statsPass">كلمة المرور</label>
       </div>
-      
       <button class="btn" onclick="verifyStats()">دخول للإحصائيات</button>
       <div id="stats-msg" class="msg"></div>
       <button class="btn btn-danger" onclick="cancelStats()">إلغاء وعودة</button>
@@ -275,7 +216,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, set, get, child, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
@@ -303,39 +244,28 @@
 
     window.login = function() {
       const msgDiv = document.getElementById('login-msg');
-      msgDiv.textContent = '';
-      msgDiv.className = 'msg';
-      
+      msgDiv.textContent = ''; msgDiv.className = 'msg';
       const codeInput = document.getElementById('loginCode').value.trim();
       const code = parseInt(codeInput);
 
-      // التحقق من النطاق المطلوب: 225501 إلى 225522
       if (!codeInput || isNaN(code) || code < 225501 || code > 225522) {
         msgDiv.textContent = 'كود الدخول غير صحيح.';
-        msgDiv.classList.add('error');
-        return;
+        msgDiv.classList.add('error'); return;
       }
 
-      // حساب ترتيب المكان بناءً على الكود
-      // 225501 - 225501 = 0 (المكان الأول)
       let idx = code - 225501;
-
-      // حماية إضافية للتأكد من وجود المكان في المصفوفة
       if (idx >= places.length) {
           msgDiv.textContent = 'كود صحيح ولكن المكان غير معرف بالنظام.';
-          msgDiv.classList.add('error');
-          return;
+          msgDiv.classList.add('error'); return;
       }
 
-      // Success
       userPlace = places[idx];
       userPlaceIdx = idx + 1;
-      userID = codeInput; // استخدام الكود كمعرف للمستخدم
+      userID = codeInput;
 
       const authCard = document.getElementById('auth-card');
       const mainCard = document.getElementById('main-card');
 
-      // Fade out effect
       authCard.style.opacity = '0';
       authCard.style.transform = 'translateY(-20px)';
       
@@ -354,31 +284,54 @@
       let name = document.getElementById('repName').value.trim();
       let natid = document.getElementById('natID').value.trim();
       const msg = document.getElementById('add-msg');
-      msg.textContent = '';
-      msg.className = 'msg';
+      msg.textContent = ''; msg.className = 'msg';
 
       if (!userPlace) return;
       if (name.length < 2) {
-        msg.textContent = 'يرجى إدخال اسم المندوب';
-        msg.className += ' error';
-        return;
+        msg.textContent = 'يرجى إدخال اسم المندوب'; msg.className += ' error'; return;
       }
       if (!/^\d{14}$/.test(natid)) {
-        msg.textContent = 'يرجى إدخال الرقم القومي صحيح (14 رقمًا).';
-        msg.className += ' error';
-        return;
+        msg.textContent = 'يرجى إدخال الرقم القومي صحيح (14 رقمًا).'; msg.className += ' error'; return;
       }
 
-      btn.disabled = true;
-      btn.innerText = 'جاري الإضافة...';
+      btn.disabled = true; btn.innerText = 'جاري الإضافة...';
 
       try {
         const snapshot = await get(child(ref(db), 'users/' + natid));
+        
         if (snapshot.exists()) {
+          // --- حالة وجود تكرار ---
           let data = snapshot.val();
-          msg.className += ' error';
-          msg.innerHTML = `تم إدخال هذا الشخص من قبل في <b>${data.place}</b> بواسطة <b>${data.repName}</b>`;
+          
+          // 1. تشغيل الصوت
+          document.getElementById('errorSound').play().catch(e => console.log('Audio play blocked'));
+
+          // 2. إظهار الرسالة في المربع الأحمر المميز
+          msg.className = 'duplicate-box'; // كلاس جديد للستايل
+          msg.innerHTML = `
+            <span>⚠️ تنبيه تكرار!</span>
+            <div style="margin-top:5px; font-size:13px; color:#333;">
+             تم إدخال هذا الشخص من قبل في <br>
+             <b style="color:#d32f2f; font-size:15px;">${data.place}</b> <br>
+             بواسطة <b style="color:#d32f2f; font-size:15px;">${data.repName}</b>
+            </div>
+          `;
+
+          // 3. تسجيل المحاولة المكررة في قاعدة البيانات للإحصائيات
+          const duplicateData = {
+             duplicatedID: natid,
+             attemptByRep: name,
+             attemptPlace: userPlace,
+             originalRep: data.repName,
+             originalPlace: data.place,
+             timestamp: new Date().toISOString(),
+             status: "rejected"
+          };
+          // إضافة السجل في قسم جديد اسمه duplicates
+          await push(ref(db, 'duplicates'), duplicateData);
+
         } else {
+          // --- حالة الإضافة الجديدة ---
           const now = new Date();
           let payload = {
             natid, repName: name, place: userPlace, placeIdx: userPlaceIdx,
@@ -391,7 +344,7 @@
           document.getElementById('natID').focus();
         }
       } catch (error) {
-        msg.className += ' error';
+        msg.className = 'msg error';
         msg.textContent = 'حدث خطأ في الاتصال، حاول مرة أخرى.';
         console.error(error);
       } finally {
@@ -421,13 +374,10 @@
     window.verifyStats = function() {
         const pass = document.getElementById('statsPass').value;
         const msg = document.getElementById('stats-msg');
-        // كلمة السر الخاصة بالإحصائيات
         if(pass === '251988') {
             msg.className = 'msg success';
             msg.textContent = 'كلمة المرور صحيحة، جاري التحويل...';
-            setTimeout(() => {
-                location.href = 'stats.html';
-            }, 1000);
+            setTimeout(() => { location.href = 'stats.html'; }, 1000);
         } else {
             msg.className = 'msg error';
             msg.textContent = 'كلمة المرور خاطئة!';
