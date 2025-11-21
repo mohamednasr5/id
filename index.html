@@ -5,7 +5,7 @@
   <title>تسجيل دخول المندوب</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
-  <script src="https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
   <style>
     :root {
@@ -106,7 +106,7 @@
       background: #fff; color: var(--primary-color); font-weight: 600; border-radius: 5px;
     }
 
-    /* زر الكاميرا */
+    /* زر المسح الضوئي */
     .scan-btn {
       position: absolute;
       left: 5px;
@@ -115,24 +115,35 @@
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 20px;
+      font-size: 22px;
       padding: 5px;
       border-radius: 50%;
       transition: 0.3s;
       z-index: 10;
     }
-    .scan-btn:hover { background-color: rgba(0,0,0,0.05); }
+    .scan-btn:hover { color: var(--primary-color); transform: translateY(-50%) scale(1.1); }
 
-    /* مؤشر التحميل للكاميرا */
-    .scan-loading {
-      position: absolute;
-      left: 40px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 12px;
-      color: var(--primary-color);
-      font-weight: bold;
-      display: none;
+    /* منطقة الكاميرا المنبثقة */
+    #scanner-modal {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.9); z-index: 9999;
+        display: none; flex-direction: column; align-items: center; justify-content: center;
+    }
+    #reader {
+        width: 100%; max-width: 500px;
+        background: #000;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .close-scan {
+        margin-top: 20px;
+        padding: 10px 30px;
+        background: #e74c3c;
+        color: #fff;
+        border: none;
+        border-radius: 25px;
+        font-size: 16px;
+        cursor: pointer;
     }
 
     .btn {
@@ -194,12 +205,19 @@
 </head>
 <body>
 
+  <audio id="successSound" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg" preload="auto"></audio>
   <audio id="errorSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 
   <ul class="circles">
     <li></li><li></li><li></li><li></li><li></li>
     <li></li><li></li><li></li><li></li><li></li>
   </ul>
+
+  <div id="scanner-modal">
+    <div style="color:white; margin-bottom:10px;">وجه الكاميرا نحو الباركود خلف البطاقة</div>
+    <div id="reader"></div>
+    <button class="close-scan" onclick="stopScanner()">إغلاق الكاميرا</button>
+  </div>
 
   <div class="container">
     
@@ -225,9 +243,7 @@
         <input id="natID" type="number" autocomplete="off" placeholder=" " oninput="if(this.value.length>14)this.value=this.value.slice(0,14);">
         <label for="natID">الرقم القومي (14 رقم)</label>
         
-        <button class="scan-btn" onclick="document.getElementById('cameraInput').click()" title="التقاط الرقم">📷</button>
-        <span id="scanLoading" class="scan-loading">جاري قراءة البطاقة...</span>
-        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="processImage(this)">
+        <button class="scan-btn" onclick="startScanner()" title="مسح الباركود">📷</button>
       </div>
       
       <button class="btn" onclick="addUser()">إضافة</button>
@@ -276,49 +292,72 @@
     ];
 
     let userPlace = null, userPlaceIdx = null, userID = null;
+    
+    // --- متغيرات الماسح الضوئي ---
+    let html5QrcodeScanner = null;
 
-    // --- كود معالجة الصورة (OCR) ---
-    window.processImage = function(input) {
-      if (input.files && input.files[0]) {
-        const file = input.files[0];
-        const loadingSpan = document.getElementById('scanLoading');
-        const natIdInput = document.getElementById('natID');
+    window.startScanner = function() {
+        const modal = document.getElementById('scanner-modal');
+        modal.style.display = 'flex';
         
-        loadingSpan.style.display = 'block'; // إظهار كلمة جاري القراءة
-        natIdInput.value = ''; // تفريغ الحقل مؤقتا
+        // إعدادات الماسح
+        html5QrcodeScanner = new Html5Qrcode("reader");
+        const config = { 
+            fps: 10, 
+            qrbox: { width: 300, height: 150 }, // مستطيل عريض لأن الباركود عريض
+            aspectRatio: 1.0
+        };
+        
+        // تحديد نوع الباركود PDF_417 فقط لزيادة الدقة والسرعة
+        const formats = { formatsToSupport: [ Html5QrcodeSupportedFormats.PDF_417 ] };
 
-        Tesseract.recognize(
-          file,
-          'eng', // نستخدم eng لأن الأرقام في النظام تقرأ كإنجليزية
-          {
-            logger: m => console.log(m) // لمتابعة التقدم في الكونسول
-          }
-        ).then(({ data: { text } }) => {
-          console.log("النص المستخرج:", text);
-          
-          // تنظيف النص والبحث عن 14 رقم متصل
-          // 1. تحويل الأرقام العربية المشرقية (١٢٣) إلى إنجليزية إذا وجدت
-          let cleanText = text.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-          
-          // 2. البحث عن نمط 14 رقم
-          const matches = cleanText.match(/\b\d{14}\b/);
-          
-          loadingSpan.style.display = 'none';
-
-          if (matches && matches[0]) {
-             natIdInput.value = matches[0];
-             // جعل الحقل يومض باللون الأخضر كتأكيد
-             natIdInput.style.borderColor = '#2ecc71';
-             setTimeout(() => natIdInput.style.borderColor = 'transparent', 2000);
-          } else {
-             alert("لم يتم العثور على رقم قومي واضح (14 رقم) في الصورة. يرجى المحاولة مرة أخرى أو الكتابة يدوياً.");
-          }
-        }).catch(err => {
-          console.error(err);
-          loadingSpan.style.display = 'none';
-          alert("حدث خطأ أثناء معالجة الصورة.");
+        html5QrcodeScanner.start(
+            { facingMode: "environment" }, // الكاميرا الخلفية
+            config,
+            onScanSuccess,
+            onScanFailure
+        ).catch(err => {
+            console.error("Error starting scanner", err);
+            alert("لا يمكن الوصول للكاميرا، تأكد من الصلاحيات.");
+            stopScanner();
         });
-      }
+    }
+
+    window.stopScanner = function() {
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.stop().then(() => {
+                html5QrcodeScanner.clear();
+                document.getElementById('scanner-modal').style.display = 'none';
+            }).catch(err => console.error("Failed to stop scanner", err));
+        } else {
+             document.getElementById('scanner-modal').style.display = 'none';
+        }
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+        console.log(`Scan result: ${decodedText}`);
+        
+        // البحث عن 14 رقم داخل النص المقروء
+        // الباركود أحياناً يحتوي على بيانات إضافية، نحن نريد الرقم القومي فقط
+        const match = decodedText.match(/\d{14}/);
+        
+        if (match) {
+            const id = match[0];
+            document.getElementById('natID').value = id;
+            document.getElementById('successSound').play().catch(e=>{});
+            
+            // وميض تأكيد
+            const input = document.getElementById('natID');
+            input.style.backgroundColor = '#d4edda';
+            setTimeout(() => input.style.backgroundColor = '#f0f4f8', 1000);
+
+            stopScanner();
+        }
+    }
+
+    function onScanFailure(error) {
+        // لا نفعل شيء هنا لتجنب إزعاج المستخدم، الماسح يستمر في المحاولة
+        // console.warn(`Code scan error = ${error}`);
     }
 
     window.login = function() {
