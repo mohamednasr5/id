@@ -2,42 +2,278 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>إحصائيات الدخول</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cairo:wght@700&display=swap">
+  <title>تسجيل دخول المندوب</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
   <style>
-    body {font-family: 'Cairo', sans-serif; background: #f3f9fb; padding:25px;}
-    h2 {color: #179fd6;}
-    table {width:100%; border-collapse:collapse; background:#fff; margin-top:22px;}
-    th, td {padding:10px; border:1px solid #ddd; text-align:center;}
-    th {background:#e6f2fa;}
-    .btn_back {margin: 10px 0 0 0;display:inline-block;background:#179fd6;color:#fff;padding:7px 18px;border-radius:6px;border:none;font-size:17px;}
-    .statok {color:#197a48;}
-    .statdupl {color: #e4722c;}
+    :root {
+      --primary-color: #0072ff;
+      --secondary-color: #00c6ff;
+      --bg-gradient: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+      --glass-bg: rgba(255, 255, 255, 0.9);
+      --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+      --input-bg: #f0f4f8;
+      --text-color: #2d3436;
+      --error-color: #e74c3c;
+      --success-color: #2ecc71;
+    }
+
+    * { box-sizing: border-box; outline: none; }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-gradient);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      overflow: hidden;
+      color: var(--text-color);
+    }
+
+    /* خلفية متحركة */
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* كرات تزيين في الخلفية */
+    .circles {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+    .circles li {
+      position: absolute;
+      display: block;
+      list-style: none;
+      width: 20px; height: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      animation: animate 25s linear infinite;
+      bottom: -150px;
+      border-radius: 50%;
+    }
+    .circles li:nth-child(1){ left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+    .circles li:nth-child(2){ left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+    .circles li:nth-child(3){ left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+    .circles li:nth-child(4){ left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+    .circles li:nth-child(5){ left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
+    @keyframes animate {
+      0%{ transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 0; }
+      100%{ transform: translateY(-1000px) rotate(720deg); opacity: 0; border-radius: 50%; }
+    }
+
+    /* البطاقة الزجاجية */
+    .container {
+      position: relative;
+      z-index: 1;
+      perspective: 1000px;
+    }
+
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px 30px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: var(--glass-shadow);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      transform: translateY(20px);
+      opacity: 0;
+      animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      transition: all 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: var(--primary-color);
+      font-weight: 700;
+      font-size: 24px;
+      letter-spacing: -0.5px;
+    }
+
+    /* حقول الإدخال المتطورة */
+    .input-group {
+      position: relative;
+      margin-bottom: 25px;
+    }
+
+    .input-group label {
+      position: absolute;
+      top: 50%;
+      right: 15px;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: #999;
+      pointer-events: none;
+      transition: 0.3s ease all;
+      padding: 0 5px;
+      background: transparent;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 16px;
+      background: var(--input-bg);
+      border: 2px solid transparent;
+      border-radius: 10px;
+      font-family: 'Cairo', sans-serif;
+      transition: 0.3s ease;
+      color: #333;
+    }
+
+    input:focus,
+    input:not(:placeholder-shown) {
+      background: #fff;
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 15px rgba(0, 198, 255, 0.1);
+    }
+
+    input:focus ~ label,
+    input:not(:placeholder-shown) ~ label {
+      top: 0;
+      transform: translateY(-50%) scale(0.85);
+      background: #fff;
+      color: var(--primary-color);
+      font-weight: 600;
+      border-radius: 5px;
+    }
+
+    /* الأزرار */
+    .btn {
+      background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
+      color: white;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 114, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 114, 255, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(to right, #43cea2, #185a9d);
+      margin-top: 15px;
+    }
+
+    /* رسائل الخطأ والنجاح */
+    .msg {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      min-height: 20px;
+      transition: 0.3s;
+    }
+    .msg.error { color: var(--error-color); animation: shake 0.5s; }
+    .msg.success { color: var(--success-color); }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(10px); }
+      75% { transform: translateX(-10px); }
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 480px) {
+      .card {
+        padding: 30px 20px;
+        margin: 20px;
+        width: 90%;
+      }
+      h2 { font-size: 20px; }
+    }
+
+    /* Transition utility */
+    .hidden { display: none; }
+    .fade-in { animation: fadeIn 0.5s forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
   </style>
 </head>
 <body>
-  <h2>إحصائيات الدخول</h2>
-  <button class="btn_back" onclick="location='index.html'">عودة</button>
-  <table id="statTable">
-    <thead>
-      <tr>
-        <th>المكان</th>
-        <th>عدد الأشخاص الجدد</th>
-        <th>عدد الأشخاص المكررين</th>
-        <th>أسماء المناديب وعدد مدخليهم</th>
-        <th>بداية الإدخال</th>
-        <th>نهاية الإدخال</th>
-        <th>المدة</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
-  
+
+  <!-- كرات الخلفية للتزيين -->
+  <ul class="circles">
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+  </ul>
+
+  <div class="container">
+    
+    <!-- Login Card -->
+    <div class="card" id="auth-card">
+      <h2>تسجيل دخول المندوب</h2>
+      
+      <div class="input-group">
+        <input id="username" type="text" autocomplete="off" maxlength="7" placeholder=" ">
+        <label for="username">رقم المستخدم</label>
+      </div>
+      
+      <div class="input-group">
+        <input id="password" type="password" maxlength="7" placeholder=" ">
+        <label for="password">كلمة المرور</label>
+      </div>
+      
+      <button class="btn" onclick="login()">
+        <span>دخول</span>
+      </button>
+      <div id="login-msg" class="msg"></div>
+    </div>
+
+    <!-- Main Card -->
+    <div class="card hidden" id="main-card">
+      <h2 id="welcome">مرحبًا</h2>
+      
+      <div class="input-group">
+        <input id="repName" type="text" autocomplete="off" maxlength="30" placeholder=" ">
+        <label for="repName">اسم المندوب</label>
+      </div>
+      
+      <div class="input-group">
+        <input id="natID" type="number" autocomplete="off" placeholder=" " oninput="if(this.value.length>14)this.value=this.value.slice(0,14);">
+        <label for="natID">الرقم القومي (14 رقم)</label>
+      </div>
+      
+      <button class="btn" onclick="addUser()">إضافة</button>
+      <div id="add-msg" class="msg"></div>
+      <button class="btn btn-secondary" onclick="location='stats.html'">صفحة الإحصائيات</button>
+    </div>
+
+  </div>
+
   <!-- Firebase App (modular) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
@@ -61,42 +297,108 @@
       "الكفر 3 بجوار ملعب برشلونة","مقهي أبو سليمان","حي الزهراء"
     ];
 
-    (async function(){
-      const snapshot = await get(child(ref(db), 'users'));
-      let users = snapshot.exists() ? snapshot.val() : {};
-      let perPlace = {};
-      for (let id in users) {
-        let u = users[id];
-        const key = u.place;
-        if (!perPlace[key]) {
-          perPlace[key] = {count:0,duplicates:0,reps:{}, times:[]};
-        }
-        perPlace[key].count++;
-        if (!perPlace[key].reps[u.repName]) perPlace[key].reps[u.repName]=[];
-        perPlace[key].reps[u.repName].push(u.time);
-        perPlace[key].times.push(u.time);
+    let userPlace = null, userPlaceIdx = null, userID = null;
+
+    window.login = function() {
+      const msgDiv = document.getElementById('login-msg');
+      msgDiv.textContent = '';
+      msgDiv.className = 'msg';
+      
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!/^80080\d+$/.test(username)) {
+        msgDiv.textContent = 'رقم المستخدم غير صحيح.';
+        msgDiv.classList.add('error');
+        return;
       }
-      // عرض الإحصائيات
-      let tbody = '';
-      places.forEach((place, i) => {
-        let p = perPlace[place] || {count:0,reps:{},times:[]};
-        let minTime = p.times.length ? new Date(Math.min(...p.times.map(t=>new Date(t)))) : '-';
-        let maxTime = p.times.length ? new Date(Math.max(...p.times.map(t=>new Date(t)))) : '-';
-        let diff = (minTime!='-' && maxTime!='-') ? ((maxTime-minTime)/60000) : null;
-        let duration = (diff!==null)? `${Math.floor(diff/60)}:${Math.floor(diff%60).toString().padStart(2,'0')} ساعة`:'-';
-        let repDetails = Object.entries(p.reps).map(([k,v]) => `${k}<span class="statok">(${v.length})</span>`).join("<br>");
-        tbody += `<tr>
-          <td>${place}</td>
-          <td>${p.count}</td>
-          <td>${p.duplicates||0}</td>
-          <td>${repDetails||'-'}</td>
-          <td>${minTime!='-'?minTime.toLocaleString('ar-EG'): '-'}</td>
-          <td>${maxTime!='-'?maxTime.toLocaleString('ar-EG'): '-'}</td>
-          <td>${duration}</td>
-        </tr>`;
-      });
-      document.getElementById('tbody').innerHTML = tbody;
-    })();
+      let idx = parseInt(username.slice(5)) - 1;
+      if (idx < 0 || idx >= places.length) {
+        msgDiv.textContent = 'رقم المستخدم غير موجود.';
+        msgDiv.classList.add('error');
+        return;
+      }
+      if (password !== '80080+' + (idx + 1)) {
+        msgDiv.textContent = 'كلمة المرور غير صحيحة.';
+        msgDiv.classList.add('error');
+        return;
+      }
+
+      // Success Logic with Animation
+      userPlace = places[idx];
+      userPlaceIdx = idx+1;
+      userID = username;
+
+      const authCard = document.getElementById('auth-card');
+      const mainCard = document.getElementById('main-card');
+
+      // Fade out effect
+      authCard.style.opacity = '0';
+      authCard.style.transform = 'translateY(-20px)';
+      
+      setTimeout(() => {
+        authCard.classList.add('hidden');
+        mainCard.classList.remove('hidden');
+        mainCard.classList.add('fade-in');
+        document.getElementById('welcome').textContent = `مرحبًا في ${userPlace}`;
+      }, 400);
+    }
+
+    window.addUser = async function() {
+      const btn = event.target; // Capture button to disable during process
+      const originalText = btn.innerText;
+      
+      let name = document.getElementById('repName').value.trim();
+      let natid = document.getElementById('natID').value.trim();
+      const msg = document.getElementById('add-msg');
+      msg.textContent = '';
+      msg.className = 'msg';
+
+      if (!userPlace) return;
+      if (name.length < 2) {
+        msg.textContent = 'يرجى إدخال اسم المندوب';
+        msg.className += ' error';
+        return;
+      }
+      if (!/^\d{14}$/.test(natid)) {
+        msg.textContent = 'يرجى إدخال الرقم القومي صحيح (14 رقمًا).';
+        msg.className += ' error';
+        return;
+      }
+
+      // Loading State
+      btn.disabled = true;
+      btn.innerText = 'جاري الإضافة...';
+
+      try {
+        // تحقق من التكرار
+        const snapshot = await get(child(ref(db), 'users/' + natid));
+        if (snapshot.exists()) {
+          let data = snapshot.val();
+          msg.className += ' error';
+          msg.innerHTML = `تم إدخال هذا الشخص من قبل في <b>${data.place}</b> بواسطة <b>${data.repName}</b>`;
+        } else {
+          // أضف الجديد
+          const now = new Date();
+          let payload = {
+            natid, repName: name, place: userPlace, placeIdx: userPlaceIdx,
+            time: now.toISOString(), username: userID
+          };
+          await set(ref(db, 'users/' + natid), payload);
+          msg.className += ' success';
+          msg.textContent = "تمت الإضافة بنجاح.";
+          document.getElementById('natID').value = '';
+          document.getElementById('natID').focus();
+        }
+      } catch (error) {
+        msg.className += ' error';
+        msg.textContent = 'حدث خطأ في الاتصال، حاول مرة أخرى.';
+        console.error(error);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
+    }
   </script>
 </body>
 </html>
