@@ -123,27 +123,36 @@
     }
     .scan-btn:hover { color: var(--primary-color); transform: translateY(-50%) scale(1.1); }
 
-    /* منطقة الكاميرا المنبثقة */
-    #scanner-modal {
+    /* --- ستايل النافذة المنبثقة للكاميرا --- */
+    #scanner-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.9); z-index: 9999;
+        background: rgba(0,0,0,0.95); z-index: 9999;
         display: none; flex-direction: column; align-items: center; justify-content: center;
     }
     #reader {
-        width: 100%; max-width: 500px;
-        background: #000;
+        width: 100%; max-width: 600px; /* عريض ليناسب الباركود */
         border-radius: 10px;
         overflow: hidden;
+        border: 2px solid #00c6ff;
+        box-shadow: 0 0 20px rgba(0, 198, 255, 0.5);
     }
+    .scan-guide {
+        color: #fff; text-align: center; margin-bottom: 15px;
+    }
+    .scan-guide h3 { margin: 0 0 5px 0; color: #00c6ff; }
+    .scan-guide p { margin: 0; font-size: 14px; opacity: 0.8; }
+    
     .close-scan {
-        margin-top: 20px;
-        padding: 10px 30px;
+        margin-top: 25px;
+        padding: 12px 35px;
         background: #e74c3c;
         color: #fff;
         border: none;
-        border-radius: 25px;
+        border-radius: 50px;
         font-size: 16px;
+        font-weight: bold;
         cursor: pointer;
+        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
     }
 
     .btn {
@@ -213,8 +222,11 @@
     <li></li><li></li><li></li><li></li><li></li>
   </ul>
 
-  <div id="scanner-modal">
-    <div style="color:white; margin-bottom:10px;">وجه الكاميرا نحو الباركود خلف البطاقة</div>
+  <div id="scanner-overlay">
+    <div class="scan-guide">
+        <h3>جاري المسح...</h3>
+        <p>اقترب من الباركود الخلفي حتى يملأ المربع</p>
+    </div>
     <div id="reader"></div>
     <button class="close-scan" onclick="stopScanner()">إغلاق الكاميرا</button>
   </div>
@@ -243,7 +255,7 @@
         <input id="natID" type="number" autocomplete="off" placeholder=" " oninput="if(this.value.length>14)this.value=this.value.slice(0,14);">
         <label for="natID">الرقم القومي (14 رقم)</label>
         
-        <button class="scan-btn" onclick="startScanner()" title="مسح الباركود">📷</button>
+        <button class="scan-btn" onclick="startScanner()" title="مسح الباركود">🔍</button>
       </div>
       
       <button class="btn" onclick="addUser()">إضافة</button>
@@ -292,74 +304,76 @@
     ];
 
     let userPlace = null, userPlaceIdx = null, userID = null;
-    
-    // --- متغيرات الماسح الضوئي ---
-    let html5QrcodeScanner = null;
+    let html5QrCode = null;
 
+    // --- منطق السكانر المتقدم ---
     window.startScanner = function() {
-        const modal = document.getElementById('scanner-modal');
-        modal.style.display = 'flex';
+        const overlay = document.getElementById('scanner-overlay');
+        overlay.style.display = 'flex';
         
-        // إعدادات الماسح
-        html5QrcodeScanner = new Html5Qrcode("reader");
-        const config = { 
-            fps: 10, 
-            qrbox: { width: 300, height: 150 }, // مستطيل عريض لأن الباركود عريض
-            aspectRatio: 1.0
-        };
-        
-        // تحديد نوع الباركود PDF_417 فقط لزيادة الدقة والسرعة
-        const formats = { formatsToSupport: [ Html5QrcodeSupportedFormats.PDF_417 ] };
+        // استخدام Class الأساسي للتحكم الكامل
+        html5QrCode = new Html5Qrcode("reader");
 
-        html5QrcodeScanner.start(
+        const config = {
+            fps: 15, // زيادة عدد الإطارات في الثانية
+            qrbox: function(viewfinderWidth, viewfinderHeight) {
+                // جعل مربع المسح مستطيلاً عريضاً جداً ليناسب الباركود الطويل
+                let minEdgePercentage = 0.85; 
+                let qrboxWidth = Math.floor(viewfinderWidth * minEdgePercentage);
+                let qrboxHeight = Math.floor(qrboxWidth / 3.5); // ارتفاع قصير
+                return { width: qrboxWidth, height: qrboxHeight };
+            },
+            aspectRatio: 1.0,
+            // تفعيل خاصية الكشف الأصلي (الأسرع على الإطلاق)
+            experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true
+            }
+        };
+
+        html5QrCode.start(
             { facingMode: "environment" }, // الكاميرا الخلفية
             config,
-            onScanSuccess,
-            onScanFailure
-        ).catch(err => {
-            console.error("Error starting scanner", err);
-            alert("لا يمكن الوصول للكاميرا، تأكد من الصلاحيات.");
+            (decodedText, decodedResult) => {
+                // عند النجاح
+                console.log("Found:", decodedText);
+                const match = decodedText.match(/\b\d{14}\b/); // البحث عن 14 رقم بالظبط
+                
+                if (match) {
+                    document.getElementById('successSound').play().catch(e=>{});
+                    document.getElementById('natID').value = match[0];
+                    stopScanner();
+                    
+                    // وميض تأكيد
+                    const field = document.getElementById('natID');
+                    field.style.backgroundColor = '#d4edda';
+                    setTimeout(() => field.style.backgroundColor = '#f0f4f8', 1500);
+                }
+            },
+            (errorMessage) => {
+                // تجاهل أخطاء المسح المتكررة
+            }
+        ).catch((err) => {
+            console.error(err);
+            alert("يرجى السماح باستخدام الكاميرا أو التأكد من الإضاءة.");
             stopScanner();
         });
     }
 
     window.stopScanner = function() {
-        if (html5QrcodeScanner) {
-            html5QrcodeScanner.stop().then(() => {
-                html5QrcodeScanner.clear();
-                document.getElementById('scanner-modal').style.display = 'none';
-            }).catch(err => console.error("Failed to stop scanner", err));
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                html5QrCode.clear();
+                document.getElementById('scanner-overlay').style.display = 'none';
+            }).catch(err => {
+                console.log("Error stopping", err);
+                document.getElementById('scanner-overlay').style.display = 'none';
+            });
         } else {
-             document.getElementById('scanner-modal').style.display = 'none';
+            document.getElementById('scanner-overlay').style.display = 'none';
         }
     }
 
-    function onScanSuccess(decodedText, decodedResult) {
-        console.log(`Scan result: ${decodedText}`);
-        
-        // البحث عن 14 رقم داخل النص المقروء
-        // الباركود أحياناً يحتوي على بيانات إضافية، نحن نريد الرقم القومي فقط
-        const match = decodedText.match(/\d{14}/);
-        
-        if (match) {
-            const id = match[0];
-            document.getElementById('natID').value = id;
-            document.getElementById('successSound').play().catch(e=>{});
-            
-            // وميض تأكيد
-            const input = document.getElementById('natID');
-            input.style.backgroundColor = '#d4edda';
-            setTimeout(() => input.style.backgroundColor = '#f0f4f8', 1000);
-
-            stopScanner();
-        }
-    }
-
-    function onScanFailure(error) {
-        // لا نفعل شيء هنا لتجنب إزعاج المستخدم، الماسح يستمر في المحاولة
-        // console.warn(`Code scan error = ${error}`);
-    }
-
+    // --- باقي دوال الموقع (كما هي) ---
     window.login = function() {
       const msgDiv = document.getElementById('login-msg');
       msgDiv.textContent = ''; msgDiv.className = 'msg';
