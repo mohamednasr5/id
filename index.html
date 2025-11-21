@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>إحصائيات الدخول</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cairo:wght@700&display=swap">
+  <style>
+    body {font-family: 'Cairo', sans-serif; background: #f3f9fb; padding:25px;}
+    h2 {color: #179fd6;}
+    table {width:100%; border-collapse:collapse; background:#fff; margin-top:22px;}
+    th, td {padding:10px; border:1px solid #ddd; text-align:center;}
+    th {background:#e6f2fa;}
+    .btn_back {margin: 10px 0 0 0;display:inline-block;background:#179fd6;color:#fff;padding:7px 18px;border-radius:6px;border:none;font-size:17px;}
+    .statok {color:#197a48;}
+    .statdupl {color: #e4722c;}
+  </style>
+</head>
+<body>
+  <h2>إحصائيات الدخول</h2>
+  <button class="btn_back" onclick="location='index.html'">عودة</button>
+  <table id="statTable">
+    <thead>
+      <tr>
+        <th>المكان</th>
+        <th>عدد الأشخاص الجدد</th>
+        <th>عدد الأشخاص المكررين</th>
+        <th>أسماء المناديب وعدد مدخليهم</th>
+        <th>بداية الإدخال</th>
+        <th>نهاية الإدخال</th>
+        <th>المدة</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  
+  <!-- Firebase App (modular) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
+      authDomain: "idmanazla.firebaseapp.com",
+      databaseURL: "https://idmanazla-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "idmanazla",
+      storageBucket: "idmanazla.firebasestorage.app",
+      messagingSenderId: "408446131276",
+      appId: "1:408446131276:web:976ae54181b5398de5a8e9",
+      measurementId: "G-9YSW9HNYTG"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const places = [
+      "المنزلة الجديدة 1","المنزلة الجديدة 2","بحر البلد شارع الكابتن",
+      "مدرسة عبد العال شلبياية","مصنع البصل","الكفر 1","الكفر 2 تحت السكة",
+      "سوق الجملة","الفداء","نقطة حمام الكيال","الحمزاوي","الجرن 1","الجرن 2",
+      "البر التاني حي السلام","حي الاعجام","العزبة منشية ناصر","الطويل",
+      "البر التاني 2 الهاويس","الفقاعي","بحر البلد 2","حي الجبانة",
+      "الكفر 3 بجوار ملعب برشلونة","مقهي أبو سليمان","حي الزهراء"
+    ];
+
+    (async function(){
+      const snapshot = await get(child(ref(db), 'users'));
+      let users = snapshot.exists() ? snapshot.val() : {};
+      let perPlace = {};
+      for (let id in users) {
+        let u = users[id];
+        const key = u.place;
+        if (!perPlace[key]) {
+          perPlace[key] = {count:0,duplicates:0,reps:{}, times:[]};
+        }
+        perPlace[key].count++;
+        if (!perPlace[key].reps[u.repName]) perPlace[key].reps[u.repName]=[];
+        perPlace[key].reps[u.repName].push(u.time);
+        perPlace[key].times.push(u.time);
+      }
+      // عرض الإحصائيات
+      let tbody = '';
+      places.forEach((place, i) => {
+        let p = perPlace[place] || {count:0,reps:{},times:[]};
+        let minTime = p.times.length ? new Date(Math.min(...p.times.map(t=>new Date(t)))) : '-';
+        let maxTime = p.times.length ? new Date(Math.max(...p.times.map(t=>new Date(t)))) : '-';
+        let diff = (minTime!='-' && maxTime!='-') ? ((maxTime-minTime)/60000) : null;
+        let duration = (diff!==null)? `${Math.floor(diff/60)}:${Math.floor(diff%60).toString().padStart(2,'0')} ساعة`:'-';
+        let repDetails = Object.entries(p.reps).map(([k,v]) => `${k}<span class="statok">(${v.length})</span>`).join("<br>");
+        tbody += `<tr>
+          <td>${place}</td>
+          <td>${p.count}</td>
+          <td>${p.duplicates||0}</td>
+          <td>${repDetails||'-'}</td>
+          <td>${minTime!='-'?minTime.toLocaleString('ar-EG'): '-'}</td>
+          <td>${maxTime!='-'?maxTime.toLocaleString('ar-EG'): '-'}</td>
+          <td>${duration}</td>
+        </tr>`;
+      });
+      document.getElementById('tbody').innerHTML = tbody;
+    })();
+  </script>
+</body>
+</html>
