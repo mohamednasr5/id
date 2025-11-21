@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>لوحة التحكم والإحصائيات</title>
+  <title>لوحة التحكم والإحصائيات الحية</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
   <style>
@@ -21,8 +21,7 @@
 
     body {
       font-family: 'Cairo', sans-serif;
-      margin: 0;
-      padding: 20px;
+      margin: 0; padding: 20px;
       min-height: 100vh;
       background: var(--bg-gradient);
       background-size: 400% 400%;
@@ -38,21 +37,13 @@
 
     /* كرات الخلفية */
     .circles {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      overflow: hidden;
-      z-index: -1;
-      pointer-events: none;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      overflow: hidden; z-index: -1; pointer-events: none;
     }
     .circles li {
-      position: absolute;
-      display: block;
-      list-style: none;
-      width: 20px; height: 20px;
-      background: rgba(255, 255, 255, 0.2);
-      animation: animate 25s linear infinite;
-      bottom: -150px;
-      border-radius: 50%;
+      position: absolute; display: block; list-style: none;
+      width: 20px; height: 20px; background: rgba(255, 255, 255, 0.2);
+      animation: animate 25s linear infinite; bottom: -150px; border-radius: 50%;
     }
     .circles li:nth-child(1){ left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
     .circles li:nth-child(2){ left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
@@ -66,104 +57,52 @@
 
     /* شاشة تسجيل الدخول */
     #loginScreen {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(15px);
-      z-index: 9999;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(15px);
+      z-index: 9999; display: flex; justify-content: center; align-items: center;
     }
     .login-box {
-      background: white;
-      padding: 40px;
-      border-radius: 20px;
-      text-align: center;
-      width: 90%;
-      max-width: 400px;
+      background: white; padding: 40px; border-radius: 20px;
+      text-align: center; width: 90%; max-width: 400px;
       box-shadow: 0 20px 50px rgba(0,0,0,0.3);
     }
     .login-box input {
-      width: 100%;
-      padding: 15px;
-      margin: 20px 0;
-      border: 2px solid #eee;
-      border-radius: 10px;
-      font-size: 18px;
-      font-family: 'Cairo', sans-serif;
-      text-align: center;
-      transition: 0.3s;
+      width: 100%; padding: 15px; margin: 20px 0; border: 2px solid #eee;
+      border-radius: 10px; font-size: 18px; font-family: 'Cairo', sans-serif;
+      text-align: center; transition: 0.3s;
     }
-    .login-box input:focus {
-      border-color: var(--primary-color);
-      outline: none;
-    }
+    .login-box input:focus { border-color: var(--primary-color); outline: none; }
     .login-btn {
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      padding: 12px 40px;
-      border-radius: 50px;
-      font-size: 18px;
-      font-family: 'Cairo', sans-serif;
-      cursor: pointer;
-      transition: 0.3s;
+      background: var(--primary-color); color: white; border: none;
+      padding: 12px 40px; border-radius: 50px; font-size: 18px;
+      font-family: 'Cairo', sans-serif; cursor: pointer; transition: 0.3s;
     }
     .login-btn:hover { transform: scale(1.05); }
 
     /* الحاوية الرئيسية */
     .container {
-      max-width: 1300px;
-      margin: 0 auto;
-      background: var(--glass-bg);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-radius: 20px;
-      box-shadow: var(--glass-shadow);
-      padding: 30px;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: 0.8s ease;
-      display: none;
+      max-width: 1300px; margin: 0 auto;
+      background: var(--glass-bg); backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px); border-radius: 20px;
+      box-shadow: var(--glass-shadow); padding: 30px;
+      opacity: 0; transform: translateY(20px); transition: 0.8s ease; display: none;
     }
-
-    .container.visible {
-      opacity: 1;
-      transform: translateY(0);
-      display: block;
-    }
+    .container.visible { opacity: 1; transform: translateY(0); display: block; }
 
     .header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      gap: 10px;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
     }
     
-    .controls {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; }
 
     h2 { margin: 0; color: var(--primary-color); font-weight: 700; font-size: 1.5rem; }
 
     .btn {
-      padding: 8px 20px;
-      border-radius: 50px;
-      border: none;
-      font-size: 14px;
-      cursor: pointer;
-      transition: 0.3s;
-      color: white;
-      font-family: 'Cairo', sans-serif;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
+      padding: 8px 20px; border-radius: 50px; border: none; font-size: 14px;
+      cursor: pointer; transition: 0.3s; color: white;
+      font-family: 'Cairo', sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: inline-flex; align-items: center; gap: 5px;
     }
     .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
     
@@ -173,105 +112,75 @@
     .btn-reset { background: var(--danger-color); }
 
     /* تنسيق الجدول */
-    .table-wrapper {
-      overflow-x: auto;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
+    .table-wrapper { overflow-x: auto; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 
-    table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      background: #fff;
-      min-width: 800px;
-    }
-
-    th, td {
-      padding: 15px;
-      text-align: center;
-      border-bottom: 1px solid #eee;
-    }
-
+    table { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff; min-width: 800px; }
+    th, td { padding: 15px; text-align: center; border-bottom: 1px solid #eee; }
     th {
-      background: rgba(0, 114, 255, 0.1);
-      color: var(--primary-color);
-      font-weight: 700;
-      white-space: nowrap;
-      position: sticky;
-      top: 0;
+      background: rgba(0, 114, 255, 0.1); color: var(--primary-color);
+      font-weight: 700; white-space: nowrap; position: sticky; top: 0;
       border-bottom: 2px solid var(--primary-color);
     }
-
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: rgba(0, 114, 255, 0.05); }
 
     /* تنسيق المندوب */
     .rep-tag {
-        cursor: pointer;
-        padding: 4px 8px;
-        border-radius: 8px;
-        transition: 0.2s;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 4px;
-        border: 1px solid transparent;
+        cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: 0.2s;
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 4px; border: 1px solid transparent;
     }
-    .rep-tag:hover {
-        background: rgba(0, 114, 255, 0.1);
-        border-color: var(--secondary-color);
-    }
+    .rep-tag:hover { background: rgba(0, 114, 255, 0.1); border-color: var(--secondary-color); }
 
     .statok {
-      color: #2ecc71;
-      font-weight: bold;
-      background: rgba(46, 204, 113, 0.1);
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 0.9em;
+      color: #2ecc71; font-weight: bold; background: rgba(46, 204, 113, 0.1);
+      padding: 2px 8px; border-radius: 12px; font-size: 0.9em;
     }
-    .statdupl { color: #e74c3c; font-weight: bold; }
+    
+    /* تنسيق خلية النصابة */
+    .nassaba-cell {
+        color: #e74c3c;
+        font-weight: 900;
+        cursor: pointer;
+        transition: 0.2s;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+    }
+    .nassaba-cell:hover {
+        background-color: #ffecec;
+        transform: scale(1.1);
+    }
+    .zero-nassaba { color: #bbb; text-decoration: none; cursor: default; }
 
-    /* Modal */
-    #repModal {
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.8);
-        z-index: 10000;
-        display: none;
-        justify-content: center;
-        align-items: center;
-        backdrop-filter: blur(8px);
+    /* Modals */
+    .modal {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8); z-index: 10000; display: none;
+        justify-content: center; align-items: center; backdrop-filter: blur(8px);
     }
-    .rep-modal-content {
-        background: white;
-        padding: 40px;
-        border-radius: 25px;
-        text-align: center;
-        position: relative;
-        animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        width: 90%;
-        max-width: 450px;
+    .modal-content {
+        background: white; padding: 40px; border-radius: 25px; text-align: center;
+        position: relative; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        width: 90%; max-width: 450px; max-height: 80vh; overflow-y: auto;
     }
     @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    
     .close-modal {
-        position: absolute;
-        top: 15px; left: 15px; font-size: 24px; cursor: pointer;
+        position: absolute; top: 15px; left: 15px; font-size: 24px; cursor: pointer;
         color: #aaa; width: 30px; height: 30px; line-height: 30px;
         background: #eee; border-radius: 50%;
     }
-    .rep-name-title { color: var(--primary-color); margin-bottom: 10px; font-size: 1.5rem; }
-    .rep-subtitle { color: #666; font-size: 1.2rem; margin: 0; }
-    .big-number {
-        font-size: 6rem; font-weight: 800;
-        background: -webkit-linear-gradient(var(--secondary-color), var(--primary-color));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin: 10px 0; line-height: 1;
+    
+    /* ستايل قائمة النصابة */
+    .nassaba-list {
+        list-style: none; padding: 0; margin-top: 15px; text-align: right;
+    }
+    .nassaba-list li {
+        background: #fff5f5; border: 1px solid #ffcccc; color: #c0392b;
+        padding: 10px; margin-bottom: 8px; border-radius: 8px;
+        display: flex; justify-content: space-between;
     }
 
-    /* Spinner */
     .loader {
       border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color);
       border-radius: 50%; width: 40px; height: 40px;
@@ -279,24 +188,14 @@
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* تنسيق الطباعة */
     @media print {
-        body {
-            background: white;
-            animation: none;
-            padding: 0;
-            color: black;
-        }
-        .circles, .controls, .btn_back, #loginScreen, .btn { display: none !important; }
-        .container {
-            box-shadow: none; margin: 0; width: 100%; max-width: 100%;
-            padding: 10px; backdrop-filter: none; animation: none; opacity: 1; transform: none;
-        }
+        body { background: white; animation: none; padding: 0; color: black; }
+        .circles, .controls, .btn_back, #loginScreen, .btn, .modal { display: none !important; }
+        .container { box-shadow: none; margin: 0; width: 100%; max-width: 100%; padding: 10px; opacity: 1; transform: none; }
         .table-wrapper { overflow: visible; box-shadow: none; }
         table { min-width: 100%; border: 1px solid #000; }
         th { background-color: #eee !important; color: #000 !important; border: 1px solid #000; }
         td { border: 1px solid #000; color: #000; }
-        h2 { text-align: center; color: #000; text-decoration: underline; margin-bottom: 20px; }
     }
   </style>
 </head>
@@ -312,15 +211,26 @@
     </div>
   </div>
 
-  <div id="repModal">
-      <div class="rep-modal-content">
-          <div class="close-modal" onclick="closeRepModal()">&times;</div>
-          <h3 class="rep-name-title" id="modalRepName">اسم المندوب</h3>
-          <p class="rep-subtitle">هذا المندوب أدخل</p>
-          <div class="big-number" id="modalRepCount">0</div>
+  <div id="repModal" class="modal">
+      <div class="modal-content">
+          <div class="close-modal" onclick="closeModal('repModal')">&times;</div>
+          <h3 style="color:var(--primary-color)" id="modalRepName">اسم المندوب</h3>
+          <p>هذا المندوب أدخل</p>
+          <div style="font-size:6rem; font-weight:800; color:var(--primary-color);" id="modalRepCount">0</div>
           <p style="color:#888; margin:0;">ناخب</p>
       </div>
   </div>
+
+  <div id="nassabaModal" class="modal">
+    <div class="modal-content">
+        <div class="close-modal" onclick="closeModal('nassabaModal')">&times;</div>
+        <h3 style="color:var(--danger-color)">⚠️ قائمة النصابة</h3>
+        <p>أرقام البطاقات التي حاولت التكرار في:</p>
+        <h4 id="nassabaPlaceName" style="color:#333;"></h4>
+        <ul id="nassabaListContainer" class="nassaba-list">
+            </ul>
+    </div>
+</div>
 
   <ul class="circles">
     <li></li><li></li><li></li><li></li><li></li>
@@ -329,7 +239,7 @@
 
   <div class="container">
     <div class="header-row">
-      <h2>إحصائيات الدخول</h2>
+      <h2>إحصائيات الدخول (بث مباشر 🔴)</h2>
       <div class="controls">
         <button class="btn btn-print" onclick="window.print()">طباعة A4</button>
         <button class="btn btn-excel" onclick="exportToExcel()">تصدير Excel</button>
@@ -345,7 +255,7 @@
             <th>م</th>
             <th>المكان</th>
             <th>العدد الكلي</th>
-            <th>مكرر</th>
+            <th style="color:var(--danger-color);">نصابة ⚠️</th>
             <th>تفاصيل المناديب</th>
             <th>أول إدخال</th>
             <th>آخر إدخال</th>
@@ -361,7 +271,7 @@
   
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, get, child, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
@@ -385,19 +295,24 @@
       "الكفر 3 بجوار ملعب برشلونة","مقهي أبو سليمان","حي الزهراء"
     ];
 
-    window.exportData = []; // لتخزين البيانات لغرض التصدير
+    // دالة الاستماع اللحظي للبيانات
+    window.startListening = function() {
+      // نستمع للجذر بالكامل لنجلب Users و Duplicates معاً
+      const dbRef = ref(db);
+      
+      onValue(dbRef, (snapshot) => {
+        const data = snapshot.val() || {};
+        const users = data.users || {};
+        const duplicates = data.duplicates || {}; // نجلب بيانات النصابة
 
-    window.loadData = async function(){
-      try {
-        const snapshot = await get(child(ref(db), 'users'));
-        let users = snapshot.exists() ? snapshot.val() : {};
         let perPlace = {};
         
+        // 1. معالجة المستخدمين الصحيحين
         for (let id in users) {
           let u = users[id];
           const key = u.place;
           if (!perPlace[key]) {
-            perPlace[key] = {count:0, duplicates:0, reps:{}, times:[]};
+            perPlace[key] = {count:0, nassabaList:[], reps:{}, times:[]};
           }
           perPlace[key].count++;
           if (!perPlace[key].reps[u.repName]) perPlace[key].reps[u.repName]=[];
@@ -405,30 +320,64 @@
           perPlace[key].times.push(u.time);
         }
 
-        // حفظ البيانات عالمياً للاكسيل
-        window.allStats = perPlace;
+        // 2. معالجة النصابة (Duplicates)
+        for (let pushId in duplicates) {
+            let d = duplicates[pushId];
+            const key = d.attemptPlace; // المكان الذي تمت فيه المحاولة
+            // إذا المكان موجود في القائمة، نضيف له، وإلا ننشئ له سجل
+            if (!perPlace[key]) {
+                 perPlace[key] = {count:0, nassabaList:[], reps:{}, times:[]};
+            }
+            // نضيف بيانات النصاب للقائمة
+            perPlace[key].nassabaList.push({
+                id: d.duplicatedID,
+                by: d.attemptByRep,
+                time: d.timestamp
+            });
+        }
 
+        // حفظ البيانات عالمياً
+        window.allStats = perPlace;
+        renderTable(perPlace);
+      }, (error) => {
+        document.getElementById('tbody').innerHTML = `<tr><td colspan="8" style="color:red">حدث خطأ في الاتصال: ${error.message}</td></tr>`;
+      });
+    };
+
+    function renderTable(perPlace) {
         let tbody = '';
         places.forEach((place, i) => {
-          let p = perPlace[place] || {count:0, duplicates:0, reps:{}, times:[]};
+          let p = perPlace[place] || {count:0, nassabaList:[], reps:{}, times:[]};
+          
+          // حساب الأوقات
           let minTime = p.times.length ? new Date(Math.min(...p.times.map(t=>new Date(t)))) : '-';
           let maxTime = p.times.length ? new Date(Math.max(...p.times.map(t=>new Date(t)))) : '-';
           let diff = (minTime!='-' && maxTime!='-') ? ((maxTime-minTime)/60000) : null;
-          let duration = (diff!==null)? `${Math.floor(diff/60)} س و ${Math.floor(diff%60).toString().padStart(2,'0')} د`:'-';
+          let duration = (diff!==null)? `${Math.floor(diff/60)} س ${Math.floor(diff%60).toString().padStart(2,'0')} د`:'-';
           
+          // HTML المناديب
           let repDetails = Object.entries(p.reps)
             .map(([k,v]) => `
                 <div class="rep-tag" onclick="showRepStat('${k}', ${v.length})">
                     <span>${k}</span>
                     <span class="statok">${v.length}</span>
                 </div>
-            `)
-            .join("");
+            `).join("");
+
+          // HTML النصابة
+          let nassabaCount = p.nassabaList.length;
+          let nassabaClass = nassabaCount > 0 ? 'nassaba-cell' : 'zero-nassaba';
+          let nassabaAction = nassabaCount > 0 ? `onclick="showNassabaDetails('${place}')"` : '';
 
           tbody += `<tr>
-            <td><b>${i + 1}</b></td> <td style="font-weight:bold; color:var(--primary-color)">${place}</td>
+            <td><b>${i + 1}</b></td> 
+            <td style="font-weight:bold; color:var(--primary-color)">${place}</td>
             <td><span style="font-size:1.1em; font-weight:bold;">${p.count}</span></td>
-            <td><span class="statdupl">${p.duplicates||0}</span></td>
+            
+            <td>
+                <span class="${nassabaClass}" ${nassabaAction}>${nassabaCount}</span>
+            </td>
+
             <td style="text-align:right; direction:rtl;">${repDetails||'-'}</td>
             <td dir="ltr">${minTime!='-' ? minTime.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '-'}</td>
             <td dir="ltr">${maxTime!='-' ? maxTime.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '-'}</td>
@@ -436,20 +385,15 @@
           </tr>`;
         });
         document.getElementById('tbody').innerHTML = tbody;
-      } catch (e) {
-        document.getElementById('tbody').innerHTML = `<tr><td colspan="8" style="color:red">حدث خطأ أثناء تحميل البيانات</td></tr>`;
-        console.error(e);
-      }
-    };
+    }
 
     window.resetData = async function() {
-        if(confirm("تحذير هام:\nهل أنت متأكد من رغبتك في تصفير العدادات وحذف جميع البيانات؟")) {
+        if(confirm("تحذير هام:\nهل أنت متأكد من تصفير العدادات وحذف المستخدمين والنصابة؟")) {
             const userPass = prompt("للتأكيد، أدخل كلمة المرور مرة أخرى (251988):");
             if(userPass === "251988"){
                 try {
-                    await remove(ref(db, 'users'));
-                    alert("تم حذف البيانات.");
-                    location.reload();
+                    await remove(ref(db)); // حذف كل شيء (Users + Duplicates)
+                    alert("تم تصفير النظام بالكامل.");
                 } catch(e) {
                     alert("حدث خطأ: " + e.message);
                 }
@@ -475,25 +419,58 @@
         if (pass === '251988') {
             document.getElementById('loginScreen').style.display = 'none';
             document.querySelector('.container').classList.add('visible');
-            if(window.loadData) window.loadData();
+            if(window.startListening) window.startListening();
         } else {
             document.getElementById('errorMsg').style.display = 'block';
         }
     }
 
-    function showRepStat(name, count) {
+    // دوال المودال العامة
+    window.closeModal = function(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    }
+
+    // عرض إحصائية المندوب
+    window.showRepStat = function(name, count) {
         document.getElementById('modalRepName').innerText = name;
         document.getElementById('modalRepCount').innerText = count;
         document.getElementById('repModal').style.display = 'flex';
     }
-    function closeRepModal() { document.getElementById('repModal').style.display = 'none'; }
-    window.onclick = function(event) { if (event.target == document.getElementById('repModal')) closeRepModal(); }
 
-    // منطق الإكسيل المتقدم (فرد المناديب وتلوين الأعمدة)
-    function exportToExcel() {
+    // عرض تفاصيل النصابة
+    window.showNassabaDetails = function(place) {
+        if(!window.allStats || !window.allStats[place]) return;
+        
+        const list = window.allStats[place].nassabaList;
+        const container = document.getElementById('nassabaListContainer');
+        document.getElementById('nassabaPlaceName').innerText = place;
+        
+        container.innerHTML = '';
+        
+        list.forEach(item => {
+            let date = new Date(item.time).toLocaleTimeString('ar-EG');
+            let li = document.createElement('li');
+            li.innerHTML = `
+                <span>🆔 <b>${item.id}</b></span>
+                <span style="font-size:0.85em; color:#666;">
+                    بواسطة: ${item.by} <br> الساعة: ${date}
+                </span>
+            `;
+            container.appendChild(li);
+        });
+
+        document.getElementById('nassabaModal').style.display = 'flex';
+    }
+
+    // تصدير إكسيل
+    window.exportToExcel = function() {
         if(!window.allStats) { alert("انتظر تحميل البيانات أولاً"); return; }
 
-        // 1. حساب أقصى عدد للمناديب في مكان واحد لإنشاء الأعمدة
         let maxReps = 0;
         places.forEach(place => {
             let p = window.allStats[place];
@@ -503,14 +480,12 @@
             }
         });
 
-        // 2. بناء عناوين الجدول
         let header = `
             <th style="background:#4a90e2; color:white; border:1px solid #000;">م</th>
             <th style="background:#4a90e2; color:white; border:1px solid #000;">المكان</th>
             <th style="background:#4a90e2; color:white; border:1px solid #000;">العدد الكلي</th>
-            <th style="background:#4a90e2; color:white; border:1px solid #000;">مكرر</th>
+            <th style="background:#ff4757; color:white; border:1px solid #000;">نصابة</th>
         `;
-        // إنشاء أعمدة المناديب ديناميكياً
         for(let i=1; i<=maxReps; i++) {
             header += `<th style="background:#4a90e2; color:white; border:1px solid #000;">مندوب ${i}</th>`;
             header += `<th style="background:#4a90e2; color:white; border:1px solid #000;">عدد ${i}</th>`;
@@ -521,37 +496,30 @@
             <th style="background:#4a90e2; color:white; border:1px solid #000;">المدة</th>
         `;
 
-        // 3. بناء الصفوف
         let rows = '';
         places.forEach((place, index) => {
-            let p = window.allStats[place] || {count:0, duplicates:0, reps:{}, times:[]};
+            let p = window.allStats[place] || {count:0, nassabaList:[], reps:{}, times:[]};
             let minTime = p.times.length ? new Date(Math.min(...p.times.map(t=>new Date(t)))).toLocaleTimeString('ar-EG') : '-';
             let maxTime = p.times.length ? new Date(Math.max(...p.times.map(t=>new Date(t)))).toLocaleTimeString('ar-EG') : '-';
             let diff = (minTime!='-' && maxTime!='-') ? ((new Date(Math.max(...p.times.map(t=>new Date(t)))) - new Date(Math.min(...p.times.map(t=>new Date(t)))))/60000) : null;
             let duration = (diff!==null)? `${Math.floor(diff/60)}:${Math.floor(diff%60)}`:'-';
 
-            let bgColor = (index % 2 === 0) ? "#ffffff" : "#f9f9f9"; // Zebra
+            let bgColor = (index % 2 === 0) ? "#ffffff" : "#f9f9f9";
 
             let row = `<tr>
                 <td style="background:${bgColor}; border:1px solid #000;">${index + 1}</td>
                 <td style="background:${bgColor}; border:1px solid #000;">${place}</td>
                 <td style="background:${bgColor}; border:1px solid #000;">${p.count}</td>
-                <td style="background:${bgColor}; border:1px solid #000;">${p.duplicates||0}</td>
+                <td style="background:${p.nassabaList.length > 0 ? '#ffecec' : bgColor}; color:${p.nassabaList.length > 0 ? 'red' : 'black'}; border:1px solid #000;">${p.nassabaList.length}</td>
             `;
 
-            // تعبئة بيانات المناديب
-            let repEntries = Object.entries(p.reps); // [['name', [times]], ['name2', [times]]]
+            let repEntries = Object.entries(p.reps);
             for(let i=0; i<maxReps; i++) {
                 if(i < repEntries.length) {
-                    let repName = repEntries[i][0];
-                    let repCount = repEntries[i][1].length;
-                    row += `<td style="background:${bgColor}; border:1px solid #000;">${repName}</td>`;
-                    // تلوين عمود الرقم بالأخضر
-                    row += `<td style="background:#dff0d8; color:#2e7d32; font-weight:bold; border:1px solid #000;">${repCount}</td>`;
+                    row += `<td style="background:${bgColor}; border:1px solid #000;">${repEntries[i][0]}</td>`;
+                    row += `<td style="background:#dff0d8; color:#2e7d32; font-weight:bold; border:1px solid #000;">${repEntries[i][1].length}</td>`;
                 } else {
-                    // خلايا فارغة إذا لم يوجد مندوب
-                    row += `<td style="background:${bgColor}; border:1px solid #000;">-</td>`;
-                    row += `<td style="background:${bgColor}; border:1px solid #000;">-</td>`;
+                    row += `<td style="background:${bgColor}; border:1px solid #000;">-</td><td style="background:${bgColor}; border:1px solid #000;">-</td>`;
                 }
             }
 
@@ -565,20 +533,14 @@
 
         let excelFile = `
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-            <head>
-                <meta charset="UTF-8">
-                <style>table { border-collapse: collapse; width: 100%; } td, th { text-align: center; vertical-align: middle; }</style>
-            </head>
-            <body dir="rtl">
-                <table><thead><tr>${header}</tr></thead><tbody>${rows}</tbody></table>
-            </body>
+            <head><meta charset="UTF-8"></head>
+            <body dir="rtl"><table><thead><tr>${header}</tr></thead><tbody>${rows}</tbody></table></body>
             </html>
         `;
-
         var blob = new Blob([excelFile], { type: 'application/vnd.ms-excel' });
         var link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "Detailed_Report.xls";
+        link.download = "Live_Report.xls";
         link.click();
     }
   </script>
