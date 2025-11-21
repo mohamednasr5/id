@@ -178,8 +178,18 @@
     .nassaba-list li {
         background: #fff5f5; border: 1px solid #ffcccc; color: #c0392b;
         padding: 10px; margin-bottom: 8px; border-radius: 8px;
-        display: flex; justify-content: space-between;
+        display: flex; justify-content: space-between; align-items: center;
     }
+    
+    /* زر النسخ */
+    .copy-btn {
+        background: #eee; border: 1px solid #ccc; padding: 4px 10px;
+        border-radius: 4px; cursor: pointer; font-size: 0.85rem;
+        font-family: 'Cairo', sans-serif; margin-right: 8px;
+        transition: 0.2s; outline: none;
+    }
+    .copy-btn:hover { background: #ddd; }
+    .copy-btn.copied { background: #2ecc71; color: white; border-color: #2ecc71; }
 
     .loader {
       border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color);
@@ -297,17 +307,15 @@
 
     // دالة الاستماع اللحظي للبيانات
     window.startListening = function() {
-      // نستمع للجذر بالكامل لنجلب Users و Duplicates معاً
       const dbRef = ref(db);
       
       onValue(dbRef, (snapshot) => {
         const data = snapshot.val() || {};
         const users = data.users || {};
-        const duplicates = data.duplicates || {}; // نجلب بيانات النصابة
+        const duplicates = data.duplicates || {};
 
         let perPlace = {};
         
-        // 1. معالجة المستخدمين الصحيحين
         for (let id in users) {
           let u = users[id];
           const key = u.place;
@@ -320,15 +328,12 @@
           perPlace[key].times.push(u.time);
         }
 
-        // 2. معالجة النصابة (Duplicates)
         for (let pushId in duplicates) {
             let d = duplicates[pushId];
-            const key = d.attemptPlace; // المكان الذي تمت فيه المحاولة
-            // إذا المكان موجود في القائمة، نضيف له، وإلا ننشئ له سجل
+            const key = d.attemptPlace;
             if (!perPlace[key]) {
                  perPlace[key] = {count:0, nassabaList:[], reps:{}, times:[]};
             }
-            // نضيف بيانات النصاب للقائمة
             perPlace[key].nassabaList.push({
                 id: d.duplicatedID,
                 by: d.attemptByRep,
@@ -336,7 +341,6 @@
             });
         }
 
-        // حفظ البيانات عالمياً
         window.allStats = perPlace;
         renderTable(perPlace);
       }, (error) => {
@@ -349,13 +353,11 @@
         places.forEach((place, i) => {
           let p = perPlace[place] || {count:0, nassabaList:[], reps:{}, times:[]};
           
-          // حساب الأوقات
           let minTime = p.times.length ? new Date(Math.min(...p.times.map(t=>new Date(t)))) : '-';
           let maxTime = p.times.length ? new Date(Math.max(...p.times.map(t=>new Date(t)))) : '-';
           let diff = (minTime!='-' && maxTime!='-') ? ((maxTime-minTime)/60000) : null;
           let duration = (diff!==null)? `${Math.floor(diff/60)} س ${Math.floor(diff%60).toString().padStart(2,'0')} د`:'-';
           
-          // HTML المناديب
           let repDetails = Object.entries(p.reps)
             .map(([k,v]) => `
                 <div class="rep-tag" onclick="showRepStat('${k}', ${v.length})">
@@ -364,7 +366,6 @@
                 </div>
             `).join("");
 
-          // HTML النصابة
           let nassabaCount = p.nassabaList.length;
           let nassabaClass = nassabaCount > 0 ? 'nassaba-cell' : 'zero-nassaba';
           let nassabaAction = nassabaCount > 0 ? `onclick="showNassabaDetails('${place}')"` : '';
@@ -392,7 +393,7 @@
             const userPass = prompt("للتأكيد، أدخل كلمة المرور مرة أخرى (251988):");
             if(userPass === "251988"){
                 try {
-                    await remove(ref(db)); // حذف كل شيء (Users + Duplicates)
+                    await remove(ref(db)); 
                     alert("تم تصفير النظام بالكامل.");
                 } catch(e) {
                     alert("حدث خطأ: " + e.message);
@@ -425,7 +426,6 @@
         }
     }
 
-    // دوال المودال العامة
     window.closeModal = function(id) {
         document.getElementById(id).style.display = 'none';
     }
@@ -435,14 +435,26 @@
         }
     }
 
-    // عرض إحصائية المندوب
     window.showRepStat = function(name, count) {
         document.getElementById('modalRepName').innerText = name;
         document.getElementById('modalRepCount').innerText = count;
         document.getElementById('repModal').style.display = 'flex';
     }
 
-    // عرض تفاصيل النصابة
+    // دالة النسخ المضافة
+    window.copyToClipboard = function(text, btn) {
+        navigator.clipboard.writeText(text).then(() => {
+            let originalText = btn.innerText;
+            btn.innerText = 'تم النسخ ✓';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.classList.remove('copied');
+            }, 2000);
+        }).catch(err => console.error('Could not copy', err));
+    }
+
+    // عرض تفاصيل النصابة مع زر النسخ
     window.showNassabaDetails = function(place) {
         if(!window.allStats || !window.allStats[place]) return;
         
@@ -455,8 +467,12 @@
         list.forEach(item => {
             let date = new Date(item.time).toLocaleTimeString('ar-EG');
             let li = document.createElement('li');
+            // هنا إضافة زر النسخ
             li.innerHTML = `
-                <span>🆔 <b>${item.id}</b></span>
+                <div style="display:flex; align-items:center;">
+                    <button class="copy-btn" onclick="copyToClipboard('${item.id}', this)">نسخ</button>
+                    <span>🆔 <b>${item.id}</b></span>
+                </div>
                 <span style="font-size:0.85em; color:#666;">
                     بواسطة: ${item.by} <br> الساعة: ${date}
                 </span>
@@ -467,7 +483,6 @@
         document.getElementById('nassabaModal').style.display = 'flex';
     }
 
-    // تصدير إكسيل
     window.exportToExcel = function() {
         if(!window.allStats) { alert("انتظر تحميل البيانات أولاً"); return; }
 
