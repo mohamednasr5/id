@@ -5,6 +5,8 @@
   <title>تسجيل دخول المندوب</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
+  <script src="https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js"></script>
+
   <style>
     :root {
       --primary-color: #0072ff;
@@ -104,6 +106,35 @@
       background: #fff; color: var(--primary-color); font-weight: 600; border-radius: 5px;
     }
 
+    /* زر الكاميرا */
+    .scan-btn {
+      position: absolute;
+      left: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      padding: 5px;
+      border-radius: 50%;
+      transition: 0.3s;
+      z-index: 10;
+    }
+    .scan-btn:hover { background-color: rgba(0,0,0,0.05); }
+
+    /* مؤشر التحميل للكاميرا */
+    .scan-loading {
+      position: absolute;
+      left: 40px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: var(--primary-color);
+      font-weight: bold;
+      display: none;
+    }
+
     .btn {
       background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
       color: white; padding: 12px; width: 100%; border: none;
@@ -193,6 +224,10 @@
       <div class="input-group">
         <input id="natID" type="number" autocomplete="off" placeholder=" " oninput="if(this.value.length>14)this.value=this.value.slice(0,14);">
         <label for="natID">الرقم القومي (14 رقم)</label>
+        
+        <button class="scan-btn" onclick="document.getElementById('cameraInput').click()" title="التقاط الرقم">📷</button>
+        <span id="scanLoading" class="scan-loading">جاري قراءة البطاقة...</span>
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="processImage(this)">
       </div>
       
       <button class="btn" onclick="addUser()">إضافة</button>
@@ -241,6 +276,50 @@
     ];
 
     let userPlace = null, userPlaceIdx = null, userID = null;
+
+    // --- كود معالجة الصورة (OCR) ---
+    window.processImage = function(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const loadingSpan = document.getElementById('scanLoading');
+        const natIdInput = document.getElementById('natID');
+        
+        loadingSpan.style.display = 'block'; // إظهار كلمة جاري القراءة
+        natIdInput.value = ''; // تفريغ الحقل مؤقتا
+
+        Tesseract.recognize(
+          file,
+          'eng', // نستخدم eng لأن الأرقام في النظام تقرأ كإنجليزية
+          {
+            logger: m => console.log(m) // لمتابعة التقدم في الكونسول
+          }
+        ).then(({ data: { text } }) => {
+          console.log("النص المستخرج:", text);
+          
+          // تنظيف النص والبحث عن 14 رقم متصل
+          // 1. تحويل الأرقام العربية المشرقية (١٢٣) إلى إنجليزية إذا وجدت
+          let cleanText = text.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+          
+          // 2. البحث عن نمط 14 رقم
+          const matches = cleanText.match(/\b\d{14}\b/);
+          
+          loadingSpan.style.display = 'none';
+
+          if (matches && matches[0]) {
+             natIdInput.value = matches[0];
+             // جعل الحقل يومض باللون الأخضر كتأكيد
+             natIdInput.style.borderColor = '#2ecc71';
+             setTimeout(() => natIdInput.style.borderColor = 'transparent', 2000);
+          } else {
+             alert("لم يتم العثور على رقم قومي واضح (14 رقم) في الصورة. يرجى المحاولة مرة أخرى أو الكتابة يدوياً.");
+          }
+        }).catch(err => {
+          console.error(err);
+          loadingSpan.style.display = 'none';
+          alert("حدث خطأ أثناء معالجة الصورة.");
+        });
+      }
+    }
 
     window.login = function() {
       const msgDiv = document.getElementById('login-msg');
@@ -300,14 +379,9 @@
         const snapshot = await get(child(ref(db), 'users/' + natid));
         
         if (snapshot.exists()) {
-          // --- حالة وجود تكرار ---
           let data = snapshot.val();
-          
-          // 1. تشغيل الصوت
           document.getElementById('errorSound').play().catch(e => console.log('Audio play blocked'));
-
-          // 2. إظهار الرسالة في المربع الأحمر المميز
-          msg.className = 'duplicate-box'; // كلاس جديد للستايل
+          msg.className = 'duplicate-box';
           msg.innerHTML = `
             <span>⚠️ تنبيه تكرار!</span>
             <div style="margin-top:5px; font-size:13px; color:#333;">
@@ -317,7 +391,6 @@
             </div>
           `;
 
-          // 3. تسجيل المحاولة المكررة في قاعدة البيانات للإحصائيات
           const duplicateData = {
              duplicatedID: natid,
              attemptByRep: name,
@@ -327,11 +400,9 @@
              timestamp: new Date().toISOString(),
              status: "rejected"
           };
-          // إضافة السجل في قسم جديد اسمه duplicates
           await push(ref(db, 'duplicates'), duplicateData);
 
         } else {
-          // --- حالة الإضافة الجديدة ---
           const now = new Date();
           let payload = {
             natid, repName: name, place: userPlace, placeIdx: userPlaceIdx,
