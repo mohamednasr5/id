@@ -59,14 +59,16 @@
       transform: translateY(20px); opacity: 0;
       animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
       transition: all 0.5s ease;
+      max-height: 90vh; /* لمنع الخروج عن الشاشة في القوائم الطويلة */
+      overflow-y: auto;
     }
     @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
     h2 { text-align: center; margin-bottom: 30px; color: var(--primary-color); font-weight: 700; font-size: 24px; }
+    h3 { text-align: right; color: #333; margin: 15px 0 10px; font-size: 18px; border-bottom: 2px solid #eee; padding-bottom: 5px;}
 
     .input-group { position: relative; margin-bottom: 25px; }
 
-    /* تنسيق الحقل الثابت */
     .fixed-input-box {
       display: flex; align-items: center; background: var(--input-bg);
       border-radius: 10px; padding: 0 15px; border: 2px solid transparent;
@@ -96,30 +98,20 @@
       background: #fff; color: var(--primary-color); font-weight: 600; border-radius: 5px;
     }
 
-    /* --- ستايل صورة البطاقة المميز --- */
     .id-card-visual-container {
-      text-align: center;
-      margin: 10px 0 25px 0;
-      perspective: 800px; /* لعمل تأثير ثلاثي الأبعاد */
+      text-align: center; margin: 10px 0 25px 0; perspective: 800px; 
     }
-
     .id-card-img {
-      max-width: 80%;
-      height: auto;
-      border-radius: 15px;
+      max-width: 80%; height: auto; border-radius: 15px;
       box-shadow: 0 15px 35px rgba(0, 114, 255, 0.25);
       border: 2px solid rgba(255, 255, 255, 0.6);
-      /* حركة الطفو */
       animation: floatCard 4s ease-in-out infinite;
-      transform-style: preserve-3d;
-      transition: transform 0.3s ease;
+      transform-style: preserve-3d; transition: transform 0.3s ease;
     }
-
     @keyframes floatCard {
       0%, 100% { transform: translateY(0) rotateX(0deg); }
       50% { transform: translateY(-8px) rotateX(5deg); }
     }
-    /* -------------------------------- */
 
     .btn {
       background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
@@ -133,6 +125,7 @@
 
     .btn-secondary { background: linear-gradient(to right, #43cea2, #185a9d); margin-top: 15px; }
     .btn-danger { background: linear-gradient(to right, #ff416c, #ff4b2b); margin-top: 15px; }
+    .btn-warning { background: linear-gradient(to right, #f2994a, #f2c94c); color: #333; margin-top: 5px; }
 
     .msg { margin-top: 15px; text-align: center; font-size: 14px; font-weight: 600; min-height: 20px; transition: 0.3s; padding: 10px; border-radius: 8px; }
     .msg.error { color: var(--error-color); animation: shake 0.5s; }
@@ -147,6 +140,38 @@
     }
     @keyframes pulseRed { from { border-color: #ff0000; box-shadow: 0 0 10px rgba(255, 0, 0, 0.3); } to { border-color: #ff6b6b; box-shadow: 0 0 20px rgba(255, 0, 0, 0.6); } }
     @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(10px); } 75% { transform: translateX(-10px); } }
+
+    /* --- ستايل قائمة المناديب في لوحة الأدمن --- */
+    .admin-list-container {
+        max-height: 250px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.5);
+    }
+    .rep-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        transition: 0.2s;
+    }
+    .rep-item:last-child { border-bottom: none; }
+    .rep-item:hover { background: rgba(255,255,255,0.8); }
+    .rep-name { font-weight: 600; color: #333; }
+    .btn-delete-rep {
+        background: #ff4b2b;
+        color: white;
+        border: none;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+    .btn-delete-rep:hover { background: #d32f2f; }
+    .empty-list { text-align: center; padding: 20px; color: #888; font-size: 14px; }
 
     @media (max-width: 480px) { .card { padding: 30px 20px; margin: 20px; width: 90%; } h2 { font-size: 20px; } }
     .hidden { display: none; }
@@ -176,7 +201,8 @@
       <h2 id="welcome">مرحبًا</h2>
       
       <div class="input-group">
-        <input id="repName" type="text" autocomplete="off" maxlength="30" placeholder=" ">
+        <input id="repName" type="text" autocomplete="off" list="repNamesHistory" maxlength="30" placeholder=" ">
+        <datalist id="repNamesHistory"></datalist>
         <label for="repName">اسم المندوب</label>
       </div>
       
@@ -191,21 +217,38 @@
       <div class="id-card-visual-container">
         <img src="https://raw.githubusercontent.com/mohamednasr5/id/c87bcf1a33cafce80afaaf871105564368a0f615/4.png" alt="مثال للبطاقة" class="id-card-img">
       </div>
+      
       <button class="btn" onclick="addUser()">إضافة</button>
       <div id="add-msg" class="msg"></div>
-      <button class="btn btn-secondary" onclick="showStatsLogin()">صفحة الإحصائيات</button>
+      <button class="btn btn-secondary" onclick="showStatsLogin()">لوحة الإدارة / الإحصائيات</button>
     </div>
 
     <div class="card hidden" id="stats-auth-card">
       <h2>صلاحية المدير</h2>
-      <p style="text-align: center; color: #666; margin-bottom: 20px;">أدخل كلمة مرور الإحصائيات</p>
+      <p style="text-align: center; color: #666; margin-bottom: 20px;">أدخل كلمة مرور الإدارة</p>
       <div class="input-group">
         <input id="statsPass" type="password" placeholder=" ">
         <label for="statsPass">كلمة المرور</label>
       </div>
-      <button class="btn" onclick="verifyStats()">دخول للإحصائيات</button>
+      <button class="btn" onclick="verifyStats()">دخول</button>
       <div id="stats-msg" class="msg"></div>
       <button class="btn btn-danger" onclick="cancelStats()">إلغاء وعودة</button>
+    </div>
+
+    <div class="card hidden" id="admin-panel-card">
+        <h2>لوحة التحكم</h2>
+        
+        <button class="btn btn-warning" onclick="location.href='stats.html'">عرض صفحة الإحصائيات الكاملة 📊</button>
+        
+        <h3>إدارة أسماء المناديب</h3>
+        <p style="font-size:12px; color:#666; text-align:right; margin-bottom:10px;">
+            تنبيه: حذف الاسم من هنا يزيله من قائمة الاقتراحات فقط. لا يتم حذف البيانات المسجلة.
+        </p>
+
+        <div class="admin-list-container" id="adminRepList">
+            </div>
+
+        <button class="btn btn-danger" onclick="closeAdminPanel()">خروج من اللوحة</button>
     </div>
 
   </div>
@@ -238,6 +281,70 @@
 
     let userPlace = null, userPlaceIdx = null, userID = null;
 
+    // --- دوال حفظ واسترجاع الأسماء ---
+    function loadRepNames() {
+        const stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
+        const datalist = document.getElementById('repNamesHistory');
+        datalist.innerHTML = '';
+        stored.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            datalist.appendChild(opt);
+        });
+    }
+
+    function saveRepName(name) {
+        if(!name) return;
+        let stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
+        if (!stored.includes(name)) {
+            stored.push(name);
+            localStorage.setItem('saved_rep_names', JSON.stringify(stored));
+            loadRepNames(); 
+        }
+    }
+    // ------------------------------
+
+    // --- دوال لوحة التحكم (Admin Logic) ---
+    function renderAdminRepList() {
+        const container = document.getElementById('adminRepList');
+        const stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
+        container.innerHTML = '';
+
+        if (stored.length === 0) {
+            container.innerHTML = '<div class="empty-list">لا توجد أسماء محفوظة حالياً</div>';
+            return;
+        }
+
+        stored.forEach(name => {
+            const div = document.createElement('div');
+            div.className = 'rep-item';
+            div.innerHTML = `
+                <span class="rep-name">${name}</span>
+                <button class="btn-delete-rep" onclick="window.deleteRepName('${name}')">حذف</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // جعل الدالة متاحة في window لاستدعائها من HTML
+    window.deleteRepName = function(nameToDelete) {
+        if(confirm(`هل أنت متأكد من حذف المندوب "${nameToDelete}" من قائمة الاقتراحات؟`)) {
+            let stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
+            stored = stored.filter(n => n !== nameToDelete);
+            localStorage.setItem('saved_rep_names', JSON.stringify(stored));
+            
+            // تحديث الواجهة
+            renderAdminRepList();
+            loadRepNames(); 
+        }
+    }
+    
+    window.closeAdminPanel = function() {
+        document.getElementById('admin-panel-card').classList.add('hidden');
+        document.getElementById('main-card').classList.remove('hidden');
+    }
+    // ------------------------------
+
     window.login = function() {
       const msgDiv = document.getElementById('login-msg');
       msgDiv.textContent = ''; msgDiv.className = 'msg';
@@ -267,6 +374,7 @@
         mainCard.classList.remove('hidden');
         mainCard.classList.add('fade-in');
         document.getElementById('welcome').textContent = `مرحبًا في ${userPlace}`;
+        loadRepNames(); 
       }, 400);
     }
 
@@ -293,7 +401,7 @@
         const snapshot = await get(child(ref(db), 'users/' + natid));
         
         if (snapshot.exists()) {
-          // --- حالة وجود تكرار ---
+          // --- تكرار ---
           let data = snapshot.val();
           document.getElementById('errorSound').play().catch(e => console.log('Audio play blocked'));
 
@@ -317,15 +425,18 @@
              status: "rejected"
           };
           await push(ref(db, 'duplicates'), duplicateData);
+          saveRepName(name);
 
         } else {
-          // --- حالة الإضافة الجديدة ---
+          // --- إضافة ناجحة ---
           const now = new Date();
           let payload = {
             natid, repName: name, place: userPlace, placeIdx: userPlaceIdx,
             time: now.toISOString(), username: userID
           };
           await set(ref(db, 'users/' + natid), payload);
+          saveRepName(name);
+
           msg.className += ' success';
           msg.textContent = "تمت الإضافة بنجاح.";
           document.getElementById('natID').value = '';
@@ -341,7 +452,7 @@
       }
     }
 
-    // Stats Logic
+    // Stats / Admin Logic
     window.showStatsLogin = function() {
         document.getElementById('main-card').classList.add('hidden');
         const statsCard = document.getElementById('stats-auth-card');
@@ -360,10 +471,20 @@
     window.verifyStats = function() {
         const pass = document.getElementById('statsPass').value;
         const msg = document.getElementById('stats-msg');
+        
         if(pass === '251988') {
             msg.className = 'msg success';
-            msg.textContent = 'كلمة المرور صحيحة، جاري التحويل...';
-            setTimeout(() => { location.href = 'stats.html'; }, 1000);
+            msg.textContent = 'كلمة المرور صحيحة.';
+            
+            // بدلاً من التحويل لصفحة أخرى، نظهر لوحة التحكم
+            setTimeout(() => { 
+                document.getElementById('stats-auth-card').classList.add('hidden');
+                const adminPanel = document.getElementById('admin-panel-card');
+                adminPanel.classList.remove('hidden');
+                adminPanel.classList.add('fade-in');
+                renderAdminRepList(); // تحميل القائمة
+            }, 500);
+
         } else {
             msg.className = 'msg error';
             msg.textContent = 'كلمة المرور خاطئة!';
