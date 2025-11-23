@@ -38,7 +38,6 @@
       100% { background-position: 0% 50%; }
     }
 
-    /* الخلفية المتحركة */
     .circles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; }
     .circles li { position: absolute; display: block; list-style: none; width: 20px; height: 20px; background: rgba(255, 255, 255, 0.2); animation: animate 25s linear infinite; bottom: -150px; border-radius: 50%; }
     .circles li:nth-child(1){ left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
@@ -67,70 +66,60 @@
 
     .input-group { position: relative; margin-bottom: 25px; }
 
-    /* تنسيق خاص للحقل المركب (الثابت + المتغير) */
+    /* تنسيق الحقل الثابت */
     .fixed-input-box {
-      display: flex;
-      align-items: center;
-      background: var(--input-bg);
-      border-radius: 10px;
-      padding: 0 15px;
-      border: 2px solid transparent;
-      transition: 0.3s ease;
-      direction: ltr; /* مهم جداً لترتيب الأرقام */
+      display: flex; align-items: center; background: var(--input-bg);
+      border-radius: 10px; padding: 0 15px; border: 2px solid transparent;
+      transition: 0.3s ease; direction: ltr;
     }
-
-    /* تأثير التركيز على الحاوية بالكامل */
-    .fixed-input-box:focus-within {
-      background: #fff;
-      border-color: var(--secondary-color);
-      box-shadow: 0 0 15px rgba(0, 198, 255, 0.1);
-    }
-
-    /* العلامات الثابتة */
-    .static-x {
-      color: #aaa;
-      font-weight: bold;
-      font-size: 18px;
-      letter-spacing: 2px;
-      margin-right: 5px;
-      pointer-events: none; /* لمنع تحديدها */
-      user-select: none;
-    }
-
-    /* الحقل الفعلي */
+    .fixed-input-box:focus-within { background: #fff; border-color: var(--secondary-color); box-shadow: 0 0 15px rgba(0, 198, 255, 0.1); }
+    .static-x { color: #aaa; font-weight: bold; font-size: 18px; letter-spacing: 2px; margin-right: 5px; pointer-events: none; user-select: none; }
+    
     input, select {
       width: 100%; padding: 12px 15px; font-size: 16px;
       background: var(--input-bg); border: 2px solid transparent;
       border-radius: 10px; font-family: 'Cairo', sans-serif;
       transition: 0.3s ease; color: #333;
     }
-    
-    /* تعديل الحقل داخل الحاوية الثابتة */
-    .fixed-input-box input {
-      background: transparent;
-      border: none;
-      padding: 12px 0;
-      width: auto;
-      flex-grow: 1;
-      font-weight: bold;
-      letter-spacing: 2px;
-    }
+    .fixed-input-box input { background: transparent; border: none; padding: 12px 0; width: auto; flex-grow: 1; font-weight: bold; letter-spacing: 2px; }
     .fixed-input-box input:focus { box-shadow: none; background: transparent; }
 
-    /* الليبل العائم */
     .input-group label {
       position: absolute; top: 50%; right: 15px; transform: translateY(-50%);
       font-size: 16px; color: #999; pointer-events: none;
       transition: 0.3s ease all; padding: 0 5px; background: transparent; z-index: 10;
     }
-
-    /* تحريك الليبل عند التركيز */
     input:focus ~ label, input:not(:placeholder-shown) ~ label, 
     .fixed-input-box:focus-within ~ label, 
     .fixed-input-box input:not(:placeholder-shown) ~ label {
       top: 0; transform: translateY(-50%) scale(0.85);
       background: #fff; color: var(--primary-color); font-weight: 600; border-radius: 5px;
     }
+
+    /* --- ستايل صورة البطاقة المميز --- */
+    .id-card-visual-container {
+      text-align: center;
+      margin: 10px 0 25px 0;
+      perspective: 800px; /* لعمل تأثير ثلاثي الأبعاد */
+    }
+
+    .id-card-img {
+      max-width: 80%;
+      height: auto;
+      border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0, 114, 255, 0.25);
+      border: 2px solid rgba(255, 255, 255, 0.6);
+      /* حركة الطفو */
+      animation: floatCard 4s ease-in-out infinite;
+      transform-style: preserve-3d;
+      transition: transform 0.3s ease;
+    }
+
+    @keyframes floatCard {
+      0%, 100% { transform: translateY(0) rotateX(0deg); }
+      50% { transform: translateY(-8px) rotateX(5deg); }
+    }
+    /* -------------------------------- */
 
     .btn {
       background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
@@ -191,14 +180,17 @@
         <label for="repName">اسم المندوب</label>
       </div>
       
-      <div class="input-group">
+      <div class="input-group" style="margin-bottom: 5px;">
         <div class="fixed-input-box">
           <span class="static-x">××××××××××</span>
           <input id="natID" type="tel" maxlength="4" placeholder=" " autocomplete="off">
         </div>
         <label for="natID">آخر 4 أرقام من القومي</label>
       </div>
-      
+
+      <div class="id-card-visual-container">
+        <img src="https://raw.githubusercontent.com/mohamednasr5/id/c87bcf1a33cafce80afaaf871105564368a0f615/4.png" alt="مثال للبطاقة" class="id-card-img">
+      </div>
       <button class="btn" onclick="addUser()">إضافة</button>
       <div id="add-msg" class="msg"></div>
       <button class="btn btn-secondary" onclick="showStatsLogin()">صفحة الإحصائيات</button>
@@ -282,7 +274,7 @@
       const btn = event.target;
       const originalText = btn.innerText;
       let name = document.getElementById('repName').value.trim();
-      let natid = document.getElementById('natID').value.trim(); // الرقم الذي أدخله المندوب (4 أرقام)
+      let natid = document.getElementById('natID').value.trim();
 
       const msg = document.getElementById('add-msg');
       msg.textContent = ''; msg.className = 'msg';
@@ -291,8 +283,6 @@
       if (name.length < 2) {
         msg.textContent = 'يرجى إدخال اسم المندوب'; msg.className += ' error'; return;
       }
-      
-      // التحقق أن الرقم مكون من 4 أرقام فقط
       if (!/^\d{4}$/.test(natid)) {
         msg.textContent = 'يرجى إدخال آخر 4 أرقام بشكل صحيح.'; msg.className += ' error'; return;
       }
@@ -300,9 +290,6 @@
       btn.disabled = true; btn.innerText = 'جاري الإضافة...';
 
       try {
-        // البحث باستخدام الـ 4 أرقام فقط (لاحظ أن قاعدة البيانات يجب أن تخزن الـ 4 أرقام فقط كمفتاح أو تبحث بداخلها)
-        // إذا كنت تخزن الـ 14 رقم في قاعدة البيانات، هذا البحث لن يجد الشخص إلا إذا كنت تخزن الـ 4 أرقام فقط.
-        // بناءً على طلبك، سنبحث ونخزن باستخدام الـ 4 أرقام
         const snapshot = await get(child(ref(db), 'users/' + natid));
         
         if (snapshot.exists()) {
@@ -314,7 +301,7 @@
           msg.innerHTML = `
             <span>⚠️ تنبيه تكرار!</span>
             <div style="margin-top:5px; font-size:13px; color:#333;">
-             هذه البطاقة (${natid}) مسجلة مسبقاً في <br>
+             الكود (${natid}) مسجل مسبقاً في <br>
              <b style="color:#d32f2f; font-size:15px;">${data.place}</b> <br>
              بواسطة <b style="color:#d32f2f; font-size:15px;">${data.repName}</b>
             </div>
@@ -338,7 +325,6 @@
             natid, repName: name, place: userPlace, placeIdx: userPlaceIdx,
             time: now.toISOString(), username: userID
           };
-          // التخزين يتم برقم الـ 4 خانات فقط
           await set(ref(db, 'users/' + natid), payload);
           msg.className += ' success';
           msg.textContent = "تمت الإضافة بنجاح.";
