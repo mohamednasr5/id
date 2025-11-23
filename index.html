@@ -1,544 +1,533 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>تسجيل دخول المندوب</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
-  <style>
-    :root {
-      --primary-color: #0072ff;
-      --secondary-color: #00c6ff;
-      --bg-gradient: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
-      --glass-bg: rgba(255, 255, 255, 0.95);
-      --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-      --input-bg: #f0f4f8;
-      --text-color: #2d3436;
-      --error-color: #e74c3c;
-      --success-color: #2ecc71;
-    }
+  <meta charset="UTF-8">
+  <title>تسجيل دخول المندوب</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
+  <style>
+    :root {
+      --primary-color: #0072ff;
+      --secondary-color: #00c6ff;
+      --bg-gradient: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+      --glass-bg: rgba(255, 255, 255, 0.95);
+      --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+      --input-bg: #f0f4f8;
+      --text-color: #2d3436;
+      --error-color: #e74c3c;
+      --success-color: #2ecc71;
+    }
 
-    * { box-sizing: border-box; outline: none; }
+    * { box-sizing: border-box; outline: none; }
 
-    body {
-      font-family: 'Cairo', sans-serif;
-      margin: 0; padding: 0;
-      min-height: 100vh;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--bg-gradient);
-      background-size: 400% 400%;
-      animation: gradientBG 15s ease infinite;
-      overflow: hidden;
-      color: var(--text-color);
-      position: fixed;
-      width: 100%;
-      height: 100%;
-    }
+    body {
+      font-family: 'Cairo', sans-serif;
+      margin: 0; padding: 0;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-gradient);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      overflow: hidden;
+      color: var(--text-color);
+      position: fixed;
+      width: 100%;
+      height: 100%;
+    }
 
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
-    .circles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; }
-    .circles li { position: absolute; display: block; list-style: none; width: 20px; height: 20px; background: rgba(255, 255, 255, 0.2); animation: animate 25s linear infinite; bottom: -150px; border-radius: 50%; }
-    .circles li:nth-child(1){ left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
-    .circles li:nth-child(2){ left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
-    .circles li:nth-child(3){ left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
-    .circles li:nth-child(4){ left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
-    .circles li:nth-child(5){ left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
-    @keyframes animate { 0%{ transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 0; } 100%{ transform: translateY(-1000px) rotate(720deg); opacity: 0; border-radius: 50%; } }
+    .circles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; }
+    .circles li { position: absolute; display: block; list-style: none; width: 20px; height: 20px; background: rgba(255, 255, 255, 0.2); animation: animate 25s linear infinite; bottom: -150px; border-radius: 50%; }
+    .circles li:nth-child(1){ left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+    .circles li:nth-child(2){ left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+    .circles li:nth-child(3){ left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+    .circles li:nth-child(4){ left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+    .circles li:nth-child(5){ left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
+    @keyframes animate { 0%{ transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 0; } 100%{ transform: translateY(-1000px) rotate(720deg); opacity: 0; border-radius: 50%; } }
 
-    .container { position: relative; z-index: 1; perspective: 1000px; width: 100%; padding: 10px; display: flex; align-items: center; justify-content: center; }
+    .container { position: relative; z-index: 1; perspective: 1000px; width: 100%; padding: 10px; display: flex; align-items: center; justify-content: center; }
 
-    .card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      border-radius: 20px; padding: 30px 25px;
-      width: 100%; max-width: 420px;
-      box-shadow: var(--glass-shadow);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      transform: translateY(20px); opacity: 0;
-      animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-      transition: all 0.5s ease;
-      max-height: calc(100vh - 40px);
-      overflow-y: auto;
-      overflow-x: hidden;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-    .card::-webkit-scrollbar { display: none; }
-    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      border-radius: 20px; padding: 30px 25px;
+      width: 100%; max-width: 420px;
+      box-shadow: var(--glass-shadow);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      transform: translateY(20px); opacity: 0;
+      animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      transition: all 0.5s ease;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .card::-webkit-scrollbar { display: none; }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
-    h2 { text-align: center; margin-bottom: 20px; color: var(--primary-color); font-weight: 700; font-size: 22px; }
-    h3 { text-align: right; color: #333; margin: 12px 0 8px; font-size: 16px; border-bottom: 2px solid #eee; padding-bottom: 5px;}
+    h2 { text-align: center; margin-bottom: 20px; color: var(--primary-color); font-weight: 700; font-size: 22px; }
+    h3 { text-align: right; color: #333; margin: 12px 0 8px; font-size: 16px; border-bottom: 2px solid #eee; padding-bottom: 5px;}
 
-    .input-group { position: relative; margin-bottom: 18px; }
+    .input-group { position: relative; margin-bottom: 18px; }
 
-    /* تم إبقاء هذا الكلاس في حال أردت استخدامه لاحقاً لكنه غير مستخدم الآن في الإدخال الرئيسي */
-    .fixed-input-box {
-      display: flex; align-items: center; background: var(--input-bg);
-      border-radius: 10px; padding: 0 15px; border: 2px solid transparent;
-      transition: 0.3s ease; direction: ltr;
-    }
-    .fixed-input-box:focus-within { background: #fff; border-color: var(--secondary-color); box-shadow: 0 0 15px rgba(0, 198, 255, 0.1); }
-    .static-x { color: #aaa; font-weight: bold; font-size: 18px; letter-spacing: 2px; margin-right: 5px; pointer-events: none; user-select: none; }
-    
-    input, select {
-      width: 100%; padding: 12px 15px; font-size: 16px;
-      background: var(--input-bg); border: 2px solid transparent;
-      border-radius: 10px; font-family: 'Cairo', sans-serif;
-      transition: 0.3s ease; color: #333;
-    }
-    /* تعديل تنسيق الـ input ليكون طبيعياً بدون خصائص الـ fixed-box السابقة */
-    input:focus { background: #fff; border-color: var(--secondary-color); box-shadow: 0 0 15px rgba(0, 198, 255, 0.1); }
+    .fixed-input-box {
+      display: flex; align-items: center; background: var(--input-bg);
+      border-radius: 10px; padding: 0 15px; border: 2px solid transparent;
+      transition: 0.3s ease; direction: ltr;
+    }
+    .fixed-input-box:focus-within { background: #fff; border-color: var(--secondary-color); box-shadow: 0 0 15px rgba(0, 198, 255, 0.1); }
+    .static-x { color: #aaa; font-weight: bold; font-size: 18px; letter-spacing: 2px; margin-right: 5px; pointer-events: none; user-select: none; }
+    
+    input, select {
+      width: 100%; padding: 12px 15px; font-size: 16px;
+      background: var(--input-bg); border: 2px solid transparent;
+      border-radius: 10px; font-family: 'Cairo', sans-serif;
+      transition: 0.3s ease; color: #333;
+    }
+    input:focus { background: #fff; border-color: var(--secondary-color); box-shadow: 0 0 15px rgba(0, 198, 255, 0.1); }
 
-    .input-group label {
-      position: absolute; top: 50%; right: 15px; transform: translateY(-50%);
-      font-size: 16px; color: #999; pointer-events: none;
-      transition: 0.3s ease all; padding: 0 5px; background: transparent; z-index: 10;
-    }
-    input:focus ~ label, input:not(:placeholder-shown) ~ label {
-      top: 0; transform: translateY(-50%) scale(0.85);
-      background: #fff; color: var(--primary-color); font-weight: 600; border-radius: 5px;
-    }
+    .input-group label {
+      position: absolute; top: 50%; right: 15px; transform: translateY(-50%);
+      font-size: 16px; color: #999; pointer-events: none;
+      transition: 0.3s ease all; padding: 0 5px; background: transparent; z-index: 10;
+    }
+    input:focus ~ label, input:not(:placeholder-shown) ~ label {
+      top: 0; transform: translateY(-50%) scale(0.85);
+      background: #fff; color: var(--primary-color); font-weight: 600; border-radius: 5px;
+    }
 
-    .id-card-visual-container {
-      text-align: center; margin: 8px 0 15px 0; perspective: 800px; 
-    }
-    .id-card-img {
-      max-width: 75%; height: auto; border-radius: 12px;
-      box-shadow: 0 12px 28px rgba(0, 114, 255, 0.2);
-      border: 2px solid rgba(255, 255, 255, 0.6);
-      animation: floatCard 4s ease-in-out infinite;
-      transform-style: preserve-3d; transition: transform 0.3s ease;
-    }
-    @keyframes floatCard {
-      0%, 100% { transform: translateY(0) rotateX(0deg); }
-      50% { transform: translateY(-8px) rotateX(5deg); }
-    }
+    .id-card-visual-container {
+      text-align: center; margin: 8px 0 15px 0; perspective: 800px; 
+    }
+    .id-card-img {
+      max-width: 75%; height: auto; border-radius: 12px;
+      box-shadow: 0 12px 28px rgba(0, 114, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.6);
+      animation: floatCard 4s ease-in-out infinite;
+      transform-style: preserve-3d; transition: transform 0.3s ease;
+    }
+    @keyframes floatCard {
+      0%, 100% { transform: translateY(0) rotateX(0deg); }
+      50% { transform: translateY(-8px) rotateX(5deg); }
+    }
 
-    .btn {
-      background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
-      color: white; padding: 11px; width: 100%; border: none;
-      border-radius: 50px; font-size: 16px; font-weight: 700; cursor: pointer;
-      transition: 0.3s ease; box-shadow: 0 5px 15px rgba(0, 114, 255, 0.3);
-      position: relative; overflow: hidden;
-    }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 114, 255, 0.4); }
-    .btn:active { transform: translateY(1px); }
+    .btn {
+      background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
+      color: white; padding: 11px; width: 100%; border: none;
+      border-radius: 50px; font-size: 16px; font-weight: 700; cursor: pointer;
+      transition: 0.3s ease; box-shadow: 0 5px 15px rgba(0, 114, 255, 0.3);
+      position: relative; overflow: hidden;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 114, 255, 0.4); }
+    .btn:active { transform: translateY(1px); }
 
-    .btn-secondary { background: linear-gradient(to right, #43cea2, #185a9d); margin-top: 10px; }
-    .btn-danger { background: linear-gradient(to right, #ff416c, #ff4b2b); margin-top: 10px; }
-    .btn-warning { background: linear-gradient(to right, #f2994a, #f2c94c); color: #333; margin-top: 5px; }
+    .btn-secondary { background: linear-gradient(to right, #43cea2, #185a9d); margin-top: 10px; }
+    .btn-danger { background: linear-gradient(to right, #ff416c, #ff4b2b); margin-top: 10px; }
+    .btn-warning { background: linear-gradient(to right, #f2994a, #f2c94c); color: #333; margin-top: 5px; }
 
-    .msg { margin-top: 12px; text-align: center; font-size: 13px; font-weight: 600; min-height: 18px; transition: 0.3s; padding: 8px; border-radius: 8px; }
-    .msg.error { color: var(--error-color); animation: shake 0.5s; }
-    .msg.success { color: var(--success-color); }
+    .msg { margin-top: 12px; text-align: center; font-size: 13px; font-weight: 600; min-height: 18px; transition: 0.3s; padding: 8px; border-radius: 8px; }
+    .msg.error { color: var(--error-color); animation: shake 0.5s; }
+    .msg.success { color: var(--success-color); }
 
-    .duplicate-box {
-        background-color: #fff5f5; border: 2px solid #ff0000; color: #c0392b;
-        padding: 12px; border-radius: 10px; margin-top: 15px; font-weight: bold;
-        box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
-        animation: pulseRed 0.8s infinite alternate;
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        font-size: 13px;
-    }
-    @keyframes pulseRed { from { border-color: #ff0000; box-shadow: 0 0 10px rgba(255, 0, 0, 0.3); } to { border-color: #ff6b6b; box-shadow: 0 0 20px rgba(255, 0, 0, 0.6); } }
-    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(10px); } 75% { transform: translateX(-10px); } }
+    .duplicate-box {
+        background-color: #fff5f5; border: 2px solid #ff0000; color: #c0392b;
+        padding: 12px; border-radius: 10px; margin-top: 15px; font-weight: bold;
+        box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
+        animation: pulseRed 0.8s infinite alternate;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        font-size: 13px;
+    }
+    @keyframes pulseRed { from { border-color: #ff0000; box-shadow: 0 0 10px rgba(255, 0, 0, 0.3); } to { border-color: #ff6b6b; box-shadow: 0 0 20px rgba(255, 0, 0, 0.6); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(10px); } 75% { transform: translateX(-10px); } }
 
-    /* --- ستايل قائمة المناديب في لوحة الأدمن --- */
-    .admin-list-container {
-        max-height: 200px;
-        overflow-y: auto;
-        margin-bottom: 15px;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        background: rgba(255,255,255,0.5);
-        scrollbar-width: thin;
-        scrollbar-color: #0072ff #f0f4f8;
-    }
-    .admin-list-container::-webkit-scrollbar { width: 6px; }
-    .admin-list-container::-webkit-scrollbar-track { background: #f0f4f8; border-radius: 10px; }
-    .admin-list-container::-webkit-scrollbar-thumb { background: #0072ff; border-radius: 10px; }
-    .rep-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px;
-        border-bottom: 1px solid #eee;
-        transition: 0.2s;
-    }
-    .rep-item:last-child { border-bottom: none; }
-    .rep-item:hover { background: rgba(255,255,255,0.8); }
-    .rep-name { font-weight: 600; color: #333; }
-    .btn-delete-rep {
-        background: #ff4b2b;
-        color: white;
-        border: none;
-        padding: 5px 12px;
-        border-radius: 15px;
-        font-size: 12px;
-        cursor: pointer;
-    }
-    .btn-delete-rep:hover { background: #d32f2f; }
-    .empty-list { text-align: center; padding: 20px; color: #888; font-size: 14px; }
+    .admin-list-container {
+        max-height: 200px;
+        overflow-y: auto;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.5);
+        scrollbar-width: thin;
+        scrollbar-color: #0072ff #f0f4f8;
+    }
+    .admin-list-container::-webkit-scrollbar { width: 6px; }
+    .admin-list-container::-webkit-scrollbar-track { background: #f0f4f8; border-radius: 10px; }
+    .admin-list-container::-webkit-scrollbar-thumb { background: #0072ff; border-radius: 10px; }
+    .rep-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        transition: 0.2s;
+    }
+    .rep-item:last-child { border-bottom: none; }
+    .rep-item:hover { background: rgba(255,255,255,0.8); }
+    .rep-name { font-weight: 600; color: #333; }
+    .btn-delete-rep {
+        background: #ff4b2b;
+        color: white;
+        border: none;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+    .btn-delete-rep:hover { background: #d32f2f; }
+    .empty-list { text-align: center; padding: 20px; color: #888; font-size: 14px; }
 
-    @media (max-width: 480px) { 
-      .card { padding: 25px 18px; margin: 15px; width: 95%; max-width: 100%; } 
-      h2 { font-size: 18px; margin-bottom: 15px; } 
-      h3 { font-size: 15px; }
-      .btn { font-size: 15px; padding: 10px; }
-      .input-group { margin-bottom: 15px; }
-      input, select { font-size: 15px; padding: 10px 12px; }
-      .id-card-img { max-width: 70%; }
-      .msg { font-size: 12px; }
-    }
-    @media (max-width: 360px) { 
-      .card { padding: 20px 15px; }
-      h2 { font-size: 16px; }
-      .btn { font-size: 14px; }
-    }
-    @media (max-height: 600px) {
-      .card { padding: 20px 20px; }
-      h2 { margin-bottom: 12px; font-size: 18px; }
-      .input-group { margin-bottom: 12px; }
-      .btn { padding: 9px; font-size: 15px; }
-      .id-card-visual-container { margin: 5px 0 10px 0; }
-      .id-card-img { max-width: 65%; }
-      .admin-list-container { max-height: 150px; }
-    }
-    .hidden { display: none; }
-    .fade-in { animation: fadeIn 0.5s forwards; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  </style>
+    @media (max-width: 480px) { 
+      .card { padding: 25px 18px; margin: 15px; width: 95%; max-width: 100%; } 
+      h2 { font-size: 18px; margin-bottom: 15px; } 
+      h3 { font-size: 15px; }
+      .btn { font-size: 15px; padding: 10px; }
+      .input-group { margin-bottom: 15px; }
+      input, select { font-size: 15px; padding: 10px 12px; }
+      .id-card-img { max-width: 70%; }
+      .msg { font-size: 12px; }
+    }
+    @media (max-width: 360px) { 
+      .card { padding: 20px 15px; }
+      h2 { font-size: 16px; }
+      .btn { font-size: 14px; }
+    }
+    @media (max-height: 600px) {
+      .card { padding: 20px 20px; }
+      h2 { margin-bottom: 12px; font-size: 18px; }
+      .input-group { margin-bottom: 12px; }
+      .btn { padding: 9px; font-size: 15px; }
+      .id-card-visual-container { margin: 5px 0 10px 0; }
+      .id-card-img { max-width: 65%; }
+      .admin-list-container { max-height: 150px; }
+    }
+    .hidden { display: none; }
+    .fade-in { animation: fadeIn 0.5s forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
 </head>
 <body>
 
-  <audio id="errorSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+  <audio id="errorSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 
-  <ul class="circles"><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li></ul>
+  <ul class="circles"><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li></ul>
 
-  <div class="container">
-    
-    <div class="card" id="auth-card">
-      <h2>تسجيل دخول المندوب</h2>
-      <div class="input-group">
-        <input id="loginCode" type="number" placeholder=" ">
-        <label for="loginCode">كود الدخول</label>
-      </div>
-      <button class="btn" onclick="login()"><span>دخول</span></button>
-      <div id="login-msg" class="msg"></div>
-    </div>
+  <div class="container">
+    
+    <div class="card" id="auth-card">
+      <h2>تسجيل دخول المندوب</h2>
+      <div class="input-group">
+        <input id="loginCode" type="number" placeholder=" ">
+        <label for="loginCode">كود الدخول</label>
+      </div>
+      <button class="btn" onclick="login()"><span>دخول</span></button>
+      <div id="login-msg" class="msg"></div>
+    </div>
 
-    <div class="card hidden" id="main-card">
-      <h2 id="welcome">مرحبًا</h2>
-      
-      <div class="input-group">
-        <input id="repName" type="text" autocomplete="off" list="repNamesHistory" maxlength="30" placeholder=" ">
-        <datalist id="repNamesHistory"></datalist>
-        <label for="repName">اسم المندوب</label>
-      </div>
-      
-      <div class="input-group" style="margin-bottom: 5px;">
-        <input id="natID" type="tel" maxlength="14" placeholder=" " autocomplete="off">
-        <label for="natID">الرقم القومي (14 رقم)</label>
-      </div>
+    <div class="card hidden" id="main-card">
+      <h2 id="welcome">مرحبًا</h2>
+      
+      <div class="input-group">
+        <input id="repName" type="text" autocomplete="off" list="repNamesHistory" maxlength="30" placeholder=" ">
+        <datalist id="repNamesHistory"></datalist>
+        <label for="repName">اسم المندوب</label>
+      </div>
+      
+      <div class="input-group" style="margin-bottom: 5px;">
+        <input id="natID" type="tel" maxlength="14" placeholder=" " autocomplete="off">
+        <label for="natID">الرقم القومي (14 رقم)</label>
+      </div>
 
-      <div class="id-card-visual-container">
-        <img src="https://raw.githubusercontent.com/mohamednasr5/id/e83438329b0f009f6eebf61b2797496d744589f2/5.png" alt="مثال للبطاقة" class="id-card-img">
-      </div>
-      
-      <button class="btn" onclick="addUser()">إضافة</button>
-      <div id="add-msg" class="msg"></div>
-      <button class="btn btn-secondary" onclick="showStatsLogin()">لوحة الإدارة / الإحصائيات</button>
-    </div>
+      <div class="id-card-visual-container">
+        <img src="https://raw.githubusercontent.com/mohamednasr5/id/e83438329b0f009f6eebf61b2797496d744589f2/5.png" alt="مثال للبطاقة" class="id-card-img">
+      </div>
+      
+      <button class="btn" onclick="addUser()">إضافة</button>
+      <div id="add-msg" class="msg"></div>
+      <button class="btn btn-secondary" onclick="showStatsLogin()">لوحة الإدارة / الإحصائيات</button>
+    </div>
 
-    <div class="card hidden" id="stats-auth-card">
-      <h2>صلاحية المدير</h2>
-      <p style="text-align: center; color: #666; margin-bottom: 20px;">أدخل كلمة مرور الإدارة</p>
-      <div class="input-group">
-        <input id="statsPass" type="password" placeholder=" ">
-        <label for="statsPass">كلمة المرور</label>
-      </div>
-      <button class="btn" onclick="verifyStats()">دخول</button>
-      <div id="stats-msg" class="msg"></div>
-      <button class="btn btn-danger" onclick="cancelStats()">إلغاء وعودة</button>
-    </div>
+    <div class="card hidden" id="stats-auth-card">
+      <h2>صلاحية المدير</h2>
+      <p style="text-align: center; color: #666; margin-bottom: 20px;">أدخل كلمة مرور الإدارة</p>
+      <div class="input-group">
+        <input id="statsPass" type="password" placeholder=" ">
+        <label for="statsPass">كلمة المرور</label>
+      </div>
+      <button class="btn" onclick="verifyStats()">دخول</button>
+      <div id="stats-msg" class="msg"></div>
+      <button class="btn btn-danger" onclick="cancelStats()">إلغاء وعودة</button>
+    </div>
 
-    <div class="card hidden" id="admin-panel-card">
-        <h2>لوحة التحكم</h2>
-        
-        <button class="btn btn-warning" onclick="location.href='stats.html'">عرض صفحة الإحصائيات الكاملة 📊</button>
-        
-        <h3>إدارة أسماء المناديب</h3>
-        <p style="font-size:12px; color:#666; text-align:right; margin-bottom:10px;">
-            تنبيه: حذف الاسم من هنا يزيله من قائمة الاقتراحات فقط. لا يتم حذف البيانات المسجلة.
-        </p>
+    <div class="card hidden" id="admin-panel-card">
+        <h2>لوحة التحكم</h2>
+        
+        <button class="btn btn-warning" onclick="location.href='stats.html'">عرض صفحة الإحصائيات الكاملة 📊</button>
+        
+        <h3>إدارة أسماء المناديب</h3>
+        <p style="font-size:12px; color:#666; text-align:right; margin-bottom:10px;">
+            تنبيه: حذف الاسم من هنا يزيله من قائمة الاقتراحات فقط. لا يتم حذف البيانات المسجلة.
+        </p>
 
-        <div class="admin-list-container" id="adminRepList">
-        </div>
+        <div class="admin-list-container" id="adminRepList">
+        </div>
 
-        <button class="btn btn-danger" onclick="closeAdminPanel()">خروج من اللوحة</button>
-    </div>
+        <button class="btn btn-danger" onclick="closeAdminPanel()">خروج من اللوحة</button>
+    </div>
 
-  </div>
+  </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, set, get, child, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, set, get, child, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
-      authDomain: "idmanazla.firebaseapp.com",
-      databaseURL: "https://idmanazla-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "idmanazla",
-      storageBucket: "idmanazla.firebasestorage.app",
-      messagingSenderId: "408446131276",
-      appId: "1:408446131276:web:976ae54181b5398de5a8e9",
-      measurementId: "G-9YSW9HNYTG"
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    const firebaseConfig = {
+      apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
+      authDomain: "idmanazla.firebaseapp.com",
+      databaseURL: "https://idmanazla-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "idmanazla",
+      storageBucket: "idmanazla.firebasestorage.app",
+      messagingSenderId: "408446131276",
+      appId: "1:408446131276:web:976ae54181b5398de5a8e9",
+      measurementId: "G-9YSW9HNYTG"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    const places = [
-      "المنزلة الجديدة 1 - كريم المرور",
-      "المنزلة الجديدة 2 - شريف التأمين لصحي",
-      "بحر البلد شارع الكابتن - شريف العزازي",
-      "مدرسة عبد العال شلبياية - اشرف الأباصيري",
-      "مصنع البصل - فؤاد حال",
-      "الكفر 1 - علي شطا",
-      "الكفر 2 تحت السكة - رابح شطا",
-      "سوق الجملة - السعيد شطا",
-      "الفداء 1 - عمر الكيال",
-      "الفداء 2 - حماده الكيال",
-      "الحمزاوي - حماده الشري",
-      "الجرن 1 - بوجي البرعي",
-      "الجرن 2 - إبراهيم فهيد",
-      "البر الثاني حي السلام - يحيى حبق",
-      "حي الأعجام - محمد أبو رجب",
-      "العزبة منشية ناصر - أيمن قنديل",
-      "الطويل - أحمد عبد العظيم",
-      "البر الثاني 2 الهاويس - إبراهيم عبد المجيد",
-      "الفقاعي - محمد حبيب",
-      "بحر البلد 2 - السيد حراز",
-      "حي الجبانة - سعد الشلودي",
-      "الكفر 3 بجوار ملعب برشلونة - محمد البداية",
-      "أبو رشاد مقهى أبو سليمان - محمد رشاد",
-      "حي الزهراء - عبدالله عيد",
-      "بحر البلد 3 - منصور البدري"
-    ];
+    const places = [
+      "المنزلة الجديدة 1 - كريم المرور",
+      "المنزلة الجديدة 2 - شريف التأمين الصحي",
+      "بحر البلد شارع الكابتن - شريف العزازي",
+      "مدرسة عبد العال شلبياية - اشرف الأباصيري",
+      "مصنع البصل - فؤاد حال",
+      "الكفر 1 - علي شطا",
+      "الكفر 2 تحت السكة - رابح شطا",
+      "سوق الجملة - السعيد شطا",
+      "الفداء 1 - عمر الكيال",
+      "الفداء 2 - حماده الكيال",
+      "الحمزاوي - حماده الشري",
+      "الجرن 1 - بوجي البرعي",
+      "الجرن 2 - إبراهيم فهيد",
+      "البر الثاني حي السلام - يحيى حبق",
+      "حي الأعجام - محمد أبو رجب",
+      "العزبة منشية ناصر - أيمن قنديل",
+      "الطويل - أحمد عبد العظيم",
+      "البر الثاني 2 الهاويس - إبراهيم عبد المجيد",
+      "الفقاعي - محمد حبيب",
+      "بحر البلد 2 - السيد حراز",
+      "حي الجبانة - سعد الشلودي",
+      "الكفر 3 بجوار ملعب برشلونة - محمد البداية",
+      "أبو رشاد مقهى أبو سليمان - محمد رشاد",
+      "حي الزهراء - عبدالله عيد",
+      "بحر البلد 3 - منصور البدري"
+    ];
 
-    let userPlace = null, userPlaceIdx = null, userID = null;
+    let userPlace = null, userPlaceIdx = null, userID = null;
 
-    // --- دوال حفظ واسترجاع الأسماء ---
-    function loadRepNames() {
-        const stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
-        const datalist = document.getElementById('repNamesHistory');
-        datalist.innerHTML = '';
-        stored.forEach(name => {
-            const opt = document.createElement('option');
-            opt.value = name;
-            datalist.appendChild(opt);
-        });
-    }
+    function loadRepNames() {
+        const stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
+        const datalist = document.getElementById('repNamesHistory');
+        datalist.innerHTML = '';
+        stored.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            datalist.appendChild(opt);
+        });
+    }
 
-    function saveRepName(name) {
-        if(!name) return;
-        let stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
-        if (!stored.includes(name)) {
-            stored.push(name);
-            localStorage.setItem('saved_rep_names', JSON.stringify(stored));
-            loadRepNames(); 
-        }
-    }
-    // ------------------------------
+    function saveRepName(name) {
+        if(!name) return;
+        let stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
+        if (!stored.includes(name)) {
+            stored.push(name);
+            localStorage.setItem('saved_rep_names', JSON.stringify(stored));
+            loadRepNames(); 
+        }
+    }
 
-    // --- دوال لوحة التحكم (Admin Logic) ---
-    function renderAdminRepList() {
-        const container = document.getElementById('adminRepList');
-        const stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
-        container.innerHTML = '';
+    function renderAdminRepList() {
+        const container = document.getElementById('adminRepList');
+        const stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
+        container.innerHTML = '';
 
-        if (stored.length === 0) {
-            container.innerHTML = '<div class="empty-list">لا توجد أسماء محفوظة حالياً</div>';
-            return;
-        }
+        if (stored.length === 0) {
+            container.innerHTML = '<div class="empty-list">لا توجد أسماء محفوظة حالياً</div>';
+            return;
+        }
 
-        stored.forEach(name => {
-            const div = document.createElement('div');
-            div.className = 'rep-item';
-            div.innerHTML = `
-                <span class="rep-name">${name}</span>
-                <button class="btn-delete-rep" onclick="window.deleteRepName('${name}')">حذف</button>
-            `;
-            container.appendChild(div);
-        });
-    }
+        stored.forEach(name => {
+            const div = document.createElement('div');
+            div.className = 'rep-item';
+            div.innerHTML = `
+                <span class="rep-name">${name}</span>
+                <button class="btn-delete-rep" onclick="window.deleteRepName('${name}')">حذف</button>
+            `;
+            container.appendChild(div);
+        });
+    }
 
-    window.deleteRepName = function(nameToDelete) {
-        if(confirm(`هل أنت متأكد من حذف المندوب "${nameToDelete}" من قائمة الاقتراحات؟`)) {
-            let stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
-            stored = stored.filter(n => n !== nameToDelete);
-            localStorage.setItem('saved_rep_names', JSON.stringify(stored));
-            renderAdminRepList();
-            loadRepNames(); 
-        }
-    }
-    
-    window.closeAdminPanel = function() {
-        document.getElementById('admin-panel-card').classList.add('hidden');
-        document.getElementById('main-card').classList.remove('hidden');
-    }
-    // ------------------------------
+    window.deleteRepName = function(nameToDelete) {
+        if(confirm(`هل أنت متأكد من حذف المندوب "${nameToDelete}" من قائمة الاقتراحات؟`)) {
+            let stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
+            stored = stored.filter(n => n !== nameToDelete);
+            localStorage.setItem('saved_rep_names', JSON.stringify(stored));
+            renderAdminRepList();
+            loadRepNames(); 
+        }
+    }
+    
+    window.closeAdminPanel = function() {
+        document.getElementById('admin-panel-card').classList.add('hidden');
+        document.getElementById('main-card').classList.remove('hidden');
+    }
 
-    window.login = function() {
-      const msgDiv = document.getElementById('login-msg');
-      msgDiv.textContent = ''; msgDiv.className = 'msg';
-      const codeInput = document.getElementById('loginCode').value.trim();
-      const code = parseInt(codeInput);
+    window.login = function() {
+      const msgDiv = document.getElementById('login-msg');
+      msgDiv.textContent = ''; msgDiv.className = 'msg';
+      const codeInput = document.getElementById('loginCode').value.trim();
+      const code = parseInt(codeInput);
 
-if (!codeInput || isNaN(code) || code < 225501 || code > 225525) {
-        msgDiv.textContent = 'كود الدخول غير صحيح.';
-        msgDiv.classList.add('error'); return;
-      }
-      let idx = code - 225501;
-      if (idx >= places.length) {
-          msgDiv.textContent = 'كود صحيح ولكن المكان غير معرف بالنظام.';
-          msgDiv.classList.add('error'); return;
-      }
-      userPlace = places[idx];
-      userPlaceIdx = idx + 1;
-      userID = codeInput;
+      if (!codeInput || isNaN(code) || code < 225501 || code > 225525) {
+        msgDiv.textContent = 'كود الدخول غير صحيح.';
+        msgDiv.classList.add('error'); return;
+      }
+      let idx = code - 225501;
+      if (idx >= places.length) {
+          msgDiv.textContent = 'كود صحيح ولكن المكان غير معرف بالنظام.';
+          msgDiv.classList.add('error'); return;
+      }
+      userPlace = places[idx];
+      userPlaceIdx = idx + 1;
+      userID = codeInput;
 
-      const authCard = document.getElementById('auth-card');
-      const mainCard = document.getElementById('main-card');
-      authCard.style.opacity = '0';
-      authCard.style.transform = 'translateY(-20px)';
-      
-      setTimeout(() => {
-        authCard.classList.add('hidden');
-        mainCard.classList.remove('hidden');
-        mainCard.classList.add('fade-in');
-        document.getElementById('welcome').textContent = `مرحبًا في ${userPlace}`;
-        loadRepNames(); 
-      }, 400);
-    }
+      const authCard = document.getElementById('auth-card');
+      const mainCard = document.getElementById('main-card');
+      authCard.style.opacity = '0';
+      authCard.style.transform = 'translateY(-20px)';
+      
+      setTimeout(() => {
+        authCard.classList.add('hidden');
+        mainCard.classList.remove('hidden');
+        mainCard.classList.add('fade-in');
+        document.getElementById('welcome').textContent = `مرحبًا في ${userPlace}`;
+        loadRepNames(); 
+      }, 400);
+    }
 
-    window.addUser = async function() {
-      const btn = event.target;
-      const originalText = btn.innerText;
-      let name = document.getElementById('repName').value.trim();
-      let natid = document.getElementById('natID').value.trim();
+    window.addUser = async function() {
+      const btn = event.target;
+      const originalText = btn.innerText;
+      let name = document.getElementById('repName').value.trim();
+      let natid = document.getElementById('natID').value.trim();
 
-      const msg = document.getElementById('add-msg');
-      msg.textContent = ''; msg.className = 'msg';
+      const msg = document.getElementById('add-msg');
+      msg.textContent = ''; msg.className = 'msg';
 
-      if (!userPlace) return;
-      if (name.length < 2) {
-        msg.textContent = 'يرجى إدخال اسم المندوب'; msg.className += ' error'; return;
-      }
-      
-      // هنا التعديل: التحقق من أن الرقم القومي 14 رقم
-      if (!/^\d{14}$/.test(natid)) {
-        msg.textContent = 'يرجى إدخال الـ 14 رقم للرقم القومي بشكل صحيح.'; msg.className += ' error'; return;
-      }
+      if (!userPlace) return;
+      if (name.length < 2) {
+        msg.textContent = 'يرجى إدخال اسم المندوب'; msg.className += ' error'; return;
+      }
+      
+      if (!/^\d{14}$/.test(natid)) {
+        msg.textContent = 'يرجى إدخال الـ 14 رقم للرقم القومي بشكل صحيح.'; msg.className += ' error'; return;
+      }
 
-      btn.disabled = true; btn.innerText = 'جاري الإضافة...';
+      btn.disabled = true; btn.innerText = 'جاري الإضافة...';
 
-      try {
-        const snapshot = await get(child(ref(db), 'users/' + natid));
-        
-        if (snapshot.exists()) {
-          // --- تكرار ---
-          let data = snapshot.val();
-          document.getElementById('errorSound').play().catch(e => console.log('Audio play blocked'));
+      try {
+        const snapshot = await get(child(ref(db), 'users/' + natid));
+        
+        if (snapshot.exists()) {
+          let data = snapshot.val();
+          document.getElementById('errorSound').play().catch(e => console.log('Audio play blocked'));
 
-          msg.className = 'duplicate-box';
-          msg.innerHTML = `
-            <span>⚠️ تنبيه تكرار!</span>
-            <div style="margin-top:5px; font-size:13px; color:#333;">
-             الكود (${natid}) مسجل مسبقاً في <br>
-             <b style="color:#d32f2f; font-size:15px;">${data.place}</b> <br>
-             بواسطة <b style="color:#d32f2f; font-size:15px;">${data.repName}</b>
-            </div>
-          `;
+          msg.className = 'duplicate-box';
+          msg.innerHTML = `
+            <span>⚠️ تنبيه تكرار!</span>
+            <div style="margin-top:5px; font-size:13px; color:#333;">
+             الكود (${natid}) مسجل مسبقاً في <br>
+             <b style="color:#d32f2f; font-size:15px;">${data.place}</b> <br>
+             بواسطة <b style="color:#d32f2f; font-size:15px;">${data.repName}</b>
+            </div>
+          `;
 
-          const duplicateData = {
-              duplicatedID: natid,
-              attemptByRep: name,
-              attemptPlace: userPlace,
-              originalRep: data.repName,
-              originalPlace: data.place,
-              timestamp: new Date().toISOString(),
-              status: "rejected"
-          };
-          await push(ref(db, 'duplicates'), duplicateData);
-          saveRepName(name);
+          const duplicateData = {
+              duplicatedID: natid,
+              attemptByRep: name,
+              attemptPlace: userPlace,
+              originalRep: data.repName,
+              originalPlace: data.place,
+              timestamp: new Date().toISOString(),
+              status: "rejected"
+          };
+          await push(ref(db, 'duplicates'), duplicateData);
+          saveRepName(name);
 
-        } else {
-          // --- إضافة ناجحة ---
-          const now = new Date();
-          let payload = {
-            natid, repName: name, place: userPlace, placeIdx: userPlaceIdx,
-            time: now.toISOString(), username: userID
-          };
-          await set(ref(db, 'users/' + natid), payload);
-          saveRepName(name);
+        } else {
+          const now = new Date();
+          let payload = {
+            natid, repName: name, place: userPlace, placeIdx: userPlaceIdx,
+            time: now.toISOString(), username: userID
+          };
+          await set(ref(db, 'users/' + natid), payload);
+          saveRepName(name);
 
-          msg.className += ' success';
-          msg.textContent = "تمت الإضافة بنجاح.";
-          document.getElementById('natID').value = '';
-          document.getElementById('natID').focus();
-        }
-      } catch (error) {
-        msg.className = 'msg error';
-        msg.textContent = 'حدث خطأ في الاتصال، حاول مرة أخرى.';
-        console.error(error);
-      } finally {
-        btn.disabled = false;
-        btn.innerText = originalText;
-      }
-    }
+          msg.className += ' success';
+          msg.textContent = "تمت الإضافة بنجاح.";
+          document.getElementById('natID').value = '';
+          document.getElementById('natID').focus();
+        }
+      } catch (error) {
+        msg.className = 'msg error';
+        msg.textContent = 'حدث خطأ في الاتصال، حاول مرة أخرى.';
+        console.error(error);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
+    }
 
-    // Stats / Admin Logic
-    window.showStatsLogin = function() {
-        document.getElementById('main-card').classList.add('hidden');
-        const statsCard = document.getElementById('stats-auth-card');
-        statsCard.classList.remove('hidden');
-        statsCard.classList.add('fade-in');
-        document.getElementById('statsPass').value = '';
-        document.getElementById('stats-msg').textContent = '';
-        document.getElementById('statsPass').focus();
-    }
-    window.cancelStats = function() {
-        document.getElementById('stats-auth-card').classList.add('hidden');
-        const mainCard = document.getElementById('main-card');
-        mainCard.classList.remove('hidden');
-        mainCard.classList.add('fade-in');
-    }
-    window.verifyStats = function() {
-        const pass = document.getElementById('statsPass').value;
-        const msg = document.getElementById('stats-msg');
-        
-        if(pass === '251988') {
-            msg.className = 'msg success';
-            msg.textContent = 'كلمة المرور صحيحة.';
-            
-            setTimeout(() => { 
-                document.getElementById('stats-auth-card').classList.add('hidden');
-                const adminPanel = document.getElementById('admin-panel-card');
-                adminPanel.classList.remove('hidden');
-                adminPanel.classList.add('fade-in');
-                renderAdminRepList(); 
-            }, 500);
+    window.showStatsLogin = function() {
+        document.getElementById('main-card').classList.add('hidden');
+        const statsCard = document.getElementById('stats-auth-card');
+        statsCard.classList.remove('hidden');
+        statsCard.classList.add('fade-in');
+        document.getElementById('statsPass').value = '';
+        document.getElementById('stats-msg').textContent = '';
+        document.getElementById('statsPass').focus();
+    }
+    window.cancelStats = function() {
+        document.getElementById('stats-auth-card').classList.add('hidden');
+        const mainCard = document.getElementById('main-card');
+        mainCard.classList.remove('hidden');
+        mainCard.classList.add('fade-in');
+    }
+    window.verifyStats = function() {
+        const pass = document.getElementById('statsPass').value;
+        const msg = document.getElementById('stats-msg');
+        
+        if(pass === '251988') {
+            msg.className = 'msg success';
+            msg.textContent = 'كلمة المرور صحيحة.';
+            
+            setTimeout(() => { 
+                document.getElementById('stats-auth-card').classList.add('hidden');
+                const adminPanel = document.getElementById('admin-panel-card');
+                adminPanel.classList.remove('hidden');
+                adminPanel.classList.add('fade-in');
+                renderAdminRepList(); 
+            }, 500);
 
-        } else {
-            msg.className = 'msg error';
-            msg.textContent = 'كلمة المرور خاطئة!';
-        }
-    }
-  </script>
+        } else {
+            msg.className = 'msg error';
+            msg.textContent = 'كلمة المرور خاطئة!';
+        }
+    }
+  </script>
 </body>
 </html>
