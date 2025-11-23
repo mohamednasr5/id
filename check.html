@@ -1,605 +1,758 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>التحقق من الهوية</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-app-compat.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-database-compat.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-storage-compat.min.js"></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js'></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 700px;
-            width: 100%;
-        }
-        
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 28px;
-        }
-        
-        .camera-section {
-            margin-bottom: 20px;
-            position: relative;
-        }
-        
-        video, canvas, #capturedImage {
-            width: 100%;
-            max-width: 100%;
-            border-radius: 10px;
-            border: 3px solid #667eea;
-            display: none;
-        }
-        
-        video.active, canvas.active, #capturedImage.active {
-            display: block;
-        }
-        
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        
-        button {
-            flex: 1;
-            min-width: 120px;
-            padding: 15px 25px;
-            font-size: 16px;
-            font-weight: bold;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: white;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .btn-success {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
-        }
-        
-        .btn-warning {
-            background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .result-section {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            display: none;
-        }
-        
-        .result-section.active {
-            display: block;
-        }
-        
-        .result-section h2 {
-            margin-bottom: 15px;
-            font-size: 20px;
-        }
-        
-        .result-section.verified h2 {
-            color: #28a745;
-        }
-        
-        .result-section.not-verified h2 {
-            color: #dc3545;
-        }
-        
-        .info-grid {
-            display: grid;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .info-item {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            border-right: 4px solid #667eea;
-        }
-        
-        .info-item label {
-            display: block;
-            font-weight: bold;
-            color: #666;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        
-        .info-item .value {
-            color: #333;
-            font-size: 18px;
-            direction: ltr;
-            text-align: right;
-        }
-        
-        .status {
-            text-align: center;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 10px;
-            font-weight: bold;
-            display: none;
-        }
-        
-        .status.active {
-            display: block;
-        }
-        
-        .status.processing {
-            background: #fff3cd;
-            color: #856404;
-        }
-        
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .verification-badge {
-            text-align: center;
-            padding: 20px;
-            margin-top: 20px;
-            border-radius: 10px;
-            font-size: 24px;
-            font-weight: bold;
-        }
-        
-        .verification-badge.verified {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .verification-badge.not-verified {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .upload-section {
-            margin-top: 20px;
-            padding: 20px;
-            border: 2px dashed #667eea;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        input[type="file"] {
-            display: none;
-        }
-        
-        .upload-label {
-            display: inline-block;
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-        
-        .upload-label:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        .comparison-section {
-            margin-top: 20px;
-            padding: 20px;
-            background: #e3f2fd;
-            border-radius: 10px;
-            display: none;
-        }
-
-        .comparison-section.active {
-            display: block;
-        }
-
-        .image-comparison {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .comparison-item {
-            text-align: center;
-        }
-
-        .comparison-item img {
-            width: 100%;
-            border-radius: 8px;
-            border: 2px solid #667eea;
-        }
-
-        .comparison-item h3 {
-            margin-top: 10px;
-            color: #333;
-            font-size: 16px;
-        }
-
-        @media (max-width: 600px) {
-            .image-comparison {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>تسجيل دخول المندوب</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-app-compat.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-database-compat.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-storage-compat.min.js"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js'></script>
+  <style>
+    :root {
+      --primary-color: #0072ff;
+      --secondary-color: #00c6ff;
+      --bg-gradient: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+      --glass-bg: rgba(255, 255, 255, 0.95);
+      --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+      --input-bg: #f0f4f8;
+      --text-color: #2d3436;
+      --error-color: #e74c3c;
+      --success-color: #2ecc71;
+    }
+    * { box-sizing: border-box; outline: none; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      margin: 0; padding: 0;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-gradient);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      overflow-x: hidden;
+      color: var(--text-color);
+    }
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .circles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; }
+    .circles li { position: absolute; display: block; list-style: none; width: 20px; height: 20px; background: rgba(255, 255, 255, 0.2); animation: animate 25s linear infinite; bottom: -150px; border-radius: 50%; }
+    .circles li:nth-child(1){ left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+    .circles li:nth-child(2){ left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+    .circles li:nth-child(3){ left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+    .circles li:nth-child(4){ left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+    .circles li:nth-child(5){ left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
+    @keyframes animate { 0%{ transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 0; } 100%{ transform: translateY(-1000px) rotate(720deg); opacity: 0; border-radius: 50%; } }
+    .container { position: relative; z-index: 1; perspective: 1000px; width: 100%; max-width: 500px; padding: 0 10px; }
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      border-radius: 20px; padding: 40px 30px;
+      width: 100%;
+      box-shadow: var(--glass-shadow);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      transform: translateY(20px); opacity: 0;
+      animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      transition: all 0.5s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    h2 { text-align: center; margin-bottom: 30px; color: var(--primary-color); font-weight: 700; font-size: 24px; }
+    h3 { text-align: right; color: #333; margin: 15px 0 10px; font-size: 18px; border-bottom: 2px solid #eee; padding-bottom: 5px;}
+    .input-group { position: relative; margin-bottom: 25px; }
+    .fixed-input-box {
+      display: flex; align-items: center; background: var(--input-bg);
+      border-radius: 10px; padding: 0 15px; border: 2px solid transparent;
+      transition: 0.3s ease; direction: ltr;
+    }
+    .fixed-input-box:focus-within { background: #fff; border-color: var(--secondary-color); box-shadow: 0 0 15px rgba(0, 198, 255, 0.1); }
+    .static-x { color: #aaa; font-weight: bold; font-size: 18px; letter-spacing: 2px; margin-right: 5px; pointer-events: none; user-select: none; }
+    
+    input, select {
+      width: 100%; padding: 12px 15px; font-size: 16px;
+      background: var(--input-bg); border: 2px solid transparent;
+      border-radius: 10px; font-family: 'Cairo', sans-serif;
+      transition: 0.3s ease; color: #333;
+    }
+    .fixed-input-box input { background: transparent; border: none; padding: 12px 0; width: auto; flex-grow: 1; font-weight: bold; letter-spacing: 2px; }
+    .fixed-input-box input:focus { box-shadow: none; background: transparent; }
+    .input-group label {
+      position: absolute; top: 50%; right: 15px; transform: translateY(-50%);
+      font-size: 16px; color: #999; pointer-events: none;
+      transition: 0.3s ease all; padding: 0 5px; background: transparent; z-index: 10;
+    }
+    input:focus ~ label, input:not(:placeholder-shown) ~ label, 
+    .fixed-input-box:focus-within ~ label, 
+    .fixed-input-box input:not(:placeholder-shown) ~ label {
+      top: 0; transform: translateY(-50%) scale(0.85);
+      background: #fff; color: var(--primary-color); font-weight: 600; border-radius: 5px;
+    }
+    
+    /* Camera Styles */
+    .camera-section {
+      margin: 20px 0;
+      text-align: center;
+    }
+    video, canvas, #capturedImage {
+      width: 100%;
+      max-width: 100%;
+      border-radius: 10px;
+      border: 3px solid var(--secondary-color);
+      display: none;
+      margin: 10px 0;
+    }
+    video.active, canvas.active, #capturedImage.active {
+      display: block;
+    }
+    
+    .camera-controls {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
+      color: white; padding: 12px 20px; border: none;
+      border-radius: 50px; font-size: 16px; font-weight: 700; cursor: pointer;
+      transition: 0.3s ease; box-shadow: 0 5px 15px rgba(0, 114, 255, 0.3);
+      position: relative; overflow: hidden;
+      flex: 1;
+      min-width: 120px;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 114, 255, 0.4); }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-secondary { background: linear-gradient(to right, #43cea2, #185a9d); }
+    .btn-danger { background: linear-gradient(to right, #ff416c, #ff4b2b); }
+    .btn-warning { background: linear-gradient(to right, #f2994a, #f2c94c); color: #333; }
+    .btn-success { background: linear-gradient(to right, #11998e, #38ef7d); }
+    
+    .msg { margin-top: 15px; text-align: center; font-size: 14px; font-weight: 600; min-height: 20px; transition: 0.3s; padding: 10px; border-radius: 8px; }
+    .msg.error { color: var(--error-color); animation: shake 0.5s; }
+    .msg.success { color: var(--success-color); }
+    .msg.processing { background: #fff3cd; color: #856404; }
+    
+    .duplicate-box {
+        background-color: #fff5f5; border: 2px solid #ff0000; color: #c0392b;
+        padding: 15px; border-radius: 12px; margin-top: 20px; font-weight: bold;
+        box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
+        animation: pulseRed 0.8s infinite alternate;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    @keyframes pulseRed { from { border-color: #ff0000; box-shadow: 0 0 10px rgba(255, 0, 0, 0.3); } to { border-color: #ff6b6b; box-shadow: 0 0 20px rgba(255, 0, 0, 0.6); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(10px); } 75% { transform: translateX(-10px); } }
+    
+    .admin-list-container {
+        max-height: 250px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.5);
+    }
+    .rep-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        transition: 0.2s;
+    }
+    .rep-item:last-child { border-bottom: none; }
+    .rep-item:hover { background: rgba(255,255,255,0.8); }
+    .rep-name { font-weight: 600; color: #333; }
+    .btn-delete-rep {
+        background: #ff4b2b;
+        color: white;
+        border: none;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+    .btn-delete-rep:hover { background: #d32f2f; }
+    .empty-list { text-align: center; padding: 20px; color: #888; font-size: 14px; }
+    
+    .comparison-section {
+      margin-top: 20px;
+      padding: 20px;
+      background: #e3f2fd;
+      border-radius: 10px;
+      display: none;
+    }
+    .comparison-section.active { display: block; }
+    .image-comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .comparison-item {
+      text-align: center;
+    }
+    .comparison-item img {
+      width: 100%;
+      border-radius: 8px;
+      border: 2px solid var(--primary-color);
+    }
+    .comparison-item h4 {
+      margin-top: 10px;
+      color: #333;
+      font-size: 14px;
+    }
+    
+    @media (max-width: 600px) {
+      .image-comparison {
+        grid-template-columns: 1fr;
+      }
+      .camera-controls {
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+      }
+    }
+    
+    .hidden { display: none; }
+    .fade-in { animation: fadeIn 0.5s forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔐 التحقق من الهوية</h1>
-        
-        <div class="camera-section">
-            <video id="video" autoplay playsinline></video>
-            <canvas id="canvas"></canvas>
-            <img id="capturedImage" alt="الصورة الملتقطة">
-        </div>
-        
-        <div class="controls">
-            <button class="btn-primary" id="startCamera">تشغيل الكاميرا</button>
-            <button class="btn-success" id="capture" disabled>التقاط الصورة</button>
-            <button class="btn-warning" id="verify" style="display:none;">التحقق من الهوية</button>
-            <button class="btn-danger" id="reset" style="display:none;">إعادة المحاولة</button>
-        </div>
-        
-        <div class="upload-section">
-            <label for="fileInput" class="upload-label">📁 أو اختر صورة من الجهاز</label>
-            <input type="file" id="fileInput" accept="image/*">
-        </div>
-        
-        <div class="status" id="status"></div>
-        
-        <div class="comparison-section" id="comparisonSection">
-            <h3 style="text-align: center; color: #333;">مقارنة الصور</h3>
-            <div class="image-comparison">
-                <div class="comparison-item">
-                    <img id="currentImage" alt="الصورة الحالية">
-                    <h3>الصورة الملتقطة</h3>
-                </div>
-                <div class="comparison-item">
-                    <img id="databaseImage" alt="الصورة من قاعدة البيانات">
-                    <h3>الصورة المسجلة</h3>
-                </div>
-            </div>
-        </div>
-        
-        <div class="result-section" id="resultSection">
-            <h2 id="resultTitle">نتيجة التحقق</h2>
-            <div class="verification-badge" id="verificationBadge"></div>
-            <div class="info-grid" id="infoGrid"></div>
-        </div>
+  <audio id="errorSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+  <ul class="circles"><li></li><li></li><li></li><li></li><li></li></ul>
+  
+  <div class="container">
+    <!-- شاشة تسجيل الدخول -->
+    <div class="card" id="auth-card">
+      <h2>تسجيل دخول المندوب</h2>
+      <div class="input-group">
+        <input id="loginCode" type="number" placeholder=" ">
+        <label for="loginCode">كود الدخول</label>
+      </div>
+      <button class="btn" onclick="login()">دخول</button>
+      <div id="login-msg" class="msg"></div>
     </div>
 
-    <script>
-        // تهيئة Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
-            authDomain: "idmanazla.firebaseapp.com",
-            databaseURL: "https://idmanazla-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "idmanazla",
-            storageBucket: "idmanazla.firebasestorage.app",
-            messagingSenderId: "408446131276",
-            appId: "1:408446131276:web:976ae54181b5398de5a8e9",
-            measurementId: "G-9YSW9HNYTG"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const storage = firebase.storage();
-
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const capturedImage = document.getElementById('capturedImage');
-        const ctx = canvas.getContext('2d');
-        const startCameraBtn = document.getElementById('startCamera');
-        const captureBtn = document.getElementById('capture');
-        const verifyBtn = document.getElementById('verify');
-        const resetBtn = document.getElementById('reset');
-        const fileInput = document.getElementById('fileInput');
-        const status = document.getElementById('status');
-        const resultSection = document.getElementById('resultSection');
-        const comparisonSection = document.getElementById('comparisonSection');
-        const verificationBadge = document.getElementById('verificationBadge');
-        const infoGrid = document.getElementById('infoGrid');
+    <!-- الشاشة الرئيسية -->
+    <div class="card hidden" id="main-card">
+      <h2 id="welcome">مرحبًا</h2>
+      
+      <div class="input-group">
+        <input id="repName" type="text" autocomplete="off" list="repNamesHistory" maxlength="30" placeholder=" ">
+        <datalist id="repNamesHistory"></datalist>
+        <label for="repName">اسم المندوب</label>
+      </div>
+      
+      <!-- قسم التصوير -->
+      <div class="camera-section">
+        <h3 style="text-align: center; font-size: 16px; color: #666;">📸 تصوير البطاقة</h3>
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas"></canvas>
+        <img id="capturedImage" alt="الصورة الملتقطة">
         
-        let stream = null;
-        let capturedImageData = null;
+        <div class="camera-controls">
+          <button class="btn btn-secondary" id="startCamera" onclick="startCamera()">تشغيل الكاميرا</button>
+          <button class="btn btn-success" id="capture" onclick="capturePhoto()" disabled>التقاط صورة</button>
+          <button class="btn btn-danger" id="resetCamera" onclick="resetCamera()" style="display:none;">إعادة التصوير</button>
+        </div>
+        
+        <div style="text-align: center; margin: 10px 0;">
+          <label for="fileInput" class="btn btn-warning" style="display: inline-block; cursor: pointer;">
+            📁 اختر صورة من الجهاز
+          </label>
+          <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileUpload(event)">
+        </div>
+      </div>
+      
+      <button class="btn" id="addBtn" onclick="processAndAdd()" disabled>استخراج البيانات وإضافة</button>
+      
+      <div id="add-msg" class="msg"></div>
+      
+      <div class="comparison-section" id="comparisonSection">
+        <h4 style="text-align: center; color: #d32f2f;">⚠️ تحذير: هذه البطاقة مسجلة مسبقاً</h4>
+        <div class="image-comparison">
+          <div class="comparison-item">
+            <img id="currentImage" alt="الصورة الحالية">
+            <h4>الصورة الحالية</h4>
+          </div>
+          <div class="comparison-item">
+            <img id="databaseImage" alt="الصورة المسجلة">
+            <h4>الصورة المسجلة سابقاً</h4>
+          </div>
+        </div>
+      </div>
+      
+      <button class="btn btn-secondary" onclick="showStatsLogin()" style="margin-top: 15px;">لوحة الإدارة / الإحصائيات</button>
+    </div>
 
-        function showStatus(message, type) {
-            status.textContent = message;
-            status.className = 'status active ' + type;
+    <!-- شاشة صلاحية المدير -->
+    <div class="card hidden" id="stats-auth-card">
+      <h2>صلاحية المدير</h2>
+      <p style="text-align: center; color: #666; margin-bottom: 20px;">أدخل كلمة مرور الإدارة</p>
+      <div class="input-group">
+        <input id="statsPass" type="password" placeholder=" ">
+        <label for="statsPass">كلمة المرور</label>
+      </div>
+      <button class="btn" onclick="verifyStats()">دخول</button>
+      <div id="stats-msg" class="msg"></div>
+      <button class="btn btn-danger" onclick="cancelStats()">إلغاء وعودة</button>
+    </div>
+
+    <!-- لوحة التحكم -->
+    <div class="card hidden" id="admin-panel-card">
+      <h2>لوحة التحكم</h2>
+      <button class="btn btn-warning" onclick="location.href='stats.html'">عرض صفحة الإحصائيات الكاملة 📊</button>
+      <h3>إدارة أسماء المناديب</h3>
+      <p style="font-size:12px; color:#666; text-align:right; margin-bottom:10px;">
+        تنبيه: حذف الاسم من هنا يزيله من قائمة الاقتراحات فقط.
+      </p>
+      <div class="admin-list-container" id="adminRepList"></div>
+      <button class="btn btn-danger" onclick="closeAdminPanel()">خروج من اللوحة</button>
+    </div>
+  </div>
+
+  <script>
+    // تهيئة Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
+      authDomain: "idmanazla.firebaseapp.com",
+      databaseURL: "https://idmanazla-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "idmanazla",
+      storageBucket: "idmanazla.firebasestorage.app",
+      messagingSenderId: "408446131276",
+      appId: "1:408446131276:web:976ae54181b5398de5a8e9",
+      measurementId: "G-9YSW9HNYTG"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const storage = firebase.storage();
+
+    const places = [
+      "المنزلة الجديدة 1","المنزلة الجديدة 2","بحر البلد شارع الكابتن",
+      "مدرسة عبد العال شلبياية","مصنع البصل","الكفر 1","الكفر 2 تحت السكة",
+      "سوق الجملة","الفداء","نقطة حمام الكيال","الحمزاوي","الجرن 1","الجرن 2",
+      "البر التاني حي السلام","حي الاعجام","العزبة منشية ناصر","الطويل",
+      "البر التاني 2 الهاويس","الفقاعي","بحر البلد 2","حي الجبانة",
+      "الكفر 3 بجوار ملعب برشلونة","مقهي أبو سليمان","حي الزهراء"
+    ];
+    
+    let userPlace = null, userPlaceIdx = null, userID = null;
+    let stream = null;
+    let capturedImageData = null;
+    let extractedNationalId = null;
+
+    // دوال الأسماء
+    function loadRepNames() {
+      const stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
+      const datalist = document.getElementById('repNamesHistory');
+      datalist.innerHTML = '';
+      stored.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        datalist.appendChild(opt);
+      });
+    }
+    
+    function saveRepName(name) {
+      if(!name) return;
+      let stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
+      if (!stored.includes(name)) {
+        stored.push(name);
+        localStorage.setItem('saved_rep_names', JSON.stringify(stored));
+        loadRepNames();
+      }
+    }
+
+    // تسجيل الدخول
+    function login() {
+      const msgDiv = document.getElementById('login-msg');
+      msgDiv.textContent = ''; msgDiv.className = 'msg';
+      const codeInput = document.getElementById('loginCode').value.trim();
+      const code = parseInt(codeInput);
+      
+      if (!codeInput || isNaN(code) || code < 225501 || code > 225522) {
+        msgDiv.textContent = 'كود الدخول غير صحيح.';
+        msgDiv.classList.add('error');
+        return;
+      }
+      
+      let idx = code - 225501;
+      if (idx >= places.length) {
+        msgDiv.textContent = 'كود صحيح ولكن المكان غير معرف بالنظام.';
+        msgDiv.classList.add('error');
+        return;
+      }
+      
+      userPlace = places[idx];
+      userPlaceIdx = idx + 1;
+      userID = codeInput;
+      
+      const authCard = document.getElementById('auth-card');
+      const mainCard = document.getElementById('main-card');
+      authCard.style.opacity = '0';
+      authCard.style.transform = 'translateY(-20px)';
+      
+      setTimeout(() => {
+        authCard.classList.add('hidden');
+        mainCard.classList.remove('hidden');
+        mainCard.classList.add('fade-in');
+        document.getElementById('welcome').textContent = `مرحبًا في ${userPlace}`;
+        loadRepNames();
+      }, 400);
+    }
+
+    // دوال الكاميرا
+    async function startCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'environment',
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          }
+        });
+        
+        const video = document.getElementById('video');
+        video.srcObject = stream;
+        video.classList.add('active');
+        
+        document.getElementById('canvas').classList.remove('active');
+        document.getElementById('capturedImage').classList.remove('active');
+        document.getElementById('startCamera').disabled = true;
+        document.getElementById('capture').disabled = false;
+        document.getElementById('resetCamera').style.display = 'none';
+        
+        showMsg('الكاميرا جاهزة - صور البطاقة بوضوح', 'success');
+      } catch (err) {
+        showMsg('خطأ في تشغيل الكاميرا: ' + err.message, 'error');
+      }
+    }
+
+    function capturePhoto() {
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      const capturedImage = document.getElementById('capturedImage');
+      const ctx = canvas.getContext('2d');
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+      
+      capturedImageData = canvas.toDataURL('image/jpeg', 0.9);
+      capturedImage.src = capturedImageData;
+      
+      video.classList.remove('active');
+      capturedImage.classList.add('active');
+      
+      document.getElementById('capture').disabled = true;
+      document.getElementById('resetCamera').style.display = 'inline-block';
+      document.getElementById('addBtn').disabled = false;
+      
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+      
+      showMsg('تم التقاط الصورة! اضغط "استخراج البيانات"', 'success');
+    }
+
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.getElementById('canvas');
+          const capturedImage = document.getElementById('capturedImage');
+          const ctx = canvas.getContext('2d');
+          
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          
+          capturedImageData = canvas.toDataURL('image/jpeg', 0.9);
+          capturedImage.src = capturedImageData;
+          capturedImage.classList.add('active');
+          
+          document.getElementById('video').classList.remove('active');
+          document.getElementById('resetCamera').style.display = 'inline-block';
+          document.getElementById('addBtn').disabled = false;
+          
+          showMsg('تم تحميل الصورة! اضغط "استخراج البيانات"', 'success');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function resetCamera() {
+      document.getElementById('video').classList.remove('active');
+      document.getElementById('canvas').classList.remove('active');
+      document.getElementById('capturedImage').classList.remove('active');
+      document.getElementById('comparisonSection').classList.remove('active');
+      
+      document.getElementById('startCamera').disabled = false;
+      document.getElementById('capture').disabled = true;
+      document.getElementById('resetCamera').style.display = 'none';
+      document.getElementById('addBtn').disabled = true;
+      
+      capturedImageData = null;
+      extractedNationalId = null;
+      
+      showMsg('', '');
+    }
+
+    // استخراج الرقم القومي
+    function extractNationalId(text) {
+      const cleanText = text.replace(/\s+/g, '');
+      const patterns = [
+        /\b(\d{14})\b/,
+        /(\d{3}\s*\d{11})/,
+        /(\d{3}[-\/]\d{11})/
+      ];
+      
+      for (let pattern of patterns) {
+        const match = cleanText.match(pattern);
+        if (match) {
+          const id = match[1].replace(/\D/g, '');
+          if (id.length === 14) {
+            return id.substring(10); // آخر 4 أرقام
+          }
         }
-
-        function hideStatus() {
-            status.classList.remove('active');
+      }
+      
+      const allNumbers = cleanText.match(/\d+/g);
+      if (allNumbers) {
+        for (let num of allNumbers) {
+          if (num.length === 14) {
+            return num.substring(10);
+          }
         }
+      }
+      
+      return null;
+    }
 
-        startCameraBtn.addEventListener('click', async () => {
+    // معالجة وإضافة
+    async function processAndAdd() {
+      if (!capturedImageData) {
+        showMsg('يرجى التقاط صورة أولاً', 'error');
+        return;
+      }
+      
+      const repName = document.getElementById('repName').value.trim();
+      if (repName.length < 2) {
+        showMsg('يرجى إدخال اسم المندوب', 'error');
+        return;
+      }
+      
+      showMsg('جاري استخراج الرقم القومي من الصورة...', 'processing');
+      document.getElementById('addBtn').disabled = true;
+      
+      try {
+        const { data: { text } } = await Tesseract.recognize(
+          capturedImageData,
+          'eng',
+          {
+            logger: m => {
+              if (m.status === 'recognizing text') {
+                showMsg(`جاري التحليل: ${Math.round(m.progress * 100)}%`, 'processing');
+              }
+            }
+          }
+        );
+        
+        const natid = extractNationalId(text);
+        
+        if (!natid || natid.length !== 4) {
+          showMsg('فشل استخراج الرقم القومي. تأكد من وضوح الصورة وحاول مرة أخرى.', 'error');
+          document.getElementById('addBtn').disabled = false;
+          return;
+        }
+        
+        extractedNationalId = natid;
+        showMsg('تم استخراج الرقم: ' + natid + ' - جاري التحقق...', 'processing');
+        
+        // التحقق من قاعدة البيانات
+        const snapshot = await db.ref('users/' + natid).once('value');
+        
+        if (snapshot.exists()) {
+          // البطاقة مسجلة مسبقاً - تحذير
+          const data = snapshot.val();
+          document.getElementById('errorSound').play().catch(e => console.log('Audio blocked'));
+          
+          // عرض مقارنة الصور
+          document.getElementById('comparisonSection').classList.add('active');
+          document.getElementById('currentImage').src = capturedImageData;
+          
+          // جلب الصورة المسجلة
+          if (data.imageUrl) {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: 'environment',
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
-                    } 
-                });
-                video.srcObject = stream;
-                video.classList.add('active');
-                canvas.classList.remove('active');
-                capturedImage.classList.remove('active');
-                startCameraBtn.disabled = true;
-                captureBtn.disabled = false;
-                showStatus('الكاميرا جاهزة - صور البطاقة بالكامل', 'success');
+              const oldImageUrl = await storage.refFromURL(data.imageUrl).getDownloadURL();
+              document.getElementById('databaseImage').src = oldImageUrl;
             } catch (err) {
-                showStatus('خطأ في تشغيل الكاميرا: ' + err.message, 'error');
+              document.getElementById('databaseImage').src = capturedImageData;
             }
-        });
-
-        captureBtn.addEventListener('click', () => {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0);
-            
-            capturedImageData = canvas.toDataURL('image/jpeg', 0.9);
-            capturedImage.src = capturedImageData;
-            
-            video.classList.remove('active');
-            canvas.classList.remove('active');
-            capturedImage.classList.add('active');
-            
-            captureBtn.disabled = true;
-            verifyBtn.style.display = 'inline-block';
-            resetBtn.style.display = 'inline-block';
-            
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                stream = null;
-            }
-            
-            showStatus('تم التقاط الصورة بنجاح! اضغط "التحقق من الهوية"', 'success');
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        ctx.drawImage(img, 0, 0);
-                        
-                        capturedImageData = canvas.toDataURL('image/jpeg', 0.9);
-                        capturedImage.src = capturedImageData;
-                        
-                        capturedImage.classList.add('active');
-                        video.classList.remove('active');
-                        canvas.classList.remove('active');
-                        
-                        verifyBtn.style.display = 'inline-block';
-                        resetBtn.style.display = 'inline-block';
-                        
-                        showStatus('تم تحميل الصورة بنجاح! اضغط "التحقق من الهوية"', 'success');
-                    };
-                    img.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        verifyBtn.addEventListener('click', async () => {
-            await verifyIdentity();
-        });
-
-        resetBtn.addEventListener('click', () => {
-            capturedImage.classList.remove('active');
-            video.classList.remove('active');
-            canvas.classList.remove('active');
-            
-            captureBtn.disabled = true;
-            startCameraBtn.disabled = false;
-            verifyBtn.style.display = 'none';
-            resetBtn.style.display = 'none';
-            
-            resultSection.classList.remove('active');
-            comparisonSection.classList.remove('active');
-            hideStatus();
-            
-            capturedImageData = null;
-        });
-
-        async function verifyIdentity() {
-            showStatus('جاري استخراج الرقم القومي من الصورة...', 'processing');
-            
-            try {
-                // استخراج الرقم القومي من الصورة
-                const { data: { text } } = await Tesseract.recognize(
-                    capturedImageData,
-                    'eng',
-                    {
-                        logger: m => {
-                            if (m.status === 'recognizing text') {
-                                showStatus(`جاري تحليل الصورة: ${Math.round(m.progress * 100)}%`, 'processing');
-                            }
-                        }
-                    }
-                );
-                
-                const nationalId = extractNationalId(text);
-                
-                if (!nationalId) {
-                    showStatus('لم يتم العثور على رقم قومي في الصورة. تأكد من وضوح البطاقة وحاول مرة أخرى.', 'error');
-                    return;
-                }
-                
-                showStatus('تم استخراج الرقم القومي: ' + nationalId + ' - جاري البحث في قاعدة البيانات...', 'processing');
-                
-                // البحث في قاعدة البيانات
-                const snapshot = await database.ref('users/' + nationalId).once('value');
-                
-                if (!snapshot.exists()) {
-                    displayResult(false, nationalId, null, null);
-                    showStatus('❌ الرقم القومي غير مسجل في قاعدة البيانات', 'error');
-                    return;
-                }
-                
-                const userData = snapshot.val();
-                
-                // جلب الصورة من Storage
-                let databaseImageUrl = null;
-                try {
-                    if (userData.imageUrl) {
-                        databaseImageUrl = await storage.refFromURL(userData.imageUrl).getDownloadURL();
-                    }
-                } catch (err) {
-                    console.log('لم يتم العثور على صورة في Storage');
-                }
-                
-                // عرض النتيجة
-                displayResult(true, nationalId, userData, databaseImageUrl);
-                showStatus('✅ تم التحقق من الهوية بنجاح!', 'success');
-                
-            } catch (err) {
-                showStatus('حدث خطأ: ' + err.message, 'error');
-                console.error(err);
-            }
+          } else {
+            document.getElementById('databaseImage').src = capturedImageData;
+          }
+          
+          const msg = document.getElementById('add-msg');
+          msg.className = 'duplicate-box';
+          msg.innerHTML = `
+            <span>⚠️ تنبيه تكرار!</span>
+            <div style="margin-top:5px; font-size:13px; color:#333;">
+             الكود (${natid}) مسجل مسبقاً في <br>
+             <b style="color:#d32f2f; font-size:15px;">${data.place}</b> <br>
+             بواسطة <b style="color:#d32f2f; font-size:15px;">${data.repName}</b>
+            </div>
+          `;
+          
+          // حفظ التكرار
+          const duplicateData = {
+            duplicatedID: natid,
+            attemptByRep: repName,
+            attemptPlace: userPlace,
+            originalRep: data.repName,
+            originalPlace: data.place,
+            timestamp: new Date().toISOString(),
+            status: "rejected"
+          };
+          await db.ref('duplicates').push(duplicateData);
+          
+          saveRepName(repName);
+          document.getElementById('addBtn').disabled = false;
+          
+        } else {
+          // إضافة جديدة
+          showMsg('جاري رفع الصورة والبيانات...', 'processing');
+          
+          // رفع الصورة إلى Storage
+          const storageRef = storage.ref('id-cards/' + natid + '_' + Date.now() + '.jpg');
+          const uploadTask = await storageRef.putString(capturedImageData, 'data_url');
+          const imageUrl = await uploadTask.ref.getDownloadURL();
+          
+          // حفظ البيانات
+          const now = new Date();
+          const payload = {
+            natid,
+            repName,
+            place: userPlace,
+            placeIdx: userPlaceIdx,
+            time: now.toISOString(),
+            username: userID,
+            imageUrl: imageUrl
+          };
+          
+          await db.ref('users/' + natid).set(payload);
+          
+          saveRepName(repName);
+          showMsg('✅ تمت الإضافة بنجاح!', 'success');
+          
+          // إعادة تعيين النموذج
+          setTimeout(() => {
+            resetCamera();
+            document.getElementById('repName').value = '';
+          }, 2000);
         }
+        
+      } catch (error) {
+        showMsg('حدث خطأ: ' + error.message, 'error');
+        console.error(error);
+        document.getElementById('addBtn').disabled = false;
+      }
+    }
 
-        function extractNationalId(text) {
-            const cleanText = text.replace(/\s+/g, '');
-            const patterns = [
-                /\b(\d{14})\b/,
-                /(\d{3}\s*\d{11})/,
-                /(\d{3}[-\/]\d{11})/
-            ];
-            
-            for (let pattern of patterns) {
-                const match = cleanText.match(pattern);
-                if (match) {
-                    const id = match[1].replace(/\D/g, '');
-                    if (id.length === 14) {
-                        return id;
-                    }
-                }
-            }
-            
-            const allNumbers = cleanText.match(/\d+/g);
-            if (allNumbers) {
-                for (let num of allNumbers) {
-                    if (num.length === 14) {
-                        return num;
-                    }
-                }
-            }
-            
-            return null;
-        }
+    function showMsg(text, type) {
+      const msg = document.getElementById('add-msg');
+      msg.textContent = text;
+      msg.className = 'msg ' + type;
+    }
 
-        function displayResult(isVerified, nationalId, userData, databaseImageUrl) {
-            resultSection.classList.add('active');
-            
-            if (isVerified) {
-                resultSection.className = 'result-section active verified';
-                document.getElementById('resultTitle').textContent = '✅ تم التحقق من الهوية بنجاح';
-                verificationBadge.className = 'verification-badge verified';
-                verificationBadge.textContent = '✓ هوية موثقة';
-                
-                // عرض معلومات المستخدم
-                infoGrid.innerHTML = `
-                    <div class="info-item">
-                        <label>الرقم القومي</label>
-                        <div class="value">${nationalId}</div>
-                    </div>
-                    <div class="info-item">
-                        <label>الاسم</label>
-                        <div class="value">${userData.name || 'غير متوفر'}</div>
-                    </div>
-                    <div class="info-item">
-                        <label>العنوان</label>
-                        <div class="value">${userData.address || 'غير متوفر'}</div>
-                    </div>
-                    <div class="info-item">
-                        <label>تاريخ التسجيل</label>
-                        <div class="value">${userData.registrationDate || 'غير متوفر'}</div>
-                    </div>
-                `;
-                
-                // عرض مقارنة الصور إذا كانت متوفرة
-                if (databaseImageUrl) {
-                    comparisonSection.classList.add('active');
-                    document.getElementById('currentImage').src = capturedImageData;
-                    document.getElementById('databaseImage').src = databaseImageUrl;
-                }
-                
-            } else {
-                resultSection.className = 'result-section active not-verified';
-                document.getElementById('resultTitle').textContent = '❌ فشل التحقق من الهوية';
-                verificationBadge.className = 'verification-badge not-verified';
-                verificationBadge.textContent = '✗ هوية غير مسجلة';
-                
-                infoGrid.innerHTML = `
-                    <div class="info-item">
-                        <label>الرقم القومي المستخرج</label>
-                        <div class="value">${nationalId}</div>
-                    </div>
-                    <div class="info-item" style="border-right-color: #dc3545;">
-                        <label>الحالة</label>
-                        <div class="value" style="color: #dc3545;">غير مسجل في قاعدة البيانات</div>
-                    </div>
-                `;
-            }
-        }
-    </script>
+    // دوال الإحصائيات والإدارة
+    function showStatsLogin() {
+      document.getElementById('main-card').classList.add('hidden');
+      const statsCard = document.getElementById('stats-auth-card');
+      statsCard.classList.remove('hidden');
+      statsCard.classList.add('fade-in');
+      document.getElementById('statsPass').value = '';
+      document.getElementById('stats-msg').textContent = '';
+      document.getElementById('statsPass').focus();
+    }
+
+    function cancelStats() {
+      document.getElementById('stats-auth-card').classList.add('hidden');
+      const mainCard = document.getElementById('main-card');
+      mainCard.classList.remove('hidden');
+      mainCard.classList.add('fade-in');
+    }
+
+    function verifyStats() {
+      const pass = document.getElementById('statsPass').value;
+      const msg = document.getElementById('stats-msg');
+      
+      if(pass === '251988') {
+        msg.className = 'msg success';
+        msg.textContent = 'كلمة المرور صحيحة.';
+        
+        setTimeout(() => {
+          document.getElementById('stats-auth-card').classList.add('hidden');
+          const adminPanel = document.getElementById('admin-panel-card');
+          adminPanel.classList.remove('hidden');
+          adminPanel.classList.add('fade-in');
+          renderAdminRepList();
+        }, 500);
+      } else {
+        msg.className = 'msg error';
+        msg.textContent = 'كلمة المرور خاطئة!';
+      }
+    }
+
+    function renderAdminRepList() {
+      const container = document.getElementById('adminRepList');
+      const stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
+      container.innerHTML = '';
+      
+      if (stored.length === 0) {
+        container.innerHTML = '<div class="empty-list">لا توجد أسماء محفوظة حالياً</div>';
+        return;
+      }
+      
+      stored.forEach(name => {
+        const div = document.createElement('div');
+        div.className = 'rep-item';
+        div.innerHTML = `
+          <span class="rep-name">${name}</span>
+          <button class="btn-delete-rep" onclick="deleteRepName('${name}')">حذف</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function deleteRepName(nameToDelete) {
+      if(confirm(`هل أنت متأكد من حذف المندوب "${nameToDelete}" من قائمة الاقتراحات؟`)) {
+        let stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
+        stored = stored.filter(n => n !== nameToDelete);
+        localStorage.setItem('saved_rep_names', JSON.stringify(stored));
+        renderAdminRepList();
+        loadRepNames();
+      }
+    }
+
+    function closeAdminPanel() {
+      document.getElementById('admin-panel-card').classList.add('hidden');
+      document.getElementById('main-card').classList.remove('hidden');
+    }
+  </script>
 </body>
 </html>
