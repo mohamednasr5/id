@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مسح الرقم القومي</title>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js'></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .camera-section {
+            margin-bottom: 20px;
+        }
+        
+        video, canvas {
+            width: 100%;
+            max-width: 100%;
+            border-radius: 10px;
+            border: 3px solid #667eea;
+            display: none;
+        }
+        
+        video.active, canvas.active {
+            display: block;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            flex: 1;
+            min-width: 120px;
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .result-section.active {
+            display: block;
+        }
+        
+        .result-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .national-id {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            letter-spacing: 3px;
+            direction: ltr;
+            border: 2px solid #667eea;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .status.active {
+            display: block;
+        }
+        
+        .status.processing {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .upload-section {
+            margin-top: 20px;
+            padding: 20px;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .upload-label {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📷 مسح الرقم القومي من البطاقة</h1>
+        
+        <div class="camera-section">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas"></canvas>
+        </div>
+        
+        <div class="controls">
+            <button class="btn-primary" id="startCamera">تشغيل الكاميرا</button>
+            <button class="btn-success" id="capture" disabled>التقاط الصورة</button>
+            <button class="btn-danger" id="reset" style="display:none;">إعادة المحاولة</button>
+        </div>
+        
+        <div class="upload-section">
+            <label for="fileInput" class="upload-label">📁 أو اختر صورة من الجهاز</label>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+        
+        <div class="status" id="status"></div>
+        
+        <div class="result-section" id="resultSection">
+            <h2>✅ الرقم القومي المستخرج:</h2>
+            <div class="national-id" id="nationalId">---</div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const startCameraBtn = document.getElementById('startCamera');
+        const captureBtn = document.getElementById('capture');
+        const resetBtn = document.getElementById('reset');
+        const fileInput = document.getElementById('fileInput');
+        const status = document.getElementById('status');
+        const resultSection = document.getElementById('resultSection');
+        const nationalIdDisplay = document.getElementById('nationalId');
+        
+        let stream = null;
+
+        function showStatus(message, type) {
+            status.textContent = message;
+            status.className = 'status active ' + type;
+        }
+
+        function hideStatus() {
+            status.classList.remove('active');
+        }
+
+        startCameraBtn.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                video.srcObject = stream;
+                video.classList.add('active');
+                canvas.classList.remove('active');
+                startCameraBtn.disabled = true;
+                captureBtn.disabled = false;
+                showStatus('الكاميرا جاهزة - قم بتوجيهها نحو البطاقة', 'success');
+            } catch (err) {
+                showStatus('خطأ في تشغيل الكاميرا: ' + err.message, 'error');
+            }
+        });
+
+        captureBtn.addEventListener('click', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            video.classList.remove('active');
+            canvas.classList.add('active');
+            captureBtn.disabled = true;
+            resetBtn.style.display = 'inline-block';
+            
+            processImage(canvas);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+                        canvas.classList.add('active');
+                        video.classList.remove('active');
+                        resetBtn.style.display = 'inline-block';
+                        processImage(canvas);
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            if (stream) {
+                video.classList.add('active');
+                canvas.classList.remove('active');
+                captureBtn.disabled = false;
+            } else {
+                canvas.classList.remove('active');
+            }
+            resetBtn.style.display = 'none';
+            resultSection.classList.remove('active');
+            hideStatus();
+        });
+
+        async function processImage(canvas) {
+            showStatus('جاري معالجة الصورة والبحث عن الرقم القومي...', 'processing');
+            
+            try {
+                const { data: { text } } = await Tesseract.recognize(
+                    canvas,
+                    'eng',
+                    {
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                showStatus(`جاري المعالجة: ${Math.round(m.progress * 100)}%`, 'processing');
+                            }
+                        }
+                    }
+                );
+                
+                const nationalId = extractNationalId(text);
+                
+                if (nationalId) {
+                    nationalIdDisplay.textContent = nationalId;
+                    resultSection.classList.add('active');
+                    showStatus('تم استخراج الرقم القومي بنجاح!', 'success');
+                } else {
+                    showStatus('لم يتم العثور على رقم قومي صحيح. حاول مرة أخرى بصورة أوضح.', 'error');
+                }
+            } catch (err) {
+                showStatus('خطأ في معالجة الصورة: ' + err.message, 'error');
+            }
+        }
+
+        function extractNationalId(text) {
+            const cleanText = text.replace(/\s+/g, '');
+            const patterns = [
+                /\b(\d{14})\b/,
+                /(\d{3}\s*\d{11})/,
+                /(\d{3}[-\/]\d{11})/
+            ];
+            
+            for (let pattern of patterns) {
+                const match = cleanText.match(pattern);
+                if (match) {
+                    const id = match[1].replace(/\D/g, '');
+                    if (id.length === 14) {
+                        return id;
+                    }
+                }
+            }
+            
+            const allNumbers = cleanText.match(/\d+/g);
+            if (allNumbers) {
+                for (let num of allNumbers) {
+                    if (num.length === 14) {
+                        return num;
+                    }
+                }
+            }
+            
+            return null;
+        }
+    </script>
+</body>
+</html>
