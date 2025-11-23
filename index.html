@@ -76,6 +76,7 @@
 
     .input-group { position: relative; margin-bottom: 18px; }
 
+    /* تم إبقاء هذا الكلاس في حال أردت استخدامه لاحقاً لكنه غير مستخدم الآن في الإدخال الرئيسي */
     .fixed-input-box {
       display: flex; align-items: center; background: var(--input-bg);
       border-radius: 10px; padding: 0 15px; border: 2px solid transparent;
@@ -90,17 +91,15 @@
       border-radius: 10px; font-family: 'Cairo', sans-serif;
       transition: 0.3s ease; color: #333;
     }
-    .fixed-input-box input { background: transparent; border: none; padding: 12px 0; width: auto; flex-grow: 1; font-weight: bold; letter-spacing: 2px; }
-    .fixed-input-box input:focus { box-shadow: none; background: transparent; }
+    /* تعديل تنسيق الـ input ليكون طبيعياً بدون خصائص الـ fixed-box السابقة */
+    input:focus { background: #fff; border-color: var(--secondary-color); box-shadow: 0 0 15px rgba(0, 198, 255, 0.1); }
 
     .input-group label {
       position: absolute; top: 50%; right: 15px; transform: translateY(-50%);
       font-size: 16px; color: #999; pointer-events: none;
       transition: 0.3s ease all; padding: 0 5px; background: transparent; z-index: 10;
     }
-    input:focus ~ label, input:not(:placeholder-shown) ~ label, 
-    .fixed-input-box:focus-within ~ label, 
-    .fixed-input-box input:not(:placeholder-shown) ~ label {
+    input:focus ~ label, input:not(:placeholder-shown) ~ label {
       top: 0; transform: translateY(-50%) scale(0.85);
       background: #fff; color: var(--primary-color); font-weight: 600; border-radius: 5px;
     }
@@ -243,11 +242,8 @@
       </div>
       
       <div class="input-group" style="margin-bottom: 5px;">
-        <div class="fixed-input-box">
-          <span class="static-x">××××××××××</span>
-          <input id="natID" type="tel" maxlength="4" placeholder=" " autocomplete="off">
-        </div>
-        <label for="natID">آخر 4 أرقام من القومي</label>
+        <input id="natID" type="tel" maxlength="14" placeholder=" " autocomplete="off">
+        <label for="natID">الرقم القومي (14 رقم)</label>
       </div>
 
       <div class="id-card-visual-container">
@@ -362,14 +358,11 @@
         });
     }
 
-    // جعل الدالة متاحة في window لاستدعائها من HTML
     window.deleteRepName = function(nameToDelete) {
         if(confirm(`هل أنت متأكد من حذف المندوب "${nameToDelete}" من قائمة الاقتراحات؟`)) {
             let stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
             stored = stored.filter(n => n !== nameToDelete);
             localStorage.setItem('saved_rep_names', JSON.stringify(stored));
-            
-            // تحديث الواجهة
             renderAdminRepList();
             loadRepNames(); 
         }
@@ -427,8 +420,10 @@
       if (name.length < 2) {
         msg.textContent = 'يرجى إدخال اسم المندوب'; msg.className += ' error'; return;
       }
-      if (!/^\d{4}$/.test(natid)) {
-        msg.textContent = 'يرجى إدخال آخر 4 أرقام بشكل صحيح.'; msg.className += ' error'; return;
+      
+      // هنا التعديل: التحقق من أن الرقم القومي 14 رقم
+      if (!/^\d{14}$/.test(natid)) {
+        msg.textContent = 'يرجى إدخال الـ 14 رقم للرقم القومي بشكل صحيح.'; msg.className += ' error'; return;
       }
 
       btn.disabled = true; btn.innerText = 'جاري الإضافة...';
@@ -452,13 +447,13 @@
           `;
 
           const duplicateData = {
-             duplicatedID: natid,
-             attemptByRep: name,
-             attemptPlace: userPlace,
-             originalRep: data.repName,
-             originalPlace: data.place,
-             timestamp: new Date().toISOString(),
-             status: "rejected"
+              duplicatedID: natid,
+              attemptByRep: name,
+              attemptPlace: userPlace,
+              originalRep: data.repName,
+              originalPlace: data.place,
+              timestamp: new Date().toISOString(),
+              status: "rejected"
           };
           await push(ref(db, 'duplicates'), duplicateData);
           saveRepName(name);
@@ -512,13 +507,12 @@
             msg.className = 'msg success';
             msg.textContent = 'كلمة المرور صحيحة.';
             
-            // بدلاً من التحويل لصفحة أخرى، نظهر لوحة التحكم
             setTimeout(() => { 
                 document.getElementById('stats-auth-card').classList.add('hidden');
                 const adminPanel = document.getElementById('admin-panel-card');
                 adminPanel.classList.remove('hidden');
                 adminPanel.classList.add('fade-in');
-                renderAdminRepList(); // تحميل القائمة
+                renderAdminRepList(); 
             }, 500);
 
         } else {
