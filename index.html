@@ -1,775 +1,388 @@
 <!DOCTYPE html>
-
 <html lang="ar" dir="rtl">
-
 <head>
-
   <meta charset="UTF-8">
-
   <title>تسجيل دخول المندوب</title>
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
-
   <style>
-
     :root {
-
       --primary-color: #0072ff;
-
       --secondary-color: #00c6ff;
-
       --bg-gradient: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
-
       --glass-bg: rgba(255, 255, 255, 0.95);
-
       --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-
       --input-bg: #f0f4f8;
-
       --text-color: #2d3436;
-
       --error-color: #e74c3c;
-
       --success-color: #2ecc71;
-
     }
-
-
 
     * { box-sizing: border-box; outline: none; }
 
-
-
     body {
-
       font-family: 'Cairo', sans-serif;
-
       margin: 0; padding: 0;
-
       min-height: 100vh;
-
       display: flex; align-items: center; justify-content: center;
-
       background: var(--bg-gradient);
-
       background-size: 400% 400%;
-
       animation: gradientBG 15s ease infinite;
-
       overflow: hidden;
-
       color: var(--text-color);
-
     }
-
-
 
     @keyframes gradientBG {
-
       0% { background-position: 0% 50%; }
-
       50% { background-position: 100% 50%; }
-
       100% { background-position: 0% 50%; }
-
     }
 
-
-
-    .circles {
-
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1;
-
-    }
-
-    .circles li {
-
-      position: absolute; display: block; list-style: none;
-
-      width: 20px; height: 20px; background: rgba(255, 255, 255, 0.2);
-
-      animation: animate 25s linear infinite; bottom: -150px; border-radius: 50%;
-
-    }
-
+    /* الخلفية المتحركة */
+    .circles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; }
+    .circles li { position: absolute; display: block; list-style: none; width: 20px; height: 20px; background: rgba(255, 255, 255, 0.2); animation: animate 25s linear infinite; bottom: -150px; border-radius: 50%; }
     .circles li:nth-child(1){ left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
-
     .circles li:nth-child(2){ left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
-
     .circles li:nth-child(3){ left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
-
     .circles li:nth-child(4){ left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
-
     .circles li:nth-child(5){ left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
+    @keyframes animate { 0%{ transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 0; } 100%{ transform: translateY(-1000px) rotate(720deg); opacity: 0; border-radius: 50%; } }
 
-    @keyframes animate {
-
-      0%{ transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 0; }
-
-      100%{ transform: translateY(-1000px) rotate(720deg); opacity: 0; border-radius: 50%; }
-
-    }
-
-
-
-    .container {
-
-      position: relative; z-index: 1; perspective: 1000px;
-
-    }
-
-
+    .container { position: relative; z-index: 1; perspective: 1000px; }
 
     .card {
-
       background: var(--glass-bg);
-
       backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-
       border-radius: 20px; padding: 40px 30px;
-
       width: 100%; max-width: 400px;
-
       box-shadow: var(--glass-shadow);
-
       border: 1px solid rgba(255, 255, 255, 0.18);
-
       transform: translateY(20px); opacity: 0;
-
       animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-
       transition: all 0.5s ease;
-
     }
-
-
-
     @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
-
-
-    h2 {
-
-      text-align: center; margin-bottom: 30px;
-
-      color: var(--primary-color); font-weight: 700; font-size: 24px; letter-spacing: -0.5px;
-
-    }
-
-
+    h2 { text-align: center; margin-bottom: 30px; color: var(--primary-color); font-weight: 700; font-size: 24px; }
 
     .input-group { position: relative; margin-bottom: 25px; }
 
-
-
-    .input-group label {
-
-      position: absolute; top: 50%; right: 15px; transform: translateY(-50%);
-
-      font-size: 16px; color: #999; pointer-events: none;
-
-      transition: 0.3s ease all; padding: 0 5px; background: transparent;
-
+    /* تنسيق خاص للحقل المركب (الثابت + المتغير) */
+    .fixed-input-box {
+      display: flex;
+      align-items: center;
+      background: var(--input-bg);
+      border-radius: 10px;
+      padding: 0 15px;
+      border: 2px solid transparent;
+      transition: 0.3s ease;
+      direction: ltr; /* مهم جداً لترتيب الأرقام */
     }
 
-
-
-    input, select {
-
-      width: 100%; padding: 12px 15px; font-size: 16px;
-
-      background: var(--input-bg); border: 2px solid transparent;
-
-      border-radius: 10px; font-family: 'Cairo', sans-serif;
-
-      transition: 0.3s ease; color: #333;
-
-    }
-
-
-
-    input:focus, input:not(:placeholder-shown) {
-
-      background: #fff; border-color: var(--secondary-color);
-
+    /* تأثير التركيز على الحاوية بالكامل */
+    .fixed-input-box:focus-within {
+      background: #fff;
+      border-color: var(--secondary-color);
       box-shadow: 0 0 15px rgba(0, 198, 255, 0.1);
-
     }
 
+    /* العلامات الثابتة */
+    .static-x {
+      color: #aaa;
+      font-weight: bold;
+      font-size: 18px;
+      letter-spacing: 2px;
+      margin-right: 5px;
+      pointer-events: none; /* لمنع تحديدها */
+      user-select: none;
+    }
 
+    /* الحقل الفعلي */
+    input, select {
+      width: 100%; padding: 12px 15px; font-size: 16px;
+      background: var(--input-bg); border: 2px solid transparent;
+      border-radius: 10px; font-family: 'Cairo', sans-serif;
+      transition: 0.3s ease; color: #333;
+    }
+    
+    /* تعديل الحقل داخل الحاوية الثابتة */
+    .fixed-input-box input {
+      background: transparent;
+      border: none;
+      padding: 12px 0;
+      width: auto;
+      flex-grow: 1;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+    .fixed-input-box input:focus { box-shadow: none; background: transparent; }
 
-    input:focus ~ label, input:not(:placeholder-shown) ~ label {
+    /* الليبل العائم */
+    .input-group label {
+      position: absolute; top: 50%; right: 15px; transform: translateY(-50%);
+      font-size: 16px; color: #999; pointer-events: none;
+      transition: 0.3s ease all; padding: 0 5px; background: transparent; z-index: 10;
+    }
 
+    /* تحريك الليبل عند التركيز */
+    input:focus ~ label, input:not(:placeholder-shown) ~ label, 
+    .fixed-input-box:focus-within ~ label, 
+    .fixed-input-box input:not(:placeholder-shown) ~ label {
       top: 0; transform: translateY(-50%) scale(0.85);
-
       background: #fff; color: var(--primary-color); font-weight: 600; border-radius: 5px;
-
     }
-
-
 
     .btn {
-
       background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
-
       color: white; padding: 12px; width: 100%; border: none;
-
       border-radius: 50px; font-size: 18px; font-weight: 700; cursor: pointer;
-
       transition: 0.3s ease; box-shadow: 0 5px 15px rgba(0, 114, 255, 0.3);
-
       position: relative; overflow: hidden;
-
     }
-
     .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 114, 255, 0.4); }
-
     .btn:active { transform: translateY(1px); }
 
-
-
     .btn-secondary { background: linear-gradient(to right, #43cea2, #185a9d); margin-top: 15px; }
-
     .btn-danger { background: linear-gradient(to right, #ff416c, #ff4b2b); margin-top: 15px; }
 
-
-
-    .msg {
-
-      margin-top: 15px; text-align: center; font-size: 14px; font-weight: 600;
-
-      min-height: 20px; transition: 0.3s; padding: 10px; border-radius: 8px;
-
-    }
-
+    .msg { margin-top: 15px; text-align: center; font-size: 14px; font-weight: 600; min-height: 20px; transition: 0.3s; padding: 10px; border-radius: 8px; }
     .msg.error { color: var(--error-color); animation: shake 0.5s; }
-
     .msg.success { color: var(--success-color); }
 
-
-
-    /* --- ستايل المستطيل الأحمر المميز للتكرار --- */
-
     .duplicate-box {
-
-        background-color: #fff5f5;
-
-        border: 2px solid #ff0000;
-
-        color: #c0392b;
-
-        padding: 15px;
-
-        border-radius: 12px;
-
-        margin-top: 20px;
-
-        font-weight: bold;
-
+        background-color: #fff5f5; border: 2px solid #ff0000; color: #c0392b;
+        padding: 15px; border-radius: 12px; margin-top: 20px; font-weight: bold;
         box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
-
         animation: pulseRed 0.8s infinite alternate;
-
-        display: flex;
-
-        flex-direction: column;
-
-        align-items: center;
-
-        justify-content: center;
-
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
+    @keyframes pulseRed { from { border-color: #ff0000; box-shadow: 0 0 10px rgba(255, 0, 0, 0.3); } to { border-color: #ff6b6b; box-shadow: 0 0 20px rgba(255, 0, 0, 0.6); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(10px); } 75% { transform: translateX(-10px); } }
 
-
-
-    @keyframes pulseRed {
-
-        from { border-color: #ff0000; box-shadow: 0 0 10px rgba(255, 0, 0, 0.3); }
-
-        to { border-color: #ff6b6b; box-shadow: 0 0 20px rgba(255, 0, 0, 0.6); }
-
-    }
-
-
-
-    @keyframes shake {
-
-      0%, 100% { transform: translateX(0); }
-
-      25% { transform: translateX(10px); }
-
-      75% { transform: translateX(-10px); }
-
-    }
-
-
-
-    @media (max-width: 480px) {
-
-      .card { padding: 30px 20px; margin: 20px; width: 90%; }
-
-      h2 { font-size: 20px; }
-
-    }
-
+    @media (max-width: 480px) { .card { padding: 30px 20px; margin: 20px; width: 90%; } h2 { font-size: 20px; } }
     .hidden { display: none; }
-
     .fade-in { animation: fadeIn 0.5s forwards; }
-
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
   </style>
-
 </head>
-
 <body>
-
-
 
   <audio id="errorSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 
-
-
-  <ul class="circles">
-
-    <li></li><li></li><li></li><li></li><li></li>
-
-    <li></li><li></li><li></li><li></li><li></li>
-
-  </ul>
-
-
+  <ul class="circles"><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li></ul>
 
   <div class="container">
-
     
-
     <div class="card" id="auth-card">
-
       <h2>تسجيل دخول المندوب</h2>
-
       <div class="input-group">
-
         <input id="loginCode" type="number" placeholder=" ">
-
         <label for="loginCode">كود الدخول</label>
-
       </div>
-
       <button class="btn" onclick="login()"><span>دخول</span></button>
-
       <div id="login-msg" class="msg"></div>
-
     </div>
-
-
 
     <div class="card hidden" id="main-card">
-
       <h2 id="welcome">مرحبًا</h2>
-
       
-
       <div class="input-group">
-
         <input id="repName" type="text" autocomplete="off" maxlength="30" placeholder=" ">
-
         <label for="repName">اسم المندوب</label>
-
       </div>
-
       
-
       <div class="input-group">
-
-        <input id="natID" type="number" autocomplete="off" placeholder=" " oninput="if(this.value.length>14)this.value=this.value.slice(0,14);">
-
-        <label for="natID">الرقم القومي (14 رقم)</label>
-
+        <div class="fixed-input-box">
+          <span class="static-x">××××××××××</span>
+          <input id="natID" type="tel" maxlength="4" placeholder=" " autocomplete="off">
+        </div>
+        <label for="natID">آخر 4 أرقام من القومي</label>
       </div>
-
       
-
       <button class="btn" onclick="addUser()">إضافة</button>
-
       <div id="add-msg" class="msg"></div>
-
       <button class="btn btn-secondary" onclick="showStatsLogin()">صفحة الإحصائيات</button>
-
     </div>
-
-
 
     <div class="card hidden" id="stats-auth-card">
-
       <h2>صلاحية المدير</h2>
-
       <p style="text-align: center; color: #666; margin-bottom: 20px;">أدخل كلمة مرور الإحصائيات</p>
-
       <div class="input-group">
-
         <input id="statsPass" type="password" placeholder=" ">
-
         <label for="statsPass">كلمة المرور</label>
-
       </div>
-
       <button class="btn" onclick="verifyStats()">دخول للإحصائيات</button>
-
       <div id="stats-msg" class="msg"></div>
-
       <button class="btn btn-danger" onclick="cancelStats()">إلغاء وعودة</button>
-
     </div>
-
-
 
   </div>
 
-
-
   <script type="module">
-
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-
     import { getDatabase, ref, set, get, child, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-
-
     const firebaseConfig = {
-
       apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
-
       authDomain: "idmanazla.firebaseapp.com",
-
       databaseURL: "https://idmanazla-default-rtdb.europe-west1.firebasedatabase.app",
-
       projectId: "idmanazla",
-
       storageBucket: "idmanazla.firebasestorage.app",
-
       messagingSenderId: "408446131276",
-
       appId: "1:408446131276:web:976ae54181b5398de5a8e9",
-
       measurementId: "G-9YSW9HNYTG"
-
     };
-
     const app = initializeApp(firebaseConfig);
-
     const db = getDatabase(app);
 
-
-
     const places = [
-
       "المنزلة الجديدة 1","المنزلة الجديدة 2","بحر البلد شارع الكابتن",
-
       "مدرسة عبد العال شلبياية","مصنع البصل","الكفر 1","الكفر 2 تحت السكة",
-
       "سوق الجملة","الفداء","نقطة حمام الكيال","الحمزاوي","الجرن 1","الجرن 2",
-
       "البر التاني حي السلام","حي الاعجام","العزبة منشية ناصر","الطويل",
-
       "البر التاني 2 الهاويس","الفقاعي","بحر البلد 2","حي الجبانة",
-
       "الكفر 3 بجوار ملعب برشلونة","مقهي أبو سليمان","حي الزهراء"
-
     ];
-
-
 
     let userPlace = null, userPlaceIdx = null, userID = null;
 
-
-
     window.login = function() {
-
       const msgDiv = document.getElementById('login-msg');
-
       msgDiv.textContent = ''; msgDiv.className = 'msg';
-
       const codeInput = document.getElementById('loginCode').value.trim();
-
       const code = parseInt(codeInput);
 
-
-
       if (!codeInput || isNaN(code) || code < 225501 || code > 225522) {
-
         msgDiv.textContent = 'كود الدخول غير صحيح.';
-
         msgDiv.classList.add('error'); return;
-
       }
-
-
-
       let idx = code - 225501;
-
       if (idx >= places.length) {
-
           msgDiv.textContent = 'كود صحيح ولكن المكان غير معرف بالنظام.';
-
           msgDiv.classList.add('error'); return;
-
       }
-
-
-
       userPlace = places[idx];
-
       userPlaceIdx = idx + 1;
-
       userID = codeInput;
 
-
-
       const authCard = document.getElementById('auth-card');
-
       const mainCard = document.getElementById('main-card');
-
-
-
       authCard.style.opacity = '0';
-
       authCard.style.transform = 'translateY(-20px)';
-
       
-
       setTimeout(() => {
-
         authCard.classList.add('hidden');
-
         mainCard.classList.remove('hidden');
-
         mainCard.classList.add('fade-in');
-
         document.getElementById('welcome').textContent = `مرحبًا في ${userPlace}`;
-
       }, 400);
-
     }
 
-
-
     window.addUser = async function() {
-
       const btn = event.target;
-
       const originalText = btn.innerText;
-
-      
-
       let name = document.getElementById('repName').value.trim();
-
-      let natid = document.getElementById('natID').value.trim();
+      let natid = document.getElementById('natID').value.trim(); // الرقم الذي أدخله المندوب (4 أرقام)
 
       const msg = document.getElementById('add-msg');
-
       msg.textContent = ''; msg.className = 'msg';
 
-
-
       if (!userPlace) return;
-
       if (name.length < 2) {
-
         msg.textContent = 'يرجى إدخال اسم المندوب'; msg.className += ' error'; return;
-
       }
-
-      if (!/^\d{14}$/.test(natid)) {
-
-        msg.textContent = 'يرجى إدخال الرقم القومي صحيح (14 رقمًا).'; msg.className += ' error'; return;
-
+      
+      // التحقق أن الرقم مكون من 4 أرقام فقط
+      if (!/^\d{4}$/.test(natid)) {
+        msg.textContent = 'يرجى إدخال آخر 4 أرقام بشكل صحيح.'; msg.className += ' error'; return;
       }
-
-
 
       btn.disabled = true; btn.innerText = 'جاري الإضافة...';
 
-
-
       try {
-
+        // البحث باستخدام الـ 4 أرقام فقط (لاحظ أن قاعدة البيانات يجب أن تخزن الـ 4 أرقام فقط كمفتاح أو تبحث بداخلها)
+        // إذا كنت تخزن الـ 14 رقم في قاعدة البيانات، هذا البحث لن يجد الشخص إلا إذا كنت تخزن الـ 4 أرقام فقط.
+        // بناءً على طلبك، سنبحث ونخزن باستخدام الـ 4 أرقام
         const snapshot = await get(child(ref(db), 'users/' + natid));
-
         
-
         if (snapshot.exists()) {
-
           // --- حالة وجود تكرار ---
-
           let data = snapshot.val();
-
-          
-
-          // 1. تشغيل الصوت
-
           document.getElementById('errorSound').play().catch(e => console.log('Audio play blocked'));
 
-
-
-          // 2. إظهار الرسالة في المربع الأحمر المميز
-
-          msg.className = 'duplicate-box'; // كلاس جديد للستايل
-
+          msg.className = 'duplicate-box';
           msg.innerHTML = `
-
             <span>⚠️ تنبيه تكرار!</span>
-
             <div style="margin-top:5px; font-size:13px; color:#333;">
-
-             تم إدخال هذا الشخص من قبل في <br>
-
+             الكود (${natid}) مسجل مسبقاً في <br>
              <b style="color:#d32f2f; font-size:15px;">${data.place}</b> <br>
-
              بواسطة <b style="color:#d32f2f; font-size:15px;">${data.repName}</b>
-
             </div>
-
           `;
 
-
-
-          // 3. تسجيل المحاولة المكررة في قاعدة البيانات للإحصائيات
-
           const duplicateData = {
-
              duplicatedID: natid,
-
              attemptByRep: name,
-
              attemptPlace: userPlace,
-
              originalRep: data.repName,
-
              originalPlace: data.place,
-
              timestamp: new Date().toISOString(),
-
              status: "rejected"
-
           };
-
-          // إضافة السجل في قسم جديد اسمه duplicates
-
           await push(ref(db, 'duplicates'), duplicateData);
 
-
-
         } else {
-
           // --- حالة الإضافة الجديدة ---
-
           const now = new Date();
-
           let payload = {
-
             natid, repName: name, place: userPlace, placeIdx: userPlaceIdx,
-
             time: now.toISOString(), username: userID
-
           };
-
+          // التخزين يتم برقم الـ 4 خانات فقط
           await set(ref(db, 'users/' + natid), payload);
-
           msg.className += ' success';
-
           msg.textContent = "تمت الإضافة بنجاح.";
-
           document.getElementById('natID').value = '';
-
           document.getElementById('natID').focus();
-
         }
-
       } catch (error) {
-
         msg.className = 'msg error';
-
         msg.textContent = 'حدث خطأ في الاتصال، حاول مرة أخرى.';
-
         console.error(error);
-
       } finally {
-
         btn.disabled = false;
-
         btn.innerText = originalText;
-
       }
-
     }
-
-
 
     // Stats Logic
-
     window.showStatsLogin = function() {
-
         document.getElementById('main-card').classList.add('hidden');
-
         const statsCard = document.getElementById('stats-auth-card');
-
         statsCard.classList.remove('hidden');
-
         statsCard.classList.add('fade-in');
-
         document.getElementById('statsPass').value = '';
-
         document.getElementById('stats-msg').textContent = '';
-
         document.getElementById('statsPass').focus();
-
     }
-
-
-
     window.cancelStats = function() {
-
         document.getElementById('stats-auth-card').classList.add('hidden');
-
         const mainCard = document.getElementById('main-card');
-
         mainCard.classList.remove('hidden');
-
         mainCard.classList.add('fade-in');
-
     }
-
-
-
     window.verifyStats = function() {
-
         const pass = document.getElementById('statsPass').value;
-
         const msg = document.getElementById('stats-msg');
-
         if(pass === '251988') {
-
             msg.className = 'msg success';
-
             msg.textContent = 'كلمة المرور صحيحة، جاري التحويل...';
-
             setTimeout(() => { location.href = 'stats.html'; }, 1000);
-
         } else {
-
             msg.className = 'msg error';
-
             msg.textContent = 'كلمة المرور خاطئة!';
-
         }
-
     }
-
   </script>
-
 </body>
-
 </html>
