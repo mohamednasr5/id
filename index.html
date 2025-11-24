@@ -325,7 +325,7 @@
       "أبو رشاد مقهى أبو سليمان - محمد رشاد",
       "حي الزهراء - عبدالله عيد",
       "بحر البلد 3 - منصور البدري",
-      "حي السلمونى - حسن المناخلي"
+      "حي السلموني - حسن المناخلى"
     ];
 
     let userPlace = null, userPlaceIdx = null, userID = null;
@@ -393,6 +393,7 @@
       const codeInput = document.getElementById('loginCode').value.trim();
       const code = parseInt(codeInput);
 
+      // تم تحديث الشرط ليشمل حتى الكود 225526 (المكان رقم 26)
       if (!codeInput || isNaN(code) || code < 225501 || code > 225526) {
         msgDiv.textContent = 'كود الدخول غير صحيح.';
         msgDiv.classList.add('error'); return;
