@@ -931,12 +931,22 @@
         for (let id in users) {
           let u = users[id];
           const key = u.place;
+          
+          if (!key) continue; // تخطي إذا لم يكن هناك مكان
+
+          // ++++ التعديل هنا: تنظيف اسم المندوب من المسافات لضمان الدمج ++++
+          let cleanRepName = u.repName ? u.repName.trim() : "غير معروف";
+
           if (!perPlace[key]) {
             perPlace[key] = {count:0, nassabaList:[], reps:{}, times:[]};
           }
+          
           perPlace[key].count++;
-          if (!perPlace[key].reps[u.repName]) perPlace[key].reps[u.repName]=[];
-          perPlace[key].reps[u.repName].push(u.time);
+          
+          if (!perPlace[key].reps[cleanRepName]) {
+             perPlace[key].reps[cleanRepName] = [];
+          }
+          perPlace[key].reps[cleanRepName].push(u.time);
           perPlace[key].times.push(u.time);
         }
 
