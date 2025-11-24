@@ -324,7 +324,8 @@
       "الكفر 3 بجوار ملعب برشلونة - محمد البداية",
       "أبو رشاد مقهى أبو سليمان - محمد رشاد",
       "حي الزهراء - عبدالله عيد",
-      "بحر البلد 3 - منصور البدري"
+      "بحر البلد 3 - منصور البدري",
+      "حي السلمونى - حسن المناخلي"
     ];
 
     let userPlace = null, userPlaceIdx = null, userID = null;
@@ -392,7 +393,7 @@
       const codeInput = document.getElementById('loginCode').value.trim();
       const code = parseInt(codeInput);
 
-      if (!codeInput || isNaN(code) || code < 225501 || code > 225525) {
+      if (!codeInput || isNaN(code) || code < 225501 || code > 225526) {
         msgDiv.textContent = 'كود الدخول غير صحيح.';
         msgDiv.classList.add('error'); return;
       }
