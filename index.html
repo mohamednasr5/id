@@ -393,7 +393,7 @@
       const codeInput = document.getElementById('loginCode').value.trim();
       const code = parseInt(codeInput);
 
-      // تم تحديث الشرط ليشمل حتى الكود 225526 (المكان رقم 26)
+      // تم تعديل الشرط ليشمل الرقم 225526 (المكان رقم 26)
       if (!codeInput || isNaN(code) || code < 225501 || code > 225526) {
         msgDiv.textContent = 'كود الدخول غير صحيح.';
         msgDiv.classList.add('error'); return;
