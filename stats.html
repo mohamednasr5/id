@@ -1049,6 +1049,73 @@
             }
         }
     };
+
+    window.exportToExcel = function() {
+        if(!window.allStats) { alert("انتظر تحميل البيانات أولاً"); return; }
+
+        // تم تحديث الهيدر ليكون عمود واحد للمناديب
+        let header = `
+            <th style="background:#4a90e2; color:white; border:1px solid #000;">م</th>
+            <th style="background:#4a90e2; color:white; border:1px solid #000;">المكان</th>
+            <th style="background:#4a90e2; color:white; border:1px solid #000;">العدد الكلي</th>
+            <th style="background:#ff4757; color:white; border:1px solid #000;">نصابة</th>
+            <th style="background:#4a90e2; color:white; border:1px solid #000;">تفاصيل المناديب</th>
+            <th style="background:#4a90e2; color:white; border:1px solid #000;">أول إدخال</th>
+            <th style="background:#4a90e2; color:white; border:1px solid #000;">آخر إدخال</th>
+            <th style="background:#4a90e2; color:white; border:1px solid #000;">المدة</th>
+        `;
+
+        let rows = '';
+        firebaseKeys.forEach((key, index) => {
+            let p = window.allStats[key] || {count:0, nassabaList:[], reps:{}, times:[]};
+            let minTime = p.times.length ? new Date(Math.min(...p.times.map(t=>new Date(t)))).toLocaleTimeString('ar-EG') : '-';
+            let maxTime = p.times.length ? new Date(Math.max(...p.times.map(t=>new Date(t)))).toLocaleTimeString('ar-EG') : '-';
+            let diff = (minTime!='-' && maxTime!='-') ? ((new Date(Math.max(...p.times.map(t=>new Date(t)))) - new Date(Math.min(...p.times.map(t=>new Date(t)))))/60000) : null;
+            let duration = (diff!==null)? `${Math.floor(diff/60)}:${Math.floor(diff%60)}`:'-';
+
+            let bgColor = (index % 2 === 0) ? "#ffffff" : "#f9f9f9";
+
+            let row = `<tr>
+                <td style="background:${bgColor}; border:1px solid #000;">${index + 1}</td>
+                <td style="background:${bgColor}; border:1px solid #000;">${places[index]}</td>
+                <td style="background:${bgColor}; border:1px solid #000;">${p.count}</td>
+                <td style="background:${p.nassabaList.length > 0 ? '#ffecec' : bgColor}; color:${p.nassabaList.length > 0 ? 'red' : 'black'}; border:1px solid #000;">${p.nassabaList.length}</td>
+            `;
+
+            // تجميع المناديب في نص واحد (Vertical List in Excel Cell)
+            let repString = "";
+            let repEntries = Object.entries(p.reps);
+            if(repEntries.length > 0) {
+                repEntries.forEach(([name, times]) => {
+                    repString += `${name} (${times.length}) \n`;
+                });
+            } else {
+                repString = "-";
+            }
+            
+            // استخدام white-space: pre-wrap للحفاظ على الأسطر الجديدة في Excel HTML
+            row += `<td style="background:${bgColor}; border:1px solid #000; white-space: pre-wrap; text-align:right;">${repString}</td>`;
+
+            row += `
+                <td style="background:${bgColor}; border:1px solid #000;">${minTime}</td>
+                <td style="background:${bgColor}; border:1px solid #000;">${maxTime}</td>
+                <td style="background:${bgColor}; border:1px solid #000;">${duration}</td>
+            </tr>`;
+            rows += row;
+        });
+
+        let excelFile = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head><meta charset="UTF-8"></head>
+            <body dir="rtl"><table><thead><tr>${header}</tr></thead><tbody>${rows}</tbody></table></body>
+            </html>
+        `;
+        var blob = new Blob([excelFile], { type: 'application/vnd.ms-excel' });
+        var link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "Live_Report.xls";
+        link.click();
+    }
   </script>
 
   <script>
@@ -1181,82 +1248,6 @@
         });
 
         document.getElementById('nassabaModal').style.display = 'flex';
-    }
-
-    window.exportToExcel = function() {
-        if(!window.allStats) { alert("انتظر تحميل البيانات أولاً"); return; }
-
-        let maxReps = 0;
-        firebaseKeys.forEach(key => {
-            let p = window.allStats[key];
-            if(p && p.reps) {
-                let count = Object.keys(p.reps).length;
-                if(count > maxReps) maxReps = count;
-            }
-        });
-
-        let header = `
-            <th style="background:#4a90e2; color:white; border:1px solid #000;">م</th>
-            <th style="background:#4a90e2; color:white; border:1px solid #000;">المكان</th>
-            <th style="background:#4a90e2; color:white; border:1px solid #000;">العدد الكلي</th>
-            <th style="background:#ff4757; color:white; border:1px solid #000;">نصابة</th>
-        `;
-        for(let i=1; i<=maxReps; i++) {
-            header += `<th style="background:#4a90e2; color:white; border:1px solid #000;">مندوب ${i}</th>`;
-            header += `<th style="background:#4a90e2; color:white; border:1px solid #000;">عدد ${i}</th>`;
-        }
-        header += `
-            <th style="background:#4a90e2; color:white; border:1px solid #000;">أول إدخال</th>
-            <th style="background:#4a90e2; color:white; border:1px solid #000;">آخر إدخال</th>
-            <th style="background:#4a90e2; color:white; border:1px solid #000;">المدة</th>
-        `;
-
-        let rows = '';
-        firebaseKeys.forEach((key, index) => {
-            let p = window.allStats[key] || {count:0, nassabaList:[], reps:{}, times:[]};
-            let minTime = p.times.length ? new Date(Math.min(...p.times.map(t=>new Date(t)))).toLocaleTimeString('ar-EG') : '-';
-            let maxTime = p.times.length ? new Date(Math.max(...p.times.map(t=>new Date(t)))).toLocaleTimeString('ar-EG') : '-';
-            let diff = (minTime!='-' && maxTime!='-') ? ((new Date(Math.max(...p.times.map(t=>new Date(t)))) - new Date(Math.min(...p.times.map(t=>new Date(t)))))/60000) : null;
-            let duration = (diff!==null)? `${Math.floor(diff/60)}:${Math.floor(diff%60)}`:'-';
-
-            let bgColor = (index % 2 === 0) ? "#ffffff" : "#f9f9f9";
-
-            let row = `<tr>
-                <td style="background:${bgColor}; border:1px solid #000;">${index + 1}</td>
-                <td style="background:${bgColor}; border:1px solid #000;">${places[index]}</td>
-                <td style="background:${bgColor}; border:1px solid #000;">${p.count}</td>
-                <td style="background:${p.nassabaList.length > 0 ? '#ffecec' : bgColor}; color:${p.nassabaList.length > 0 ? 'red' : 'black'}; border:1px solid #000;">${p.nassabaList.length}</td>
-            `;
-
-            let repEntries = Object.entries(p.reps);
-            for(let i=0; i<maxReps; i++) {
-                if(i < repEntries.length) {
-                    row += `<td style="background:${bgColor}; border:1px solid #000;">${repEntries[i][0]}</td>`;
-                    row += `<td style="background:#dff0d8; color:#2e7d32; font-weight:bold; border:1px solid #000;">${repEntries[i][1].length}</td>`;
-                } else {
-                    row += `<td style="background:${bgColor}; border:1px solid #000;">-</td><td style="background:${bgColor}; border:1px solid #000;">-</td>`;
-                }
-            }
-
-            row += `
-                <td style="background:${bgColor}; border:1px solid #000;">${minTime}</td>
-                <td style="background:${bgColor}; border:1px solid #000;">${maxTime}</td>
-                <td style="background:${bgColor}; border:1px solid #000;">${duration}</td>
-            </tr>`;
-            rows += row;
-        });
-
-        let excelFile = `
-            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-            <head><meta charset="UTF-8"></head>
-            <body dir="rtl"><table><thead><tr>${header}</tr></thead><tbody>${rows}</tbody></table></body>
-            </html>
-        `;
-        var blob = new Blob([excelFile], { type: 'application/vnd.ms-excel' });
-        var link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "Live_Report.xls";
-        link.click();
     }
   </script>
 </body>
