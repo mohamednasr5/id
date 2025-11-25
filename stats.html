@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
   <style>
-    /* نفس التنسيقات السابقة تماماً للحفاظ على الشكل الجميل */
     :root {
       --primary-color: #0072ff;
       --secondary-color: #00c6ff;
@@ -56,7 +55,7 @@
     .btn:hover { transform: translateY(-2px); }
     .btn-print { background: #0984e3; }
     .btn-excel { background: #00b894; }
-    .btn-merge { background: #e17055; } /* لون زر الدمج */
+    .btn-merge { background: #e17055; }
     .btn-reset { background: #d63031; }
     .btn-back { background: #636e72; }
 
@@ -66,22 +65,17 @@
     td { padding: 15px; border-bottom: 1px solid #eee; text-align: center; }
     tr:hover { background: #f8f9fa; }
 
-    /* تفاصيل المندوب */
     .rep-list-container { display: flex; flex-direction: column; gap: 5px; max-width: 250px; margin: 0 auto; }
     .rep-tag { background: #f1f2f6; padding: 8px 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.3s; border-right: 3px solid var(--primary-color); }
     .rep-tag:hover { background: #e1e2e6; transform: translateX(-3px); }
     .statok { background: var(--success-color); color: white; padding: 2px 10px; border-radius: 15px; font-size: 0.9em; font-weight: bold; }
 
-    /* نصابة */
     .nassaba-cell { color: var(--danger-color); font-weight: bold; cursor: pointer; text-decoration: underline; }
     .zero-nassaba { color: #ccc; }
 
-    /* Modals */
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
     .modal-content { background: white; padding: 40px; border-radius: 20px; width: 90%; max-width: 500px; text-align: center; position: relative; max-height: 80vh; overflow-y: auto; }
     .close-modal { position: absolute; top: 15px; left: 15px; font-size: 24px; cursor: pointer; color: #aaa; }
-    
-    /* Merge Styles */
     .merge-input-group { text-align: right; margin-bottom: 15px; }
     .merge-input-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
     .merge-input-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Cairo'; }
@@ -137,7 +131,6 @@
         <p style="font-size:0.9rem; color:#666; margin-bottom:20px;">
             سيتم جمع أرقام (الاسم القديم) وإضافتها إلى (الاسم الجديد) وسيظهر الاسم الجديد فقط.
         </p>
-        
         <div class="merge-input-group">
             <label>الاسم الذي تريد إلغاءه (القديم):</label>
             <input type="text" id="mergeFrom" placeholder="انسخ الاسم القديم هنا">
@@ -147,7 +140,6 @@
             <input type="text" id="mergeTo" placeholder="انسخ الاسم المعتمد هنا">
         </div>
         <button class="btn btn-merge" style="width:100%" onclick="addMergeRule()">تنفيذ الدمج وحفظ</button>
-
         <h4 style="margin-top:25px; text-align:right; border-bottom:1px solid #eee; padding-bottom:5px;">قائمة الدمج النشطة:</h4>
         <ul id="mergeListDisplay" class="merge-list"></ul>
     </div>
@@ -166,7 +158,6 @@
         <button class="btn btn-back" onclick="location='DelegateApp_Pro.html'">عودة</button>
       </div>
     </div>
-
     <div class="table-wrapper">
       <table id="statTable">
         <thead>
@@ -233,36 +224,22 @@
         const duplicates = data.duplicates || {};
 
         let perPlace = {};
-        
-        // ** هنا يحدث السحر والدمج **
         for (let id in users) {
           let u = users[id];
           const key = u.place;
           if (!key) continue;
-
-          // 1. تنظيف الاسم من المسافات
           let rawName = u.repName ? u.repName.trim() : "غير معروف";
-
-          // 2. التحقق: هل هذا الاسم موجود في قائمة الدمج؟
-          // إذا نعم، استخدم الاسم الجديد. إذا لا، استخدم الاسم كما هو.
           let finalRepName = window.mergeMap[rawName] ? window.mergeMap[rawName] : rawName;
-
           if (!perPlace[key]) {
             perPlace[key] = {count:0, nassabaList:[], reps:{}, times:[]};
           }
-          
           perPlace[key].count++;
-          
-          // 3. التجميع يتم بناءً على الاسم النهائي (المدمج)
-          // هذا يعني أن الأعداد ستتراكم تلقائياً تحت الاسم الجديد
           if (!perPlace[key].reps[finalRepName]) {
              perPlace[key].reps[finalRepName] = [];
           }
           perPlace[key].reps[finalRepName].push(u.time);
           perPlace[key].times.push(u.time);
         }
-
-        // معالجة النصابة
         for (let pushId in duplicates) {
             let d = duplicates[pushId];
             const key = d.attemptPlace;
@@ -273,7 +250,6 @@
                 id: d.duplicatedID, by: d.attemptByRep, time: d.timestamp
             });
         }
-
         window.allStats = perPlace;
         renderTable(perPlace);
       }, (error) => {
@@ -282,21 +258,15 @@
     };
 
     function renderTable(perPlace) {
-        // مفاتيح الأماكن (نفس القائمة بالأعلى للتأكد من الترتيب)
-        const firebaseKeys = places; // يمكن استخدام نفس المصفوفة لأنها متطابقة
-
+        const firebaseKeys = places;
         let tbody = '';
         firebaseKeys.forEach((key, i) => {
           let p = perPlace[key] || {count:0, nassabaList:[], reps:{}, times:[]};
-          
           let minTime = p.times.length ? new Date(Math.min(...p.times.map(t=>new Date(t)))) : '-';
           let maxTime = p.times.length ? new Date(Math.max(...p.times.map(t=>new Date(t)))) : '-';
           let diff = (minTime!='-' && maxTime!='-') ? ((maxTime-minTime)/60000) : null;
           let duration = (diff!==null)? `${Math.floor(diff/60)} س ${Math.floor(diff%60).toString().padStart(2,'0')} د`:'-';
-          
-          // ترتيب المناديب حسب الأكثر إدخالاً
           let sortedReps = Object.entries(p.reps).sort((a, b) => b[1].length - a[1].length);
-
           let repDetails = sortedReps
             .map(([k,v]) => `
                 <div class="rep-tag" onclick="showRepStat('${k}', ${v.length})">
@@ -304,11 +274,9 @@
                     <span class="statok">${v.length}</span>
                 </div>
             `).join("");
-
           let nassabaCount = p.nassabaList.length;
           let nassabaClass = nassabaCount > 0 ? 'nassaba-cell' : 'zero-nassaba';
           let nassabaAction = nassabaCount > 0 ? `onclick="showNassabaDetails('${key}')"` : '';
-
           tbody += `<tr>
             <td><b>${i + 1}</b></td> 
             <td style="font-weight:bold; color:var(--primary-color)">${places[i]}</td>
@@ -325,48 +293,31 @@
         document.getElementById('tbody').innerHTML = tbody;
     }
 
-    // حفظ قواعد الدمج
     window.saveMergeRules = function() {
         localStorage.setItem('repMergeRules', JSON.stringify(window.mergeMap));
-        window.startListening(); // إعادة تحميل البيانات لتطبيق التغيير فوراً
+        window.startListening();
         renderMergeList();
     }
-
-    // إضافة قاعدة دمج جديدة
     window.addMergeRule = function() {
         const fromName = document.getElementById('mergeFrom').value.trim();
         const toName = document.getElementById('mergeTo').value.trim();
-
-        if(!fromName || !toName) {
-            alert("يرجى كتابة الاسمين بشكل صحيح");
-            return;
-        }
-        if(fromName === toName) {
-            alert("لا يمكن دمج الاسم مع نفسه!");
-            return;
-        }
-
+        if(!fromName || !toName) { alert("يرجى كتابة الاسمين بشكل صحيح"); return; }
+        if(fromName === toName) { alert("لا يمكن دمج الاسم مع نفسه!"); return; }
         window.mergeMap[fromName] = toName;
         document.getElementById('mergeFrom').value = '';
         document.getElementById('mergeTo').value = '';
-        
         window.saveMergeRules();
         alert(`تم دمج (${fromName}) مع (${toName}) بنجاح!\nالآن سيظهر (${toName}) فقط بمجموع الأرقام.`);
     }
-
-    // حذف قاعدة دمج
     window.removeMergeRule = function(fromName) {
         if(confirm(`هل تريد إلغاء دمج (${fromName})؟`)) {
             delete window.mergeMap[fromName];
             window.saveMergeRules();
         }
     }
-
-    // عرض القائمة في الـ Modal
     window.renderMergeList = function() {
         const list = document.getElementById('mergeListDisplay');
         list.innerHTML = '';
-        
         for (let [from, to] of Object.entries(window.mergeMap)) {
             let li = document.createElement('li');
             li.innerHTML = `
@@ -380,11 +331,8 @@
             list.appendChild(li);
         }
     }
-
-    // عند التحميل
     window.renderMergeList();
 
-    // بقية الدوال
     window.resetData = async function() {
         if(confirm("تحذير هام:\nهل أنت متأكد من تصفير العدادات وحذف المستخدمين والنصابة؟")) {
             const userPass = prompt("للتأكيد، أدخل كلمة المرور مرة أخرى:");
@@ -399,53 +347,65 @@
         }
     };
 
-    // *** الكود الجديد لدالة تصدير الإكسل ***
+    // *** دالة تصدير متقدمة مع تنسيقات وألوان وحدود ***
     window.exportToExcel = function() {
-        if(!window.allStats) {
-            alert("انتظر تحميل البيانات أولاً");
-            return;
-        }
+        if(!window.allStats) { alert("انتظر تحميل البيانات أولاً"); return; }
         const firebaseKeys = places;
-        const header = [
-            "م", "المكان", "العدد الكلي", "نصابة", "تفاصيل المناديب", "أول إدخال", "آخر إدخال", "المدة"
-        ];
-        const rows = [];
+        let styles = `
+            <style>
+                table {border-collapse:collapse; width:100%; font-family:'Cairo',sans-serif;}
+                th {background:#f1f2f6; color:#0072ff; font-weight:bold; border:2px solid #0072ff; padding:10px;}
+                td {border:1px solid #00c6ff; padding:10px;}
+                .rep-cell {color:#0984e3;}
+                .nassaba-cell {color:#ff4757; font-weight:bold;}
+            </style>
+        `;
+        let header = `<th>م</th><th>المكان</th><th>العدد الكلي</th><th>نصابة</th><th>تفاصيل المناديب</th><th>أول إدخال</th><th>آخر إدخال</th><th>المدة</th>`;
+        let rows = '';
         firebaseKeys.forEach((key, idx) => {
             const p = window.allStats[key] || {count:0, nassabaList:[], reps:{}, times:[]};
-            let minTime = p.times.length ? new Date(Math.min(...p.times.map(t=>new Date(t)))) : null;
-            let maxTime = p.times.length ? new Date(Math.max(...p.times.map(t=>new Date(t)))) : null;
-            let diff = (minTime && maxTime) ? ((maxTime - minTime) / 60000) : null;
+            let minTime = p.times.length ? new Date(Math.min(...p.times.map(t=>new Date(t)))).toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'}) : '-';
+            let maxTime = p.times.length ? new Date(Math.max(...p.times.map(t=>new Date(t)))).toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'}) : '-';
+            let diff = (minTime!='-' && maxTime!='-') ? ((new Date(maxTime) - new Date(minTime))/60000) : null;
             let duration = (diff!==null) ? `${Math.floor(diff/60)} س ${Math.floor(diff%60).toString().padStart(2,'0')} د` : '-';
             let repDetails = Object.entries(p.reps)
-              .sort((a,b)=>b[1].length-a[1].length)
-              .map(([n,v])=>`${n} (${v.length})`).join("\n");
-            rows.push([
-                idx+1,
-                firebaseKeys[idx],
-                p.count,
-                p.nassabaList.length,
-                repDetails,
-                minTime ? minTime.toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'}) : '-',
-                maxTime ? maxTime.toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'}) : '-',
-                duration
-            ]);
+                .sort((a,b)=>b[1].length-a[1].length)
+                .map(([n,v])=>`<div class="rep-cell">${n} (${v.length})</div>`).join(" ");
+            let nassabaClass = p.nassabaList.length > 0 ? 'nassaba-cell' : '';
+            rows += `<tr>
+                <td style="font-weight:bold;">${idx+1}</td>
+                <td style="background:#f1f2f6; color:#0072ff;">${firebaseKeys[idx]}</td>
+                <td style="font-weight:bold; background:#e0f7fa;">${p.count}</td>
+                <td class="${nassabaClass}" style="background:#ffeaea;">${p.nassabaList.length}</td>
+                <td style="background:#fffbe6;">${repDetails||'-'}</td>
+                <td>${minTime}</td>
+                <td>${maxTime}</td>
+                <td style="font-weight:bold;">${duration}</td>
+            </tr>`;
         });
-
-        let csv = '\uFEFF' + header.join(',') + '\n' +
-            rows.map(r => r.map(cell =>
-                '"' + String(cell).replace(/"/g, '""').replace(/\n/g, ' / ') + '"'
-            ).join(',')).join('\n');
-
-        let blob = new Blob([csv], {type: 'text/csv'});
-        let link = document.createElement("a");
+        let excelFile = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+              xmlns:x="urn:schemas-microsoft-com:office:excel" 
+              xmlns="http://www.w3.org/TR/REC-html40">
+          <head>
+            <meta charset="UTF-8">${styles}
+          </head>
+          <body dir="rtl">
+            <table>
+              <thead><tr>${header}</tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </body>
+        </html>`;
+        var blob = new Blob([excelFile], { type: 'application/vnd.ms-excel' });
+        var link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "Live_Report.csv";
+        link.download = "Live_Report.xls";
         link.click();
     }
   </script>
 
   <script>
-    // الدوال المساعدة للواجهة
     function checkPassword() {
         if (document.getElementById('passwordInput').value === '521988') {
             document.getElementById('loginScreen').style.display = 'none';
@@ -457,15 +417,12 @@
     }
     window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; }
     window.onclick = function(e) { if(e.target.classList.contains('modal')) e.target.style.display='none'; }
-    
     window.showRepStat = function(name, count) {
         document.getElementById('modalRepName').innerText = name;
         document.getElementById('modalRepCount').innerText = count;
         document.getElementById('repModal').style.display = 'flex';
     }
-
     window.showNassabaDetails = function(placeKey) {
-        // نفس كود عرض النصابة
         const places = [
             "المنزلة الجديدة 1 - كريم المرور", "المنزلة الجديدة 2 - شريف التأمين الصحي", "بحر البلد شارع الكابتن - شريف العزازي", "مدرسة عبد العال شلبياية - اشرف الأباصيري", "مصنع البصل - فؤاد حال", "الكفر 1 - علي شطا", "الكفر 2 تحت السكة - عادل جلال", "سوق الجملة - السعيد شطا- على البياع", "الفداء 1 - عمر الكيال", "الفداء 2 - حماده الكيال", "الحمزاوي - حماده السري", "الجرن 1 - بوجي البرعي", "الجرن 2 - إبراهيم فهيد", "البر الثاني حي السلام - يحيى حبق", "حي الأعجام - حماده ابو رشاد", "العزبة منشية ناصر -حسان عطية", "الطويل - أحمد عبد العظيم", "البر الثاني 2 الهاويس - إبراهيم عبد المجيد", "الفقاعي - محمد حبيب", "بحر البلد 2 - السيد حراز", "حي الجبانة - سعد الشلودي", "الكفر 3 بجوار ملعب برشلونة - محمد البداية", "أبو رشاد مقهى أبو سليمان - محمد رشاد", "حي الزهراء - رشاد عبد الوهاب", "بحر البلد 3 - منصور البدري", "حي السلموني - حسن المناخلى", "حى مزلفان العلمي -أبوعلاء", "حي البصله حمود-عبد الحميد", "حى الجرن 3 -قهوة النجدي محمد النجدي"
         ];
