@@ -105,7 +105,7 @@
   <div id="loginScreen">
     <div class="login-box">
       <h2>محمية بكلمة مرور</h2>
-      <p>أدخل الرمز (521988)</p>
+      <p>أدخل الرمز</p>
       <input type="password" id="passwordInput" placeholder="******">
       <button class="login-btn" onclick="checkPassword()">دخول</button>
       <p id="errorMsg" style="color:red; display:none; margin-top:10px;">خطأ في الكود</p>
@@ -387,7 +387,7 @@
     // بقية الدوال
     window.resetData = async function() {
         if(confirm("تحذير هام:\nهل أنت متأكد من تصفير العدادات وحذف المستخدمين والنصابة؟")) {
-            const userPass = prompt("للتأكيد، أدخل كلمة المرور مرة أخرى (521988):");
+            const userPass = prompt("للتأكيد، أدخل كلمة المرور مرة أخرى:");
             if(userPass === "521988"){
                 try {
                     await remove(ref(db)); 
