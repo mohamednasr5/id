@@ -399,31 +399,92 @@
         }
     };
 
-    window.exportToExcel = function() {
+   window.exportToExcel = function() {
         if(!window.allStats) { alert("انتظر تحميل البيانات أولاً"); return; }
-        let header = `<th style="border:1px solid #000;">م</th><th style="border:1px solid #000;">المكان</th><th style="border:1px solid #000;">العدد الكلي</th><th style="border:1px solid #000;">نصابة</th><th style="border:1px solid #000;">تفاصيل المناديب</th><th style="border:1px solid #000;">أول إدخال</th><th style="border:1px solid #000;">آخر إدخال</th><th style="border:1px solid #000;">المدة</th>`;
-        let rows = '';
-        firebaseKeys.forEach((key, index) => {
+        
+        // استخدام المتغير العام places بدلاً من firebaseKeys
+        const keysToExport = places; 
+
+        // رأس ملف الإكسل مع تنسيقات CSS لتحسين المظهر ودعم الاتجاه
+        let tableHeader = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body { font-family: 'Cairo', Arial, sans-serif; }
+                table { border-collapse: collapse; width: 100%; direction: rtl; }
+                td, th { border: 1px solid #000; text-align: center; padding: 5px; vertical-align: middle; }
+                th { background-color: #f1f2f6; color: #0072ff; font-weight: bold; }
+                .text-left { text-align: left; }
+                .text-right { text-align: right; }
+            </style>
+        </head>
+        <body dir="rtl">
+            <table>
+                <thead>
+                    <tr>
+                        <th>م</th>
+                        <th>المكان</th>
+                        <th>العدد الكلي</th>
+                        <th style="color:red">نصابة</th>
+                        <th style="width: 300px;">تفاصيل المناديب</th>
+                        <th>أول إدخال</th>
+                        <th>آخر إدخال</th>
+                        <th>المدة</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+        let tableRows = '';
+        
+        keysToExport.forEach((key, index) => {
             let p = window.allStats[key] || {count:0, nassabaList:[], reps:{}, times:[]};
-            let minTime = p.times.length ? new Date(Math.min(...p.times.map(t=>new Date(t)))).toLocaleTimeString('ar-EG') : '-';
-            let maxTime = p.times.length ? new Date(Math.max(...p.times.map(t=>new Date(t)))).toLocaleTimeString('ar-EG') : '-';
-            let diff = (minTime!='-' && maxTime!='-') ? ((new Date(Math.max(...p.times.map(t=>new Date(t)))) - new Date(Math.min(...p.times.map(t=>new Date(t)))))/60000) : null;
-            let duration = (diff!==null)? `${Math.floor(diff/60)}:${Math.floor(diff%60)}`:'-';
             
-            // ترتيب المناديب في الإكسل أيضاً
+            // معالجة التوقيتات
+            let times = p.times.map(t => new Date(t));
+            let minTime = times.length ? new Date(Math.min(...times)).toLocaleTimeString('ar-EG') : '-';
+            let maxTime = times.length ? new Date(Math.max(...times)).toLocaleTimeString('ar-EG') : '-';
+            
+            let diff = (times.length > 0) ? ((new Date(Math.max(...times)) - new Date(Math.min(...times)))/60000) : null;
+            let duration = (diff !== null) ? `${Math.floor(diff/60)}:${Math.floor(diff%60).toString().padStart(2, '0')}` : '-';
+            
+            // ترتيب وتنسيق المناديب (استخدام فاصل أسطر خاص بالإكسيل)
             let repString = "";
-            Object.entries(p.reps).sort((a,b)=>b[1].length-a[1].length).forEach(([name, times]) => { repString += `${name} (${times.length}) \n`; });
+            Object.entries(p.reps)
+                .sort((a,b) => b[1].length - a[1].length)
+                .forEach(([name, arr]) => { 
+                    // mso-data-placement:same-cell يجعل السطر الجديد داخل نفس الخلية
+                    repString += `${name} (${arr.length}) <br style="mso-data-placement:same-cell;" />`; 
+                });
             
-            rows += `<tr><td style="border:1px solid #000;">${index+1}</td><td style="border:1px solid #000;">${places[index]}</td><td style="border:1px solid #000;">${p.count}</td><td style="border:1px solid #000;">${p.nassabaList.length}</td><td style="border:1px solid #000; white-space:pre-wrap;">${repString}</td><td style="border:1px solid #000;">${minTime}</td><td style="border:1px solid #000;">${maxTime}</td><td style="border:1px solid #000;">${duration}</td></tr>`;
+            tableRows += `
+                <tr>
+                    <td>${index+1}</td>
+                    <td style="font-weight:bold;">${places[index]}</td>
+                    <td>${p.count}</td>
+                    <td>${p.nassabaList.length}</td>
+                    <td class="text-right" style="white-space:normal;">${repString}</td>
+                    <td>${minTime}</td>
+                    <td>${maxTime}</td>
+                    <td>${duration}</td>
+                </tr>`;
         });
-        let excelFile = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body dir="rtl"><table><thead><tr>${header}</tr></thead><tbody>${rows}</tbody></table></body></html>`;
-        var blob = new Blob([excelFile], { type: 'application/vnd.ms-excel' });
+
+        let tableFooter = `</tbody></table></body></html>`;
+        let fullHTML = tableHeader + tableRows + tableFooter;
+
+        // ** هام جداً: إضافة BOM (\uFEFF) لدعم اللغة العربية **
+        var blob = new Blob(['\uFEFF', fullHTML], { type: 'application/vnd.ms-excel;charset=utf-8' });
+        
         var link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "Live_Report.xls";
+        // اسم الملف يتضمن التاريخ
+        link.download = `Report_${new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}.xls`;
+        
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
     }
-  </script>
 
   <script>
     // الدوال المساعدة للواجهة
