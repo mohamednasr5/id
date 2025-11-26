@@ -225,16 +225,31 @@
     .hidden { display: none; }
     .fade-in { animation: fadeIn 0.5s forwards; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* --- عداد الإدخالات اليومي --- */
+    .counter-box {
+      background: #f0f7ff;
+      color: #0072ff;
+      font-weight: bold;
+      font-size: 18px;
+      border-radius: 15px;
+      padding: 10px 25px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 12px rgba(0,114,255,0.05);
+      text-align: center;
+    }
+    .counter-label {
+      font-size: 12px;
+      color: #444;
+      margin-top: 3px;
+      font-weight: normal;
+    }
   </style>
 </head>
 <body>
-
   <audio id="errorSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
-
-  <ul class="circles"><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li></ul>
-
+  <ul class="circles"><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li></ul>
   <div class="container">
-    
     <div class="card" id="auth-card">
       <h2>تسجيل دخول المندوب</h2>
       <div class="input-group">
@@ -244,33 +259,31 @@
       <button class="btn" id="loginBtn" onclick="login()"><span>دخول</span></button>
       <div id="login-msg" class="msg"></div>
     </div>
-
     <div class="card hidden" id="main-card">
       <h2 id="welcome">مرحبًا</h2>
-      
+      <div class="counter-box" id="entryCounterBox">
+        عدد الإدخالات اليوم: <span id="entryCounter">0</span>
+        <div class="counter-label">يتم تصفير العداد تلقائياً كل 24 ساعة</div>
+      </div>
       <div class="input-group">
         <input id="repName" type="text" autocomplete="off" list="repNamesHistory" maxlength="30" placeholder=" ">
         <datalist id="repNamesHistory"></datalist>
         <label for="repName">اسم المندوب</label>
       </div>
-      
       <div class="input-group" style="margin-bottom: 5px;">
         <input id="natID" type="tel" maxlength="14" placeholder=" " autocomplete="off">
         <label for="natID">الرقم القومي (14 رقم)</label>
       </div>
-
       <div class="id-card-visual-container">
         <img src="https://raw.githubusercontent.com/mohamednasr5/id/e83438329b0f009f6eebf61b2797496d744589f2/5.png" alt="مثال للبطاقة" class="id-card-img">
       </div>
-      
       <button class="btn" onclick="addUser()">إضافة</button>
       <div id="add-msg" class="msg"></div>
       <button class="btn btn-secondary" onclick="showStatsLogin()">لوحة الإدارة / الإحصائيات</button>
       <div style="margin-top:5px; text-align:center;">
-          <small style="color:#777; cursor:pointer;" onclick="logout()">تسجيل خروج</small>
+        <small style="color:#777; cursor:pointer;" onclick="logout()">تسجيل خروج</small>
       </div>
     </div>
-
     <div class="card hidden" id="stats-auth-card">
       <h2>صلاحية المدير</h2>
       <p style="text-align: center; color: #666; margin-bottom: 20px;">أدخل كلمة مرور الإدارة </p>
@@ -282,7 +295,6 @@
       <div id="stats-msg" class="msg"></div>
       <button class="btn btn-danger" onclick="cancelStats()">إلغاء وعودة</button>
     </div>
-
     <div class="card hidden" id="admin-panel-card">
         <h2>لوحة التحكم</h2>
         
@@ -292,16 +304,12 @@
         <p style="font-size:11px; color:#666; text-align:right;">المسموح: 3 أجهزة لكل كود</p>
         <div class="admin-list-container" id="activeSessionsList">
             </div>
-
         <h3>إدارة أسماء المناديب (Local)</h3>
         <div class="admin-list-container" id="adminRepList">
         </div>
-
         <button class="btn btn-danger" onclick="closeAdminPanel()">خروج من اللوحة</button>
     </div>
-
   </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getDatabase, ref, set, get, child, push, remove, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
@@ -353,11 +361,9 @@
 
     let userPlace = null, userPlaceIdx = null, userID = null;
     
-    // --- Device ID Logic ---
     function getDeviceId() {
         let id = localStorage.getItem('app_device_id');
         if (!id) {
-            // Generate a random ID if not exists
             id = 'dev_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
             localStorage.setItem('app_device_id', id);
         }
@@ -365,7 +371,6 @@
     }
     const currentDeviceId = getDeviceId();
 
-    // --- Rep Names Local Storage Logic ---
     function loadRepNames() {
         const stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
         const datalist = document.getElementById('repNamesHistory');
@@ -376,7 +381,6 @@
             datalist.appendChild(opt);
         });
     }
-
     function saveRepName(name) {
         if(!name) return;
         let stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
@@ -386,18 +390,14 @@
             loadRepNames(); 
         }
     }
-
-    // --- Admin: Render Local Reps ---
     function renderAdminRepList() {
         const container = document.getElementById('adminRepList');
         const stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
         container.innerHTML = '';
-
         if (stored.length === 0) {
             container.innerHTML = '<div class="empty-list">لا توجد أسماء محفوظة حالياً</div>';
             return;
         }
-
         stored.forEach(name => {
             const div = document.createElement('div');
             div.className = 'rep-item';
@@ -408,7 +408,6 @@
             container.appendChild(div);
         });
     }
-
     window.deleteRepName = function(nameToDelete) {
         if(confirm(`هل أنت متأكد من حذف المندوب "${nameToDelete}" من قائمة الاقتراحات؟`)) {
             let stored = JSON.parse(localStorage.getItem('saved_rep_names') || '[]');
@@ -418,13 +417,10 @@
             loadRepNames(); 
         }
     }
-    
     window.closeAdminPanel = function() {
         document.getElementById('admin-panel-card').classList.add('hidden');
         document.getElementById('main-card').classList.remove('hidden');
     }
-
-    // --- LOGIN Logic with 3 Device Limit ---
     window.login = async function() {
       const btn = document.getElementById('loginBtn');
       const msgDiv = document.getElementById('login-msg');
@@ -446,19 +442,13 @@
       btn.disabled = true; btn.innerText = 'جاري التحقق...';
 
       try {
-          // Check Active Sessions in Firebase
           const sessionsRef = ref(db, `active_sessions/${codeInput}`);
           const snapshot = await get(sessionsRef);
           let currentSessions = snapshot.val() || {};
           let deviceCount = Object.keys(currentSessions).length;
           
-          // If this device is already registered, allow. 
-          // If not registered but count < 3, allow and register.
-          // Else reject.
-          
           if (currentSessions[currentDeviceId]) {
-              // Already logged in on this device, proceed
-              await registerSession(codeInput); // Refresh timestamp
+              await registerSession(codeInput);
               proceedLogin(idx, codeInput);
           } else {
               if (deviceCount >= 3) {
@@ -467,7 +457,6 @@
                   btn.disabled = false; btn.innerText = 'دخول';
                   return;
               } else {
-                  // Register new device
                   await registerSession(codeInput);
                   proceedLogin(idx, codeInput);
               }
@@ -479,7 +468,6 @@
           btn.disabled = false; btn.innerText = 'دخول';
       }
     }
-
     async function registerSession(code) {
         const sessionData = {
             loginTime: new Date().toISOString(),
@@ -488,49 +476,67 @@
         await set(ref(db, `active_sessions/${code}/${currentDeviceId}`), sessionData);
     }
 
+    // --- كود عداد الإدخالات اليومي LOCALSTORAGE ---
+    function loadEntryCounter() {
+      const counterBox = document.getElementById('entryCounterBox');
+      const counterEl = document.getElementById('entryCounter');
+      let entryData = JSON.parse(localStorage.getItem('daily_entry_counter') || '{}');
+      const todayStr = new Date().toISOString().substr(0,10);
+      if (!entryData.date || entryData.date !== todayStr || Date.now() - (entryData.ts || 0) > 24*60*60*1000) {
+        entryData = { date: todayStr, count: 0, ts: Date.now() };
+        localStorage.setItem('daily_entry_counter', JSON.stringify(entryData));
+      }
+      counterEl.textContent = entryData.count;
+    }
+    function incrementEntryCounter() {
+      let entryData = JSON.parse(localStorage.getItem('daily_entry_counter') || '{}');
+      const todayStr = new Date().toISOString().substr(0,10);
+      if (!entryData.date || entryData.date !== todayStr || Date.now() - (entryData.ts || 0) > 24*60*60*1000) {
+        entryData = { date: todayStr, count: 1, ts: Date.now() };
+      } else {
+        entryData.count = (entryData.count || 0) + 1;
+        entryData.ts = Date.now();
+      }
+      localStorage.setItem('daily_entry_counter', JSON.stringify(entryData));
+      document.getElementById('entryCounter').textContent = entryData.count;
+    }
+    window.logout = function() {
+        location.reload();
+    }
+
+    // هذه النسخة الكاملة من proceedLogin فيها استدعاء عداد الإدخالات
     function proceedLogin(idx, codeInput) {
       userPlace = places[idx];
       userPlaceIdx = idx + 1;
       userID = codeInput;
-
       const authCard = document.getElementById('auth-card');
       const mainCard = document.getElementById('main-card');
       authCard.style.opacity = '0';
       authCard.style.transform = 'translateY(-20px)';
-      
       setTimeout(() => {
         authCard.classList.add('hidden');
         mainCard.classList.remove('hidden');
         mainCard.classList.add('fade-in');
         document.getElementById('welcome').textContent = `مرحبًا في ${userPlace}`;
         loadRepNames(); 
-        
-        // Start monitoring session (To be kicked if admin deletes)
+        loadEntryCounter(); // تحميل عداد الإدخالات
         monitorSession(codeInput);
-        
       }, 400);
-      
-      // Reset button
       const btn = document.getElementById('loginBtn');
       btn.disabled = false; btn.innerText = 'دخول';
     }
 
-    // --- Monitor Session (Kick Listener) ---
     function monitorSession(code) {
         const mySessionRef = ref(db, `active_sessions/${code}/${currentDeviceId}`);
         onValue(mySessionRef, (snapshot) => {
             if (!snapshot.exists() && userID === code) {
-                // Admin deleted this session!
                 alert("تم تسجيل خروجك من قبل الإدارة.");
                 logout();
             }
         });
     }
 
-    window.logout = function() {
-        location.reload();
-    }
-
+    // كود إضافة المستخدم + تحديث العداد فقط عند الإضافة الناجحة
     window.addUser = async function() {
       const btn = event.target;
       const originalText = btn.innerText;
@@ -544,20 +550,15 @@
       if (name.length < 2) {
         msg.textContent = 'يرجى إدخال اسم المندوب'; msg.className += ' error'; return;
       }
-      
       if (!/^\d{14}$/.test(natid)) {
         msg.textContent = 'يرجى إدخال الـ 14 رقم للرقم القومي بشكل صحيح.'; msg.className += ' error'; return;
       }
-
       btn.disabled = true; btn.innerText = 'جاري الإضافة...';
-
       try {
         const snapshot = await get(child(ref(db), 'users/' + natid));
-        
         if (snapshot.exists()) {
           let data = snapshot.val();
           document.getElementById('errorSound').play().catch(e => console.log('Audio play blocked'));
-
           msg.className = 'duplicate-box';
           msg.innerHTML = `
             <span>⚠️ تنبيه تكرار!</span>
@@ -567,7 +568,6 @@
              بواسطة <b style="color:#d32f2f; font-size:15px;">${data.repName}</b>
             </div>
           `;
-
           const duplicateData = {
               duplicatedID: natid,
               attemptByRep: name,
@@ -579,7 +579,6 @@
           };
           await push(ref(db, 'duplicates'), duplicateData);
           saveRepName(name);
-
         } else {
           const now = new Date();
           let payload = {
@@ -588,11 +587,11 @@
           };
           await set(ref(db, 'users/' + natid), payload);
           saveRepName(name);
-
           msg.className += ' success';
           msg.textContent = "تمت الإضافة بنجاح.";
           document.getElementById('natID').value = '';
           document.getElementById('natID').focus();
+          incrementEntryCounter(); // زيادة العداد بعد الإضافة الناجحة فقط
         }
       } catch (error) {
         msg.className = 'msg error';
@@ -619,36 +618,28 @@
         mainCard.classList.remove('hidden');
         mainCard.classList.add('fade-in');
     }
-    
-    // --- ADMIN Logic ---
     window.verifyStats = function() {
         const pass = document.getElementById('statsPass').value;
         const msg = document.getElementById('stats-msg');
-        
-        if(pass === '521988') { // NEW PASSWORD
+        if(pass === '521988') {
             msg.className = 'msg success';
             msg.textContent = 'كلمة المرور صحيحة.';
-            
             setTimeout(() => { 
                 document.getElementById('stats-auth-card').classList.add('hidden');
                 const adminPanel = document.getElementById('admin-panel-card');
                 adminPanel.classList.remove('hidden');
                 adminPanel.classList.add('fade-in');
                 renderAdminRepList(); 
-                fetchActiveSessions(); // Load active users
+                fetchActiveSessions();
             }, 500);
-
         } else {
             msg.className = 'msg error';
             msg.textContent = 'كلمة المرور خاطئة!';
         }
     }
-
-    // --- Admin: Active Sessions Management ---
     function fetchActiveSessions() {
         const container = document.getElementById('activeSessionsList');
         container.innerHTML = '<div style="text-align:center;">جاري التحميل...</div>';
-        
         const sessionsRef = ref(db, 'active_sessions');
         onValue(sessionsRef, (snapshot) => {
             container.innerHTML = '';
@@ -656,21 +647,16 @@
                 container.innerHTML = '<div class="empty-list">لا توجد جلسات نشطة</div>';
                 return;
             }
-            
             const allSessions = snapshot.val();
-            // Iterate codes
             Object.keys(allSessions).forEach(code => {
                 const devices = allSessions[code];
                 const codeHeader = document.createElement('div');
                 codeHeader.style.cssText = "background:#eee; padding:5px; margin-top:5px; font-weight:bold; font-size:12px;";
                 codeHeader.textContent = `الكود: ${code} (عدد الأجهزة: ${Object.keys(devices).length})`;
                 container.appendChild(codeHeader);
-
-                // Iterate devices per code
                 Object.keys(devices).forEach(deviceId => {
                    const devData = devices[deviceId];
                    const dateStr = new Date(devData.loginTime).toLocaleTimeString('ar-EG');
-                   
                    const div = document.createElement('div');
                    div.className = 'session-item';
                    div.innerHTML = `
@@ -686,18 +672,15 @@
             });
         });
     }
-
     window.kickUser = async function(code, deviceId) {
         if(confirm('هل أنت متأكد من طرد هذا الجهاز؟ سيتم تسجيل خروجه فوراً.')) {
             try {
                 await remove(ref(db, `active_sessions/${code}/${deviceId}`));
-                // The listener on the user's device will handle the logout
             } catch(e) {
                 alert("حدث خطأ أثناء الطرد");
             }
         }
     }
-
   </script>
 </body>
 </html>
