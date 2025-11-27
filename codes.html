@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>إضافة أكواد الدخول</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    h1 {
+      color: #0072ff;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    button {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 15px;
+      transition: transform 0.3s ease;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    #status {
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: bold;
+      display: none;
+    }
+    #status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+    #status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+    #log {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 14px;
+      font-family: monospace;
+    }
+    .log-item {
+      padding: 5px;
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>⚙️ إضافة أكواد الدخول (800801 - 800829)</h1>
+    
+    <button id="addCodesBtn" onclick="addLoginCodes()">
+      إضافة جميع الأكواد إلى Firebase
+    </button>
+    
+    <button onclick="viewCodes()" style="background: linear-gradient(135deg, #43cea2, #185a9d);">
+      عرض الأكواد الحالية
+    </button>
+    
+    <div id="status"></div>
+    <div id="log"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
+      authDomain: "idmanazla.firebaseapp.com",
+      databaseURL: "https://idmanazla-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "idmanazla",
+      storageBucket: "idmanazla.firebasestorage.app",
+      messagingSenderId: "408446131276",
+      appId: "1:408446131276:web:976ae54181b5398de5a8e9"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const places = [
+      "المنزلة الجديدة 1 - كريم المرور",
+      "المنزلة الجديدة 2 - شريف التأمين الصحي",
+      "بحر البلد شارع الكابتن - شريف العزازي",
+      "مدرسة عبد العال شلبياية - اشرف الأباصيري",
+      "مصنع البصل - فؤاد حال",
+      "الكفر 1 - علي شطا",
+      "الكفر 2 تحت السكة - عادل جلال",
+      "سوق الجملة - السعيد شطا- على البياع",
+      "الفداء 1 - عمر الكيال",
+      "الفداء 2 - حماده الكيال",
+      "الحمزاوي - حماده السري",
+      "الجرن 1 - بوجي البرعي",
+      "الجرن 2 - إبراهيم فهيد",
+      "البر الثاني حي السلام - يحيى حبق",
+      "حي الأعجام - حماده ابو رشاد",
+      "العزبة منشية ناصر -حسان عطية",
+      "الطويل - أحمد عبد العظيم",
+      "البر الثاني 2 الهاويس - إبراهيم عبد المجيد",
+      "الفقاعي - محمد حبيب",
+      "بحر البلد 2 - السيد حراز",
+      "حي الجبانة - سعد الشلودي",
+      "الكفر 3 بجوار ملعب برشلونة - محمد البداية",
+      "أبو رشاد مقهى أبو سليمان - محمد رشاد",
+      "حي الزهراء - رشاد عبد الوهاب",
+      "بحر البلد 3 - منصور البدري",
+      "حي السلموني - حسن المناخلى",
+      "حى مزلفان العلمي -أبوعلاء",
+      "حي البصله حمود-عبد الحميد",
+      "حى الجرن 3 -قهوة النجدي محمد النجدي"
+    ];
+
+    function addLog(message, isError = false) {
+      const logDiv = document.getElementById('log');
+      const logItem = document.createElement('div');
+      logItem.className = 'log-item';
+      logItem.style.color = isError ? '#dc3545' : '#28a745';
+      logItem.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+      logDiv.appendChild(logItem);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    window.addLoginCodes = async function() {
+      const btn = document.getElementById('addCodesBtn');
+      const status = document.getElementById('status');
+      const logDiv = document.getElementById('log');
+      
+      btn.disabled = true;
+      btn.textContent = 'جاري الإضافة...';
+      status.className = '';
+      status.style.display = 'none';
+      logDiv.innerHTML = '';
+
+      try {
+        addLog('بدء عملية إضافة الأكواد...');
+        
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (let i = 0; i < places.length; i++) {
+          const code = String(800801 + i);
+          const place = places[i];
+          const placeIdx = i + 1;
+
+          try {
+            await set(ref(db, `login_codes/${code}`), {
+              place: place,
+              placeIdx: placeIdx
+            });
+            
+            addLog(`✅ تم إضافة الكود ${code} - ${place}`);
+            successCount++;
+            
+            // تأخير صغير لتجنب الضغط على Firebase
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+          } catch (error) {
+            addLog(`❌ خطأ في إضافة ${code}: ${error.message}`, true);
+            errorCount++;
+          }
+        }
+
+        addLog(`\n✨ اكتملت العملية: ${successCount} نجح، ${errorCount} فشل`);
+        
+        status.className = 'success';
+        status.textContent = `✅ تم إضافة ${successCount} كود بنجاح!`;
+        status.style.display = 'block';
+
+      } catch (error) {
+        addLog(`❌ خطأ عام: ${error.message}`, true);
+        status.className = 'error';
+        status.textContent = '❌ حدث خطأ: ' + error.message;
+        status.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'إضافة جميع الأكواد إلى Firebase';
+      }
+    };
+
+    window.viewCodes = async function() {
+      const logDiv = document.getElementById('log');
+      logDiv.innerHTML = '<div class="log-item">جاري تحميل الأكواد...</div>';
+
+      try {
+        const snapshot = await get(ref(db, 'login_codes'));
+        
+        if (!snapshot.exists()) {
+          addLog('⚠️ لا توجد أكواد في قاعدة البيانات', true);
+          return;
+        }
+
+        const codes = snapshot.val();
+        logDiv.innerHTML = '<div class="log-item" style="font-weight:bold;background:#e7f3ff;">الأكواد الموجودة حالياً:</div>';
+        
+        Object.keys(codes).sort().forEach(code => {
+          addLog(`🔑 ${code} → ${codes[code].place}`);
+        });
+
+      } catch (error) {
+        addLog(`❌ خطأ في عرض الأكواد: ${error.message}`, true);
+      }
+    };
+  </script>
+</body>
+</html>
