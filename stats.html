@@ -266,6 +266,11 @@
       background: linear-gradient(135deg, var(--info), #2980b9);
       color: white;
     }
+
+    .btn-message {
+      background: linear-gradient(135deg, #9b59b6, #8e44ad);
+      color: white;
+    }
     
     .container {
       max-width: 1400px;
@@ -631,6 +636,138 @@
       padding: 30px;
       color: #999;
     }
+
+    /* Modal الرسائل */
+    .message-modal-content {
+      max-width: 700px;
+    }
+
+    .message-form {
+      margin-bottom: 25px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 8px;
+      font-size: 0.95em;
+    }
+
+    .form-select, .form-textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 15px rgba(0, 114, 255, 0.2);
+    }
+
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .char-counter {
+      text-align: left;
+      color: #999;
+      font-size: 0.85em;
+      margin-top: 5px;
+    }
+
+    .send-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #9b59b6, #8e44ad);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 25px rgba(155, 89, 182, 0.3);
+    }
+
+    .send-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(155, 89, 182, 0.4);
+    }
+
+    .send-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .messages-history {
+      margin-top: 30px;
+      border-top: 2px solid var(--light);
+      padding-top: 20px;
+    }
+
+    .history-title {
+      font-size: 1.2em;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 15px;
+    }
+
+    .message-item {
+      background: #f8f9fa;
+      border-right: 4px solid var(--primary);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .message-item:hover {
+      background: #e9ecef;
+      transform: translateX(-5px);
+    }
+
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.85em;
+      color: #666;
+    }
+
+    .message-target {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .message-time {
+      color: #999;
+    }
+
+    .message-text {
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    .no-messages {
+      text-align: center;
+      color: #999;
+      padding: 30px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
     
     .loader {
       display: flex;
@@ -778,6 +915,7 @@
       </div>
       
       <div class="header-controls">
+        <button class="btn btn-message" onclick="openMessageModal()">📨 إرسال رسالة جماعية</button>
         <button class="btn btn-success" onclick="exportToExcel()">📥 تحميل Excel</button>
         <button class="btn btn-primary" onclick="location.reload()">🔄 تحديث</button>
         <button class="btn btn-info" onclick="resetUsersOnly()">🔄 تصفير الإدخالات فقط</button>
@@ -836,9 +974,54 @@
     </div>
   </div>
 
+  <!-- Modal الرسائل -->
+  <div class="modal" id="messageModal">
+    <div class="modal-content message-modal-content">
+      <div class="modal-header">
+        <div class="modal-title">📨 إرسال رسالة جماعية</div>
+        <button class="close-modal" onclick="closeMessageModal()">×</button>
+      </div>
+      
+      <form class="message-form" onsubmit="sendMessage(event)">
+        <div class="form-group">
+          <label class="form-label">المستلمون:</label>
+          <select class="form-select" id="messageTarget" required>
+            <option value="">اختر المستلمين...</option>
+            <option value="all">جميع المناديب</option>
+            <optgroup label="مناديب حسب المكان:" id="placesOptgroup"></optgroup>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">نص الرسالة:</label>
+          <textarea 
+            class="form-textarea" 
+            id="messageText" 
+            placeholder="اكتب رسالتك هنا..."
+            maxlength="500"
+            oninput="updateCharCount()"
+            required
+          ></textarea>
+          <div class="char-counter" id="charCounter">0 / 500</div>
+        </div>
+        
+        <button type="submit" class="send-btn" id="sendBtn">
+          📤 إرسال الرسالة
+        </button>
+      </form>
+
+      <div class="messages-history">
+        <div class="history-title">📜 سجل الرسائل المرسلة</div>
+        <div id="messagesHistory">
+          <div class="no-messages">لا توجد رسائل مرسلة بعد</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, onValue, remove, set, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
@@ -872,6 +1055,7 @@
     let allData = {};
     let allCards = [];
     let duplicatesData = {};
+    let allRepUsernames = new Set();
 
     // التحقق من كلمة المرور
     window.checkPassword = function() {
@@ -881,6 +1065,7 @@
       if (password === '521988') {
         document.getElementById('loginScreen').classList.add('hidden');
         loadData();
+        loadMessages();
       } else {
         errorMsg.classList.add('show');
         setTimeout(() => {
@@ -1003,6 +1188,7 @@
 
         allData = {};
         duplicatesData = {};
+        allRepUsernames.clear();
         
         places.forEach(place => {
           allData[place] = { entries: 0, duplicates: 0, reps: {}, repDuplicates: {} };
@@ -1019,6 +1205,11 @@
               allData[place].reps[repName] = 0;
             }
             allData[place].reps[repName]++;
+            
+            // جمع أسماء المستخدمين للمناديب
+            if (user.username) {
+              allRepUsernames.add(user.username);
+            }
           }
         });
 
@@ -1043,6 +1234,20 @@
         });
 
         renderDashboard();
+        populatePlacesDropdown();
+      });
+    }
+
+    // تعبئة قائمة الأماكن في dropdown الرسائل
+    function populatePlacesDropdown() {
+      const optgroup = document.getElementById('placesOptgroup');
+      optgroup.innerHTML = '';
+      
+      places.forEach(place => {
+        const option = document.createElement('option');
+        option.value = place;
+        option.textContent = place;
+        optgroup.appendChild(option);
       });
     }
 
@@ -1103,6 +1308,115 @@
       });
     };
 
+    // وظائف الرسائل
+    window.openMessageModal = function() {
+      document.getElementById('messageModal').classList.add('active');
+    };
+
+    window.closeMessageModal = function() {
+      document.getElementById('messageModal').classList.remove('active');
+    };
+
+    window.updateCharCount = function() {
+      const textarea = document.getElementById('messageText');
+      const counter = document.getElementById('charCounter');
+      counter.textContent = `${textarea.value.length} / 500`;
+    };
+
+    window.sendMessage = async function(event) {
+      event.preventDefault();
+      
+      const target = document.getElementById('messageTarget').value;
+      const text = document.getElementById('messageText').value.trim();
+      const sendBtn = document.getElementById('sendBtn');
+      
+      if (!target || !text) {
+        alert('❌ يرجى ملء جميع الحقول');
+        return;
+      }
+
+      sendBtn.disabled = true;
+      sendBtn.textContent = '⏳ جاري الإرسال...';
+
+      try {
+        // حفظ الرسالة في قاعدة البيانات
+        const messageData = {
+          target: target,
+          text: text,
+          timestamp: new Date().toISOString(),
+          sentBy: 'admin',
+          read: false
+        };
+
+        // إضافة الرسالة لجميع المناديب المستهدفين
+        const messagesRef = ref(db, 'messages');
+        await push(messagesRef, messageData);
+
+        // إضافة الرسالة لسجل الرسائل المرسلة
+        const sentMessagesRef = ref(db, 'sentMessages');
+        await push(sentMessagesRef, {
+          ...messageData,
+          sentAt: new Date().toISOString()
+        });
+
+        alert('✅ تم إرسال الرسالة بنجاح!');
+        
+        // إعادة تعيين النموذج
+        document.getElementById('messageText').value = '';
+        document.getElementById('messageTarget').value = '';
+        updateCharCount();
+        
+        loadMessages();
+        
+      } catch (error) {
+        console.error('خطأ في إرسال الرسالة:', error);
+        alert('❌ حدث خطأ في إرسال الرسالة: ' + error.message);
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = '📤 إرسال الرسالة';
+      }
+    };
+
+    // تحميل سجل الرسائل
+    function loadMessages() {
+      const messagesRef = ref(db, 'sentMessages');
+      
+      onValue(messagesRef, (snapshot) => {
+        const messages = snapshot.val();
+        const container = document.getElementById('messagesHistory');
+        
+        if (!messages) {
+          container.innerHTML = '<div class="no-messages">لا توجد رسائل مرسلة بعد</div>';
+          return;
+        }
+
+        const messagesArray = Object.entries(messages)
+          .map(([key, value]) => ({ id: key, ...value }))
+          .sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt));
+
+        container.innerHTML = '';
+        
+        messagesArray.forEach(msg => {
+          const item = document.createElement('div');
+          item.className = 'message-item';
+          
+          const targetText = msg.target === 'all' ? 'جميع المناديب' : msg.target;
+          const date = new Date(msg.sentAt);
+          const formattedDate = date.toLocaleDateString('ar-EG') + ' ' + date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+          
+          item.innerHTML = `
+            <div class="message-header">
+              <span class="message-target">إلى: ${targetText}</span>
+              <span class="message-time">${formattedDate}</span>
+            </div>
+            <div class="message-text">${msg.text}</div>
+          `;
+          
+          container.appendChild(item);
+        });
+      });
+    }
+
     // تصفير إدخالات المناديب فقط (الاحتفاظ بالنصابة)
     window.resetUsersOnly = async function() {
       const password = prompt('⚠️ تحذير: سيتم حذف إدخالات المناديب فقط!\n(سيتم الاحتفاظ بأرقام النصابة للمقارنة)\n\nأدخل كلمة المرور للتأكيد:');
@@ -1110,7 +1424,6 @@
       if (password === '521988') {
         if (confirm('هل أنت متأكد من حذف إدخالات المناديب؟\n\n✅ سيتم الاحتفاظ بأرقام النصابة\n❌ سيتم حذف جميع الإدخالات الصحيحة')) {
           try {
-            // حذف إدخالات المناديب فقط
             await remove(ref(db, 'users'));
             alert('✅ تم تصفير إدخالات المناديب بنجاح\n\n📝 تم الاحتفاظ بأرقام النصابة للمقارنة');
             location.reload();
@@ -1145,6 +1458,12 @@
     document.getElementById('duplicateModal').addEventListener('click', function(e) {
       if (e.target === this) {
         closeModal();
+      }
+    });
+
+    document.getElementById('messageModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeMessageModal();
       }
     });
 
