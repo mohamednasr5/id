@@ -701,12 +701,22 @@ input:not(:placeholder-shown) + label {
     </div>
     
     <!-- لوحة الإدارة -->
-    <div class="card hidden" id="admin-panel-card">
-      <h2>⚙️ لوحة التحكم</h2>
-      <button class="btn btn-warning" onclick="location.href='stats.html'">
-        📊 صفحة الإحصائيات الكاملة
-      </button>
-      <h3>عداد الإدخالات اليوم</h3>
+  <!-- لوحة الإدارة -->
+<div class="card hidden" id="admin-panel-card">
+  <h2>⚙️ لوحة التحكم</h2>
+  <button class="btn btn-warning" onclick="location.href='stats.html'">
+    📊 صفحة الإحصائيات الكاملة
+  </button>
+  
+  <h3>📨 إدارة الرسائل</h3>
+  <div class="admin-controls">
+    <button class="btn btn-info" onclick="viewAllMessages()">عرض الرسائل</button>
+    <button class="btn btn-danger" onclick="deleteAllMessages()">مسح كل الرسائل</button>
+  </div>
+  <div class="admin-list-container" id="adminMessagesList"></div>
+  
+  <h3>عداد الإدخالات اليوم</h3>
+
       <div class="counter-box">
         <span>العدد: <span id="adminEntryCounter">0</span></span>
         <div class="admin-controls">
