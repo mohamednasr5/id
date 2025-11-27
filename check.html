@@ -1,411 +1,247 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Camera, Square, RefreshCw, CheckCircle, AlertCircle, X, Scan } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ماسح البطاقة القومية المصرية</title>
 
-export default function EgyptianIDScanner() {
-  const [scanning, setScanning] = useState(false);
-  const [processing, setProcessing] = useState(false);
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
-  const [capturedImage, setCapturedImage] = useState(null);
-  const [tesseractLoaded, setTesseractLoaded] = useState(false);
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const streamRef = useRef(null);
+<!-- Tesseract -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js"></script>
 
-  // Load Tesseract on component mount
-  useEffect(() => {
-    const loadTesseract = async () => {
-      if (!window.Tesseract) {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js';
-        script.onload = () => setTesseractLoaded(true);
-        script.onerror = () => setError('فشل تحميل مكتبة OCR');
-        document.body.appendChild(script);
-      } else {
-        setTesseractLoaded(true);
-      }
-    };
-    loadTesseract();
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.344.0/font/lucide.css"/>
 
-    return () => {
-      stopCamera();
-    };
-  }, []);
-
-  const startCamera = async () => {
-    try {
-      setError(null);
-      
-      const constraints = {
-        video: {
-          facingMode: { ideal: 'environment' },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
-        }
-      };
-
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-        streamRef.current = stream;
-        setScanning(true);
-      }
-    } catch (err) {
-      console.error('Camera error:', err);
-      setError('لا يمكن الوصول للكاميرا. تأكد من منح الإذن للموقع.');
+<style>
+    body {
+        font-family: "Cairo", sans-serif;
+        margin: 0;
+        background: linear-gradient(135deg, #e8fff1, #e9f4ff, #f3eaff);
+        min-height: 100vh;
     }
-  };
-
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
+    .container {
+        max-width: 650px;
+        margin: auto;
+        background: white;
+        margin-top: 20px;
+        margin-bottom: 40px;
+        border-radius: 25px;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+        overflow: hidden;
     }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
+    header {
+        background: linear-gradient(90deg, #059669, #2563eb, #7c3aed);
+        padding: 20px;
+        color: white;
+        text-align: center;
     }
-    setScanning(false);
-  };
-
-  const captureAndProcess = async () => {
-    if (!videoRef.current || !canvasRef.current) {
-      setError('حدث خطأ في الكاميرا');
-      return;
+    header h1 {
+        margin: 10px 0 0;
+        font-size: 28px;
     }
-
-    if (!tesseractLoaded) {
-      setError('يرجى الانتظار حتى يتم تحميل النظام');
-      return;
+    video {
+        width: 100%;
+        border-radius: 15px;
     }
-
-    setProcessing(true);
-    setError(null);
-
-    try {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      
-      // Set canvas dimensions to match video
-      canvas.width = video.videoWidth || 1920;
-      canvas.height = video.videoHeight || 1080;
-      
-      const ctx = canvas.getContext('2d');
-      
-      // Draw mirrored image
-      ctx.save();
-      ctx.scale(-1, 1);
-      ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
-      ctx.restore();
-
-      // Get image data
-      const imageData = canvas.toDataURL('image/png');
-      setCapturedImage(imageData);
-
-      // Perform OCR
-      const { createWorker } = window.Tesseract;
-      const worker = await createWorker('ara');
-      
-      await worker.setParameters({
-        tessedit_char_whitelist: '0123456789٠١٢٣٤٥٦٧٨٩ ',
-      });
-
-      const { data: { text } } = await worker.recognize(canvas);
-      await worker.terminate();
-
-      // Process extracted text
-      const processedData = processExtractedText(text);
-      setResult(processedData);
-      stopCamera();
-      
-    } catch (err) {
-      console.error('OCR Error:', err);
-      setError('حدث خطأ في معالجة الصورة. حاول مرة أخرى.');
-    } finally {
-      setProcessing(false);
+    button {
+        width: 100%;
+        padding: 18px;
+        border: none;
+        margin-top: 10px;
+        font-size: 20px;
+        font-weight: bold;
+        border-radius: 15px;
+        cursor: pointer;
+        color: white;
     }
-  };
-
-  const processExtractedText = (text) => {
-    // Extract National ID (14 consecutive digits)
-    const nationalIdMatch = text.match(/\d{14}/);
-    
-    // Extract all Arabic numbers
-    const arabicNumbers = text.match(/[٠-٩]+/g) || [];
-    
-    // Extract all English numbers
-    const englishNumbers = text.match(/\d+/g) || [];
-    
-    // Convert Arabic numbers to English
-    const convertArabicToEnglish = (str) => {
-      const arabicNums = '٠١٢٣٤٥٦٧٨٩';
-      const englishNums = '0123456789';
-      return str.split('').map(c => {
-        const idx = arabicNums.indexOf(c);
-        return idx !== -1 ? englishNums[idx] : c;
-      }).join('');
-    };
-
-    // Try to find 14-digit ID in Arabic numbers
-    let nationalId = nationalIdMatch ? nationalIdMatch[0] : null;
-    
-    if (!nationalId) {
-      for (const num of arabicNumbers) {
-        const converted = convertArabicToEnglish(num);
-        if (converted.length === 14) {
-          nationalId = converted;
-          break;
-        }
-      }
+    .start-btn { background: linear-gradient(90deg,#059669,#2563eb); }
+    .scan-btn  { background: #059669; }
+    .cancel-btn{ background: #dc2626; }
+    .result-box {
+        background: #f0fdf4;
+        border: 2px solid #86efac;
+        padding: 15px;
+        margin: 20px 10px;
+        border-radius: 15px;
     }
+    .number {
+        background: #dbeafe;
+        padding: 6px 12px;
+        border-radius: 10px;
+        font-weight: bold;
+        display: inline-block;
+        margin: 4px;
+    }
+</style>
+</head>
 
-    return {
-      rawText: text,
-      nationalId: nationalId,
-      arabicNumbers: arabicNumbers,
-      englishNumbers: englishNumbers,
-      allNumbers: [...new Set([...arabicNumbers, ...englishNumbers])]
-    };
-  };
+<body>
 
-  const handleReset = () => {
-    setCapturedImage(null);
-    setResult(null);
-    setError(null);
-    stopCamera();
-  };
+<div class="container">
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 p-4" dir="rtl">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 p-6 text-white">
-            <div className="flex items-center justify-center gap-3 mb-2">
-              <Scan className="w-10 h-10" />
-              <h1 className="text-3xl font-bold">
-                ماسح البطاقة القومية
-              </h1>
-            </div>
-            <p className="text-center text-emerald-100">
-              مسح مباشر وفوري للأرقام
-            </p>
-          </div>
+    <header>
+        <i class="lucide lucide-scan" style="font-size:40px;"></i>
+        <h1>ماسح البطاقة القومية</h1>
+        <p>يدعم الأرقام العربية والإنجليزية</p>
+    </header>
 
-          {/* Start Screen */}
-          {!scanning && !result && !processing && (
-            <div className="p-8">
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-emerald-100 to-blue-100 rounded-full mb-6 shadow-lg">
-                  <Camera className="w-16 h-16 text-emerald-600" />
-                </div>
-                <h2 className="text-3xl font-bold text-gray-800 mb-3">
-                  ابدأ المسح
-                </h2>
-                <p className="text-gray-600 text-lg">
-                  اضغط على الزر لتشغيل الكاميرا ومسح البطاقة
-                </p>
-              </div>
+    <!-- CAMERA -->
+    <div id="camera-box" style="padding:20px; display:none;">
+        <video id="video" autoplay playsinline muted></video>
 
-              <button
-                onClick={startCamera}
-                disabled={!tesseractLoaded}
-                className="w-full bg-gradient-to-r from-emerald-600 to-blue-600 text-white py-5 rounded-2xl hover:from-emerald-700 hover:to-blue-700 transition-all font-bold text-xl shadow-xl flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Camera className="w-7 h-7" />
-                {tesseractLoaded ? 'تشغيل الكاميرا' : 'جاري التحميل...'}
-              </button>
+        <button class="scan-btn" onclick="captureAndProcess()">
+            <i class="lucide lucide-square"></i> مسح الآن
+        </button>
+        <button class="cancel-btn" onclick="stopCamera()">إلغاء</button>
 
-              <div className="mt-8 p-6 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl border border-blue-200">
-                <h3 className="font-bold text-blue-900 mb-3 text-lg flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5" />
-                  نصائح للحصول على أفضل نتيجة
-                </h3>
-                <ul className="text-sm text-blue-800 space-y-2">
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 font-bold">•</span>
-                    <span>ضع البطاقة في إطار الكاميرا بشكل واضح</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 font-bold">•</span>
-                    <span>استخدم إضاءة جيدة وتجنب الظلال</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 font-bold">•</span>
-                    <span>حافظ على ثبات الكاميرا عند المسح</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 font-bold">•</span>
-                    <span>تأكد من وضوح الأرقام في الكاميرا</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          )}
-
-          {/* Camera View */}
-          {scanning && !processing && (
-            <div className="relative bg-black">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-full"
-                style={{ transform: 'scaleX(-1)' }}
-              />
-              
-              {/* Overlay Guide */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="relative border-4 border-emerald-400 rounded-3xl w-11/12 h-3/4 shadow-2xl">
-                  {/* Corner markers */}
-                  <div className="absolute -top-1 -left-1 w-12 h-12 border-t-8 border-l-8 border-white rounded-tl-3xl"></div>
-                  <div className="absolute -top-1 -right-1 w-12 h-12 border-t-8 border-r-8 border-white rounded-tr-3xl"></div>
-                  <div className="absolute -bottom-1 -left-1 w-12 h-12 border-b-8 border-l-8 border-white rounded-bl-3xl"></div>
-                  <div className="absolute -bottom-1 -right-1 w-12 h-12 border-b-8 border-r-8 border-white rounded-br-3xl"></div>
-                  
-                  {/* Center instruction */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-emerald-500 bg-opacity-90 text-white px-6 py-3 rounded-full font-bold text-lg">
-                    ضع البطاقة هنا
-                  </div>
-                </div>
-              </div>
-
-              {/* Top instruction */}
-              <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg">
-                جهز البطاقة داخل الإطار الأخضر
-              </div>
-
-              {/* Control Buttons */}
-              <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black to-transparent">
-                <div className="flex gap-4 justify-center items-center">
-                  <button
-                    onClick={stopCamera}
-                    className="bg-red-500 hover:bg-red-600 text-white px-8 py-4 rounded-2xl transition-all font-bold text-lg flex items-center gap-3 shadow-xl"
-                  >
-                    <X className="w-6 h-6" />
-                    إلغاء
-                  </button>
-                  
-                  <button
-                    onClick={captureAndProcess}
-                    className="bg-emerald-500 hover:bg-emerald-600 text-white px-12 py-5 rounded-2xl transition-all font-bold text-xl flex items-center gap-3 shadow-2xl transform hover:scale-105"
-                  >
-                    <Square className="w-7 h-7" />
-                    مسح الآن
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Hidden Canvas */}
-          <canvas ref={canvasRef} className="hidden" />
-
-          {/* Processing State */}
-          {processing && (
-            <div className="p-8">
-              {capturedImage && (
-                <div className="mb-6">
-                  <img src={capturedImage} alt="الصورة الممسوحة" className="w-full rounded-2xl shadow-xl" />
-                </div>
-              )}
-              <div className="text-center">
-                <div className="inline-block animate-spin rounded-full h-20 w-20 border-4 border-emerald-500 border-t-transparent mb-4"></div>
-                <p className="text-2xl font-bold text-gray-700">جاري المعالجة...</p>
-                <p className="text-gray-500 mt-2">يتم التعرف على الأرقام</p>
-              </div>
-            </div>
-          )}
-
-          {/* Error State */}
-          {error && !processing && (
-            <div className="p-8">
-              <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 flex items-start gap-4 mb-6">
-                <AlertCircle className="w-8 h-8 text-red-500 flex-shrink-0" />
-                <div>
-                  <p className="text-red-900 font-bold text-lg">حدث خطأ</p>
-                  <p className="text-red-700 mt-1">{error}</p>
-                </div>
-              </div>
-              <button
-                onClick={handleReset}
-                className="w-full bg-red-500 hover:bg-red-600 text-white py-4 rounded-2xl transition-colors font-bold text-lg"
-              >
-                حاول مرة أخرى
-              </button>
-            </div>
-          )}
-
-          {/* Results */}
-          {result && !processing && (
-            <div className="p-8">
-              {capturedImage && (
-                <div className="mb-6">
-                  <img
-                    src={capturedImage}
-                    alt="الصورة الممسوحة"
-                    className="w-full rounded-2xl shadow-xl"
-                  />
-                </div>
-              )}
-
-              <div className="bg-gradient-to-br from-emerald-50 to-blue-50 border-2 border-emerald-200 rounded-2xl p-6 mb-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <CheckCircle className="w-8 h-8 text-emerald-600" />
-                  <h3 className="text-2xl font-bold text-emerald-900">تم المسح بنجاح</h3>
-                </div>
-
-                {result.nationalId && (
-                  <div className="mb-4 p-5 bg-white rounded-xl shadow-md border-2 border-emerald-300">
-                    <p className="text-sm text-gray-600 mb-2 font-semibold">الرقم القومي:</p>
-                    <p className="text-3xl font-bold text-emerald-700" dir="ltr">{result.nationalId}</p>
-                  </div>
-                )}
-
-                {result.allNumbers.length > 0 && (
-                  <div className="p-5 bg-white rounded-xl shadow-md">
-                    <p className="text-sm text-gray-600 mb-3 font-semibold">جميع الأرقام المستخرجة:</p>
-                    <div className="flex flex-wrap gap-3">
-                      {result.allNumbers.map((num, idx) => (
-                        <span key={idx} className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-900 px-4 py-2 rounded-xl font-bold shadow-sm">
-                          {num}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {result.rawText && (
-                  <details className="mt-4">
-                    <summary className="cursor-pointer text-gray-600 hover:text-gray-900 font-semibold py-2">
-                      عرض النص الكامل المستخرج
-                    </summary>
-                    <div className="mt-3 p-4 bg-gray-50 rounded-xl text-sm text-gray-700 whitespace-pre-wrap max-h-48 overflow-y-auto border border-gray-200">
-                      {result.rawText}
-                    </div>
-                  </details>
-                )}
-              </div>
-
-              <button
-                onClick={handleReset}
-                className="w-full bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white py-5 rounded-2xl transition-all font-bold text-xl shadow-xl flex items-center justify-center gap-3"
-              >
-                <RefreshCw className="w-6 h-6" />
-                مسح بطاقة جديدة
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="text-center mt-8 text-gray-600">
-          <p className="font-semibold">ماسح ضوئي احترافي للبطاقة القومية المصرية</p>
-          <p className="text-sm mt-1">يدعم الأرقام العربية والإنجليزية</p>
-        </div>
-      </div>
+        <p style="text-align:center; color:#555; margin-top:10px;">
+            ضع البطاقة داخل الكادر بوضوح
+        </p>
     </div>
-  );
+
+    <!-- START SCREEN -->
+    <div id="start-box" style="padding:20px; text-align:center;">
+        <i class="lucide lucide-camera" style="font-size:70px; color:#059669;"></i>
+        <h2>ابدأ المسح</h2>
+        <p>اضغط على الزر لتشغيل الكاميرا</p>
+        <button class="start-btn" onclick="startCamera()">
+            <i class="lucide lucide-camera"></i> تشغيل الكاميرا
+        </button>
+    </div>
+
+    <!-- RESULT -->
+    <div id="result-box" style="display:none; padding:20px;">
+        <h3 style="color:#065f46;">✔ تم استخراج الرقم القومي</h3>
+
+        <div id="national-id-box" class="result-box" style="display:none;">
+            <p style="margin:0; font-size:18px;">الرقم القومي:</p>
+            <p id="nid" style="font-size:30px; font-weight:bold; color:#065f46;"></p>
+        </div>
+
+        <div id="numbers-box" class="result-box" style="display:none;">
+            <p style="margin:0; font-size:16px;">الأرقام المستخرجة:</p>
+            <div id="all-nums"></div>
+        </div>
+
+        <button class="start-btn" onclick="resetScanner()">
+            <i class="lucide lucide-refresh-ccw"></i> مسح بطاقة جديدة
+        </button>
+    </div>
+
+</div>
+
+<canvas id="canvas" style="display:none;"></canvas>
+
+<script>
+let video = document.getElementById("video");
+let canvas = document.getElementById("canvas");
+let stream = null;
+
+function $(id) { return document.getElementById(id); }
+
+function startCamera() {
+    $("#start-box").style.display = "none";
+    $("#camera-box").style.display = "block";
+
+    navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } }
+    }).then(s => {
+        stream = s;
+        video.srcObject = s;
+    }).catch(() => alert("لا يمكن فتح الكاميرا"));
 }
+
+function stopCamera() {
+    if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+    }
+    $("#camera-box").style.display = "none";
+    $("#start-box").style.display = "block";
+}
+
+function preprocess(ctx, canvas) {
+    let img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let data = img.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+        let g = (data[i] * 0.3 + data[i+1] * 0.59 + data[i+2] * 0.11);
+        g = ((g - 128) * 1.6) + 128;
+        g = Math.min(255, Math.max(0, g));
+        data[i] = data[i+1] = data[i+2] = g;
+    }
+
+    ctx.putImageData(img, 0, 0);
+}
+
+async function captureAndProcess() {
+    let ctx = canvas.getContext("2d");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    ctx.save();
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+    ctx.restore();
+
+    preprocess(ctx, canvas);
+
+    const worker = await Tesseract.createWorker("ara");
+
+    await worker.setParameters({
+        tessedit_char_whitelist: "0123456789٠١٢٣٤٥٦٧٨٩ "
+    });
+
+    const { data: { text } } = await worker.recognize(canvas);
+    await worker.terminate();
+
+    processText(text);
+}
+
+function processText(text) {
+    const arab = "٠١٢٣٤٥٦٧٨٩";
+    const eng =  "0123456789";
+
+    const convertArabic = (str) =>
+        str.split("").map(c => {
+            let i = arab.indexOf(c);
+            return i !== -1 ? eng[i] : c;
+        }).join("");
+
+    let arabNums = text.match(/[٠-٩]+/g) || [];
+    let engNums  = text.match(/\d+/g) || [];
+
+    let all = [...arabNums.map(convertArabic), ...engNums];
+
+    let nationalID = all.find(n => n.length === 14) || null;
+
+    showResult(nationalID, all);
+}
+
+function showResult(nid, numbers) {
+    stopCamera();
+
+    $("#camera-box").style.display = "none";
+    $("#result-box").style.display = "block";
+
+    if (nid) {
+        $("#nid").innerText = nid;
+        $("#national-id-box").style.display = "block";
+    }
+
+    if (numbers.length) {
+        $("#numbers-box").style.display = "block";
+        $("#all-nums").innerHTML = numbers
+            .map(n => `<span class='number'>${n}</span>`)
+            .join("");
+    }
+}
+
+function resetScanner() {
+    $("#result-box").style.display = "none";
+    $("#start-box").style.display = "block";
+}
+
+</script>
+
+</body>
+</html>
