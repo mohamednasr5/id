@@ -127,7 +127,7 @@
   <div id="mergeModal" class="modal">
     <div class="modal-content">
         <div class="close-modal" onclick="closeModal('mergeModal')">&times;</div>
-        <h3 style="color:#e17055; margin-bottom:15px;">🔗 دمج المندوبين</h3>
+        <h3 style="color:#e17055; margin-bottom:15px;">🔗 دمج المناديب</h3>
         <p style="font-size:0.9rem; color:#666; margin-bottom:20px;">
             سيتم جمع أرقام (الاسم القديم) وإضافتها إلى (الاسم الجديد) وسيظهر الاسم الجديد فقط.
         </p>
@@ -212,6 +212,9 @@
       "حي البصله حمود-عبد الحميد", "حى الجرن 3 -قهوة النجدي محمد النجدي"
     ];
 
+    // جعل places متاحة عالمياً
+    window.PLACES = places;
+
     // استرجاع قواعد الدمج
     window.mergeMap = JSON.parse(localStorage.getItem('repMergeRules')) || {};
 
@@ -268,12 +271,14 @@
           let duration = (diff!==null)? `${Math.floor(diff/60)} س ${Math.floor(diff%60).toString().padStart(2,'0')} د`:'-';
           let sortedReps = Object.entries(p.reps).sort((a, b) => b[1].length - a[1].length);
           let repDetails = sortedReps
-            .map(([k,v]) => `
-                <div class="rep-tag" onclick="showRepStat('${k}', ${v.length})">
+            .map(([k,v]) => {
+                // تنظيف اسم المندوب من علامات الاقتباس
+                let cleanName = k.replace(/'/g, "\\'");
+                return `<div class="rep-tag" onclick="showRepStat('${cleanName}', ${v.length})">
                     <span>${k}</span>
                     <span class="statok">${v.length}</span>
-                </div>
-            `).join("");
+                </div>`;
+            }).join("");
           let nassabaCount = p.nassabaList.length;
           let nassabaClass = nassabaCount > 0 ? 'nassaba-cell' : 'zero-nassaba';
           let nassabaAction = nassabaCount > 0 ? `onclick="showNassabaDetails('${key}')"` : '';
@@ -347,7 +352,7 @@
         }
     };
 
-    // *** دالة تصدير متقدمة مع تنسيقات وألوان وحدود ***
+    // دالة تصدير Excel محسّنة
     window.exportToExcel = function() {
         if(!window.allStats) { alert("انتظر تحميل البيانات أولاً"); return; }
         const firebaseKeys = places;
@@ -364,10 +369,19 @@
         let rows = '';
         firebaseKeys.forEach((key, idx) => {
             const p = window.allStats[key] || {count:0, nassabaList:[], reps:{}, times:[]};
-            let minTime = p.times.length ? new Date(Math.min(...p.times.map(t=>new Date(t)))).toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'}) : '-';
-            let maxTime = p.times.length ? new Date(Math.max(...p.times.map(t=>new Date(t)))).toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'}) : '-';
-            let diff = (minTime!='-' && maxTime!='-') ? ((new Date(maxTime) - new Date(minTime))/60000) : null;
-            let duration = (diff!==null) ? `${Math.floor(diff/60)} س ${Math.floor(diff%60).toString().padStart(2,'0')} د` : '-';
+            let minTime = '-';
+            let maxTime = '-';
+            let duration = '-';
+            
+            if (p.times.length > 0) {
+                const minDate = new Date(Math.min(...p.times.map(t=>new Date(t))));
+                const maxDate = new Date(Math.max(...p.times.map(t=>new Date(t))));
+                minTime = minDate.toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'});
+                maxTime = maxDate.toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'});
+                const diff = (maxDate - minDate) / 60000;
+                duration = `${Math.floor(diff/60)} س ${Math.floor(diff%60).toString().padStart(2,'0')} د`;
+            }
+            
             let repDetails = Object.entries(p.reps)
                 .sort((a,b)=>b[1].length-a[1].length)
                 .map(([n,v])=>`<div class="rep-cell">${n} (${v.length})</div>`).join(" ");
@@ -423,16 +437,14 @@
         document.getElementById('repModal').style.display = 'flex';
     }
     window.showNassabaDetails = function(placeKey) {
-        const places = [
-            "المنزلة الجديدة 1 - كريم المرور", "المنزلة الجديدة 2 - شريف التأمين الصحي", "بحر البلد شارع الكابتن - شريف العزازي", "مدرسة عبد العال شلبياية - اشرف الأباصيري", "مصنع البصل - فؤاد حال", "الكفر 1 - علي شطا", "الكفر 2 تحت السكة - عادل جلال", "سوق الجملة - السعيد شطا- على البياع", "الفداء 1 - عمر الكيال", "الفداء 2 - حماده الكيال", "الحمزاوي - حماده السري", "الجرن 1 - بوجي البرعي", "الجرن 2 - إبراهيم فهيد", "البر الثاني حي السلام - يحيى حبق", "حي الأعجام - حماده ابو رشاد", "العزبة منشية ناصر -حسان عطية", "الطويل - أحمد عبد العظيم", "البر الثاني 2 الهاويس - إبراهيم عبد المجيد", "الفقاعي - محمد حبيب", "بحر البلد 2 - السيد حراز", "حي الجبانة - سعد الشلودي", "الكفر 3 بجوار ملعب برشلونة - محمد البداية", "أبو رشاد مقهى أبو سليمان - محمد رشاد", "حي الزهراء - رشاد عبد الوهاب", "بحر البلد 3 - منصور البدري", "حي السلموني - حسن المناخلى", "حى مزلفان العلمي -أبوعلاء", "حي البصله حمود-عبد الحميد", "حى الجرن 3 -قهوة النجدي محمد النجدي"
-        ];
-        const placeIndex = places.indexOf(placeKey);
-        const placeName = placeIndex !== -1 ? places[placeIndex] : placeKey;
-        if(!window.allStats || !window.allStats[placeKey]) return;
+        if(!window.PLACES || !window.allStats || !window.allStats[placeKey]) return;
+        
+        const placeName = placeKey;
         const list = window.allStats[placeKey].nassabaList;
         const container = document.getElementById('nassabaListContainer');
         document.getElementById('nassabaPlaceName').innerText = placeName;
         container.innerHTML = '';
+        
         list.forEach(item => {
             let date = new Date(item.time).toLocaleTimeString('ar-EG');
             let li = document.createElement('li');
