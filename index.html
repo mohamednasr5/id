@@ -236,7 +236,7 @@
       margin-bottom: 5px;
     }
 
-    /* تنسيقات الرسائل */
+    /* تنسيقات الرسائل - إشعار عام مضغوط */
     .messages-badge {
       position: absolute;
       top: -8px;
@@ -260,9 +260,168 @@
       50% { transform: scale(1.15); }
     }
 
-    .messages-container {
-      margin-top: 15px;
-      margin-bottom: 15px;
+    /* إشعار عام بسيط */
+    .general-notification {
+      background: linear-gradient(135deg, #f5f3ff 0%, #e8e0ff 100%);
+      border: 2px solid var(--message-color);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 15px rgba(155, 89, 182, 0.2);
+      animation: notificationSlideDown 0.5s ease;
+      position: relative;
+    }
+
+    .general-notification.unread {
+      border-color: #e74c3c;
+      background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+      animation: notificationGlow 2s infinite;
+    }
+
+    @keyframes notificationSlideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes notificationGlow {
+      0%, 100% {
+        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+      }
+      50% {
+        box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
+      }
+    }
+
+    .notification-icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .notification-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .notification-text {
+      color: var(--text-color);
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 2px;
+      line-height: 1.4;
+    }
+
+    .notification-count {
+      font-size: 11px;
+      color: #666;
+    }
+
+    .notification-close {
+      background: transparent;
+      border: none;
+      color: #999;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .notification-close:hover {
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--error-color);
+      transform: rotate(90deg);
+    }
+
+    /* Modal الرسائل */
+    .messages-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(5px);
+    }
+
+    .messages-modal.active {
+      display: flex;
+    }
+
+    .messages-modal-content {
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .messages-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #eee;
+    }
+
+    .messages-modal-title {
+      margin: 0;
+      color: var(--primary-color);
+      font-size: 20px;
+    }
+
+    .modal-close-btn {
+      background: var(--error-color);
+      color: white;
+      border: none;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .modal-close-btn:hover {
+      transform: rotate(90deg);
+      background: #c0392b;
     }
 
     .message-card {
@@ -271,7 +430,6 @@
       border-radius: 15px;
       padding: 15px;
       margin-bottom: 12px;
-      position: relative;
       box-shadow: 0 4px 15px rgba(155, 89, 182, 0.2);
       animation: messageSlideIn 0.5s ease;
       transition: all 0.3s ease;
@@ -280,7 +438,6 @@
     .message-card.unread {
       border-color: #e74c3c;
       background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
-      animation: messageGlow 2s infinite;
     }
 
     @keyframes messageSlideIn {
@@ -291,15 +448,6 @@
       to {
         opacity: 1;
         transform: translateX(0);
-      }
-    }
-
-    @keyframes messageGlow {
-      0%, 100% {
-        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
-      }
-      50% {
-        box-shadow: 0 8px 25px rgba(231, 76, 60, 0.6);
       }
     }
 
@@ -318,7 +466,7 @@
     }
 
     .message-icon {
-      font-size: 24px;
+      font-size: 20px;
     }
 
     .message-time {
@@ -369,22 +517,12 @@
       transform: translateY(-2px);
     }
 
-    .delete-msg-btn {
-      background: var(--error-color);
-      color: white;
-    }
-
-    .delete-msg-btn:hover {
-      background: #c0392b;
-      transform: translateY(-2px);
-    }
-
     .no-messages {
       text-align: center;
       padding: 30px 20px;
       color: #999;
       font-size: 13px;
-      background: rgba(255, 255, 255, 0.5);
+      background: rgba(0, 0, 0, 0.02);
       border-radius: 10px;
       border: 2px dashed #ddd;
     }
@@ -395,7 +533,8 @@
       opacity: 0.3;
     }
 
-    .new-message-notification {
+    /* إشعار منبثق عند وصول رسالة */
+    .popup-notification {
       position: fixed;
       top: 20px;
       right: 20px;
@@ -403,14 +542,17 @@
       color: white;
       padding: 15px 20px;
       border-radius: 15px;
-      box-shadow: 0 8px 25px rgba(155, 89, 182, 0.4);
-      z-index: 10000;
-      animation: notificationSlide 0.5s ease;
+      box-shadow: 0 8px 25px rgba(155, 89, 182, 0.5);
+      z-index: 10001;
+      animation: popupSlide 0.5s ease;
       max-width: 300px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    @keyframes notificationSlide {
+    @keyframes popupSlide {
       from {
         transform: translateX(400px);
         opacity: 0;
@@ -421,18 +563,25 @@
       }
     }
 
-    .notification-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-      font-weight: 700;
-      font-size: 15px;
+    .popup-icon {
+      font-size: 32px;
+      flex-shrink: 0;
     }
 
-    .notification-text {
+    .popup-content {
+      flex: 1;
+    }
+
+    .popup-header {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 5px;
+    }
+
+    .popup-text {
       font-size: 13px;
       line-height: 1.4;
+      opacity: 0.95;
     }
 
     @media (max-height: 700px) {
@@ -444,17 +593,20 @@
       .id-card-img { max-width: 55%; }
       .counter-box { padding: 6px 12px; font-size: 13px; }
       h3 { font-size: 13px; }
-      .message-card { padding: 12px; }
-      .message-text { font-size: 13px; }
+      .general-notification { padding: 10px; }
+      .notification-text { font-size: 12px; }
     }
     
     @media (max-width: 480px) {
       .container { padding: 10px; }
       .card { max-width: 100%; padding: 15px; }
-      .new-message-notification {
+      .popup-notification {
         right: 10px;
         left: 10px;
         max-width: none;
+      }
+      .messages-modal-content {
+        padding: 20px;
       }
     }
   </style>
@@ -490,8 +642,8 @@
     <div class="card hidden" id="main-card">
       <h2 id="welcome">مرحبًا</h2>
       
-      <!-- عرض الرسائل -->
-      <div class="messages-container" id="messagesContainer"></div>
+      <!-- إشعار الرسائل العام -->
+      <div id="generalNotification"></div>
       
       <div class="counter-box" id="entryCounterBox">
         عدد إدخالاتك اليوم: <span id="entryCounter">0</span>
@@ -514,7 +666,7 @@
       </div>
       <button class="btn" onclick="addUser()">إضافة</button>
       <div id="add-msg" class="msg"></div>
-      <button class="btn btn-message" onclick="showMessages()" style="position: relative;">
+      <button class="btn btn-message" onclick="showMessagesModal()" style="position: relative;">
         <span id="messagesBtnText">📨 الرسائل</span>
         <span class="messages-badge hidden" id="messagesBadge">0</span>
       </button>
@@ -560,6 +712,17 @@
       <h3>أسماء المناديب</h3>
       <div class="admin-list-container" id="adminRepList"></div>
       <button class="btn btn-danger" onclick="closeAdminPanel()">خروج من اللوحة</button>
+    </div>
+  </div>
+
+  <!-- Modal الرسائل -->
+  <div class="messages-modal" id="messagesModal">
+    <div class="messages-modal-content">
+      <div class="messages-modal-header">
+        <h2 class="messages-modal-title">📨 جميع الرسائل</h2>
+        <button class="modal-close-btn" onclick="closeMessagesModal()">×</button>
+      </div>
+      <div id="messagesModalContent"></div>
     </div>
   </div>
 
@@ -694,7 +857,7 @@
       const messagesRef = ref(db, 'messages');
       messagesListener = onValue(messagesRef, (snapshot) => {
         if (!snapshot.exists()) {
-          updateMessagesDisplay([]);
+          updateGeneralNotification([]);
           return;
         }
 
@@ -721,44 +884,144 @@
         // عرض إشعار للرسائل الجديدة
         const unreadCount = relevantMessages.filter(m => !isMessageRead(m.id)).length;
         if (unreadCount > lastMessageCount && lastMessageCount > 0) {
-          showNewMessageNotification(relevantMessages[0]);
+          showPopupNotification(relevantMessages[0]);
         }
         lastMessageCount = unreadCount;
 
-        updateMessagesDisplay(relevantMessages);
+        updateGeneralNotification(relevantMessages);
+        updateBadge(unreadCount);
       });
     }
 
-    function updateMessagesDisplay(messages) {
-      const container = document.getElementById('messagesContainer');
-      const badge = document.getElementById('messagesBadge');
-      
-      const unreadCount = messages.filter(m => !isMessageRead(m.id)).length;
-      
-      if (unreadCount > 0) {
-        badge.textContent = unreadCount;
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
-      }
-
-      // عرض آخر 3 رسائل غير مقروءة فقط في الصفحة الرئيسية
-      const unreadMessages = messages.filter(m => !isMessageRead(m.id)).slice(0, 3);
+    function updateGeneralNotification(messages) {
+      const container = document.getElementById('generalNotification');
+      const unreadMessages = messages.filter(m => !isMessageRead(m.id));
       
       if (unreadMessages.length === 0) {
         container.innerHTML = '';
         return;
       }
 
+      const unreadCount = unreadMessages.length;
+      const latestMessage = unreadMessages[0];
+      const shortText = latestMessage.text.length > 50 
+        ? latestMessage.text.substring(0, 50) + '...' 
+        : latestMessage.text;
+
+      container.innerHTML = `
+        <div class="general-notification unread" onclick="showMessagesModal()">
+          <div class="notification-icon">📬</div>
+          <div class="notification-content">
+            <div class="notification-text">${shortText}</div>
+            <div class="notification-count">
+              ${unreadCount === 1 ? 'رسالة جديدة' : `${unreadCount} رسائل جديدة`}
+            </div>
+          </div>
+          <button class="notification-close" onclick="event.stopPropagation(); hideNotification()">×</button>
+        </div>
+      `;
+    }
+
+    window.hideNotification = function() {
+      document.getElementById('generalNotification').innerHTML = '';
+    };
+
+    function updateBadge(count) {
+      const badge = document.getElementById('messagesBadge');
+      
+      if (count > 0) {
+        badge.textContent = count;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    function showPopupNotification(msg) {
+      // تشغيل صوت الإشعار
+      document.getElementById('messageSound').play().catch(() => {});
+
+      const notification = document.createElement('div');
+      notification.className = 'popup-notification';
+      notification.innerHTML = `
+        <div class="popup-icon">📨</div>
+        <div class="popup-content">
+          <div class="popup-header">رسالة جديدة</div>
+          <div class="popup-text">${msg.text.substring(0, 50)}${msg.text.length > 50 ? '...' : ''}</div>
+        </div>
+      `;
+
+      document.body.appendChild(notification);
+
+      notification.onclick = () => {
+        notification.remove();
+        showMessagesModal();
+      };
+
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
+    }
+
+    window.showMessagesModal = async function() {
+      if (!userID || !userPlace) return;
+      
+      const messagesRef = ref(db, 'messages');
+      const snapshot = await get(messagesRef);
+      
+      if (!snapshot.exists()) {
+        alert('لا توجد رسائل حالياً');
+        return;
+      }
+
+      const allMessages = snapshot.val();
+      const relevantMessages = [];
+
+      Object.keys(allMessages).forEach(msgId => {
+        const msg = allMessages[msgId];
+        
+        if (msg.target === 'all' || msg.target === userPlace) {
+          relevantMessages.push({
+            id: msgId,
+            ...msg
+          });
+        }
+      });
+
+      relevantMessages.sort((a, b) => 
+        new Date(b.timestamp) - new Date(a.timestamp)
+      );
+
+      displayMessagesInModal(relevantMessages);
+      document.getElementById('messagesModal').classList.add('active');
+    };
+
+    window.closeMessagesModal = function() {
+      document.getElementById('messagesModal').classList.remove('active');
+    };
+
+    function displayMessagesInModal(messages) {
+      const container = document.getElementById('messagesModalContent');
+      
+      if (messages.length === 0) {
+        container.innerHTML = `
+          <div class="no-messages">
+            <div class="no-messages-icon">📭</div>
+            <div>لا توجد رسائل</div>
+          </div>
+        `;
+        return;
+      }
+
       container.innerHTML = '';
       
-      unreadMessages.forEach(msg => {
-        const msgCard = createMessageCard(msg, false);
+      messages.forEach(msg => {
+        const msgCard = createMessageCard(msg);
         container.appendChild(msgCard);
       });
     }
 
-    function createMessageCard(msg, showActions = true) {
+    function createMessageCard(msg) {
       const div = document.createElement('div');
       div.className = 'message-card';
       if (!isMessageRead(msg.id)) {
@@ -778,166 +1041,20 @@
         </div>
         <div class="message-text">${msg.text}</div>
         <div class="message-from">إلى: ${targetText}</div>
-        ${showActions ? `
-          <div class="message-actions">
-            ${!isMessageRead(msg.id) ? `
-              <button class="message-btn mark-read-btn" onclick="markMessageAsRead('${msg.id}')">
-                ✓ تم القراءة
-              </button>
-            ` : ''}
-          </div>
-        ` : `
+        ${!isMessageRead(msg.id) ? `
           <div class="message-actions">
             <button class="message-btn mark-read-btn" onclick="markMessageAsRead('${msg.id}')">
               ✓ تم القراءة
             </button>
           </div>
+        ` : `
+          <div style="text-align: center; color: var(--success-color); font-size: 12px; margin-top: 8px; padding: 5px; background: rgba(46, 204, 113, 0.1); border-radius: 8px;">
+            ✓ تمت القراءة
+          </div>
         `}
       `;
 
       return div;
-    }
-
-    function showNewMessageNotification(msg) {
-      // تشغيل صوت الإشعار
-      document.getElementById('messageSound').play().catch(() => {});
-
-      const notification = document.createElement('div');
-      notification.className = 'new-message-notification';
-      notification.innerHTML = `
-        <div class="notification-header">
-          📨 رسالة جديدة
-        </div>
-        <div class="notification-text">${msg.text.substring(0, 50)}${msg.text.length > 50 ? '...' : ''}</div>
-      `;
-
-      document.body.appendChild(notification);
-
-      notification.onclick = () => {
-        notification.remove();
-        showMessages();
-      };
-
-      setTimeout(() => {
-        notification.remove();
-      }, 5000);
-    }
-
-    window.showMessages = function() {
-      if (!userID || !userPlace) return;
-      
-      const messagesRef = ref(db, 'messages');
-      get(messagesRef).then(snapshot => {
-        if (!snapshot.exists()) {
-          alert('لا توجد رسائل حالياً');
-          return;
-        }
-
-        const allMessages = snapshot.val();
-        const relevantMessages = [];
-
-        Object.keys(allMessages).forEach(msgId => {
-          const msg = allMessages[msgId];
-          
-          if (msg.target === 'all' || msg.target === userPlace) {
-            relevantMessages.push({
-              id: msgId,
-              ...msg
-            });
-          }
-        });
-
-        relevantMessages.sort((a, b) => 
-          new Date(b.timestamp) - new Date(a.timestamp)
-        );
-
-        displayMessagesModal(relevantMessages);
-      });
-    };
-
-    function displayMessagesModal(messages) {
-      // إنشاء modal لعرض جميع الرسائل
-      const modal = document.createElement('div');
-      modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.8);
-        z-index: 10000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        backdrop-filter: blur(5px);
-      `;
-
-      const modalContent = document.createElement('div');
-      modalContent.style.cssText = `
-        background: white;
-        border-radius: 20px;
-        padding: 25px;
-        max-width: 500px;
-        width: 100%;
-        max-height: 80vh;
-        overflow-y: auto;
-      `;
-
-      const header = document.createElement('div');
-      header.style.cssText = `
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid #eee;
-      `;
-      header.innerHTML = `
-        <h2 style="margin: 0; color: var(--primary-color);">📨 جميع الرسائل</h2>
-        <button style="
-          background: var(--error-color);
-          color: white;
-          border: none;
-          width: 35px;
-          height: 35px;
-          border-radius: 50%;
-          font-size: 20px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        " onclick="this.closest('.modal-wrapper').remove()">×</button>
-      `;
-
-      const messagesContainer = document.createElement('div');
-      
-      if (messages.length === 0) {
-        messagesContainer.innerHTML = `
-          <div class="no-messages">
-            <div class="no-messages-icon">📭</div>
-            <div>لا توجد رسائل</div>
-          </div>
-        `;
-      } else {
-        messages.forEach(msg => {
-          const msgCard = createMessageCard(msg, true);
-          messagesContainer.appendChild(msgCard);
-        });
-      }
-
-      modalContent.appendChild(header);
-      modalContent.appendChild(messagesContainer);
-      modal.appendChild(modalContent);
-      modal.className = 'modal-wrapper';
-      
-      modal.onclick = (e) => {
-        if (e.target === modal) {
-          modal.remove();
-        }
-      };
-
-      document.body.appendChild(modal);
     }
 
     function isMessageRead(msgId) {
@@ -952,32 +1069,17 @@
         localStorage.setItem('read_messages', JSON.stringify(readMessages));
       }
       
-      // إعادة تحميل العرض
-      if (messagesListener) {
-        // سيتم التحديث تلقائياً من خلال المستمع
-        const container = document.getElementById('messagesContainer');
-        const cards = container.querySelectorAll('.message-card');
-        cards.forEach(card => {
-          if (card.querySelector(`[onclick*="${msgId}"]`)) {
-            card.classList.remove('unread');
-            card.querySelector('.message-actions').innerHTML = `
-              <div style="text-align: center; color: var(--success-color); font-size: 13px; padding: 5px;">
-                ✓ تمت القراءة
-              </div>
-            `;
-          }
-        });
-      }
-      
-      // تحديث العداد
-      setTimeout(() => {
-        const badge = document.getElementById('messagesBadge');
-        const readCount = JSON.parse(localStorage.getItem('read_messages') || '[]').length;
-        if (readCount === lastMessageCount) {
-          badge.classList.add('hidden');
-        }
-      }, 100);
+      // إعادة تحميل Modal
+      showMessagesModal();
     };
+
+    // إغلاق Modal عند النقر خارجه
+    document.addEventListener('click', (e) => {
+      const modal = document.getElementById('messagesModal');
+      if (e.target === modal) {
+        closeMessagesModal();
+      }
+    });
 
     function saveRepName(name) {
       let stored = JSON.parse(localStorage.getItem("saved_rep_names") || "[]");
