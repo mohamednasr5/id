@@ -612,9 +612,16 @@
   </style>
 </head>
 <body>
-  <audio id="errorSound"
-         src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"
-         preload="auto"></audio>
+  <!-- أصوات التنبيه -->
+  <audio id="duplicateAlarm1" preload="auto">
+    <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg">
+  </audio>
+  <audio id="duplicateAlarm2" preload="auto">
+    <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+  </audio>
+  <audio id="duplicateAlarm3" preload="auto">
+    <source src="https://actions.google.com/sounds/v1/emergency/siren_1.ogg" type="audio/ogg">
+  </audio>
   <audio id="messageSound"
          src="https://actions.google.com/sounds/v1/notifications/notification_simple.ogg"
          preload="auto"></audio>
@@ -771,6 +778,77 @@
     let userID = null;
     let messagesListener = null;
     let lastMessageCount = 0;
+    let alarmInterval = null;
+
+    // تشغيل صوت إنذار قوي ومتكرر للتكرار
+    function playDuplicateAlarm() {
+      // إيقاف أي إنذار سابق
+      stopDuplicateAlarm();
+
+      const alarm1 = document.getElementById('duplicateAlarm1');
+      const alarm2 = document.getElementById('duplicateAlarm2');
+      const alarm3 = document.getElementById('duplicateAlarm3');
+
+      // تشغيل الأصوات الثلاثة بالتتابع
+      alarm1.volume = 1.0;
+      alarm2.volume = 1.0;
+      alarm3.volume = 1.0;
+
+      // تشغيل فوري
+      alarm1.play().catch(() => {});
+      
+      setTimeout(() => {
+        alarm2.play().catch(() => {});
+      }, 300);
+
+      setTimeout(() => {
+        alarm3.play().catch(() => {});
+      }, 600);
+
+      // تكرار الصوت كل ثانيتين لمدة 10 ثواني
+      let count = 0;
+      alarmInterval = setInterval(() => {
+        count++;
+        if (count > 5) {
+          stopDuplicateAlarm();
+          return;
+        }
+
+        alarm1.currentTime = 0;
+        alarm2.currentTime = 0;
+        alarm3.currentTime = 0;
+        
+        alarm1.play().catch(() => {});
+        setTimeout(() => alarm2.play().catch(() => {}), 300);
+        setTimeout(() => alarm3.play().catch(() => {}), 600);
+      }, 2000);
+
+      // جعل الجهاز يهتز (إن كان مدعوماً)
+      if ('vibrate' in navigator) {
+        // نمط اهتزاز متكرر: [اهتز، توقف، اهتز، ...]
+        navigator.vibrate([200, 100, 200, 100, 200, 100, 400, 100, 400]);
+      }
+    }
+
+    function stopDuplicateAlarm() {
+      if (alarmInterval) {
+        clearInterval(alarmInterval);
+        alarmInterval = null;
+      }
+
+      // إيقاف جميع الأصوات
+      const alarm1 = document.getElementById('duplicateAlarm1');
+      const alarm2 = document.getElementById('duplicateAlarm2');
+      const alarm3 = document.getElementById('duplicateAlarm3');
+
+      alarm1.pause();
+      alarm2.pause();
+      alarm3.pause();
+      
+      alarm1.currentTime = 0;
+      alarm2.currentTime = 0;
+      alarm3.currentTime = 0;
+    }
 
     // تسجيل دخول
     window.login = async function () {
@@ -841,6 +919,7 @@
     }
 
     window.logout = async function () {
+      stopDuplicateAlarm();
       if (userID) {
         await remove(ref(db, `active_sessions/${userID}/${currentDeviceId}`));
       }
@@ -867,7 +946,6 @@
         Object.keys(allMessages).forEach(msgId => {
           const msg = allMessages[msgId];
           
-          // فلترة الرسائل المخصصة لهذا المستخدم
           if (msg.target === 'all' || msg.target === userPlace) {
             relevantMessages.push({
               id: msgId,
@@ -876,12 +954,10 @@
           }
         });
 
-        // ترتيب الرسائل حسب الوقت
         relevantMessages.sort((a, b) => 
           new Date(b.timestamp) - new Date(a.timestamp)
         );
 
-        // عرض إشعار للرسائل الجديدة
         const unreadCount = relevantMessages.filter(m => !isMessageRead(m.id)).length;
         if (unreadCount > lastMessageCount && lastMessageCount > 0) {
           showPopupNotification(relevantMessages[0]);
@@ -938,7 +1014,6 @@
     }
 
     function showPopupNotification(msg) {
-      // تشغيل صوت الإشعار
       document.getElementById('messageSound').play().catch(() => {});
 
       const notification = document.createElement('div');
@@ -1069,11 +1144,9 @@
         localStorage.setItem('read_messages', JSON.stringify(readMessages));
       }
       
-      // إعادة تحميل Modal
       showMessagesModal();
     };
 
-    // إغلاق Modal عند النقر خارجه
     document.addEventListener('click', (e) => {
       const modal = document.getElementById('messagesModal');
       if (e.target === modal) {
@@ -1141,7 +1214,10 @@
         
         if (snapshot.exists()) {
           const data = snapshot.val();
-          document.getElementById("errorSound").play().catch(() => {});
+          
+          // تشغيل صوت الإنذار القوي
+          playDuplicateAlarm();
+          
           msg.className = "duplicate-box";
           msg.innerHTML = `
             ⚠️ تكرار<br>
@@ -1157,6 +1233,12 @@
             timestamp: new Date().toISOString()
           });
           saveRepName(name);
+          
+          // إيقاف الصوت بعد 10 ثواني أو عند النقر
+          setTimeout(() => {
+            stopDuplicateAlarm();
+          }, 10000);
+          
           return;
         }
         
@@ -1181,6 +1263,13 @@
         msg.classList.add("error");
       }
     };
+
+    // إيقاف الصوت عند النقر على أي مكان في الصفحة
+    document.addEventListener('click', () => {
+      if (alarmInterval) {
+        stopDuplicateAlarm();
+      }
+    });
 
     // دوال العداد
     function getEntryData() {
