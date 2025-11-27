@@ -84,6 +84,7 @@
     input {
       width: 100%; padding: 12px 15px; background: var(--input-bg);
       border: 2px solid transparent; border-radius: 10px; font-size: 16px; transition: 0.3s ease;
+      font-family: "Cairo", sans-serif;
     }
     input:focus {
       background: #fff; border-color: var(--secondary-color);
@@ -112,6 +113,10 @@
     .btn-secondary { background: linear-gradient(to right, #43cea2, #185a9d); }
     .btn-danger { background: linear-gradient(to right, #ff416c, #ff4b2b); }
     .btn-warning { background: linear-gradient(to right, #f2994a, #f2c94c); color: #333; }
+    .btn-delete-rep { 
+      background: #ff4757; color: white; border: none; padding: 4px 12px; 
+      border-radius: 5px; cursor: pointer; font-size: 12px; font-family: "Cairo", sans-serif;
+    }
     .msg { text-align: center; font-size: 13px; margin-top: 10px; min-height: 18px; }
     .msg.error { color: var(--error-color); }
     .msg.success { color: var(--success-color); }
@@ -121,11 +126,14 @@
     }
     @keyframes pulseRed { from { box-shadow: 0 0 8px rgba(255,0,0,0.3); } to { box-shadow: 0 0 16px rgba(255,0,0,0.6); } }
     .admin-list-container { max-height: 200px; overflow-y: auto; background: rgba(255,255,255,0.7); padding: 5px; border-radius: 10px; }
-    .rep-item { display: flex; justify-content: space-between; padding: 8px; }
+    .rep-item { display: flex; justify-content: space-between; padding: 8px; align-items: center; }
     .rep-name { font-weight: bold; }
     .session-item { background: #fff; border-right: 4px solid var(--primary-color); padding: 8px; margin-bottom: 5px; border-radius: 5px; }
-    .session-kick-btn { background: #333; color: #fff; padding: 4px 10px; border-radius: 4px; border: none; cursor: pointer; }
+    .session-kick-btn { background: #333; color: #fff; padding: 4px 10px; border-radius: 4px; border: none; cursor: pointer; font-family: "Cairo", sans-serif; }
     .counter-box { background: #f0f7ff; color: #0072ff; padding: 10px 20px; font-size: 16px; border-radius: 12px; margin-bottom: 12px; text-align: center; }
+    .counter-label { font-size: 11px; color: #666; margin-top: 5px; }
+    .empty-list { text-align: center; padding: 20px; color: #999; font-size: 14px; }
+    .device-info { font-size: 11px; color: #666; margin: 0 5px; }
   </style>
 </head>
 <body>
@@ -235,6 +243,7 @@
       onValue,
       update
     } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    
     // تهيئة Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
@@ -293,12 +302,16 @@
           loginTime: Date.now(),
           expiresAt: Date.now() + 30 * 60 * 1000
         });
+        
         document.getElementById("welcome").textContent = "مرحبًا — " + userPlace;
         document.getElementById("auth-card").classList.add("hidden");
         document.getElementById("main-card").classList.remove("hidden");
         document.getElementById("main-card").classList.add("fade-in");
+        
+        // تحميل العداد بعد الدخول
+        loadEntryCounter();
       } catch (e) {
-        msg.textContent = "خطأ في الاتصال";
+        msg.textContent = "خطأ في الاتصال: " + e.message;
         msg.classList.add("error");
       }
     };
@@ -308,15 +321,20 @@
       if (!snap.exists()) return;
       const sessions = snap.val();
       const devices = Object.keys(sessions);
+      
+      // حذف الجلسات المنتهية
       for (let d of devices) {
         if (sessions[d].expiresAt < Date.now()) {
           await remove(ref(db, `active_sessions/${code}/${d}`));
         }
       }
+      
       const updatedSnap = await get(child(ref(db), "active_sessions/" + code));
       if (!updatedSnap.exists()) return;
       const updated = updatedSnap.val();
       const updatedDevices = Object.keys(updated);
+      
+      // إذا كان عدد الأجهزة 3 أو أكثر وهذا الجهاز ليس منهم
       if (updatedDevices.length >= 3 && !updatedDevices.includes(currentDeviceId)) {
         const sorted = updatedDevices.sort((a, b) => updated[a].loginTime - updated[b].loginTime);
         const oldest = sorted[0];
@@ -358,14 +376,17 @@
       const msg = document.getElementById("add-msg");
       msg.textContent = "";
       msg.className = "msg";
+      
       if (Date.now() - lastAddTime < 1200) {
         msg.textContent = "من فضلك انتظر لحظة بين كل إدخال…";
         msg.classList.add("error");
         return;
       }
       lastAddTime = Date.now();
+      
       const name = document.getElementById("repName").value.trim();
       const natid = document.getElementById("natID").value.trim();
+      
       if (name.length < 2) {
         msg.textContent = "يرجى إدخال اسم المندوب";
         msg.classList.add("error");
@@ -381,9 +402,11 @@
         msg.classList.add("error");
         return;
       }
+      
       try {
         const userRef = ref(db, "users/" + natid);
         const snapshot = await get(userRef);
+        
         if (snapshot.exists()) {
           const data = snapshot.val();
           document.getElementById("errorSound").play().catch(() => {});
@@ -404,6 +427,7 @@
           saveRepName(name);
           return;
         }
+        
         await set(userRef, {
           natid,
           repName: name,
@@ -412,55 +436,73 @@
           time: new Date().toISOString(),
           username: userID
         });
+        
         saveRepName(name);
-        msg.textContent = "تمت الإضافة بنجاح";
+        msg.textContent = "تمت الإضافة بنجاح ✓";
         msg.classList.add("success");
         document.getElementById("natID").value = "";
         document.getElementById("natID").focus();
         incrementEntryCounter();
+        
       } catch (e) {
-        msg.textContent = "خطأ في الاتصال";
+        msg.textContent = "خطأ في الاتصال: " + e.message;
         msg.classList.add("error");
       }
     };
 
+    // دوال العداد
     function getEntryData() {
       return JSON.parse(localStorage.getItem("entry_counter_names") || "{}");
     }
+    
     function setEntryData(d) {
       localStorage.setItem("entry_counter_names", JSON.stringify(d));
     }
+    
     function getActiveRepName() {
       const repNameInput = document.getElementById("repName");
       return repNameInput ? repNameInput.value.trim() : "";
     }
+    
     function loadEntryCounter() {
       const counterEl = document.getElementById("entryCounter");
+      if (!counterEl) return;
+      
       const name = getActiveRepName();
       const today = new Date().toISOString().substring(0, 10);
       let entryData = getEntryData();
+      
       if (!name) {
         counterEl.textContent = 0;
         return;
       }
+      
       if (!entryData[name] || entryData[name].date !== today) {
         entryData[name] = { date: today, count: 0 };
         setEntryData(entryData);
       }
+      
       counterEl.textContent = entryData[name].count;
     }
+    
     function incrementEntryCounter() {
       const name = getActiveRepName();
+      if (!name) return;
+      
       const today = new Date().toISOString().substring(0, 10);
       let entryData = getEntryData();
+      
       if (!entryData[name] || entryData[name].date !== today) {
         entryData[name] = { date: today, count: 1 };
       } else {
         entryData[name].count++;
       }
+      
       setEntryData(entryData);
       loadEntryCounter();
     }
+
+    // مراقبة تغيير اسم المندوب
     document.addEventListener("DOMContentLoaded", () => {
       const repNameInput = document.getElementById("repName");
       if (repNameInput) {
@@ -468,23 +510,39 @@
           loadEntryCounter();
           adminLoadCounter();
         });
+        repNameInput.addEventListener("change", () => {
+          loadEntryCounter();
+          adminLoadCounter();
+        });
       }
     });
 
+    // دوال لوحة التحكم - العدادات
     window.adminIncCounter = function () {
       let val = parseInt(document.getElementById("adminEntryCounter").textContent) || 0;
       adminSetCounter(val + 1);
     };
+    
     window.adminDecCounter = function () {
       let val = parseInt(document.getElementById("adminEntryCounter").textContent) || 0;
-      adminSetCounter(val - 1);
+      if (val > 0) {
+        adminSetCounter(val - 1);
+      }
     };
+    
     window.adminResetCounter = function () {
-      adminSetCounter(0);
+      if (confirm("هل أنت متأكد من تصفير العداد؟")) {
+        adminSetCounter(0);
+      }
     };
+    
     function adminSetCounter(val) {
       const name = getActiveRepName();
-      if (!name) return;
+      if (!name) {
+        alert("يرجى إدخال اسم المندوب أولاً");
+        return;
+      }
+      
       const today = new Date().toISOString().substring(0, 10);
       let entryData = getEntryData();
       entryData[name] = { date: today, count: Math.max(0, val) };
@@ -492,90 +550,118 @@
       adminLoadCounter();
       loadEntryCounter();
     }
+    
     function adminLoadCounter() {
       const counterEl = document.getElementById("adminEntryCounter");
+      if (!counterEl) return;
+      
       const name = getActiveRepName();
       const today = new Date().toISOString().substring(0, 10);
       let entryData = getEntryData();
+      
       if (!name) {
         counterEl.textContent = 0;
         return;
       }
+      
       if (!entryData[name] || entryData[name].date !== today) {
         entryData[name] = { date: today, count: 0 };
         setEntryData(entryData);
       }
+      
       counterEl.textContent = entryData[name].count;
     }
+
+    // دوال لوحة الإدارة
     window.showStatsLogin = function () {
       document.getElementById("main-card").classList.add("hidden");
       const card = document.getElementById("stats-auth-card");
       card.classList.remove("hidden");
       card.classList.add("fade-in");
       document.getElementById("statsPass").value = "";
+      document.getElementById("stats-msg").textContent = "";
+      document.getElementById("stats-msg").className = "msg";
     };
+    
     window.cancelStats = function () {
       document.getElementById("stats-auth-card").classList.add("hidden");
       document.getElementById("main-card").classList.remove("hidden");
     };
+    
     window.verifyStats = function () {
       const pass = document.getElementById("statsPass").value;
       const msg = document.getElementById("stats-msg");
+      
       if (pass === "521988") {
         msg.textContent = "✔ تم الدخول";
-        msg.classList.add("success");
+        msg.className = "msg success";
         setTimeout(() => {
           document.getElementById("stats-auth-card").classList.add("hidden");
           document.getElementById("admin-panel-card").classList.remove("hidden");
+          document.getElementById("admin-panel-card").classList.add("fade-in");
           renderAdminRepList();
           fetchActiveSessions();
+          adminLoadCounter();
         }, 500);
       } else {
-        msg.textContent = "خطأ!";
-        msg.classList.add("error");
+        msg.textContent = "خطأ في كلمة المرور!";
+        msg.className = "msg error";
       }
     };
+    
     function renderAdminRepList() {
       const container = document.getElementById("adminRepList");
       const stored = JSON.parse(localStorage.getItem("saved_rep_names") || "[]");
       container.innerHTML = "";
+      
       if (stored.length === 0) {
         container.innerHTML = `<div class="empty-list">لا توجد أسماء محفوظة</div>`;
         return;
       }
+      
       stored.forEach(name => {
         const div = document.createElement("div");
         div.className = "rep-item";
+        const escapedName = name.replace(/'/g, "\\'");
         div.innerHTML = `
           <span class="rep-name">${name}</span>
-          <button class="btn-delete-rep" onclick="deleteRepName('${name}')">حذف</button>
+          <button class="btn-delete-rep" onclick="deleteRepName('${escapedName}')">حذف</button>
         `;
         container.appendChild(div);
       });
     }
+    
     window.deleteRepName = function (name) {
+      if (!confirm(`هل تريد حذف "${name}" من القائمة؟`)) return;
+      
       let stored = JSON.parse(localStorage.getItem("saved_rep_names") || "[]");
       stored = stored.filter(n => n !== name);
       localStorage.setItem("saved_rep_names", JSON.stringify(stored));
       renderAdminRepList();
+      loadRepNames();
     };
+    
     function fetchActiveSessions() {
       const container = document.getElementById("activeSessionsList");
       container.innerHTML = "جاري التحميل…";
+      
       const sessionsRef = ref(db, "active_sessions");
       onValue(sessionsRef, snap => {
         container.innerHTML = "";
+        
         if (!snap.exists()) {
-          container.innerHTML = `<div class="empty-list">لا يوجد جلسات</div>`;
+          container.innerHTML = `<div class="empty-list">لا يوجد جلسات نشطة</div>`;
           return;
         }
+        
         const all = snap.val();
         Object.keys(all).forEach(code => {
           const devices = all[code];
           const header = document.createElement("div");
-          header.style.cssText = "background:#eee;padding:5px;margin-top:5px;font-weight:bold;";
+          header.style.cssText = "background:#eee;padding:5px;margin-top:5px;font-weight:bold;border-radius:5px;";
           header.textContent = `الكود: ${code} (عدد الأجهزة: ${Object.keys(devices).length})`;
           container.appendChild(header);
+          
           Object.keys(devices).forEach(devID => {
             const d = devices[devID];
             const time = new Date(d.loginTime).toLocaleTimeString("ar-EG");
@@ -585,20 +671,29 @@
               <div>
                 <span style="font-weight:bold;">جهاز</span>
                 <span class="device-info">${time}</span>
-                <span class="device-info">${devID}</span>
+                <span class="device-info">${devID.substring(0, 12)}...</span>
               </div>
               <button class="session-kick-btn" onclick="kickUser('${code}','${devID}')">طرد</button>
             `;
             container.appendChild(row);
           });
         });
+      }, (error) => {
+        container.innerHTML = `<div class="empty-list" style="color:red;">خطأ: ${error.message}</div>`;
       });
     }
+    
     window.kickUser = async function (code, devID) {
-      if (confirm("هل أنت متأكد؟")) {
-        await remove(ref(db, `active_sessions/${code}/${devID}`));
+      if (confirm("هل أنت متأكد من طرد هذا الجهاز؟")) {
+        try {
+          await remove(ref(db, `active_sessions/${code}/${devID}`));
+          alert("تم طرد الجهاز بنجاح");
+        } catch (e) {
+          alert("حدث خطأ: " + e.message);
+        }
       }
     };
+    
     window.closeAdminPanel = function () {
       document.getElementById("admin-panel-card").classList.add("hidden");
       document.getElementById("main-card").classList.remove("hidden");
