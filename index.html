@@ -124,7 +124,6 @@
       opacity: 0;
       transform: translateY(-50%) scale(0.9);
     }
-
     .id-card-visual-container { text-align: center; margin: 8px 0; }
     .id-card-img { 
       max-width: 65%; 
@@ -273,6 +272,7 @@
       box-shadow: 0 4px 15px rgba(155, 89, 182, 0.2);
       animation: notificationSlideDown 0.5s ease;
       position: relative;
+      cursor: pointer;
     }
 
     .general-notification.unread {
@@ -773,9 +773,12 @@
     let userPlace = null;
     let userPlaceIdx = null;
     let userID = null;
+    let userRepName = null;
     let messagesListener = null;
     let lastMessageCount = 0;
     let alarmInterval = null;
+    let isFirstMessagesLoad = true;
+    let currentMessagesSnapshot = null;
 
     function playDuplicateAlarm() {
       stopDuplicateAlarm();
@@ -921,19 +924,30 @@
       if (!userID || !userPlace) return;
       
       const messagesRef = ref(db, 'messages');
+      
+      // استخدام onValue للاستماع الدائم للتحديثات الفورية
       messagesListener = onValue(messagesRef, (snapshot) => {
         if (!snapshot.exists()) {
           updateGeneralNotification([]);
+          updateBadge(0);
+          currentMessagesSnapshot = null;
           return;
         }
 
         const allMessages = snapshot.val();
         const relevantMessages = [];
+        const repNameInput = document.getElementById("repName");
+        userRepName = repNameInput ? repNameInput.value.trim() : "";
 
         Object.keys(allMessages).forEach(msgId => {
           const msg = allMessages[msgId];
           
-          if (msg.target === 'all' || msg.target === userPlace) {
+          // فحص إذا كانت الرسالة موجهة للمندوب
+          const isForAll = msg.target === 'all';
+          const isForPlace = msg.target === 'place:' + userPlace;
+          const isForRep = msg.target === 'rep:' + userRepName && userRepName;
+          
+          if (isForAll || isForPlace || isForRep) {
             relevantMessages.push({
               id: msgId,
               ...msg
@@ -946,13 +960,27 @@
         );
 
         const unreadCount = relevantMessages.filter(m => !isMessageRead(m.id)).length;
-        if (unreadCount > lastMessageCount && lastMessageCount > 0) {
-          showPopupNotification(relevantMessages[0]);
+        
+        // فقط عرض الإشعار المنبثق إذا لم يكن التحميل الأول وكان هناك رسائل جديدة
+        if (!isFirstMessagesLoad && unreadCount > lastMessageCount && relevantMessages.length > 0) {
+          const newMessage = relevantMessages[0];
+          showPopupNotification(newMessage);
+          
+          // تشغيل صوت الإشعار
+          const messageSound = document.getElementById('messageSound');
+          if (messageSound) {
+            messageSound.play().catch(() => {});
+          }
         }
+        
+        isFirstMessagesLoad = false;
         lastMessageCount = unreadCount;
+        currentMessagesSnapshot = relevantMessages;
 
         updateGeneralNotification(relevantMessages);
         updateBadge(unreadCount);
+      }, (error) => {
+        console.error('خطأ في الاستماع للرسائل:', error);
       });
     }
 
@@ -1001,8 +1029,6 @@
     }
 
     function showPopupNotification(msg) {
-      document.getElementById('messageSound').play().catch(() => {});
-
       const notification = document.createElement('div');
       notification.className = 'popup-notification';
       notification.innerHTML = `
@@ -1015,6 +1041,11 @@
 
       document.body.appendChild(notification);
 
+      // الاهتزاز إذا كان متاحاً
+      if ('vibrate' in navigator) {
+        navigator.vibrate([200, 100, 200]);
+      }
+
       notification.onclick = () => {
         notification.remove();
         showMessagesModal();
@@ -1025,36 +1056,13 @@
       }, 5000);
     }
 
-    window.showMessagesModal = async function() {
-      if (!userID || !userPlace) return;
-      
-      const messagesRef = ref(db, 'messages');
-      const snapshot = await get(messagesRef);
-      
-      if (!snapshot.exists()) {
+    window.showMessagesModal = function() {
+      if (!currentMessagesSnapshot || currentMessagesSnapshot.length === 0) {
         alert('لا توجد رسائل حالياً');
         return;
       }
 
-      const allMessages = snapshot.val();
-      const relevantMessages = [];
-
-      Object.keys(allMessages).forEach(msgId => {
-        const msg = allMessages[msgId];
-        
-        if (msg.target === 'all' || msg.target === userPlace) {
-          relevantMessages.push({
-            id: msgId,
-            ...msg
-          });
-        }
-      });
-
-      relevantMessages.sort((a, b) => 
-        new Date(b.timestamp) - new Date(a.timestamp)
-      );
-
-      displayMessagesInModal(relevantMessages);
+      displayMessagesInModal(currentMessagesSnapshot);
       document.getElementById('messagesModal').classList.add('active');
     };
 
@@ -1094,7 +1102,16 @@
       const formattedTime = date.toLocaleDateString('ar-EG') + ' ' + 
                            date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
 
-      const targetText = msg.target === 'all' ? 'جميع المناديب' : msg.target;
+      let targetText = '';
+      if (msg.target === 'all') {
+        targetText = 'جميع المناديب';
+      } else if (msg.target.startsWith('place:')) {
+        targetText = msg.target.replace('place:', '');
+      } else if (msg.target.startsWith('rep:')) {
+        targetText = 'المندوب: ' + msg.target.replace('rep:', '');
+      } else {
+        targetText = msg.target;
+      }
 
       div.innerHTML = `
         <div class="message-header">
@@ -1131,7 +1148,13 @@
         localStorage.setItem('read_messages', JSON.stringify(readMessages));
       }
       
-      showMessagesModal();
+      // إعادة عرض الرسائل بعد تحديث حالة القراءة
+      if (currentMessagesSnapshot) {
+        displayMessagesInModal(currentMessagesSnapshot);
+        updateGeneralNotification(currentMessagesSnapshot);
+        const unreadCount = currentMessagesSnapshot.filter(m => !isMessageRead(m.id)).length;
+        updateBadge(unreadCount);
+      }
     };
 
     document.addEventListener('click', (e) => {
@@ -1312,10 +1335,12 @@
         repNameInput.addEventListener("input", () => {
           loadEntryCounter();
           adminLoadCounter();
+          userRepName = repNameInput.value.trim();
         });
         repNameInput.addEventListener("change", () => {
           loadEntryCounter();
           adminLoadCounter();
+          userRepName = repNameInput.value.trim();
         });
       }
     });
@@ -1436,7 +1461,17 @@
           const date = new Date(msg.timestamp);
           const formattedDate = date.toLocaleDateString('ar-EG');
           const formattedTime = date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-          const targetText = msg.target === 'all' ? 'الكل' : msg.target;
+          
+          let targetText = '';
+          if (msg.target === 'all') {
+            targetText = 'الكل';
+          } else if (msg.target.startsWith('place:')) {
+            targetText = msg.target.replace('place:', '');
+          } else if (msg.target.startsWith('rep:')) {
+            targetText = 'المندوب: ' + msg.target.replace('rep:', '');
+          } else {
+            targetText = msg.target;
+          }
           
           const msgDiv = document.createElement('div');
           msgDiv.style.cssText = 'background:#f8f9fa;padding:10px;margin-bottom:8px;border-radius:8px;border-right:3px solid #9b59b6;';
@@ -1459,53 +1494,38 @@
     };
 
     window.deleteAllMessages = async function() {
-      console.log('deleteAllMessages called');
-      
-      if (!confirm('⚠️ تحذير!\n\nهل أنت متأكد من حذف جميع الرسائل؟\n\nسيتم حذف جميع الرسائل المرسلة لكافة المناديب ولا يمكن التراجع عن هذا الإجراء!')) {
-        console.log('User cancelled first confirmation');
+      if (!confirm('⚠️ تحذير!\n\nهل أنت متأكد من حذف جميع الرسائل?\n\nسيتم حذف جميع الرسائل المرسلة لكافة المناديب ولا يمكن التراجع عن هذا الإجراء!')) {
         return;
       }
       
       if (!confirm('تأكيد نهائي!\n\nاضغط موافق لحذف جميع الرسائل نهائياً')) {
-        console.log('User cancelled second confirmation');
         return;
       }
-      
-      console.log('Starting delete operation...');
       
       try {
         const messagesRef = ref(db, 'messages');
         const sentMessagesRef = ref(db, 'sentMessages');
         
-        console.log('Deleting messages...');
         await remove(messagesRef);
-        
-        console.log('Deleting sentMessages...');
         await remove(sentMessagesRef);
         
-        console.log('Clearing localStorage...');
         localStorage.removeItem('read_messages');
         
-        console.log('Delete operation completed successfully');
-        
-        alert('✅ تم حذف جميع الرسائل بنجاح\n\n📝 ملاحظة: سيحتاج المناديب إعادة تحميل الصفحة لرؤية التحديث');
+        alert('✅ تم حذف جميع الرسائل بنجاح\n\n📝 ملاحظة: التحديث فوري لجميع المناديب');
         
         const container = document.getElementById('adminMessagesList');
         if (container) {
           container.innerHTML = '<div class="empty-list">تم حذف جميع الرسائل</div>';
         }
         
-        updateGeneralNotification([]);
-        updateBadge(0);
-        
       } catch (error) {
         console.error('Error details:', error);
-        alert('❌ حدث خطأ: ' + error.message + '\n\nتحقق من Console للمزيد من التفاصيل');
+        alert('❌ حدث خطأ: ' + error.message);
       }
     };
 
     window.deleteSingleMessage = async function(msgId) {
-      if (!confirm('هل تريد حذف هذه الرسالة؟')) {
+      if (!confirm('هل تريد حذف هذه الرسالة?')) {
         return;
       }
       
