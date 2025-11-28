@@ -5,89 +5,115 @@
 <title>ماسح بطاقة الرقم القومي المصري</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Dynamsoft barcode reader -->
-<script src="https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@9.6.20/dist/dbr.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@10.3.0/dist/dbr.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
 body {
-    background: #f1f5f9;
+    background: #eef2f5;
     font-family: 'Cairo', sans-serif;
     text-align: center;
-    padding: 20px;
+    padding: 25px;
 }
 
-video {
-    width: 340px;
+#scanner {
+    width: 350px;
+    height: 350px;
+    margin: 0 auto;
     border: 3px solid #0f3c67;
     border-radius: 12px;
-    background: #000;
+    overflow: hidden;
 }
 
 input {
-    width: 340px;
+    width: 350px;
     padding: 12px;
-    margin-top: 10px;
+    margin-top: 15px;
     font-size: 22px;
     text-align: center;
     border-radius: 10px;
     border: 2px solid #0f3c67;
+    background: #fff;
 }
 
 #success {
     display: none;
-    margin-top: 15px;
     background: #0f3c67;
     color: #fff;
     padding: 12px;
+    margin-top: 15px;
     border-radius: 10px;
+}
+
+button {
+    margin-top: 15px;
+    background: #0f3c67;
+    padding: 10px 16px;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    cursor: pointer;
 }
 </style>
 </head>
 
 <body>
 
-<h2>قارئ بطاقة الرقم القومي المصري</h2>
+<h2>قارئ بطاقة الرقم القومي المصري (DataMatrix)</h2>
 
-<div id="scanner-container"></div>
+<div id="scanner"></div>
 
-<input id="nid" type="text" placeholder="الرقم القومي يظهر هنا تلقائيًا">
+<input id="nid" type="text" placeholder="الرقم القومي يظهر تلقائيًا">
 
 <div id="success">✔️ تمت قراءة الرقم القومي بنجاح</div>
+
+<button onclick="restart()">إعادة تشغيل الماسح</button>
 
 <script>
 function toArabic(n){
     return n.replace(/[0-9]/g, d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 }
 
-(async()=>{
+let scanner;
 
-    // 🔐 ضع الترخيص هنا
-    Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMTA0ODY2MTM2LU1UQTBPRFkyTVRNMkxYZGxZaTFVY21saGJGQnliMm8iLCJtYWluU2VydmVyVVJMIjoiaHR0cHM6Ly9tZGxzLmR5bmFtc29mdG9ubGluZS5jb20iLCJvcmdhbml6YXRpb25JRCI6IjEwNDg2NjEzNiIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NkbHMuZHluYW1zb2Z0b25saW5lLmNvbSIsImNoZWNrQ29kZSI6LTE3MDIzNzIyNzh9
+async function start() {
+    try {
 
-";
+        scanner = await Dynamsoft.BarcodeScanner.createInstance({
+            license: "DLS2eyJoYW5kc2hha2VDb2RlIjoiMTA0ODY2MTM2LU1UQTBPRFkyTVRNMkxYZGxZaTFVY21saGJGQnliMm8iLCJtYWluU2VydmVyVVJMIjoiaHR0cHM6Ly9tZGxzLmR5bmFtc29mdG9ubGluZS5jb20iLCJvcmdhbml6YXRpb25JRCI6IjEwNDg2NjEzNiIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NkbHMuZHluYW1zb2Z0b25saW5lLmNvbSIsImNoZWNrQ29kZSI6LTE3MDIzNzIyNzh9",
+            videoSettings: { facingMode: "environment" }
+        });
 
-    Dynamsoft.DBR.BarcodeReader.engineResourcePath =
-        "https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@9.6.20/dist/";
+        scanner.onFrameRead = results => {
+            if (results.length === 0) return;
 
-    let scanner = await Dynamsoft.DBR.BarcodeScanner.createInstance();
+            let raw = results[0].barcodeText;
+            raw = raw.replace(/\D/g, "").substring(0, 14);
 
-    // تشغيل الكاميرا الخلفية
-    await scanner.updateVideoSettings({ facingMode: "environment" });
+            document.getElementById("nid").value = toArabic(raw);
+            document.getElementById("success").style.display = "block";
 
-    scanner.onUniqueRead = (txt)=>{
-        let clean = txt.replace(/\D/g, "").substring(0,14);
-        document.getElementById("nid").value = toArabic(clean);
+            scanner.stop();
+        };
 
-        document.getElementById("success").style.display = "block";
+        await scanner.setUIElement(document.getElementById("scanner"));
+        await scanner.open();
+    } 
+    catch (err) {
+        console.error(err);
+        alert("خطأ في تشغيل الماسح أو الكاميرا!");
+    }
+}
 
-        scanner.stopScanning();
-    };
+async function restart() {
+    document.getElementById("success").style.display = "none";
+    document.getElementById("nid").value = "";
+    await scanner.open();
+}
 
-    document.getElementById("scanner-container").appendChild(scanner.getUIElement());
-    await scanner.show();
-})();
+start();
 </script>
 
 </body>
