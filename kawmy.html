@@ -5,7 +5,7 @@
 <title>ماسح بطاقة الرقم القومي المصري</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@10.3.0/dist/dbr.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dynamsoft-barcode-reader-bundle@11.2.4000/dist/dbr.bundle.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -15,11 +15,18 @@ body {
     font-family: 'Cairo', sans-serif;
     text-align: center;
     padding: 25px;
+    margin: 0;
 }
 
-#scanner {
-    width: 350px;
-    height: 350px;
+h2 {
+    color: #0f3c67;
+    margin-bottom: 20px;
+}
+
+#camera-view-container {
+    width: 100%;
+    max-width: 500px;
+    height: 400px;
     margin: 0 auto;
     border: 3px solid #0f3c67;
     border-radius: 12px;
@@ -28,7 +35,8 @@ body {
 }
 
 input {
-    width: 350px;
+    width: 100%;
+    max-width: 500px;
     padding: 12px;
     margin-top: 15px;
     font-size: 22px;
@@ -36,15 +44,18 @@ input {
     border-radius: 10px;
     border: 2px solid #0f3c67;
     background: #fff;
+    box-sizing: border-box;
 }
 
 #success {
     display: none;
-    background: #0f3c67;
+    background: #4caf50;
     color: #fff;
     padding: 12px;
-    margin-top: 15px;
+    margin: 15px auto;
+    max-width: 500px;
     border-radius: 10px;
+    font-size: 18px;
 }
 
 #error {
@@ -52,29 +63,32 @@ input {
     background: #d32f2f;
     color: #fff;
     padding: 12px;
-    margin-top: 15px;
+    margin: 15px auto;
+    max-width: 500px;
     border-radius: 10px;
-}
-
-button {
-    margin-top: 15px;
-    background: #0f3c67;
-    padding: 10px 16px;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-size: 18px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #1a5490;
+    font-size: 16px;
 }
 
 #status {
     margin-top: 15px;
     font-size: 16px;
     color: #666;
+}
+
+button {
+    margin-top: 15px;
+    background: #0f3c67;
+    padding: 12px 20px;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+}
+
+button:hover {
+    background: #1a5490;
 }
 </style>
 </head>
@@ -85,7 +99,7 @@ button:hover {
 
 <div id="status">جاري تحميل الماسح...</div>
 
-<div id="scanner"></div>
+<div id="camera-view-container"></div>
 
 <input id="nid" type="text" placeholder="الرقم القومي يظهر تلقائيًا" readonly>
 
@@ -100,40 +114,71 @@ function toArabic(n){
     return n.replace(/[0-9]/g, d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 }
 
-let scanner;
+let cvRouter;
+let cameraEnhancer;
 
 async function start() {
     try {
-        document.getElementById("status").textContent = "جاري تشغيل الكاميرا...";
+        document.getElementById("status").textContent = "جاري تهيئة المكتبة...";
         document.getElementById("error").style.display = "none";
+        document.getElementById("success").style.display = "none";
 
-        // استخدام DBR.BarcodeScanner للإصدار 10.x
-        scanner = await Dynamsoft.DBR.BarcodeScanner.createInstance();
+        // تهيئة الترخيص
+        Dynamsoft.License.LicenseManager.initLicense("DLS2eyJoYW5kc2hha2VDb2RlIjoiMTA0ODY2MTM2LU1UQTBPRFkyTVRNMkxYZGxZaTFVY21saGJGQnliMm8iLCJtYWluU2VydmVyVVJMIjoiaHR0cHM6Ly9tZGxzLmR5bmFtc29mdG9ubGluZS5jb20iLCJvcmdhbml6YXRpb25JRCI6IjEwNDg2NjEzNiIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NkbHMuZHluYW1zb2Z0b25saW5lLmNvbSIsImNoZWNrQ29kZSI6LTE3MDIzNzIyNzh9");
+
+        // تحميل مكتبات WASM مسبقاً
+        await Dynamsoft.Core.CoreModule.loadWasm();
+
+        document.getElementById("status").textContent = "جاري تشغيل الكاميرا...";
+
+        // إنشاء CaptureVisionRouter
+        cvRouter = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
+
+        // إنشاء CameraView و CameraEnhancer
+        let cameraView = await Dynamsoft.DCE.CameraView.createInstance();
+        cameraEnhancer = await Dynamsoft.DCE.CameraEnhancer.createInstance(cameraView);
         
-        // تعيين الترخيص
-        await Dynamsoft.DBR.BarcodeReader.initLicense("DLS2eyJoYW5kc2hha2VDb2RlIjoiMTA0ODY2MTM2LU1UQTBPRFkyTVRNMkxYZGxZaTFVY21saGJGQnliMm8iLCJtYWluU2VydmVyVVJMIjoiaHR0cHM6Ly9tZGxzLmR5bmFtc29mdG9ubGluZS5jb20iLCJvcmdhbml6YXRpb25JRCI6IjEwNDg2NjEzNiIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NkbHMuZHluYW1zb2Z0b25saW5lLmNvbSIsImNoZWNrQ29kZSI6LTE3MDIzNzIyNzh9");
+        // إضافة الكاميرا للصفحة
+        document.querySelector("#camera-view-container").append(cameraView.getUIElement());
 
-        // إعدادات الكاميرا
-        let settings = await scanner.getRuntimeSettings();
-        settings.barcodeFormatIds = Dynamsoft.DBR.EnumBarcodeFormat.BF_DATAMATRIX;
-        await scanner.updateRuntimeSettings(settings);
+        // ربط الكاميرا بـ router
+        cvRouter.setInput(cameraEnhancer);
 
-        scanner.onFrameRead = results => {
-            if (results.length === 0) return;
+        // تخصيص الإعدادات للقراءة DataMatrix فقط
+        let settings = await cvRouter.getSimplifiedSettings("ReadSingleBarcode");
+        settings.barcodeSettings.barcodeFormatIds = Dynamsoft.DBR.EnumBarcodeFormat.BF_DATAMATRIX;
+        await cvRouter.updateSettings("ReadSingleBarcode", settings);
 
-            let raw = results[0].barcodeText;
-            raw = raw.replace(/\D/g, "").substring(0, 14);
+        // إضافة مستقبل النتائج
+        cvRouter.addResultReceiver({
+            onDecodedBarcodesReceived: (result) => {
+                if (result.barcodeResultItems?.length) {
+                    let raw = result.barcodeResultItems[0].text;
+                    raw = raw.replace(/\D/g, "").substring(0, 14);
 
-            if (raw.length === 14) {
-                document.getElementById("nid").value = toArabic(raw);
-                document.getElementById("success").style.display = "block";
-                document.getElementById("status").textContent = "✔️ تم المسح بنجاح";
-                scanner.stop();
+                    if (raw.length === 14) {
+                        document.getElementById("nid").value = toArabic(raw);
+                        document.getElementById("success").style.display = "block";
+                        document.getElementById("status").textContent = "✔️ تم المسح بنجاح";
+                        
+                        // إصدار صوت تنبيه
+                        try {
+                            Dynamsoft.DCE.Feedback.beep();
+                        } catch(e) {}
+                    }
+                }
             }
-        };
+        });
 
-        await scanner.setUIElement(document.getElementById("scanner"));
-        await scanner.open();
+        // إضافة فلتر لتجنب النتائج المكررة
+        let filter = new Dynamsoft.Utility.MultiFrameResultCrossFilter();
+        filter.enableResultCrossVerification("barcode", true);
+        filter.enableResultDeduplication("barcode", true);
+        await cvRouter.addResultFilter(filter);
+
+        // فتح الكاميرا وبدء المسح
+        await cameraEnhancer.open();
+        await cvRouter.startCapturing("ReadSingleBarcode");
         
         document.getElementById("status").textContent = "جاهز للمسح - وجّه الكاميرا نحو الباركود";
     } 
@@ -143,15 +188,15 @@ async function start() {
         let errorMsg = "";
         
         if (err.name === "NotAllowedError" || err.message.includes("permission")) {
-            errorMsg = "⚠️ تم رفض إذن الكاميرا. يرجى السماح بالوصول للكاميرا من إعدادات المتصفح ثم إعادة تحميل الصفحة.";
+            errorMsg = "⚠️ تم رفض إذن الكاميرا.\n\nيرجى:\n1. السماح بالوصول للكاميرا من إعدادات المتصفح\n2. إعادة تحميل الصفحة\n3. التأكد من عدم استخدام الكاميرا في تطبيق آخر";
         } else if (err.name === "NotFoundError") {
             errorMsg = "⚠️ لم يتم العثور على كاميرا متصلة بالجهاز.";
         } else if (err.name === "NotReadableError") {
             errorMsg = "⚠️ الكاميرا قيد الاستخدام من تطبيق آخر. يرجى إغلاق التطبيقات الأخرى والمحاولة مرة أخرى.";
-        } else if (err.name === "SecurityError") {
-            errorMsg = "⚠️ خطأ أمني: يجب فتح الصفحة عبر HTTPS أو localhost للوصول للكاميرا.";
+        } else if (err.name === "SecurityError" || window.location.protocol === "http:") {
+            errorMsg = "⚠️ خطأ أمني: يجب فتح الصفحة عبر HTTPS أو localhost للوصول للكاميرا.\n\nالرابط الحالي: " + window.location.protocol;
         } else {
-            errorMsg = "⚠️ خطأ في تشغيل الماسح: " + err.message;
+            errorMsg = "⚠️ خطأ في تشغيل الماسح:\n" + err.message;
         }
         
         document.getElementById("error").textContent = errorMsg;
@@ -169,8 +214,11 @@ async function restart() {
         document.getElementById("nid").value = "";
         document.getElementById("status").textContent = "جاري إعادة التشغيل...";
         
-        if (scanner) {
-            await scanner.open();
+        if (cameraEnhancer && cvRouter) {
+            await cvRouter.stopCapturing();
+            await cameraEnhancer.close();
+            await cameraEnhancer.open();
+            await cvRouter.startCapturing("ReadSingleBarcode");
             document.getElementById("status").textContent = "جاهز للمسح - وجّه الكاميرا نحو الباركود";
         } else {
             await start();
@@ -179,11 +227,12 @@ async function restart() {
         console.error(err);
         document.getElementById("error").textContent = "⚠️ فشلت إعادة التشغيل: " + err.message;
         document.getElementById("error").style.display = "block";
+        document.getElementById("status").textContent = "حدث خطأ";
     }
 }
 
 // بدء التشغيل عند تحميل الصفحة
-start();
+window.addEventListener('load', start);
 </script>
 
 </body>
