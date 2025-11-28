@@ -1,239 +1,340 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>ماسح بطاقة الرقم القومي المصري</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <meta name="description" content="قراءة باركود بطاقة الرقم القومي المصري باستخدام Dynamsoft Barcode Reader" />
+  <title>ماسح بطاقة الرقم القومي المصري</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-<script src="https://cdn.jsdelivr.net/npm/dynamsoft-barcode-reader-bundle@11.2.4000/dist/dbr.bundle.js"></script>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
 
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    .home-page {
+      text-align: center;
+      background: white;
+      padding: 60px 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 500px;
+      width: 100%;
+    }
 
-<style>
-body {
-    background: #eef2f5;
-    font-family: 'Cairo', sans-serif;
-    text-align: center;
-    padding: 25px;
-    margin: 0;
-}
+    .home-page-title {
+      color: #0f3c67;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 40px;
+    }
 
-h2 {
-    color: #0f3c67;
-    margin-bottom: 20px;
-}
+    .start-btn {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 30px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
 
-#camera-view-container {
-    width: 100%;
-    max-width: 500px;
-    height: 400px;
-    margin: 0 auto;
-    border: 3px solid #0f3c67;
-    border-radius: 12px;
-    overflow: hidden;
-    background: #000;
-}
+    .start-btn:hover {
+      transform: scale(1.1);
+    }
 
-input {
-    width: 100%;
-    max-width: 500px;
-    padding: 12px;
-    margin-top: 15px;
-    font-size: 22px;
-    text-align: center;
-    border-radius: 10px;
-    border: 2px solid #0f3c67;
-    background: #fff;
-    box-sizing: border-box;
-}
+    .start-icon {
+      width: 100%;
+      height: 100%;
+      background: #0f3c67;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
 
-#success {
-    display: none;
-    background: #4caf50;
-    color: #fff;
-    padding: 12px;
-    margin: 15px auto;
-    max-width: 500px;
-    border-radius: 10px;
-    font-size: 18px;
-}
+    .start-icon::after {
+      content: '';
+      width: 0;
+      height: 0;
+      border-left: 30px solid white;
+      border-top: 20px solid transparent;
+      border-bottom: 20px solid transparent;
+      margin-right: -5px;
+    }
 
-#error {
-    display: none;
-    background: #d32f2f;
-    color: #fff;
-    padding: 12px;
-    margin: 15px auto;
-    max-width: 500px;
-    border-radius: 10px;
-    font-size: 16px;
-}
+    .loading {
+      display: none;
+      width: 100%;
+      height: 100%;
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #0f3c67;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
 
-#status {
-    margin-top: 15px;
-    font-size: 16px;
-    color: #666;
-}
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
-button {
-    margin-top: 15px;
-    background: #0f3c67;
-    padding: 12px 20px;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-size: 18px;
-    cursor: pointer;
-    font-family: 'Cairo', sans-serif;
-}
+    .logo-dynamsoft {
+      width: 150px;
+      margin-top: 20px;
+      opacity: 0.5;
+    }
 
-button:hover {
-    background: #1a5490;
-}
-</style>
+    .parsed-result-view {
+      display: none;
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .result-title {
+      color: #0f3c67;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .barcode-text {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      word-break: break-all;
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+    }
+
+    .nid-display {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .nid-label {
+      font-size: 16px;
+      opacity: 0.9;
+      margin-bottom: 10px;
+    }
+
+    .nid-value {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: 3px;
+    }
+
+    .parsed-result-list {
+      list-style: none;
+      margin-bottom: 20px;
+    }
+
+    .parsed-result-item {
+      background: #f9f9f9;
+      padding: 12px 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border-right: 4px solid #0f3c67;
+    }
+
+    .parsed-result-item strong {
+      color: #0f3c67;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .back-to-scan {
+      background: #0f3c67;
+      color: white;
+      padding: 15px 30px;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+
+    .back-to-scan:hover {
+      background: #1a5490;
+    }
+
+    .error-message {
+      background: #ff5252;
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+  </style>
 </head>
-
 <body>
+  <div class="home-page">
+    <h1 class="home-page-title">ماسح بطاقة الرقم القومي المصري</h1>
+    <div class="start-btn">
+      <div class="start-icon"></div>
+      <div class="loading"></div>
+    </div>
+    <p style="color: #666; font-size: 16px;">اضغط للبدء في المسح</p>
+  </div>
 
-<h2>قارئ بطاقة الرقم القومي المصري (DataMatrix)</h2>
+  <div class="parsed-result-view">
+    <h2 class="result-title">✔️ نتيجة المسح</h2>
+    <div class="nid-display">
+      <div class="nid-label">الرقم القومي</div>
+      <div class="nid-value" id="nid-value"></div>
+    </div>
+    <div class="barcode-text"></div>
+    <ul class="parsed-result-list"></ul>
+    <div class="back-to-scan">مسح بطاقة أخرى</div>
+  </div>
 
-<div id="status">جاري تحميل الماسح...</div>
+  <script src="https://cdn.jsdelivr.net/npm/dynamsoft-barcode-reader-bundle@11.2.4000/dist/dbr.bundle.js"></script>
+  <script>
+    const parsedResultView = document.querySelector(".parsed-result-view");
+    const homePage = document.querySelector(".home-page");
+    const startIcon = document.querySelector(".start-icon");
+    const startBtn = document.querySelector(".start-btn");
+    const loading = document.querySelector(".loading");
+    const barcodeText = document.querySelector(".barcode-text");
+    const parsedResultList = document.querySelector(".parsed-result-list");
+    const backToScan = document.querySelector(".back-to-scan");
+    const nidValue = document.getElementById("nid-value");
 
-<div id="camera-view-container"></div>
+    const licenseString = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMTA0ODY2MTM2LU1UQTBPRFkyTVRNMkxYZGxZaTFVY21saGJGQnliMm8iLCJtYWluU2VydmVyVVJMIjoiaHR0cHM6Ly9tZGxzLmR5bmFtc29mdG9ubGluZS5jb20iLCJvcmdhbml6YXRpb25JRCI6IjEwNDg2NjEzNiIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NkbHMuZHluYW1zb2Z0b25saW5lLmNvbSIsImNoZWNrQ29kZSI6LTE3MDIzNzIyNzh9";
 
-<input id="nid" type="text" placeholder="الرقم القومي يظهر تلقائيًا" readonly>
+    Dynamsoft.License.LicenseManager.initLicense(licenseString);
 
-<div id="success">✔️ تمت قراءة الرقم القومي بنجاح</div>
+    function toArabic(n) {
+      return n.replace(/[0-9]/g, d => "٠١٢٣٤٥٦٧٨٩"[d]);
+    }
 
-<div id="error"></div>
-
-<button onclick="restart()">إعادة تشغيل الماسح</button>
-
-<script>
-function toArabic(n){
-    return n.replace(/[0-9]/g, d=>"٠١٢٣٤٥٦٧٨٩"[d]);
-}
-
-let cvRouter;
-let cameraEnhancer;
-
-async function start() {
-    try {
-        document.getElementById("status").textContent = "جاري تهيئة المكتبة...";
-        document.getElementById("error").style.display = "none";
-        document.getElementById("success").style.display = "none";
-
-        // تهيئة الترخيص
-        Dynamsoft.License.LicenseManager.initLicense("DLS2eyJoYW5kc2hha2VDb2RlIjoiMTA0ODY2MTM2LU1UQTBPRFkyTVRNMkxYZGxZaTFVY21saGJGQnliMm8iLCJtYWluU2VydmVyVVJMIjoiaHR0cHM6Ly9tZGxzLmR5bmFtc29mdG9ubGluZS5jb20iLCJvcmdhbml6YXRpb25JRCI6IjEwNDg2NjEzNiIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NkbHMuZHluYW1zb2Z0b25saW5lLmNvbSIsImNoZWNrQ29kZSI6LTE3MDIzNzIyNzh9");
-
-        // تحميل مكتبات WASM مسبقاً
-        await Dynamsoft.Core.CoreModule.loadWasm();
-
-        document.getElementById("status").textContent = "جاري تشغيل الكاميرا...";
-
-        // إنشاء CaptureVisionRouter
-        cvRouter = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
-
-        // إنشاء CameraView و CameraEnhancer
-        let cameraView = await Dynamsoft.DCE.CameraView.createInstance();
-        cameraEnhancer = await Dynamsoft.DCE.CameraEnhancer.createInstance(cameraView);
-        
-        // إضافة الكاميرا للصفحة
-        document.querySelector("#camera-view-container").append(cameraView.getUIElement());
-
-        // ربط الكاميرا بـ router
-        cvRouter.setInput(cameraEnhancer);
-
-        // تخصيص الإعدادات للقراءة DataMatrix فقط
-        let settings = await cvRouter.getSimplifiedSettings("ReadSingleBarcode");
-        settings.barcodeSettings.barcodeFormatIds = Dynamsoft.DBR.EnumBarcodeFormat.BF_DATAMATRIX;
-        await cvRouter.updateSettings("ReadSingleBarcode", settings);
-
-        // إضافة مستقبل النتائج
-        cvRouter.addResultReceiver({
-            onDecodedBarcodesReceived: (result) => {
-                if (result.barcodeResultItems?.length) {
-                    let raw = result.barcodeResultItems[0].text;
-                    raw = raw.replace(/\D/g, "").substring(0, 14);
-
-                    if (raw.length === 14) {
-                        document.getElementById("nid").value = toArabic(raw);
-                        document.getElementById("success").style.display = "block";
-                        document.getElementById("status").textContent = "✔️ تم المسح بنجاح";
-                        
-                        // إصدار صوت تنبيه
-                        try {
-                            Dynamsoft.DCE.Feedback.beep();
-                        } catch(e) {}
-                    }
-                }
+    (async () => {
+      async function launch() {
+        try {
+          const scanner = new Dynamsoft.BarcodeScanner({
+            license: licenseString,
+            showUploadImageButton: true,
+            utilizedTemplateNames: {
+              "single": "ReadDataMatrix",
+              "multi_unique": "ReadDataMatrix",
+              "image": "ReadDataMatrix"
+            },
+            scannerViewConfig: {
+              showFlashButton: true,
+              showCloseButton: false,
+              cameraSwitchControl: "toggleFrontBack",
+            },
+            onInitReady: () => {
+              homePage.style.display = "none";
             }
-        });
+          });
 
-        // إضافة فلتر لتجنب النتائج المكررة
-        let filter = new Dynamsoft.Utility.MultiFrameResultCrossFilter();
-        filter.enableResultCrossVerification("barcode", true);
-        filter.enableResultDeduplication("barcode", true);
-        await cvRouter.addResultFilter(filter);
+          // تخصيص الإعدادات لقراءة DataMatrix فقط
+          const settings = await scanner.cvRouter.getSimplifiedSettings("ReadDataMatrix");
+          settings.barcodeSettings.barcodeFormatIds = Dynamsoft.DBR.EnumBarcodeFormat.BF_DATAMATRIX;
+          await scanner.cvRouter.updateSettings("ReadDataMatrix", settings);
 
-        // فتح الكاميرا وبدء المسح
-        await cameraEnhancer.open();
-        await cvRouter.startCapturing("ReadSingleBarcode");
-        
-        document.getElementById("status").textContent = "جاهز للمسح - وجّه الكاميرا نحو الباركود";
-    } 
-    catch (err) {
-        console.error("تفاصيل الخطأ:", err);
-        
-        let errorMsg = "";
-        
-        if (err.name === "NotAllowedError" || err.message.includes("permission")) {
-            errorMsg = "⚠️ تم رفض إذن الكاميرا.\n\nيرجى:\n1. السماح بالوصول للكاميرا من إعدادات المتصفح\n2. إعادة تحميل الصفحة\n3. التأكد من عدم استخدام الكاميرا في تطبيق آخر";
-        } else if (err.name === "NotFoundError") {
-            errorMsg = "⚠️ لم يتم العثور على كاميرا متصلة بالجهاز.";
-        } else if (err.name === "NotReadableError") {
-            errorMsg = "⚠️ الكاميرا قيد الاستخدام من تطبيق آخر. يرجى إغلاق التطبيقات الأخرى والمحاولة مرة أخرى.";
-        } else if (err.name === "SecurityError" || window.location.protocol === "http:") {
-            errorMsg = "⚠️ خطأ أمني: يجب فتح الصفحة عبر HTTPS أو localhost للوصول للكاميرا.\n\nالرابط الحالي: " + window.location.protocol;
-        } else {
-            errorMsg = "⚠️ خطأ في تشغيل الماسح:\n" + err.message;
+          const result = await scanner.launch();
+          
+          if (result.barcodeResults.length > 0) {
+            let processedResult = [];
+            try {
+              const rawText = result.barcodeResults[0].text;
+              const nidOnly = rawText.replace(/\D/g, "").substring(0, 14);
+
+              if (nidOnly.length === 14) {
+                nidValue.textContent = toArabic(nidOnly);
+                
+                processedResult.push({
+                  description: "الرقم القومي (English)",
+                  value: nidOnly
+                });
+                processedResult.push({
+                  description: "طول البيانات",
+                  value: rawText.length + " حرف"
+                });
+                processedResult.push({
+                  description: "نوع الباركود",
+                  value: result.barcodeResults[0].formatString
+                });
+              } else {
+                throw new Error("الرقم القومي غير مكتمل أو غير صحيح");
+              }
+
+              barcodeText.innerText = "النص الأصلي: " + rawText.substring(0, 100) + (rawText.length > 100 ? "..." : "");
+            } catch (ex) {
+              processedResult = [
+                { description: "خطأ", value: ex.message || "فشل معالجة البيانات" },
+                {
+                  description: "النص الأصلي",
+                  value: result.barcodeResults[0].text.substring(0, 200),
+                },
+              ];
+            } finally {
+              generateResultList(processedResult);
+            }
+            parsedResultView.style.display = "block";
+          }
+        } catch (error) {
+          console.error("خطأ:", error);
+          alert("حدث خطأ في تشغيل الماسح: " + error.message + "\n\nتأكد من:\n- السماح بالوصول للكاميرا\n- استخدام HTTPS أو localhost\n- عدم وجود تطبيق آخر يستخدم الكاميرا");
+          homePage.style.display = "block";
+          loading.style.display = "none";
+          startIcon.style.display = "flex";
         }
-        
-        document.getElementById("error").textContent = errorMsg;
-        document.getElementById("error").style.display = "block";
-        document.getElementById("status").textContent = "فشل التشغيل";
-        
-        alert(errorMsg);
-    }
-}
+      }
 
-async function restart() {
-    try {
-        document.getElementById("success").style.display = "none";
-        document.getElementById("error").style.display = "none";
-        document.getElementById("nid").value = "";
-        document.getElementById("status").textContent = "جاري إعادة التشغيل...";
-        
-        if (cameraEnhancer && cvRouter) {
-            await cvRouter.stopCapturing();
-            await cameraEnhancer.close();
-            await cameraEnhancer.open();
-            await cvRouter.startCapturing("ReadSingleBarcode");
-            document.getElementById("status").textContent = "جاهز للمسح - وجّه الكاميرا نحو الباركود";
-        } else {
-            await start();
+      function generateResultList(processedResult) {
+        parsedResultList.innerHTML = "";
+        const resultList = [];
+        for (let item of processedResult) {
+          const resultItem = document.createElement("li");
+          resultItem.className = "parsed-result-item";
+          resultItem.innerHTML = `<strong>${item.description}</strong><span>${item.value}</span>`;
+          resultList.push(resultItem);
         }
-    } catch (err) {
-        console.error(err);
-        document.getElementById("error").textContent = "⚠️ فشلت إعادة التشغيل: " + err.message;
-        document.getElementById("error").style.display = "block";
-        document.getElementById("status").textContent = "حدث خطأ";
-    }
-}
+        parsedResultList.append(...resultList);
+      }
 
-// بدء التشغيل عند تحميل الصفحة
-window.addEventListener('load', start);
-</script>
+      startBtn.addEventListener("click", () => {
+        loading.style.display = "block";
+        startIcon.style.display = "none";
+        launch();
+      });
 
+      backToScan.addEventListener("click", () => {
+        parsedResultView.style.display = "none";
+        nidValue.textContent = "";
+        loading.style.display = "block";
+        startIcon.style.display = "none";
+        launch();
+      });
+    })();
+  </script>
 </body>
 </html>
