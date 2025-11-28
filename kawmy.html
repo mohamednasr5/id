@@ -2,115 +2,65 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>قارئ بطاقة الرقم القومي</title>
+<title>ماسح بطاقة الرقم القومي</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@9.6.20/dist/dbr.js"></script>
 
 <style>
-    body {
-        font-family: 'Cairo', sans-serif;
-        background: #f1f5f9;
-        margin: 0;
-        padding: 20px;
-        text-align: center;
-    }
-
-    h2 {
-        color: #0f3c67;
-        margin-bottom: 20px;
-    }
-
-    video {
-        width: 320px;
-        height: auto;
-        border: 3px solid #0f3c67;
-        border-radius: 12px;
-        background: #000;
-        margin-bottom: 15px;
-    }
-
-    input {
-        width: 320px;
-        padding: 12px;
-        border-radius: 10px;
-        border: 2px solid #0f3c67;
-        font-size: 20px;
-        text-align: center;
-    }
-
-    .success {
-        margin-top: 15px;
-        padding: 10px;
-        background: #0f3c67;
-        color: white;
-        border-radius: 10px;
-        display: none;
-    }
+body {
+    font-family: 'Cairo', sans-serif;
+    background: #f1f5f9;
+    text-align: center;
+    padding: 20px;
+}
+video {
+    width: 320px;
+    border: 3px solid #0f3c67;
+    border-radius: 12px;
+    background: #000;
+}
+input {
+    margin-top: 10px;
+    width: 320px;
+    padding: 12px;
+    font-size: 22px;
+    text-align: center;
+    border: 2px solid #0f3c67;
+    border-radius: 10px;
+}
 </style>
 </head>
 
 <body>
 
-<h2>قارئ بطاقة الرقم القومي المصري</h2>
+<h2>قارئ بطاقة الرقم القومي (DataMatrix)</h2>
 
-<video id="preview"></video>
-<br>
+<div id="barcodeScanner"></div>
 
-<input id="nationalID" type="text" placeholder="الرقم القومي سيظهر هنا تلقائيًا">
-
-<div class="success" id="success">تمت قراءة البطاقة بنجاح ✔️</div>
-
-<script src="https://unpkg.com/@zxing/browser@latest"></script>
+<input id="nid" placeholder="الرقم القومي يظهر هنا تلقائيًا">
 
 <script>
-    const codeReader = new ZXingBrowser.BrowserMultiFormatReader();
-    const video = document.getElementById('preview');
-    const resultBox = document.getElementById('nationalID');
-    const successBox = document.getElementById('success');
+function toArabic(n){
+    return n.replace(/[0-9]/g, d=>"٠١٢٣٤٥٦٧٨٩"[d]);
+}
 
-    // صوت نجاح
-    const beep = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+(async()=>{
+    Dynamsoft.DBR.BarcodeReader.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@9.6.20/dist/";
 
-    function toArabic(num) {
-        return num.replace(/[0-9]/g, d => "٠١٢٣٤٥٦٧٨٩"[d]);
-    }
+    let scanner = await Dynamsoft.DBR.BarcodeScanner.createInstance();
+    await scanner.updateVideoSettings({ facingMode: "environment" }); // الكاميرا الخلفية
 
-    async function startScanner() {
-        try {
-            const devices = await ZXingBrowser.BrowserMultiFormatReader.listVideoInputDevices();
-            const camera = devices[0]?.deviceId;
+    scanner.onUniqueRead = (txt)=>{
+        // استخراج أول 14 رقم فقط
+        let numbers = txt.replace(/\D/g,"").substring(0,14);
+        document.getElementById("nid").value = toArabic(numbers);
+        scanner.stopScanning();
+    };
 
-            if (!camera) {
-                alert("لم يتم العثور على كاميرا!");
-                return;
-            }
-
-            codeReader.decodeFromVideoDevice(camera, video, (result) => {
-                if (result) {
-                    let raw = result.text.trim();
-
-                    // استخراج أول 14 رقم فقط من الباركود
-                    raw = raw.replace(/\D/g, "").substring(0, 14);
-
-                    const arabic = toArabic(raw);
-
-                    resultBox.value = arabic;
-
-                    beep.play();
-                    successBox.style.display = "block";
-
-                    // إيقاف الكاميرا بعد القراءة
-                    codeReader.reset();
-                }
-            });
-
-        } catch (e) {
-            console.error(e);
-            alert("حدث خطأ في تشغيل الكاميرا!");
-        }
-    }
-
-    startScanner();
+    document.getElementById("barcodeScanner").appendChild(scanner.getUIElement());
+    await scanner.show();
+})();
 </script>
 
 </body>
