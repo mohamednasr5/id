@@ -1,339 +1,37 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <meta name="description" content="قراءة باركود بطاقة الرقم القومي المصري باستخدام Dynamsoft Barcode Reader" />
-  <title>ماسح بطاقة الرقم القومي المصري</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Cairo', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .home-page {
-      text-align: center;
-      background: white;
-      padding: 60px 40px;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      max-width: 500px;
-      width: 100%;
-    }
-
-    .home-page-title {
-      color: #0f3c67;
-      font-size: 32px;
-      font-weight: 700;
-      margin-bottom: 40px;
-    }
-
-    .start-btn {
-      position: relative;
-      width: 100px;
-      height: 100px;
-      margin: 0 auto 30px;
-      cursor: pointer;
-      transition: transform 0.3s ease;
-    }
-
-    .start-btn:hover {
-      transform: scale(1.1);
-    }
-
-    .start-icon {
-      width: 100%;
-      height: 100%;
-      background: #0f3c67;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-
-    .start-icon::after {
-      content: '';
-      width: 0;
-      height: 0;
-      border-left: 30px solid white;
-      border-top: 20px solid transparent;
-      border-bottom: 20px solid transparent;
-      margin-right: -5px;
-    }
-
-    .loading {
-      display: none;
-      width: 100%;
-      height: 100%;
-      border: 8px solid #f3f3f3;
-      border-top: 8px solid #0f3c67;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .logo-dynamsoft {
-      width: 150px;
-      margin-top: 20px;
-      opacity: 0.5;
-    }
-
-    .parsed-result-view {
-      display: none;
-      background: white;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      max-width: 600px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .result-title {
-      color: #0f3c67;
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .barcode-text {
-      background: #f5f5f5;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      word-break: break-all;
-      font-size: 14px;
-      color: #666;
-      text-align: center;
-    }
-
-    .nid-display {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px;
-      border-radius: 15px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .nid-label {
-      font-size: 16px;
-      opacity: 0.9;
-      margin-bottom: 10px;
-    }
-
-    .nid-value {
-      font-size: 36px;
-      font-weight: 700;
-      letter-spacing: 3px;
-    }
-
-    .parsed-result-list {
-      list-style: none;
-      margin-bottom: 20px;
-    }
-
-    .parsed-result-item {
-      background: #f9f9f9;
-      padding: 12px 15px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      border-right: 4px solid #0f3c67;
-    }
-
-    .parsed-result-item strong {
-      color: #0f3c67;
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    .back-to-scan {
-      background: #0f3c67;
-      color: white;
-      padding: 15px 30px;
-      border-radius: 10px;
-      text-align: center;
-      cursor: pointer;
-      font-size: 18px;
-      font-weight: 600;
-      transition: background 0.3s ease;
-    }
-
-    .back-to-scan:hover {
-      background: #1a5490;
-    }
-
-    .error-message {
-      background: #ff5252;
-      color: white;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>قارئ بطاقة + رخصة</title>
+  <script src="https://cdn.jsdelivr.net/npm/dynamsoft-barcode-reader-bundle@11.2.4000/dist/dbr.bundle.js"></script>
 </head>
 <body>
-  <div class="home-page">
-    <h1 class="home-page-title">ماسح بطاقة الرقم القومي المصري</h1>
-    <div class="start-btn">
-      <div class="start-icon"></div>
-      <div class="loading"></div>
-    </div>
-    <p style="color: #666; font-size: 16px;">اضغط للبدء في المسح</p>
-  </div>
+  <h2>Scan ID / Driver License</h2>
+  <div id="camera-view"></div>
+  <pre id="result"></pre>
 
-  <div class="parsed-result-view">
-    <h2 class="result-title">✔️ نتيجة المسح</h2>
-    <div class="nid-display">
-      <div class="nid-label">الرقم القومي</div>
-      <div class="nid-value" id="nid-value"></div>
-    </div>
-    <div class="barcode-text"></div>
-    <ul class="parsed-result-list"></ul>
-    <div class="back-to-scan">مسح بطاقة أخرى</div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/dynamsoft-barcode-reader-bundle@11.2.4000/dist/dbr.bundle.js"></script>
   <script>
-    const parsedResultView = document.querySelector(".parsed-result-view");
-    const homePage = document.querySelector(".home-page");
-    const startIcon = document.querySelector(".start-icon");
-    const startBtn = document.querySelector(".start-btn");
-    const loading = document.querySelector(".loading");
-    const barcodeText = document.querySelector(".barcode-text");
-    const parsedResultList = document.querySelector(".parsed-result-list");
-    const backToScan = document.querySelector(".back-to-scan");
-    const nidValue = document.getElementById("nid-value");
-
-    const licenseString = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMTA0ODY2MTM2LU1UQTBPRFkyTVRNMkxYZGxZaTFVY21saGJGQnliMm8iLCJtYWluU2VydmVyVVJMIjoiaHR0cHM6Ly9tZGxzLmR5bmFtc29mdG9ubGluZS5jb20iLCJvcmdhbml6YXRpb25JRCI6IjEwNDg2NjEzNiIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NkbHMuZHluYW1zb2Z0b25saW5lLmNvbSIsImNoZWNrQ29kZSI6LTE3MDIzNzIyNzh9";
-
-    Dynamsoft.License.LicenseManager.initLicense(licenseString);
-
-    function toArabic(n) {
-      return n.replace(/[0-9]/g, d => "٠١٢٣٤٥٦٧٨٩"[d]);
-    }
-
-    (async () => {
-      async function launch() {
-        try {
-          const scanner = new Dynamsoft.BarcodeScanner({
-            license: licenseString,
-            showUploadImageButton: true,
-            utilizedTemplateNames: {
-              "single": "ReadDataMatrix",
-              "multi_unique": "ReadDataMatrix",
-              "image": "ReadDataMatrix"
-            },
-            scannerViewConfig: {
-              showFlashButton: true,
-              showCloseButton: false,
-              cameraSwitchControl: "toggleFrontBack",
-            },
-            onInitReady: () => {
-              homePage.style.display = "none";
-            }
-          });
-
-          // تخصيص الإعدادات لقراءة DataMatrix فقط
-          const settings = await scanner.cvRouter.getSimplifiedSettings("ReadDataMatrix");
-          settings.barcodeSettings.barcodeFormatIds = Dynamsoft.DBR.EnumBarcodeFormat.BF_DATAMATRIX;
-          await scanner.cvRouter.updateSettings("ReadDataMatrix", settings);
-
-          const result = await scanner.launch();
-          
-          if (result.barcodeResults.length > 0) {
-            let processedResult = [];
-            try {
-              const rawText = result.barcodeResults[0].text;
-              const nidOnly = rawText.replace(/\D/g, "").substring(0, 14);
-
-              if (nidOnly.length === 14) {
-                nidValue.textContent = toArabic(nidOnly);
-                
-                processedResult.push({
-                  description: "الرقم القومي (English)",
-                  value: nidOnly
-                });
-                processedResult.push({
-                  description: "طول البيانات",
-                  value: rawText.length + " حرف"
-                });
-                processedResult.push({
-                  description: "نوع الباركود",
-                  value: result.barcodeResults[0].formatString
-                });
-              } else {
-                throw new Error("الرقم القومي غير مكتمل أو غير صحيح");
-              }
-
-              barcodeText.innerText = "النص الأصلي: " + rawText.substring(0, 100) + (rawText.length > 100 ? "..." : "");
-            } catch (ex) {
-              processedResult = [
-                { description: "خطأ", value: ex.message || "فشل معالجة البيانات" },
-                {
-                  description: "النص الأصلي",
-                  value: result.barcodeResults[0].text.substring(0, 200),
-                },
-              ];
-            } finally {
-              generateResultList(processedResult);
-            }
-            parsedResultView.style.display = "block";
-          }
-        } catch (error) {
-          console.error("خطأ:", error);
-          alert("حدث خطأ في تشغيل الماسح: " + error.message + "\n\nتأكد من:\n- السماح بالوصول للكاميرا\n- استخدام HTTPS أو localhost\n- عدم وجود تطبيق آخر يستخدم الكاميرا");
-          homePage.style.display = "block";
-          loading.style.display = "none";
-          startIcon.style.display = "flex";
-        }
-      }
-
-      function generateResultList(processedResult) {
-        parsedResultList.innerHTML = "";
-        const resultList = [];
-        for (let item of processedResult) {
-          const resultItem = document.createElement("li");
-          resultItem.className = "parsed-result-item";
-          resultItem.innerHTML = `<strong>${item.description}</strong><span>${item.value}</span>`;
-          resultList.push(resultItem);
-        }
-        parsedResultList.append(...resultList);
-      }
-
-      startBtn.addEventListener("click", () => {
-        loading.style.display = "block";
-        startIcon.style.display = "none";
-        launch();
+    (async ()=>{
+      // 1. تهيئة الماسح مع الترخيص
+      const scanner = new Dynamsoft.BarcodeScanner({
+        license: "DLS2eyJoYW5kc2hha2VDb2RlIjoiMTA0ODY2MTM2LU1UQTBPRFkyTVRNMkxYZGxZaTFVY21saGJGQnliMm8iLCJtYWluU2VydmVyVVJMIjoiaHR0cHM6Ly9tZGxzLmR5bmFtc29mdG9ubGluZS5jb20iLCJvcmdhbml6YXRpb25JRCI6IjEwNDg2NjEzNiIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NkbHMuZHluYW1zb2Z0b25saW5lLmNvbSIsImNoZWNrQ29kZSI6LTE3MDIzNzIyNzh9"
       });
 
-      backToScan.addEventListener("click", () => {
-        parsedResultView.style.display = "none";
-        nidValue.textContent = "";
-        loading.style.display = "block";
-        startIcon.style.display = "none";
-        launch();
-      });
+      await scanner.open();  // يفتح الكاميرا
+
+      // 2. قراءة
+      const result = await scanner.scan();  // ينتظر قراءة الباركود
+
+      if (result.barcodeResults.length > 0) {
+        const txt = result.barcodeResults[0].text;
+        console.log("Raw barcode text:", txt);
+
+        // 3. لو البيانات مش منظمة — parse البيانات
+        // (إذا الباركود PDF417 يحتوي JSON أو تنسيق قابل للتحليل)
+        document.getElementById("result").innerText = txt;
+      } else {
+        alert("لم يتم قراءة باركود!");
+      }
     })();
   </script>
 </body>
