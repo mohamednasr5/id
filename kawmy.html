@@ -2,64 +2,262 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>قراءة الرقم القومي من الباركود PDF417</title>
-<script src="https://unpkg.com/@zxing/browser@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 <style>
-  body { font-family: Tahoma; text-align: center; background:#f2f2f2; padding:20px; }
-  video { width: 90%; max-width: 400px; border: 2px solid #444; border-radius: 10px; }
-  #result { margin-top: 20px; padding: 15px; background: white; border-radius: 10px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center; 
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .container {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    max-width: 500px;
+    width: 100%;
+  }
+  h2 { 
+    color: #333; 
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+  video { 
+    display: none;
+  }
+  #preview {
+    width: 100%;
+    max-width: 400px;
+    height: 300px;
+    border: 3px solid #667eea;
+    border-radius: 15px;
+    margin: 20px 0;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+  #result { 
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 15px;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #667eea;
+  }
+  .loading {
+    color: #666;
+    font-size: 16px;
+  }
+  .success {
+    background: #d4edda;
+    border-color: #28a745;
+  }
+  .national-id {
+    font-size: 32px;
+    font-weight: bold;
+    color: #28a745;
+    letter-spacing: 2px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+  }
+  .info {
+    background: #e3f2fd;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+    text-align: right;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+  .info-row {
+    margin: 5px 0;
+    display: flex;
+    justify-content: space-between;
+  }
+  .info-label {
+    font-weight: bold;
+    color: #1976d2;
+  }
+  .copy-btn {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 15px;
+    transition: all 0.3s;
+  }
+  .copy-btn:hover {
+    background: #764ba2;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  }
+  .copy-btn:active {
+    transform: translateY(0);
+  }
+  .status {
+    font-size: 14px;
+    color: #666;
+    margin-top: 10px;
+  }
+  .error {
+    color: #dc3545;
+    background: #f8d7da;
+    border-color: #dc3545;
+  }
 </style>
 </head>
-
 <body>
-
-<h2>📇 استخراج الرقم القومي من باركود PDF417</h2>
-
-<video id="preview" autoplay playsinline></video>
-
-<div id="result">قم بتوجيه الكاميرا نحو باركود البطاقة</div>
+<div class="container">
+  <h2>📇 استخراج الرقم القومي من الباركود</h2>
+  <div id="preview"></div>
+  <div id="result" class="loading">
+    <p>🎥 جاري تشغيل الكاميرا...</p>
+    <p class="status">قم بتوجيه الكاميرا نحو باركود البطاقة</p>
+  </div>
+</div>
 
 <script>
   const preview = document.getElementById("preview");
   const resultBox = document.getElementById("result");
-
-  // مسح PDF417
-  const reader = new ZXing.BrowserPDF417Reader();
-
+  let lastScannedID = null;
+  let html5QrCode;
+  
   async function startScanner() {
-    // الحصول على الكاميرات
-    const cams = await ZXing.BrowserCodeReader.listVideoInputDevices();
-    const backCam =
-      cams.find(c => c.label.toLowerCase().includes("back")) || cams[0];
-
-    // البدء في المسح من الكاميرا
-    reader.decodeFromVideoDevice(backCam.deviceId, preview, (res, err) => {
-      if (res) {
-        const rawText = res.text; // البيانات الخام من الباركود
-
-        // استخراج الرقم القومي من أي مكان داخل النص
-        const nationalID = extractNID(rawText);
-
-        if (nationalID) {
-          resultBox.innerHTML = `
-            <b>الرقم القومي:</b><br>
-            <h2>${nationalID}</h2>
-          `;
-        } else {
-          resultBox.innerHTML = `<b>تم قراءة الباركود لكن لم يتم العثور على رقم قومي صالح.</b>`;
-        }
+    try {
+      html5QrCode = new Html5Qrcode("preview");
+      
+      const cameras = await Html5Qrcode.getCameras();
+      
+      if (cameras.length === 0) {
+        showError("لم يتم العثور على كاميرا متاحة");
+        return;
       }
-    });
+      
+      const backCam = cameras.find(c => c.label.toLowerCase().includes("back")) || cameras[0];
+      
+      resultBox.innerHTML = '<p class="loading">✅ الكاميرا جاهزة - وجه الباركود للكاميرا</p>';
+      
+      const config = {
+        fps: 10,
+        qrbox: { width: 300, height: 150 },
+        formatsToSupport: [ Html5QrcodeSupportedFormats.PDF_417 ]
+      };
+      
+      html5QrCode.start(
+        backCam.id,
+        config,
+        (decodedText, decodedResult) => {
+          console.log("البيانات الخام:", decodedText);
+          
+          const nationalID = extractNID(decodedText);
+          
+          if (nationalID && nationalID !== lastScannedID) {
+            lastScannedID = nationalID;
+            displayResult(nationalID, decodedText);
+          }
+        },
+        (errorMessage) => {
+          // تجاهل أخطاء عدم العثور على باركود
+        }
+      ).catch(err => {
+        showError("خطأ في بدء الكاميرا: " + err);
+      });
+      
+    } catch (error) {
+      showError("خطأ في الوصول إلى الكاميرا: " + error.message);
+    }
   }
-
-  // دالة استخراج الرقم القومي (14 رقم متتالي)
+  
   function extractNID(text) {
     const match = text.match(/\d{14}/);
     return match ? match[0] : null;
   }
-
+  
+  function parseNationalID(id) {
+    if (id.length !== 14) return null;
+    
+    const century = id[0] === '2' ? '19' : '20';
+    const year = century + id.substring(1, 3);
+    const month = id.substring(3, 5);
+    const day = id.substring(5, 7);
+    const governorate = id.substring(7, 9);
+    const sequence = id.substring(9, 13);
+    const gender = parseInt(id[12]) % 2 === 0 ? 'أنثى' : 'ذكر';
+    
+    const birthDate = `${day}/${month}/${year}`;
+    const age = new Date().getFullYear() - parseInt(year);
+    
+    return { birthDate, age, gender, governorate };
+  }
+  
+  function displayResult(nationalID, rawData) {
+    const info = parseNationalID(nationalID);
+    
+    resultBox.className = 'success';
+    resultBox.innerHTML = `
+      <p style="color: #28a745; font-weight: bold; margin-bottom: 10px;">✅ تم استخراج الرقم القومي بنجاح!</p>
+      <div class="national-id">${nationalID}</div>
+      <button class="copy-btn" onclick="copyToClipboard('${nationalID}')">📋 نسخ الرقم</button>
+      ${info ? `
+        <div class="info">
+          <div class="info-row">
+            <span class="info-label">تاريخ الميلاد:</span>
+            <span>${info.birthDate}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">العمر:</span>
+            <span>${info.age} سنة</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">النوع:</span>
+            <span>${info.gender}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">كود المحافظة:</span>
+            <span>${info.governorate}</span>
+          </div>
+        </div>
+      ` : ''}
+    `;
+  }
+  
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      const originalText = btn.textContent;
+      btn.textContent = '✅ تم النسخ!';
+      btn.style.background = '#28a745';
+      
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.style.background = '#667eea';
+      }, 2000);
+    }).catch(err => {
+      alert('فشل النسخ: ' + err);
+    });
+  }
+  
+  function showError(message) {
+    resultBox.className = 'error';
+    resultBox.innerHTML = `<p>❌ ${message}</p>`;
+  }
+  
   startScanner();
 </script>
-
 </body>
 </html>
