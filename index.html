@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap">
- <script src="https://unpkg.com/blockhash/dist/blockhash.min.js"></script>
   <style>
     :root {
       --primary-color: #0072ff;
@@ -667,7 +666,6 @@
              class="id-card-img" alt="مثال للبطاقة">
       </div>
       <button class="btn" onclick="addUser()">إضافة</button>
-      <button class="btn btn-info" onclick="openFacePopup()">📸 تصوير الوجه</button>
       <div id="add-msg" class="msg"></div>
       <button class="btn btn-message" onclick="showMessagesModal()" style="position: relative;">
         <span id="messagesBtnText">📨 الرسائل</span>
@@ -855,23 +853,19 @@
         msg.classList.add("error");
         return;
       }
-      
       try {
-        const snapshot = await get(child(ref(db), "places/" + code));
-        
+        const snapshot = await get(child(ref(db), "login_codes/" + code));
         if (!snapshot.exists()) {
-          msg.textContent = "كود غير صحيح";
+          msg.textContent = "الكود غير صحيح";
           msg.classList.add("error");
           return;
         }
-        
-        const place = snapshot.val();
-        userPlace = place.name;
-        userPlaceIdx = place.idx;
+        const data = snapshot.val();
         userID = code;
-        
+        userPlace = data.place;
+        userPlaceIdx = data.placeIdx || 0;
+
         await enforceSessionLimit(code);
-        
         await set(ref(db, `active_sessions/${code}/${currentDeviceId}`), {
           loginTime: Date.now(),
           expiresAt: Date.now() + 30 * 60 * 1000
@@ -931,6 +925,7 @@
       
       const messagesRef = ref(db, 'messages');
       
+      // استخدام onValue للاستماع الدائم للتحديثات الفورية
       messagesListener = onValue(messagesRef, (snapshot) => {
         if (!snapshot.exists()) {
           updateGeneralNotification([]);
@@ -947,6 +942,7 @@
         Object.keys(allMessages).forEach(msgId => {
           const msg = allMessages[msgId];
           
+          // فحص إذا كانت الرسالة موجهة للمندوب
           const isForAll = msg.target === 'all';
           const isForPlace = msg.target === 'place:' + userPlace;
           const isForRep = msg.target === 'rep:' + userRepName && userRepName;
@@ -965,10 +961,12 @@
 
         const unreadCount = relevantMessages.filter(m => !isMessageRead(m.id)).length;
         
+        // فقط عرض الإشعار المنبثق إذا لم يكن التحميل الأول وكان هناك رسائل جديدة
         if (!isFirstMessagesLoad && unreadCount > lastMessageCount && relevantMessages.length > 0) {
           const newMessage = relevantMessages[0];
           showPopupNotification(newMessage);
           
+          // تشغيل صوت الإشعار
           const messageSound = document.getElementById('messageSound');
           if (messageSound) {
             messageSound.play().catch(() => {});
@@ -1043,6 +1041,7 @@
 
       document.body.appendChild(notification);
 
+      // الاهتزاز إذا كان متاحاً
       if ('vibrate' in navigator) {
         navigator.vibrate([200, 100, 200]);
       }
@@ -1149,6 +1148,7 @@
         localStorage.setItem('read_messages', JSON.stringify(readMessages));
       }
       
+      // إعادة عرض الرسائل بعد تحديث حالة القراءة
       if (currentMessagesSnapshot) {
         displayMessagesInModal(currentMessagesSnapshot);
         updateGeneralNotification(currentMessagesSnapshot);
@@ -1187,27 +1187,17 @@
     loadRepNames();
 
     let lastAddTime = 0;
-    
     window.addUser = async function () {
       const msg = document.getElementById("add-msg");
       msg.textContent = "";
       msg.className = "msg";
-
-      // التأكد من وجود بصمة الوجه
-      const faceHash = getFaceHash();
-      if (!faceHash) {
-        msg.textContent = "يجب تصوير الوجه أولاً (اضغط على 📸 تصوير الوجه)";
+      
+      if (Date.now() - lastAddTime < 1200) {
+        msg.textContent = "انتظر لحظة...";
         msg.classList.add("error");
         return;
       }
-
-      const now = Date.now();
-      if (now - lastAddTime < 2000) {
-        msg.textContent = "يرجى الانتظار قليلاً...";
-        msg.classList.add("error");
-        return;
-      }
-      lastAddTime = now;
+      lastAddTime = Date.now();
       
       const name = document.getElementById("repName").value.trim();
       const natid = document.getElementById("natID").value.trim();
@@ -1232,7 +1222,6 @@
         const userRef = ref(db, "users/" + natid);
         const snapshot = await get(userRef);
         
-        // فحص تكرار الرقم القومي
         if (snapshot.exists()) {
           const data = snapshot.val();
           
@@ -1261,31 +1250,6 @@
           return;
         }
         
-        // فحص تكرار صورة الوجه
-        const faceRef = ref(db, "face_hashes/" + faceHash);
-        const fSnap = await get(faceRef);
-
-        if (fSnap.exists()) {
-          playDuplicateAlarm();
-          const info = fSnap.val();
-
-          msg.className = "duplicate-box";
-          msg.innerHTML = `
-            ⚠️ بطاقة مكررة بناءً على صورة الوجه<br>
-            مسجل بواسطة: <b>${info.repName}</b><br>
-            في: <b>${info.place}</b>
-          `;
-          
-          saveRepName(name);
-          
-          setTimeout(() => {
-            stopDuplicateAlarm();
-          }, 10000);
-          
-          return;
-        }
-        
-        // الإضافة الأصلية بعد التحقق من عدم التكرار
         await set(userRef, {
           natid,
           repName: name,
@@ -1295,22 +1259,12 @@
           username: userID
         });
         
-        // حفظ بصمة الوجه
-        await set(ref(db, "face_hashes/" + faceHash), {
-          repName: name,
-          place: userPlace,
-          time: new Date().toISOString()
-        });
-        
         saveRepName(name);
         msg.textContent = "تمت الإضافة بنجاح ✓";
         msg.classList.add("success");
         document.getElementById("natID").value = "";
         document.getElementById("natID").focus();
         incrementEntryCounter();
-        
-        // إعادة تعيين بصمة الوجه للتصوير التالي
-        lastFaceHash = null;
         
       } catch (e) {
         msg.textContent = "خطأ: " + e.message;
@@ -1689,96 +1643,5 @@
       document.getElementById("main-card").classList.remove("hidden");
     };
   </script>
-
-  <!-- ============== POPUP ماسح الوجه ============== -->
-<div id="facePopup" style="
-  position: fixed;
-  top: 0; left:0;
-  width:100%; height:100%;
-  background: rgba(0,0,0,0.8);
-  backdrop-filter: blur(5px);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index: 99999;
-">
-  <div style="
-    background:white;
-    padding:15px;
-    border-radius:15px;
-    width:90%;
-    max-width:400px;
-    text-align:center;
-    animation: popupIn .3s ease;
-  ">
-    <h3 style="margin-bottom:10px; font-size:18px;">📸 التقاط صورة الوجه</h3>
-
-    <video id="faceCam" autoplay playsinline 
-      style="width:100%; border-radius:12px; box-shadow:0 0 12px rgba(0,0,0,.3);">
-    </video>
-
-    <br><br>
-
-    <button class="btn btn-info" onclick="captureFace()">📷 التقط الآن</button>
-    <button class="btn btn-danger" onclick="closeFacePopup()" style="margin-top:8px;">إغلاق</button>
-  </div>
-</div>
-
-<style>
-@keyframes popupIn {
-  from { transform:scale(.8); opacity:0; }
-  to   { transform:scale(1); opacity:1; }
-}
-</style>
-
-<script>
-let faceStream = null;
-let lastFaceHash = null;
-
-window.openFacePopup = async function() {
-  document.getElementById("facePopup").style.display = "flex";
-
-  try {
-    faceStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment" }
-    });
-    document.getElementById("faceCam").srcObject = faceStream;
-  } catch (e) {
-    alert("لا يمكن تشغيل الكاميرا");
-  }
-};
-
-window.closeFacePopup = function() {
-  document.getElementById("facePopup").style.display = "none";
-  if (faceStream) {
-    faceStream.getTracks().forEach(t => t.stop());
-  }
-};
-
-window.captureFace = function() {
-  const video = document.getElementById("faceCam");
-  const canvas = document.createElement("canvas");
-  canvas.width = 320;
-  canvas.height = 240;
-  const ctx = canvas.getContext("2d");
-
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-  // قص منطقة الوجه داخل البطاقة
-  const faceCrop = ctx.getImageData(70, 20, 180, 200);
-
-  // استخلاص الهاش
-  lastFaceHash = blockhash.blockhashData(faceCrop, 16);
-
-  closeFacePopup();
-
-  alert("✔ تم التقاط صورة الوجه بنجاح");
-};
-
-window.getFaceHash = function() {
-  return lastFaceHash;
-};
-</script>
-
 </body>
 </html>
