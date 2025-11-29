@@ -1,388 +1,64 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ماسح الرقم القومي</title>
-<script src="https://cdn.jsdelivr.net/npm/@zxing/library@latest"></script>
+<meta charset="UTF-8" />
+<title>قراءة الرقم القومي من الباركود PDF417</title>
+<script src="https://unpkg.com/@zxing/browser@latest"></script>
 <style>
-* {
-box-sizing: border-box;
-margin: 0;
-padding: 0;
-}
-
-body {
-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-min-height: 100vh;
-display: flex;
-flex-direction: column;
-align-items: center;
-padding: 20px;
-}
-
-.container {
-background: white;
-padding: 25px;
-border-radius: 16px;
-box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-width: 100%;
-max-width: 600px;
-text-align: center;
-margin-top: 20px;
-}
-
-h2 { 
-margin-bottom: 20px; 
-color: #333;
-font-size: 24px;
-}
-
-#video-container {
-position: relative;
-width: 100%;
-max-width: 500px;
-margin: 0 auto 20px;
-border-radius: 12px;
-overflow: hidden;
-background: #000;
-}
-
-#video {
-width: 100%;
-height: auto;
-display: block;
-}
-
-#canvas {
-display: none;
-}
-
-.result-box {
-background: #f8f9fa;
-border: 2px solid #28a745;
-border-radius: 8px;
-padding: 15px;
-margin: 15px 0;
-display: none;
-}
-
-.result-box.show {
-display: block;
-animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-from {
-opacity: 0;
-transform: translateY(-10px);
-}
-to {
-opacity: 1;
-transform: translateY(0);
-}
-}
-
-.national-id {
-font-size: 28px;
-font-weight: bold;
-color: #28a745;
-letter-spacing: 3px;
-margin: 10px 0;
-font-family: 'Courier New', monospace;
-}
-
-button {
-background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-color: white;
-border: none;
-padding: 15px 30px;
-font-size: 18px;
-border-radius: 10px;
-cursor: pointer;
-width: 100%;
-margin: 8px 0;
-font-weight: bold;
-transition: all 0.3s;
-box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-}
-
-button:hover {
-transform: translateY(-2px);
-box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
-}
-
-button:active {
-transform: translateY(0);
-}
-
-.hint { 
-color: #666; 
-font-size: 14px; 
-margin-top: 15px; 
-line-height: 1.6;
-background: #fff3cd;
-padding: 12px;
-border-radius: 8px;
-border-right: 4px solid #ffc107;
-}
-
-.status {
-padding: 12px;
-margin: 15px 0;
-border-radius: 8px;
-font-size: 15px;
-animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-from { opacity: 0; }
-to { opacity: 1; }
-}
-
-.status.success {
-background-color: #d4edda;
-color: #155724;
-border: 1px solid #c3e6cb;
-}
-
-.status.error {
-background-color: #f8d7da;
-color: #721c24;
-border: 1px solid #f5c6cb;
-}
-
-.status.info {
-background-color: #d1ecf1;
-color: #0c5460;
-border: 1px solid #bee5eb;
-}
-
-.scanning-line {
-position: absolute;
-width: 100%;
-height: 2px;
-background: #28a745;
-box-shadow: 0 0 10px #28a745;
-animation: scan 2s linear infinite;
-}
-
-@keyframes scan {
-0% { top: 0; }
-50% { top: 100%; }
-100% { top: 0; }
-}
-
-.copy-btn {
-background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-padding: 10px 20px;
-font-size: 16px;
-margin-top: 10px;
-box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-}
-
-.loading {
-display: inline-block;
-width: 20px;
-height: 20px;
-border: 3px solid rgba(255,255,255,.3);
-border-radius: 50%;
-border-top-color: #fff;
-animation: spin 1s ease-in-out infinite;
-margin-left: 10px;
-}
-
-@keyframes spin {
-to { transform: rotate(360deg); }
-}
+  body { font-family: Tahoma; text-align: center; background:#f2f2f2; padding:20px; }
+  video { width: 90%; max-width: 400px; border: 2px solid #444; border-radius: 10px; }
+  #result { margin-top: 20px; padding: 15px; background: white; border-radius: 10px; }
 </style>
 </head>
+
 <body>
 
-<div class="container">
-<h2>📱 قارئ الرقم القومي المصري</h2>
+<h2>📇 استخراج الرقم القومي من باركود PDF417</h2>
 
-<div id="video-container">
-<video id="video" playsinline autoplay></video>
-<div class="scanning-line" id="scanning-line"></div>
-</div>
-<canvas id="canvas"></canvas>
+<video id="preview" autoplay playsinline></video>
 
-<div id="status" class="status info">
-<span id="status-text">📸 جاري تشغيل الكاميرا...</span>
-<span class="loading"></span>
-</div>
-
-<div class="result-box" id="result-box">
-<div style="color: #28a745; font-size: 18px; margin-bottom: 8px;">✓ تم قراءة الرقم القومي</div>
-<div class="national-id" id="nationalID"></div>
-<button class="copy-btn" onclick="copyToClipboard()">📋 نسخ الرقم</button>
-</div>
-
-<button id="stop-btn" onclick="stopAndRestart()">🔄 مسح بطاقة أخرى</button>
-
-<div class="hint">
-<strong>📌 تعليمات الاستخدام:</strong><br>
-• وجه الكاميرا على الباركود في <strong>ظهر البطاقة</strong><br>
-• تأكد من وضوح الإضاءة واستقرار البطاقة<br>
-• اجعل الباركود يملأ الإطار قدر الإمكان<br>
-• الكاميرا تعمل تلقائياً عند فتح الصفحة
-</div>
-</div>
+<div id="result">قم بتوجيه الكاميرا نحو باركود البطاقة</div>
 
 <script>
-let stream = null;
-let isScanning = false;
-let codeReader = null;
+  const preview = document.getElementById("preview");
+  const resultBox = document.getElementById("result");
 
-function showStatus(message, type) {
-const statusEl = document.getElementById('status');
-const statusText = document.getElementById('status-text');
-statusText.textContent = message;
-statusEl.className = 'status ' + type;
-}
+  // مسح PDF417
+  const reader = new ZXing.BrowserPDF417Reader();
 
-async function startScanner() {
-try {
-showStatus('⏳ جاري تشغيل الكاميرا...', 'info');
-document.getElementById('result-box').classList.remove('show');
+  async function startScanner() {
+    // الحصول على الكاميرات
+    const cams = await ZXing.BrowserCodeReader.listVideoInputDevices();
+    const backCam =
+      cams.find(c => c.label.toLowerCase().includes("back")) || cams[0];
 
-const video = document.getElementById('video');
-stream = await navigator.mediaDevices.getUserMedia({
-video: { 
-facingMode: 'environment',
-width: { ideal: 1280 },
-height: { ideal: 720 }
-}
-});
+    // البدء في المسح من الكاميرا
+    reader.decodeFromVideoDevice(backCam.deviceId, preview, (res, err) => {
+      if (res) {
+        const rawText = res.text; // البيانات الخام من الباركود
 
-video.srcObject = stream;
-await video.play();
+        // استخراج الرقم القومي من أي مكان داخل النص
+        const nationalID = extractNID(rawText);
 
-showStatus('📸 وجه الكاميرا على الباركود في ظهر البطاقة', 'info');
-isScanning = true;
-codeReader = new ZXing.BrowserPDF417Reader();
-scanBarcode();
+        if (nationalID) {
+          resultBox.innerHTML = `
+            <b>الرقم القومي:</b><br>
+            <h2>${nationalID}</h2>
+          `;
+        } else {
+          resultBox.innerHTML = `<b>تم قراءة الباركود لكن لم يتم العثور على رقم قومي صالح.</b>`;
+        }
+      }
+    });
+  }
 
-} catch (err) {
-console.error("خطأ في تشغيل الكاميرا:", err);
-showStatus("❌ فشل تشغيل الكاميرا. يرجى السماح بالوصول للكاميرا من إعدادات المتصفح", 'error');
+  // دالة استخراج الرقم القومي (14 رقم متتالي)
+  function extractNID(text) {
+    const match = text.match(/\d{14}/);
+    return match ? match[0] : null;
+  }
 
-// محاولة إعادة التشغيل بعد 3 ثوان
-setTimeout(() => {
-startScanner();
-}, 3000);
-}
-}
-
-async function scanBarcode() {
-if (!isScanning) return;
-
-const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-const context = canvas.getContext('2d');
-
-canvas.width = video.videoWidth;
-canvas.height = video.videoHeight;
-context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-try {
-const result = await codeReader.decodeFromCanvas(canvas);
-if (result) {
-handleScanResult(result.text);
-return;
-}
-} catch (err) {
-// لا يوجد باركود في الإطار، نستمر في المحاولة
-}
-
-// نستمر في المسح
-if (isScanning) {
-requestAnimationFrame(scanBarcode);
-}
-}
-
-function handleScanResult(decodedText) {
-console.log("Barcode detected:", decodedText);
-
-// استخراج الرقم القومي (14 رقم متتالي)
-const idMatch = decodedText.match(/\d{14}/);
-
-if (idMatch) {
-const nationalId = idMatch[0];
-document.getElementById('nationalID').textContent = nationalId;
-document.getElementById('result-box').classList.add('show');
-
-// إيقاف المسح
-isScanning = false;
-
-// اهتزاز
-if (navigator.vibrate) {
-navigator.vibrate([200, 100, 200]);
-}
-
-// صوت
-playBeep();
-
-showStatus("✅ تم قراءة الرقم القومي بنجاح!", 'success');
-
-} else {
-showStatus("⚠️ تم قراءة باركود ولكن لا يحتوي على رقم قومي صحيح. حاول مرة أخرى...", 'error');
-setTimeout(() => {
-if (!isScanning) {
-isScanning = true;
-scanBarcode();
-}
-}, 2000);
-}
-}
-
-function stopAndRestart() {
-document.getElementById('result-box').classList.remove('show');
-isScanning = true;
-showStatus('📸 جاهز لمسح بطاقة جديدة...', 'info');
-scanBarcode();
-}
-
-function copyToClipboard() {
-const text = document.getElementById('nationalID').textContent;
-navigator.clipboard.writeText(text).then(() => {
-showStatus("📋 تم نسخ الرقم القومي", 'success');
-if (navigator.vibrate) navigator.vibrate(100);
-}).catch(err => {
-showStatus("❌ فشل النسخ", 'error');
-});
-}
-
-function playBeep() {
-try {
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-const oscillator = audioCtx.createOscillator();
-const gainNode = audioCtx.createGain();
-oscillator.connect(gainNode);
-gainNode.connect(audioCtx.destination);
-oscillator.type = "sine";
-oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-oscillator.start();
-setTimeout(() => oscillator.stop(), 200);
-} catch (e) {
-console.log("Audio not supported");
-}
-}
-
-// بدء التشغيل التلقائي عند تحميل الصفحة
-window.addEventListener('load', () => {
-startScanner();
-});
-
-// إعادة التشغيل عند العودة للصفحة
-document.addEventListener('visibilitychange', () => {
-if (!document.hidden && !isScanning) {
-startScanner();
-}
-});
+  startScanner();
 </script>
 
 </body>
