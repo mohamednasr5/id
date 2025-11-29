@@ -1,195 +1,100 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>قراءة بطاقة الرقم القومي – PDF417</title>
-<script src="https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@10.4.2003/dist/dbr.bundle.js"></script>
+<title>مسح بطاقة الرقم القومي – PDF417</title>
+
+<!-- تحميل مكتبة Dynamsoft من الملفات الموجودة على GitHub -->
+<script src="./dynamsoft-barcode-reader-bundle.js"></script>
+<script src="./dynamsoft-barcode-reader-bundle-ml-simd.js"></script>
+
 <style>
-  * {
-    box-sizing: border-box;
-  }
   body {
-    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    font-family: Tahoma;
+    background: #eef2f7;
     text-align: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     padding: 20px;
-    margin: 0;
-    min-height: 100vh;
-  }
-  .container {
-    max-width: 600px;
-    margin: 0 auto;
-  }
-  h2 {
-    color: white;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    margin-bottom: 30px;
   }
   #scanner {
-    width: 100%;
-    max-width: 500px;
-    height: 400px;
-    background: #000;
-    border-radius: 16px;
+    width: 95%;
+    max-width: 450px;
+    height: 320px;
+    background: black;
     margin: 20px auto;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border-radius: 14px;
     overflow: hidden;
   }
   #result {
     background: white;
-    padding: 25px;
-    border-radius: 16px;
+    padding: 20px;
+    border-radius: 10px;
     margin-top: 20px;
-    font-size: 18px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    min-height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-  }
-  #result h3 {
-    color: #28a745;
-    margin: 10px 0;
-    font-size: 32px;
-    letter-spacing: 2px;
+    font-size: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
   }
   button {
-    padding: 14px 35px;
-    font-size: 18px;
-    border: none;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 10px;
-    cursor: pointer;
     margin-top: 20px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    font-weight: bold;
-  }
-  button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-  }
-  button:active {
-    transform: translateY(0);
-  }
-  button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    transform: none;
-  }
-  .error {
-    color: #dc3545;
-    font-weight: bold;
-  }
-  .loading {
-    color: #007bff;
+    padding: 10px 25px;
+    border: none;
+    background: #007bff;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
   }
 </style>
+
 </head>
 <body>
-<div class="container">
-  <h2>📇 مسح باركود بطاقة الرقم القومي المصرية – PDF417</h2>
-  <div id="scanner"></div>
-  <div id="result">اضغط "بدء المسح" لتشغيل الكاميرا</div>
-  <button id="startBtn" onclick="startScan()">▶ بدء المسح</button>
-</div>
+
+<h2>📇 قراءة باركود بطاقة الرقم القومي المصرية</h2>
+
+<div id="scanner"></div>
+<div id="result">اضغط زر البدء لفتح الكاميرا</div>
+
+<button onclick="startScan()">▶ بدء المسح</button>
 
 <script>
-let scanner = null;
-let isScanning = false;
 
-// استخراج الرقم القومي من النص الكامل
 function extractNID(text) {
-  const match = text.match(/\d{14}/);
-  return match ? match[0] : null;
+  const m = text.match(/\d{14}/);
+  return m ? m[0] : null;
 }
 
 async function startScan() {
-  if (isScanning) return;
-  
-  const resultDiv = document.getElementById("result");
-  const startBtn = document.getElementById("startBtn");
-  
-  try {
-    resultDiv.innerHTML = '<p class="loading">🔍 جاري تشغيل الكاميرا...</p>';
-    startBtn.disabled = true;
-    
-    // تهيئة Dynamsoft Barcode Reader
-    await Dynamsoft.DBR.BarcodeReader.loadWasm();
-    
-    // إنشاء الماسح
-    scanner = await Dynamsoft.DBR.BarcodeScanner.createInstance();
-    
-    // تكوين الإعدادات لمسح PDF417 فقط
-    let settings = await scanner.getRuntimeSettings();
-    settings.barcodeFormatIds = Dynamsoft.DBR.EnumBarcodeFormat.BF_PDF417;
-    settings.expectedBarcodesCount = 1;
-    await scanner.updateRuntimeSettings(settings);
-    
-    // ربط الماسح بالعنصر
-    scanner.setUIElement(document.getElementById("scanner"));
-    
-    // معالجة النتائج
-    scanner.onFrameRead = results => {
-      if (results.length > 0) {
-        for (let result of results) {
-          const raw = result.barcodeText;
-          const nid = extractNID(raw);
-          
-          if (nid) {
-            resultDiv.innerHTML = `
-              <p>✅ تم قراءة الرقم القومي بنجاح:</p>
-              <h3>${nid}</h3>
-              <p style="font-size: 14px; color: #666; margin-top: 10px;">
-                البيانات الكاملة: ${raw.substring(0, 100)}...
-              </p>
-            `;
-            stopScan();
-            return;
-          }
-        }
+  document.getElementById("result").innerHTML = "🔍 جاري تشغيل الكاميرا...";
+
+  const scanner = await Dynamsoft.DBR.BarcodeScanner.createInstance({
+    wasmDir: "./",
+    resourceDir: "./"
+  });
+
+  await scanner.setUIElement(document.getElementById("scanner"));
+
+  let settings = await scanner.getRuntimeSettings();
+  settings.barcodeFormatIds = Dynamsoft.DBR.EnumBarcodeFormat.BF_PDF417;
+  await scanner.updateRuntimeSettings(settings);
+
+  scanner.onFrameRead = results => {
+    for (let r of results) {
+      const raw = r.barcodeText;
+      const nid = extractNID(raw);
+      if (nid) {
+        document.getElementById("result").innerHTML = `
+          <p>✅ تم استخراج الرقم القومي:</p>
+          <h3>${nid}</h3>
+        `;
+        scanner.stop();
+        return;
       }
-    };
-    
-    scanner.onUnduplicatedRead = (txt, result) => {
-      console.log("Barcode detected:", txt);
-    };
-    
-    // تشغيل الكاميرا
-    await scanner.open();
-    isScanning = true;
-    startBtn.textContent = "⏹ إيقاف";
-    startBtn.disabled = false;
-    startBtn.onclick = stopScan;
-    
-    resultDiv.innerHTML = '<p style="color: #28a745;">📷 الكاميرا نشطة - وجه البطاقة نحو الكاميرا</p>';
-    
-  } catch (error) {
-    console.error("Error:", error);
-    resultDiv.innerHTML = `<p class="error">❌ حدث خطأ: ${error.message}</p>
-      <p style="font-size: 14px;">تأكد من منح إذن الكاميرا للمتصفح</p>`;
-    startBtn.disabled = false;
-    startBtn.textContent = "▶ بدء المسح";
-    startBtn.onclick = startScan;
-  }
+    }
+  };
+
+  await scanner.show();
 }
 
-function stopScan() {
-  if (scanner) {
-    scanner.close();
-    scanner.destroyContext();
-    scanner = null;
-  }
-  isScanning = false;
-  
-  const startBtn = document.getElementById("startBtn");
-  startBtn.textContent = "▶ بدء المسح";
-  startBtn.disabled = false;
-  startBtn.onclick = startScan;
-}
 </script>
+
 </body>
 </html>
