@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap">
+ <script src="https://unpkg.com/blockhash/dist/blockhash.min.js"></script>
+
   <style>
     :root {
       --primary-color: #0072ff;
@@ -657,30 +659,16 @@
         <datalist id="repNamesHistory"></datalist>
         <label for="repName">اسم المندوب</label>
       </div>
-    <div class="input-group" style="position:relative">
-  <input id="natID" type="tel" maxlength="14" inputmode="numeric" placeholder=" ">
-  <label for="natID">الرقم القومي (14 رقم)</label>
-<div id="cameraBox" 
-     style="display:none; margin:15px auto; text-align:center;">
-  <video id="preview" 
-         autoplay 
-         muted 
-         playsinline 
-         style="width:90%;max-width:400px;border-radius:10px;border:3px solid #007bff;">
-  </video>
-</div>
-
-  <!-- زر المسح -->
-  <span id="scanBtn" 
-        style="position:absolute; left:10px; top:50%; transform:translateY(-50%); 
-               font-size:26px; cursor:pointer;">📷</span>
-</div>
-
+      <div class="input-group">
+        <input id="natID" type="tel" maxlength="14" inputmode="numeric" placeholder=" ">
+        <label for="natID">الرقم القومي (14 رقم)</label>
+      </div>
       <div class="id-card-visual-container">
         <img src="https://raw.githubusercontent.com/mohamednasr5/id/e83438329b0f009f6eebf61b2797496d744589f2/5.png"
              class="id-card-img" alt="مثال للبطاقة">
       </div>
       <button class="btn" onclick="addUser()">إضافة</button>
+      <button class="btn btn-info" onclick="openFacePopup()">📸 تصوير الوجه</button>
       <div id="add-msg" class="msg"></div>
       <button class="btn btn-message" onclick="showMessagesModal()" style="position: relative;">
         <span id="messagesBtnText">📨 الرسائل</span>
@@ -870,17 +858,66 @@
       }
       try {
         const snapshot = await get(child(ref(db), "login_codes/" + code));
-        if (!snapshot.exists()) {
-          msg.textContent = "الكود غير صحيح";
-          msg.classList.add("error");
-          return;
-        }
-        const data = snapshot.val();
-        userID = code;
-        userPlace = data.place;
-        userPlaceIdx = data.placeIdx || 0;
+ if (snapshot.exists()) {
+  const data = snapshot.val();
+  
+  playDuplicateAlarm();
+  
+  msg.className = "duplicate-box";
+  msg.innerHTML = `
+    ⚠️ تكرار<br>
+    مسجل في: <b>${data.place}</b><br>
+    بواسطة: <b>${data.repName}</b>
+  `;
+  await push(ref(db, "duplicates"), {
+    duplicatedID: natid,
+    attemptByRep: name,
+    attemptPlace: userPlace,
+    originalRep: data.repName,
+    originalPlace: data.place,
+    timestamp: new Date().toISOString()
+  });
 
-        await enforceSessionLimit(code);
+  saveRepName(name);
+
+  setTimeout(() => {
+    stopDuplicateAlarm();
+  }, 10000);
+
+  return;
+}
+
+//-----------------------------------------------
+// فحص تكرار صورة الوجه هنا بالظبط
+//-----------------------------------------------
+const faceRef = ref(db, "face_hashes/" + faceHash);
+const fSnap = await get(faceRef);
+
+if (fSnap.exists()) {
+  playDuplicateAlarm();
+  const info = fSnap.val();
+
+  msg.className = "duplicate-box";
+  msg.innerHTML = `
+    ⚠️ بطاقة مكررة بناءً على صورة الوجه<br>
+    مسجل بواسطة: <b>${info.repName}</b><br>
+    في: <b>${info.place}</b>
+  `;
+  return;
+}
+
+//-----------------------------------------------
+// الإضافة الأصلية بعد التحقق من عدم التكرار
+//-----------------------------------------------
+await set(userRef, {
+  natid,
+  repName: name,
+  place: userPlace,
+  placeIdx: userPlaceIdx,
+  time: new Date().toISOString(),
+  username: userID
+});
+
         await set(ref(db, `active_sessions/${code}/${currentDeviceId}`), {
           loginTime: Date.now(),
           expiresAt: Date.now() + 30 * 60 * 1000
@@ -1202,16 +1239,18 @@
     loadRepNames();
 
     let lastAddTime = 0;
-    window.addUser = async function () {
-      const msg = document.getElementById("add-msg");
-      msg.textContent = "";
-      msg.className = "msg";
-      
-      if (Date.now() - lastAddTime < 1200) {
-        msg.textContent = "انتظر لحظة...";
-        msg.classList.add("error");
-        return;
-      }
+window.addUser = async function () {
+  const msg = document.getElementById("add-msg");
+  msg.textContent = "";
+  msg.className = "msg";
+
+  // التأكد من وجود بصمة الوجه
+  const faceHash = getFaceHash();
+  if (!faceHash) {
+    msg.textContent = "يجب تصوير الوجه أولاً (اضغط على 📸 تصوير الوجه)";
+    msg.classList.add("error");
+    return;
+  }
       lastAddTime = Date.now();
       
       const name = document.getElementById("repName").value.trim();
@@ -1276,6 +1315,13 @@
         
         saveRepName(name);
         msg.textContent = "تمت الإضافة بنجاح ✓";
+        await set(ref(db, "face_hashes/" + faceHash), {
+  repName: name,
+  place: userPlace,
+  time: new Date().toISOString()
+});
+lastFaceHash = null;
+
         msg.classList.add("success");
         document.getElementById("natID").value = "";
         document.getElementById("natID").focus();
@@ -1658,47 +1704,97 @@
       document.getElementById("main-card").classList.remove("hidden");
     };
   </script>
-  <script>
-  let controls = null;
+  <!-- ============== POPUP ماسح الوجه ============== -->
+<div id="facePopup" style="
+  position: fixed;
+  top: 0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(5px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index: 99999;
+">
+  <div style="
+    background:white;
+    padding:15px;
+    border-radius:15px;
+    width:90%;
+    max-width:400px;
+    text-align:center;
+    animation: popupIn .3s ease;
+  ">
+    <h3 style="margin-bottom:10px; font-size:18px;">📸 التقاط صورة الوجه</h3>
 
-  document.getElementById("scanBtn").addEventListener("click", async () => {
-    try {
-      const codeReader = new ZXingBrowser.BrowserPDF417Reader();
+    <video id="faceCam" autoplay playsinline 
+      style="width:100%; border-radius:12px; box-shadow:0 0 12px rgba(0,0,0,.3);">
+    </video>
 
-      // إظهار صندوق الكاميرا
-      document.getElementById("cameraBox").style.display = "block";
+    <br><br>
 
-      const devices = await ZXingBrowser.BrowserCodeReader.listVideoInputDevices();
-      const backCam = devices.find(d => d.label.toLowerCase().includes("back")) || devices[0];
+    <button class="btn btn-info" onclick="captureFace()">📷 التقط الآن</button>
+    <button class="btn btn-danger" onclick="closeFacePopup()" style="margin-top:8px;">إغلاق</button>
+  </div>
+</div>
 
-      const videoElem = document.getElementById("preview");
+<style>
+@keyframes popupIn {
+  from { transform:scale(.8); opacity:0; }
+  to   { transform:scale(1); opacity:1; }
+}
+</style>
+<script>
+// ===================== تشغيل popup =====================
+let faceStream = null;
+let lastFaceHash = null;
 
-      // بدء القراءة
-      controls = await codeReader.decodeFromVideoDevice(
-        backCam.deviceId,
-        videoElem,
-        (result, err) => {
-          if (result) {
-            const txt = result.getText();
-            const match = txt.match(/\d{14}/);
+window.openFacePopup = async function() {
+  document.getElementById("facePopup").style.display = "flex";
 
-            if (match) {
-              document.getElementById("natID").value = match[0];
+  try {
+    faceStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" }
+    });
+    document.getElementById("faceCam").srcObject = faceStream;
+  } catch (e) {
+    alert("لا يمكن تشغيل الكاميرا");
+  }
+};
 
-              // إيقاف الكاميرا
-              controls.stop();
-              document.getElementById("cameraBox").style.display = "none";
-            }
-          }
-        }
-      );
+window.closeFacePopup = function() {
+  document.getElementById("facePopup").style.display = "none";
+  if (faceStream) {
+    faceStream.getTracks().forEach(t => t.stop());
+  }
+};
 
-    } catch (err) {
-      alert("خطأ في تشغيل الكاميرا: " + err.message);
-      document.getElementById("cameraBox").style.display = "none";
-    }
-  });
+// ===================== التقاط صورة الوجه =====================
+window.captureFace = function() {
+  const video = document.getElementById("faceCam");
+  const canvas = document.createElement("canvas");
+  canvas.width = 320;
+  canvas.height = 240;
+  const ctx = canvas.getContext("2d");
+
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  // قص منطقة الوجه داخل البطاقة (قيمة مبدئية – تتظبط لاحقاً)
+  const faceCrop = ctx.getImageData(70, 20, 180, 200);
+
+  // استخلاص الهاش
+  lastFaceHash = blockhash.blockhashData(faceCrop, 16);
+
+  closeFacePopup();
+
+  alert("✔ تم التقاط صورة الوجه بنجاح");
+};
+
+// ============= وظيفة لحماية addUser بفحص الوجه =============
+window.getFaceHash = function() {
+  return lastFaceHash; // null لو لسه ما تصورش
+};
 </script>
-<script src="https://unpkg.com/@zxing/browser@latest"></script>
+
 </body>
 </html>
