@@ -1,98 +1,167 @@
+Download now!
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>ماسح باركود PDF417 مجاني</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<script src="https://unpkg.com/@zxing/browser@latest"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-
+<title>ماسح الرقم القومي</title>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <style>
 body {
-    background: #eef2f5;
-    font-family: 'Cairo', sans-serif;
-    text-align: center;
-    padding: 25px;
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+background-color: #f4f4f4;
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 20px;
+margin: 0;
 }
+.container {
+background: white;
+padding: 20px;
+border-radius: 12px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+width: 100%;
+max-width: 500px;
+text-align: center;
+}
+h2 { margin-bottom: 20px; color: #333; }
 
-video {
-    width: 350px;
-    border: 3px solid #0f3c67;
-    border-radius: 12px;
-    background: #000;
+#reader {
+width: 100%;
+border-radius: 8px;
+overflow: hidden;
+background: #000;
+margin-bottom: 15px;
+min-height: 300px; /* مكان الكاميرا */
 }
 
 input {
-    width: 350px;
-    padding: 12px;
-    margin-top: 15px;
-    font-size: 22px;
-    text-align: center;
-    border-radius: 10px;
-    border: 2px solid #0f3c67;
-    background: #fff;
+width: 90%;
+padding: 15px;
+font-size: 20px;
+text-align: center;
+border: 2px solid #ddd;
+border-radius: 8px;
+margin-bottom: 15px;
+letter-spacing: 2px;
+font-weight: bold;
 }
 
-#success {
-    display: none;
-    background: #0f3c67;
-    color: #fff;
-    padding: 12px;
-    margin-top: 15px;
-    border-radius: 10px;
+button {
+background-color: #28a745;
+color: white;
+border: none;
+padding: 12px 25px;
+font-size: 18px;
+border-radius: 8px;
+cursor: pointer;
+width: 100%;
+margin-bottom: 10px;
 }
+button#stop-btn { background-color: #dc3545; display: none; }
+
+.hint { color: #666; font-size: 14px; margin-top: 10px; }
 </style>
 </head>
-
 <body>
 
-<h2>قارئ بطاقة الرقم القومي — PDF417 (مجاني)</h2>
+<div class="container">
+<h2>قارئ الرقم القومي</h2>
 
-<video id="preview"></video>
+<div id="reader"></div>
 
-<input id="nid" type="text" placeholder="الرقم القومي يظهر هنا تلقائيًا">
+<input type="text" id="nationalID" placeholder="الرقم سيظهر هنا" readonly>
 
-<div id="success">✔️ تمت قراءة الرقم القومي بنجاح</div>
+<button id="start-btn" onclick="startScanner()">تشغيل الكاميرا</button>
+<button id="stop-btn" onclick="stopScanner()">إيقاف الكاميرا</button>
+
+<p class="hint">وجه الكاميرا على الباركود الأسود في <b>ظهر البطاقة</b></p>
+</div>
 
 <script>
-function toArabic(n){
-    return n.replace(/[0-9]/g, d=>"٠١٢٣٤٥٦٧٨٩"[d]);
+let html5QrcodeScanner;
+
+function startScanner() {
+document.getElementById('start-btn').style.display = 'none';
+document.getElementById('stop-btn').style.display = 'block';
+document.getElementById('nationalID').value = ''; // تفريغ الحقل
+
+html5QrcodeScanner = new Html5Qrcode("reader");
+
+// إعدادات المسح
+const config = {
+fps: 10, // عدد الإطارات في الثانية
+qrbox: { width: 300, height: 150 }, // مستطيل التركيز (عريض ليناسب الباركود)
+aspectRatio: 1.0,
+// التركيز فقط على صيغة PDF_417 الموجودة في البطاقة المصرية لزيادة السرعة
+formatsToSupport: [ Html5QrcodeSupportedFormats.PDF_417 ]
+};
+
+// تشغيل الكاميرا الخلفية
+html5QrcodeScanner.start(
+{ facingMode: "environment" },
+config,
+onScanSuccess,
+onScanFailure
+).catch(err => {
+console.error("فشل تشغيل الكاميرا", err);
+alert("يرجى السماح باستخدام الكاميرا أو التأكد من أن الموقع يعمل ببروتوكول HTTPS");
+stopScanner();
+});
 }
 
-const codeReader = new ZXingBrowser.BrowserPDF417Reader();
-const video = document.getElementById("preview");
+function onScanSuccess(decodedText, decodedResult) {
+console.log(Scan result: ${decodedText});
 
-async function startScanner() {
+// استخراج الـ 14 رقم من النص المقروء
+// الباركود قد يحتوي على بيانات إضافية، هذا الكود يستخرج أول 14 رقم متصل
+const idMatch = decodedText.match(/\d{14}/);
 
-    try {
-        const devices = await ZXingBrowser.BrowserCodeReader.listVideoInputDevices();
-        
-        const backCam = devices.find(d => d.label.includes("back"))?.deviceId || devices[0].deviceId;
+if (idMatch) {
+// 1. وضع الرقم في الحقل
+document.getElementById('nationalID').value = idMatch[0];
 
-        codeReader.decodeFromVideoDevice(backCam, video, (result, err) => {
+// 2. تشغيل صوت وتنبيه اهتزاز (اختياري لتحسين التجربة)
+if (navigator.vibrate) navigator.vibrate(200); // اهتزاز للموبايل
+playBeep();
 
-            if (result) {
-                let raw = result.getText().trim();
+// 3. إيقاف المسح تلقائياً
+stopScanner();
 
-                // استخراج أول 14 رقم فقط
-                raw = raw.replace(/\D/g, "").substring(0, 14);
-
-                document.getElementById("nid").value = toArabic(raw);
-                document.getElementById("success").style.display = "block";
-
-                codeReader.reset();
-            }
-        });
-
-    } catch (e) {
-        alert("تعذر تشغيل الكاميرا!");
-        console.error(e);
-    }
+alert("تم التقاط الرقم: " + idMatch[0]);
+}
 }
 
-startScanner();
+function onScanFailure(error) {
+// هذه الدالة تعمل باستمرار عند عدم وجود كود، لا تفعل شيئاً هنا لتجنب الإزعاج
+// console.warn(Code scan error = ${error});
+}
+
+function stopScanner() {
+if (html5QrcodeScanner) {
+html5QrcodeScanner.stop().then(() => {
+html5QrcodeScanner.clear();
+document.getElementById('start-btn').style.display = 'block';
+document.getElementById('stop-btn').style.display = 'none';
+}).catch(err => {
+console.log("Failed to stop", err);
+});
+}
+}
+
+// دالة صوت بسيط
+function playBeep() {
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const oscillator = audioCtx.createOscillator();
+const gainNode = audioCtx.createGain();
+oscillator.connect(gainNode);
+gainNode.connect(audioCtx.destination);
+oscillator.type = "sine";
+oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); // التردد
+oscillator.start();
+setTimeout(() => oscillator.stop(), 150); // مدة الصوت
+}
 </script>
 
 </body>
