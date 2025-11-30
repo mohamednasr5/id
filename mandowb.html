@@ -20,24 +20,87 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
+        }
+
+        .section {
             background: white;
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
         }
 
         h1 {
             text-align: center;
             color: #667eea;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             font-size: 28px;
         }
 
-        .login-container {
+        h2 {
             text-align: center;
-            padding: 40px 20px;
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .search-container {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 18px 55px 18px 20px;
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            font-size: 18px;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 20px rgba(102,126,234,0.4);
+            background: white;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: #667eea;
+        }
+
+        .search-hint {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .results-count {
+            text-align: center;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 10px;
         }
 
         input {
@@ -88,6 +151,7 @@
 
         .save-btn {
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            font-size: 20px;
         }
 
         .delegate-card {
@@ -100,6 +164,12 @@
             align-items: center;
             justify-content: space-between;
             border-right: 5px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .delegate-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
 
         .delegate-info {
@@ -107,16 +177,20 @@
         }
 
         .committee-number {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             color: #667eea;
             margin-left: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .delegate-name {
             font-size: 18px;
             color: #333;
             margin: 5px 0;
+            font-weight: 600;
         }
 
         .delegate-phone {
@@ -161,7 +235,7 @@
             display: none;
         }
 
-        .logout-btn {
+        .show-admin-btn {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             margin-top: 20px;
         }
@@ -186,13 +260,63 @@
             border-radius: 10px;
         }
 
+        .admin-section {
+            margin-top: 30px;
+        }
+
+        .password-container {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .password-input {
+            width: 250px;
+            padding: 15px;
+            margin: 10px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .unlock-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: auto;
+            padding: 15px 40px;
+            display: inline-block;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 18px;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
         @media (max-width: 600px) {
-            .container {
+            .section {
                 padding: 20px;
             }
 
             h1 {
                 font-size: 22px;
+            }
+
+            h2 {
+                font-size: 20px;
             }
 
             .delegate-card {
@@ -207,33 +331,59 @@
             .action-buttons {
                 margin-top: 15px;
             }
+
+            .search-input {
+                font-size: 16px;
+            }
+
+            .password-input {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- صفحة تسجيل الدخول -->
-        <div id="loginPage" class="login-container">
-            <h1>🔐 تسجيل الدخول</h1>
-            <input type="password" id="adminPassword" placeholder="أدخل كود الأدمن">
-            <button onclick="login()">دخول</button>
-        </div>
-
-        <!-- صفحة الأدمن -->
-        <div id="adminPage" class="hidden">
-            <h1>⚙️ لوحة تحكم الأدمن</h1>
-            <div class="scroll-container" id="adminCommittees"></div>
-            <button class="save-btn" onclick="saveAllData()">💾 حفظ جميع البيانات</button>
-            <button onclick="goToView()">👁️ عرض المندوبين</button>
-            <button class="logout-btn" onclick="logout()">🚪 تسجيل الخروج</button>
+        <!-- محرك البحث -->
+        <div class="search-container">
+            <h1>🔍 البحث عن المندوبين</h1>
+            <div class="search-box">
+                <input type="text" 
+                       id="searchInput" 
+                       class="search-input" 
+                       placeholder="ابحث برقم اللجنة أو الاسم أو أول 5 أرقام من الهاتف"
+                       oninput="searchDelegates()">
+                <span class="search-icon">🔎</span>
+            </div>
+            <div class="search-hint">يمكنك البحث باستخدام رقم اللجنة أو جزء من الاسم أو أول 5 أرقام من رقم الهاتف</div>
+            <div class="results-count" id="resultsCount"></div>
         </div>
 
         <!-- صفحة العرض -->
-        <div id="viewPage" class="hidden">
-            <h1>📋 قائمة المندوبين</h1>
+        <div class="section">
+            <h2>📋 قائمة المندوبين</h2>
             <div class="scroll-container" id="delegatesList"></div>
-            <button onclick="goToAdmin()">⚙️ لوحة التحكم</button>
-            <button class="logout-btn" onclick="logout()">🚪 تسجيل الخروج</button>
+        </div>
+
+        <!-- لوحة التحكم -->
+        <div class="section admin-section">
+            <h2>⚙️ لوحة تحكم الأدمن</h2>
+            
+            <div id="adminLocked" class="password-container">
+                <p style="margin-bottom: 15px; color: #666; font-size: 16px;">🔒 لوحة التحكم محمية</p>
+                <input type="password" 
+                       id="adminPassword" 
+                       class="password-input" 
+                       placeholder="أدخل كود الأدمن"
+                       onkeypress="if(event.key==='Enter') unlockAdmin()">
+                <button class="unlock-btn" onclick="unlockAdmin()">🔓 فتح لوحة التحكم</button>
+            </div>
+
+            <div id="adminUnlocked" class="hidden">
+                <div class="scroll-container" id="adminCommittees"></div>
+                <button class="save-btn" onclick="saveAllData()">💾 حفظ جميع البيانات</button>
+                <button class="show-admin-btn" onclick="lockAdmin()">🔒 إخفاء لوحة التحكم</button>
+            </div>
         </div>
     </div>
 
@@ -254,15 +404,12 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        window.db = database;
-        window.dbRef = ref;
-        window.dbSet = set;
-        window.dbGet = get;
-        window.dbUpdate = update;
+        window.allDelegates = [];
 
         // تحميل البيانات عند بدء التشغيل
-        window.addEventListener('load', () => {
-            initializeDelegates();
+        window.addEventListener('load', async () => {
+            await initializeDelegates();
+            await loadDelegatesData();
         });
 
         async function initializeDelegates() {
@@ -270,7 +417,6 @@
             const snapshot = await get(delegatesRef);
             
             if (!snapshot.exists()) {
-                // إنشاء 60 لجنة فارغة
                 const initialData = {};
                 for (let i = 1; i <= 60; i++) {
                     initialData[i] = {
@@ -283,34 +429,103 @@
             }
         }
 
-        window.login = function() {
+        async function loadDelegatesData() {
+            const delegatesRef = ref(database, 'delegates');
+            const snapshot = await get(delegatesRef);
+            const delegates = snapshot.val() || {};
+
+            window.allDelegates = [];
+            for (let i = 1; i <= 60; i++) {
+                if (delegates[i] && delegates[i].name && delegates[i].phone) {
+                    window.allDelegates.push(delegates[i]);
+                }
+            }
+
+            displayDelegates(window.allDelegates);
+        }
+
+        function displayDelegates(delegates) {
+            const container = document.getElementById('delegatesList');
+            container.innerHTML = '';
+
+            if (delegates.length === 0) {
+                container.innerHTML = '<div class="no-results">لا توجد نتائج</div>';
+                document.getElementById('resultsCount').textContent = '';
+                return;
+            }
+
+            delegates.forEach(delegate => {
+                const card = document.createElement('div');
+                card.className = 'delegate-card';
+                
+                const phoneWithPrefix = '2' + delegate.phone;
+                
+                card.innerHTML = `
+                    <div class="committee-number">${delegate.committee}</div>
+                    <div class="delegate-info">
+                        <div class="delegate-name">👤 ${delegate.name}</div>
+                        <div class="delegate-phone">📱 ${delegate.phone}</div>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="tel:${delegate.phone}" class="call-btn">📞</a>
+                        <a href="https://wa.me/${phoneWithPrefix}" class="whatsapp-btn" target="_blank">💬</a>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+
+            // تحديث عداد النتائج
+            const searchValue = document.getElementById('searchInput').value;
+            if (searchValue.trim()) {
+                document.getElementById('resultsCount').textContent = 
+                    `✨ تم العثور على ${delegates.length} نتيجة`;
+            } else {
+                document.getElementById('resultsCount').textContent = 
+                    `📊 إجمالي المندوبين: ${delegates.length}`;
+            }
+        }
+
+        window.searchDelegates = function() {
+            const searchValue = document.getElementById('searchInput').value.trim().toLowerCase();
+            
+            if (!searchValue) {
+                displayDelegates(window.allDelegates);
+                return;
+            }
+
+            const filtered = window.allDelegates.filter(delegate => {
+                // البحث برقم اللجنة
+                const committeeMatch = delegate.committee.toString() === searchValue;
+                
+                // البحث بالاسم
+                const nameMatch = delegate.name.toLowerCase().includes(searchValue);
+                
+                // البحث بأول 5 أرقام من الهاتف
+                const phoneMatch = delegate.phone.substring(0, 5).includes(searchValue);
+                
+                return committeeMatch || nameMatch || phoneMatch;
+            });
+
+            displayDelegates(filtered);
+        };
+
+        window.unlockAdmin = async function() {
             const password = document.getElementById('adminPassword').value;
             if (password === '521988') {
-                document.getElementById('loginPage').classList.add('hidden');
-                document.getElementById('adminPage').classList.remove('hidden');
-                loadAdminPanel();
+                document.getElementById('adminLocked').classList.add('hidden');
+                document.getElementById('adminUnlocked').classList.remove('hidden');
+                await loadAdminPanel();
             } else {
-                alert('كود خاطئ!');
+                alert('❌ كود خاطئ!');
+                document.getElementById('adminPassword').value = '';
             }
         };
 
-        window.logout = function() {
-            document.getElementById('adminPage').classList.add('hidden');
-            document.getElementById('viewPage').classList.add('hidden');
-            document.getElementById('loginPage').classList.remove('hidden');
+        window.lockAdmin = function() {
+            document.getElementById('adminUnlocked').classList.add('hidden');
+            document.getElementById('adminLocked').classList.remove('hidden');
             document.getElementById('adminPassword').value = '';
-        };
-
-        window.goToView = async function() {
-            document.getElementById('adminPage').classList.add('hidden');
-            document.getElementById('viewPage').classList.remove('hidden');
-            await loadDelegatesView();
-        };
-
-        window.goToAdmin = function() {
-            document.getElementById('viewPage').classList.add('hidden');
-            document.getElementById('adminPage').classList.remove('hidden');
-            loadAdminPanel();
         };
 
         window.loadAdminPanel = async function() {
@@ -329,7 +544,7 @@
                 div.innerHTML = `
                     <h3>لجنة ${i}</h3>
                     <input type="text" id="name-${i}" placeholder="اسم المندوب" value="${delegate.name || ''}">
-                    <input type="tel" id="phone-${i}" placeholder="رقم الهاتف" value="${delegate.phone || ''}">
+                    <input type="tel" id="phone-${i}" placeholder="رقم الهاتف (بدون 2)" value="${delegate.phone || ''}">
                 `;
                 container.appendChild(div);
             }
@@ -353,44 +568,12 @@
             await set(delegatesRef, delegatesData);
             
             alert('✅ تم حفظ جميع البيانات بنجاح!');
-        };
-
-        window.loadDelegatesView = async function() {
-            const delegatesRef = ref(database, 'delegates');
-            const snapshot = await get(delegatesRef);
-            const delegates = snapshot.val() || {};
-
-            const container = document.getElementById('delegatesList');
-            container.innerHTML = '';
-
-            for (let i = 1; i <= 60; i++) {
-                const delegate = delegates[i];
-                
-                if (delegate && delegate.name && delegate.phone) {
-                    const card = document.createElement('div');
-                    card.className = 'delegate-card';
-                    
-                    const phoneWithPrefix = '2' + delegate.phone;
-                    
-                    card.innerHTML = `
-                        <div class="committee-number">${i}</div>
-                        <div class="delegate-info">
-                            <div class="delegate-name">👤 ${delegate.name}</div>
-                            <div class="delegate-phone">📱 ${delegate.phone}</div>
-                        </div>
-                        <div class="action-buttons">
-                            <a href="tel:${delegate.phone}" class="call-btn">📞</a>
-                            <a href="https://wa.me/${phoneWithPrefix}" class="whatsapp-btn" target="_blank">💬</a>
-                        </div>
-                    `;
-                    
-                    container.appendChild(card);
-                }
-            }
-
-            if (container.innerHTML === '') {
-                container.innerHTML = '<p style="text-align:center;padding:40px;color:#999;">لا توجد بيانات مندوبين حالياً</p>';
-            }
+            
+            // إعادة تحميل البيانات في صفحة العرض
+            await loadDelegatesData();
+            
+            // مسح البحث لإظهار جميع البيانات الجديدة
+            document.getElementById('searchInput').value = '';
         };
     </script>
 </body>
