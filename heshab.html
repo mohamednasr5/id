@@ -569,6 +569,21 @@
             font-size: 0.7em;
             color: #888;
         }
+
+        .export-success {
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -683,7 +698,7 @@
 
         <!-- Export Section -->
         <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-bottom: 30px;">
-            <h2 style="color: #333; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 3px solid #667eea; font-size: 1.8em;">📥 التصدير</h2>
+            <h2 style="color: #333; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 3px solid #667eea; font-size: 1.8em;">📥 التصدير - الآن بألوان وحدود احترافية ✨</h2>
             <div class="export-controls">
                 <button class="btn-export" onclick="exportToExcel('all')">📊 تصدير الكل إلى Excel</button>
                 <button class="btn-export" onclick="exportToExcel('income')" style="background: linear-gradient(135deg, #10b981, #059669);">📊 تصدير الواردات</button>
@@ -830,7 +845,6 @@
                 const transcript = event.results[0][0].transcript.trim();
                 status.textContent = '🔍 جاري البحث عن: ' + transcript;
                 
-                // Auto-search with voice input
                 document.getElementById('searchPerson').value = transcript;
                 document.getElementById('searchDetails').value = transcript;
                 
@@ -1016,14 +1030,13 @@
 
         // Reset All Data
         window.resetAllData = async function() {
-            const password = prompt('⚠️ تحذير: سيتم حذف جميع البيانات!\n\nأدخل كلمة السر للتأكيد:');
+            const password = prompt('⚠️ تحذير: سيتم حذف جميع البيانات!\\n\\nأدخل كلمة السر للتأكيد:');
             
             if (password === '521988') {
-                const confirmDelete = confirm('هل أنت متأكد تماماً من حذف جميع الحسابات؟\n\nهذا الإجراء لا يمكن التراجع عنه!');
+                const confirmDelete = confirm('هل أنت متأكد تماماً من حذف جميع الحسابات؟\\n\\nهذا الإجراء لا يمكن التراجع عنه!');
                 
                 if (confirmDelete) {
                     try {
-                        // Delete all income records
                         const incomeSnapshot = await get(incomeRef);
                         if (incomeSnapshot.exists()) {
                             const incomeData = incomeSnapshot.val();
@@ -1032,7 +1045,6 @@
                             }
                         }
                         
-                        // Delete all expense records
                         const expenseSnapshot = await get(expenseRef);
                         if (expenseSnapshot.exists()) {
                             const expenseData = expenseSnapshot.val();
@@ -1130,7 +1142,7 @@
 
             isSearching = true;
             displayRecords();
-
+            
             const resultsInfo = document.getElementById('searchResultsInfo');
             resultsInfo.style.display = 'block';
             resultsInfo.innerHTML = `<div class="search-results-info"><strong>✅ تم العثور على ${searchResults.length} نتيجة</strong></div>`;
@@ -1229,10 +1241,14 @@
             }
         };
 
-        // Export to Excel
+        // ============================================
+        // دوال التصدير المحسّنة مع ألوان وحدود وتجميع
+        // ============================================
+
+        // Export to Excel - محسّنة مع ألوان وحدود وتجميع
         window.exportToExcel = function(type) {
             let recordsToExport = allRecords;
-
+            
             if (type === 'income') {
                 recordsToExport = allRecords.filter(r => r.type === 'income');
             } else if (type === 'expense') {
@@ -1245,21 +1261,108 @@
             }
 
             const wb = XLSX.utils.book_new();
-            const wsData = [];
             
+            // إنشاء أنماط الألوان والتنسيق
+            const styles = {
+                header: {
+                    font: { bold: true, color: { rgb: "FFFFFF" }, size: 14 },
+                    fill: { fgColor: { rgb: "1F2937" } },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: true },
+                    border: {
+                        left: { style: "thick", color: { rgb: "000000" } },
+                        right: { style: "thick", color: { rgb: "000000" } },
+                        top: { style: "thick", color: { rgb: "000000" } },
+                        bottom: { style: "thick", color: { rgb: "000000" } }
+                    }
+                },
+                incomeRow: {
+                    font: { color: { rgb: "047857" }, bold: false },
+                    fill: { fgColor: { rgb: "D1FAE5" } },
+                    alignment: { horizontal: "center", vertical: "center" },
+                    border: {
+                        left: { style: "medium", color: { rgb: "10B981" } },
+                        right: { style: "medium", color: { rgb: "10B981" } },
+                        top: { style: "thin", color: { rgb: "10B981" } },
+                        bottom: { style: "thin", color: { rgb: "10B981" } }
+                    }
+                },
+                expenseRow: {
+                    font: { color: { rgb: "991B1B" }, bold: false },
+                    fill: { fgColor: { rgb: "FEE2E2" } },
+                    alignment: { horizontal: "center", vertical: "center" },
+                    border: {
+                        left: { style: "medium", color: { rgb: "EF4444" } },
+                        right: { style: "medium", color: { rgb: "EF4444" } },
+                        top: { style: "thin", color: { rgb: "EF4444" } },
+                        bottom: { style: "thin", color: { rgb: "EF4444" } }
+                    }
+                },
+                totalRow: {
+                    font: { bold: true, color: { rgb: "FFFFFF" }, size: 12 },
+                    fill: { fgColor: { rgb: "4F46E5" } },
+                    alignment: { horizontal: "center", vertical: "center" },
+                    border: {
+                        left: { style: "thick", color: { rgb: "4F46E5" } },
+                        right: { style: "thick", color: { rgb: "4F46E5" } },
+                        top: { style: "thick", color: { rgb: "4F46E5" } },
+                        bottom: { style: "thick", color: { rgb: "4F46E5" } }
+                    }
+                },
+                titleCell: {
+                    font: { bold: true, size: 16, color: { rgb: "1F2937" } },
+                    alignment: { horizontal: "center", vertical: "center" },
+                    fill: { fgColor: { rgb: "F3F4F6" } }
+                }
+            };
+
+            const wsData = [];
+            let cellStyles = [];
+            
+            // العنوان الرئيسي
+            const titleRow = wsData.length;
             wsData.push(['نظام إدارة الحسابات - تقرير ' + (type === 'income' ? 'المبالغ الواردة' : type === 'expense' ? 'المصروفات' : 'الكل')]);
+            cellStyles.push({ row: titleRow, col: 0, style: styles.titleCell });
+            
+            wsData.push([]);
             wsData.push([]);
             
             if (type === 'income' || type === 'all') {
-                wsData.push(['تاريخ البيان الكامل', 'اسم الشخص', 'المبلغ', 'النوع']);
+                // رأس الجدول للواردات
+                const headerRowIncome = wsData.length;
+                wsData.push(['التاريخ الكامل', 'اسم الشخص', 'المبلغ (جنيه)', 'النوع']);
+                for (let i = 0; i < 4; i++) {
+                    cellStyles.push({ row: headerRowIncome, col: i, style: styles.header });
+                }
+                
+                // ترتيب وتجميع الواردات بالتاريخ
+                const incomeByDate = {};
                 recordsToExport.filter(r => r.type === 'income').forEach(record => {
-                    wsData.push([record.dateTime, record.person, record.amount, 'مبلغ وارد']);
+                    const date = record.dateTime.split(',')[0];
+                    if (!incomeByDate[date]) {
+                        incomeByDate[date] = [];
+                    }
+                    incomeByDate[date].push(record);
+                });
+                
+                // عرض البيانات مجمعة ومرتبة
+                Object.keys(incomeByDate).sort().reverse().forEach(date => {
+                    incomeByDate[date].forEach(record => {
+                        const dataRow = wsData.length;
+                        wsData.push([record.dateTime, record.person, record.amount, 'مبلغ وارد']);
+                        for (let i = 0; i < 4; i++) {
+                            cellStyles.push({ row: dataRow, col: i, style: styles.incomeRow });
+                        }
+                    });
                 });
                 
                 if (type === 'income') {
-                    const totalIncome = recordsToExport.reduce((sum, r) => sum + r.amount, 0);
                     wsData.push([]);
-                    wsData.push(['إجمالي المبالغ الواردة', '', totalIncome, '']);
+                    const totalIncomeRow = wsData.length;
+                    const totalIncome = recordsToExport.reduce((sum, r) => sum + r.amount, 0);
+                    wsData.push(['إجمالي المبالغ الواردة', '', totalIncome, 'المجموع']);
+                    for (let i = 0; i < 4; i++) {
+                        cellStyles.push({ row: totalIncomeRow, col: i, style: styles.totalRow });
+                    }
                 }
             }
             
@@ -1267,33 +1370,86 @@
                 if (type === 'all' && recordsToExport.filter(r => r.type === 'income').length > 0) {
                     wsData.push([]);
                     wsData.push([]);
+                    wsData.push([]);
                 }
-                wsData.push(['تاريخ البيان الكامل', 'التفاصيل', 'المبلغ', 'النوع']);
+                
+                // رأس الجدول للمصروفات
+                const headerRowExpense = wsData.length;
+                wsData.push(['التاريخ الكامل', 'التفاصيل', 'المبلغ (جنيه)', 'النوع']);
+                for (let i = 0; i < 4; i++) {
+                    cellStyles.push({ row: headerRowExpense, col: i, style: styles.header });
+                }
+                
+                // ترتيب وتجميع المصروفات بالتاريخ
+                const expenseByDate = {};
                 recordsToExport.filter(r => r.type === 'expense').forEach(record => {
-                    wsData.push([record.dateTime, record.details, record.amount, 'مصروف']);
+                    const date = record.dateTime.split(',')[0];
+                    if (!expenseByDate[date]) {
+                        expenseByDate[date] = [];
+                    }
+                    expenseByDate[date].push(record);
                 });
                 
-                const totalExpense = recordsToExport.filter(r => r.type === 'expense').reduce((sum, r) => sum + r.amount, 0);
+                // عرض البيانات مجمعة ومرتبة
+                Object.keys(expenseByDate).sort().reverse().forEach(date => {
+                    expenseByDate[date].forEach(record => {
+                        const dataRow = wsData.length;
+                        wsData.push([record.dateTime, record.details, record.amount, 'مصروف']);
+                        for (let i = 0; i < 4; i++) {
+                            cellStyles.push({ row: dataRow, col: i, style: styles.expenseRow });
+                        }
+                    });
+                });
+                
                 wsData.push([]);
-                wsData.push(['إجمالي المصروفات', '', totalExpense, '']);
+                const totalExpenseRow = wsData.length;
+                const totalExpense = recordsToExport.filter(r => r.type === 'expense').reduce((sum, r) => sum + r.amount, 0);
+                wsData.push(['إجمالي المصروفات', '', totalExpense, 'المجموع']);
+                for (let i = 0; i < 4; i++) {
+                    cellStyles.push({ row: totalExpenseRow, col: i, style: styles.totalRow });
+                }
             }
             
             if (type === 'all') {
+                wsData.push([]);
                 const totalIncome = recordsToExport.filter(r => r.type === 'income').reduce((sum, r) => sum + r.amount, 0);
                 const totalExpense = recordsToExport.filter(r => r.type === 'expense').reduce((sum, r) => sum + r.amount, 0);
                 const balance = totalIncome - totalExpense;
-                wsData.push([]);
-                wsData.push(['الرصيد النهائي', '', balance, '']);
+                const balanceRow = wsData.length;
+                wsData.push(['الرصيد النهائي', '', balance, balance >= 0 ? '✅ موجب' : '❌ سالب']);
+                for (let i = 0; i < 4; i++) {
+                    cellStyles.push({ row: balanceRow, col: i, style: styles.totalRow });
+                }
             }
             
             const ws = XLSX.utils.aoa_to_sheet(wsData);
-            ws['!cols'] = [{ wch: 25 }, { wch: 25 }, { wch: 15 }, { wch: 15 }];
+            
+            // تطبيق الأنماط على الخلايا
+            cellStyles.forEach(({ row, col, style }) => {
+                const cellAddress = XLSX.utils.encode_col(col) + (row + 1);
+                if (!ws[cellAddress]) ws[cellAddress] = {};
+                ws[cellAddress].s = style;
+            });
+            
+            // تعيين عرض الأعمدة
+            ws['!cols'] = [
+                { wch: 25 },
+                { wch: 30 },
+                { wch: 15 },
+                { wch: 12 }
+            ];
+            
+            // تعيين ارتفاع الصفوف
+            ws['!rows'] = [];
+            for (let i = 0; i < wsData.length; i++) {
+                ws['!rows'][i] = { hpx: 25 };
+            }
             
             XLSX.utils.book_append_sheet(wb, ws, 'البيانات');
             XLSX.writeFile(wb, `الحسابات_${new Date().toLocaleDateString('ar-EG')}.xlsx`);
         };
 
-        // Export Search Results
+        // Export Search Results - محسّنة مع ألوان وحدود وتجميع
         window.exportSearchResults = function() {
             if (searchResults.length === 0) {
                 alert('لا توجد نتائج بحث للتصدير');
@@ -1301,27 +1457,136 @@
             }
 
             const wb = XLSX.utils.book_new();
+            
+            const styles = {
+                header: {
+                    font: { bold: true, color: { rgb: "FFFFFF" }, size: 14 },
+                    fill: { fgColor: { rgb: "1F2937" } },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: true },
+                    border: {
+                        left: { style: "thick", color: { rgb: "000000" } },
+                        right: { style: "thick", color: { rgb: "000000" } },
+                        top: { style: "thick", color: { rgb: "000000" } },
+                        bottom: { style: "thick", color: { rgb: "000000" } }
+                    }
+                },
+                incomeRow: {
+                    font: { color: { rgb: "047857" }, bold: false },
+                    fill: { fgColor: { rgb: "D1FAE5" } },
+                    alignment: { horizontal: "center", vertical: "center" },
+                    border: {
+                        left: { style: "medium", color: { rgb: "10B981" } },
+                        right: { style: "medium", color: { rgb: "10B981" } },
+                        top: { style: "thin", color: { rgb: "10B981" } },
+                        bottom: { style: "thin", color: { rgb: "10B981" } }
+                    }
+                },
+                expenseRow: {
+                    font: { color: { rgb: "991B1B" }, bold: false },
+                    fill: { fgColor: { rgb: "FEE2E2" } },
+                    alignment: { horizontal: "center", vertical: "center" },
+                    border: {
+                        left: { style: "medium", color: { rgb: "EF4444" } },
+                        right: { style: "medium", color: { rgb: "EF4444" } },
+                        top: { style: "thin", color: { rgb: "EF4444" } },
+                        bottom: { style: "thin", color: { rgb: "EF4444" } }
+                    }
+                },
+                totalRow: {
+                    font: { bold: true, color: { rgb: "FFFFFF" }, size: 12 },
+                    fill: { fgColor: { rgb: "8B5CF6" } },
+                    alignment: { horizontal: "center", vertical: "center" },
+                    border: {
+                        left: { style: "thick", color: { rgb: "8B5CF6" } },
+                        right: { style: "thick", color: { rgb: "8B5CF6" } },
+                        top: { style: "thick", color: { rgb: "8B5CF6" } },
+                        bottom: { style: "thick", color: { rgb: "8B5CF6" } }
+                    }
+                },
+                titleCell: {
+                    font: { bold: true, size: 16, color: { rgb: "1F2937" } },
+                    alignment: { horizontal: "center", vertical: "center" },
+                    fill: { fgColor: { rgb: "F3F4F6" } }
+                }
+            };
+
             const wsData = [];
+            let cellStyles = [];
             
+            // العنوان
+            const titleRow = wsData.length;
             wsData.push(['نظام إدارة الحسابات - نتائج البحث']);
-            wsData.push([]);
-            wsData.push(['التاريخ الكامل', 'التفاصيل/الشخص', 'المبلغ', 'النوع']);
+            cellStyles.push({ row: titleRow, col: 0, style: styles.titleCell });
             
+            wsData.push([]);
+            wsData.push([]);
+            
+            // رأس الجدول
+            const headerRow = wsData.length;
+            wsData.push(['التاريخ الكامل', 'التفاصيل/الشخص', 'المبلغ (جنيه)', 'النوع']);
+            for (let i = 0; i < 4; i++) {
+                cellStyles.push({ row: headerRow, col: i, style: styles.header });
+            }
+            
+            // ترتيب وتجميع النتائج بالتاريخ
+            const resultsByDate = {};
             searchResults.forEach(record => {
-                wsData.push([
-                    record.dateTime,
-                    record.type === 'income' ? record.person : record.details,
-                    record.amount,
-                    record.type === 'income' ? 'مبلغ وارد' : 'مصروف'
-                ]);
+                const date = record.dateTime.split(',')[0];
+                if (!resultsByDate[date]) {
+                    resultsByDate[date] = [];
+                }
+                resultsByDate[date].push(record);
             });
             
+            // عرض البيانات مجمعة ومرتبة
+            Object.keys(resultsByDate).sort().reverse().forEach(date => {
+                resultsByDate[date].forEach(record => {
+                    const dataRow = wsData.length;
+                    wsData.push([
+                        record.dateTime,
+                        record.type === 'income' ? record.person : record.details,
+                        record.amount,
+                        record.type === 'income' ? 'مبلغ وارد' : 'مصروف'
+                    ]);
+                    
+                    const rowStyle = record.type === 'income' ? styles.incomeRow : styles.expenseRow;
+                    for (let i = 0; i < 4; i++) {
+                        cellStyles.push({ row: dataRow, col: i, style: rowStyle });
+                    }
+                });
+            });
+            
+            // الإجمالي
             wsData.push([]);
+            const totalRow = wsData.length;
             const totalAmount = searchResults.reduce((sum, r) => sum + r.amount, 0);
-            wsData.push(['إجمالي النتائج', '', totalAmount, '']);
+            wsData.push(['إجمالي النتائج', '', totalAmount, 'المجموع']);
+            for (let i = 0; i < 4; i++) {
+                cellStyles.push({ row: totalRow, col: i, style: styles.totalRow });
+            }
             
             const ws = XLSX.utils.aoa_to_sheet(wsData);
-            ws['!cols'] = [{ wch: 25 }, { wch: 25 }, { wch: 15 }, { wch: 15 }];
+            
+            // تطبيق الأنماط
+            cellStyles.forEach(({ row, col, style }) => {
+                const cellAddress = XLSX.utils.encode_col(col) + (row + 1);
+                if (!ws[cellAddress]) ws[cellAddress] = {};
+                ws[cellAddress].s = style;
+            });
+            
+            // تعيين عرض الأعمدة
+            ws['!cols'] = [
+                { wch: 25 },
+                { wch: 30 },
+                { wch: 15 },
+                { wch: 12 }
+            ];
+            
+            // تعيين ارتفاع الصفوف
+            ws['!rows'] = [];
+            for (let i = 0; i < wsData.length; i++) {
+                ws['!rows'][i] = { hpx: 25 };
+            }
             
             XLSX.utils.book_append_sheet(wb, ws, 'نتائج البحث');
             XLSX.writeFile(wb, `نتائج_البحث_${new Date().toLocaleDateString('ar-EG')}.xlsx`);
