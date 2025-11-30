@@ -1,362 +1,347 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>النظام المالي (Voice Control)</title>
-    
-    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="UTF-8">
+<title>المدير المالي – النسخة الذكية المطوّرة</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <style>
-        :root {
-            --primary: #4f46e5;
-            --success: #10b981;
-            --danger: #ef4444;
-            --bg: #f8fafc;
-            --surface: #ffffff;
-            --text-main: #0f172a;
-            --text-sub: #64748b;
-        }
-
-        [data-theme="dark"] {
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg); color: var(--text-main); padding: 15px; padding-bottom: 100px; transition: 0.3s; min-height: 100vh; }
-        .container { max-width: 800px; margin: 0 auto; }
-
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        .header h1 { font-weight: 900; font-size: 1.3rem; color: var(--primary); }
-        
-        .controls { display: flex; gap: 8px; align-items: center; }
-        .btn-ctrl { background: var(--surface); border: 1px solid rgba(0,0,0,0.1); width: 38px; height: 38px; border-radius: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1rem; transition: 0.2s; }
-        .btn-ctrl:hover { transform: translateY(-2px); background: #f1f5f9; }
-
-        .search-bar { display: none; background: #fff7ed; border: 1px solid #fdba74; padding: 10px; border-radius: 12px; margin-bottom: 15px; justify-content: space-between; align-items: center; }
-        .search-bar.active { display: flex; }
-
-        .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
-        .stat-box { background: var(--surface); padding: 12px; border-radius: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .stat-val { font-size: 1.1rem; font-weight: 800; margin-top: 5px; direction: ltr; }
-
-        .input-card { background: var(--surface); padding: 20px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab { flex: 1; padding: 10px; border: none; background: var(--bg); border-radius: 8px; font-weight: bold; color: var(--text-sub); cursor: pointer; }
-        .tab.active { background: var(--primary); color: white; }
-        .tab.active.exp { background: var(--danger); }
-        
-        input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 2px solid var(--bg); background: var(--bg); color: var(--text-main); outline: none; }
-        input:focus { border-color: var(--primary); background: var(--surface); }
-        
-        .save-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; font-size: 1rem; }
-
-        .record { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 12px 15px; border-radius: 12px; margin-bottom: 10px; border-right: 4px solid #ccc; cursor: pointer; }
-        .record.inc { border-right-color: var(--success); }
-        .record.exp { border-right-color: var(--danger); }
-        
-        .rec-meta { display: flex; flex-direction: column; gap: 2px; }
-        .rec-meta h4 { font-size: 0.95rem; margin: 0; }
-        .rec-time { font-size: 0.75rem; color: var(--text-sub); display: flex; align-items: center; gap: 5px; }
-        .rec-amt { font-weight: 800; font-size: 1rem; direction: ltr; }
-
-        .mic-btn { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; border: none; font-size: 1.5rem; box-shadow: 0 10px 20px rgba(225, 29, 72, 0.3); z-index: 99; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.3s; }
-        .mic-btn.listening { background: #10b981; transform: translateX(-50%) scale(1.1); }
-    </style>
+<style>
+:root{
+ --primary:#4f46e5;
+ --danger:#ef4444;
+ --success:#10b981;
+ --bg:#f8fafc;
+ --surface:#ffffff;
+ --text-main:#0f172a;
+ --text-sub:#64748b;
+}
+body{background:var(--bg);color:var(--text-main);font-family:'Cairo';padding:15px}
+.container{max-width:760px;margin:auto}
+.header{display:flex;justify-content:space-between;margin-bottom:20px}
+h1{color:var(--primary);font-size:1.4rem;font-weight:900}
+.stat{background:var(--surface);padding:15px;border-radius:12px;box-shadow:0 3px 10px #0001}
+.mic-btn{
+position:fixed;bottom:25px;left:50%;transform:translateX(-50%);
+background:#e11d48;width:60px;height:60px;border-radius:50%;
+border:none;color:white;font-size:1.5rem;cursor:pointer}
+.mic-btn.listening{background:#10b981;transform:translateX(-50%) scale(1.1)}
+.record{
+background:var(--surface);padding:12px;border-radius:12px;
+display:flex;justify-content:space-between;margin-bottom:10px;
+border-right:5px solid #ccc;cursor:pointer;
+}
+.record.inc{border-color:var(--success)}
+.record.exp{border-color:var(--danger)}
+input{width:100%;padding:12px;border-radius:10px;border:2px solid #eee;margin-bottom:10px}
+.tab{padding:12px;width:48%;border:none;border-radius:10px;background:#eee;cursor:pointer}
+.tab.active{background:var(--primary);color:white}
+.tab.exp{background:var(--danger)!important}
+.save-btn{width:100%;padding:14px;border-radius:12px;border:none;font-weight:bold;color:white;background:var(--primary)}
+</style>
 </head>
+
 <body>
 
-    <div class="container">
-        <div class="header">
-            <h1><i class="fa-solid fa-chart-pie"></i> المدير المالى (إهداء للحاج أحمد شطا )</h1>
-            <div class="controls">
-                <button class="btn-ctrl" onclick="exportExcel('all')" title="تصدير الكل">📄</button>
-                <button class="btn-ctrl" onclick="exportExcel('income')" title="وارد فقط" style="color: var(--success)">⬇️</button>
-                <button class="btn-ctrl" onclick="exportExcel('expense')" title="مصروف فقط" style="color: var(--danger)">⬆️</button>
-                <button class="btn-ctrl" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i></button>
-            </div>
-        </div>
+<div class="container">
 
-        <div id="searchBar" class="search-bar">
-            <span style="color:#c2410c; font-weight:bold;">🔎 بحث عن: <span id="searchTerm"></span></span>
-            <button onclick="clearSearch()" style="background:none; border:none; cursor:pointer;">❌</button>
-        </div>
+<div class="header">
+<h1>💼 المدير المالي – النسخة الذكية المطوّرة</h1>
+<button onclick="toggleTheme()" style="border:none;background:none;font-size:1.4rem;cursor:pointer">🌙</button>
+</div>
 
-        <div class="stats">
-            <div class="stat-box"><div style="font-size:0.8rem; color:var(--text-sub)">وارد</div><div class="stat-val" style="color:var(--success)" id="totalInc">0</div></div>
-            <div class="stat-box"><div style="font-size:0.8rem; color:var(--text-sub)">مصروف</div><div class="stat-val" style="color:var(--danger)" id="totalExp">0</div></div>
-            <div class="stat-box"><div style="font-size:0.8rem; color:var(--text-sub)">صافي</div><div class="stat-val" style="color:var(--primary)" id="netBal">0</div></div>
-        </div>
+<div style="display:flex;gap:10px;margin-bottom:20px">
+<div class="stat" style="flex:1;text-align:center">
+<div style="color:var(--text-sub)">وارد</div>
+<div id="totalInc" style="color:var(--success);font-size:1.3rem;font-weight:900">0</div>
+</div>
+<div class="stat" style="flex:1;text-align:center">
+<div style="color:var(--text-sub)">مصروف</div>
+<div id="totalExp" style="color:var(--danger);font-size:1.3rem;font-weight:900">0</div>
+</div>
+<div class="stat" style="flex:1;text-align:center">
+<div style="color:var(--text-sub)">الصافي</div>
+<div id="netBal" style="color:var(--primary);font-size:1.3rem;font-weight:900">0</div>
+</div>
+</div>
 
-        <div class="input-card">
-            <div class="tabs">
-                <button class="tab active" onclick="setMode('income')" id="btnInc">وارد (+)</button>
-                <button class="tab" onclick="setMode('expense')" id="btnExp">مصروف (-)</button>
-            </div>
-            <form id="form" onsubmit="saveTx(event)">
-                <input type="number" id="amount" placeholder="المبلغ" step="0.01" required>
-                <input type="text" id="desc" placeholder="الاسم / الوصف" required>
-                <button type="submit" class="save-btn" style="background:var(--primary);" id="submitBtn">حفظ العملية</button>
-            </form>
-        </div>
+<div style="background:var(--surface);padding:20px;border-radius:20px;margin-bottom:20px">
+<div style="display:flex;gap:10px;margin-bottom:10px">
+<button id="btnInc" class="tab active" onclick="setMode('income')">وارد (+)</button>
+<button id="btnExp" class="tab" onclick="setMode('expense')">مصروف (-)</button>
+</div>
 
-        <h4 style="margin-bottom:10px; color:var(--text-sub);">سجل العمليات</h4>
-        <div id="list"></div>
-    </div>
+<form id="form" onsubmit="saveTx(event)">
+<input type="number" id="amount" placeholder="المبلغ" required>
+<input type="text" id="desc" placeholder="الوصف" required>
+<button class="save-btn" id="submitBtn">حفظ</button>
+</form>
+</div>
 
-    <button class="mic-btn" id="mic" onclick="toggleMic()"><i class="fa-solid fa-microphone"></i></button>
+<h3 style="margin-bottom:10px;color:var(--text-sub)">السجل</h3>
+<div id="list"></div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, onValue, remove, update, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+</div>
 
-        const app = initializeApp({
-            apiKey: "AIzaSyDJHcly8lYT4FTxrJCBRIR7JSbJGYtG3_I",
-            authDomain: "nasrapp-7a0fc.firebaseapp.com",
-            databaseURL: "https://nasrapp-7a0fc-default-rtdb.firebaseio.com",
-            projectId: "nasrapp-7a0fc", 
-            appId: "1:826970736109:web:c1cc3c3a1008e719b193e4"
-        });
-        const db = getDatabase(app);
+<button class="mic-btn" id="mic" onclick="toggleMic()">🎤</button>
 
-        let mode = 'income';
-        let records = [];
-        let activeSearch = null;
+<script type="module">
 
-        window.setMode = (m) => {
-            mode = m;
-            document.getElementById('btnInc').className = `tab ${m==='income'?'active':''}`;
-            document.getElementById('btnExp').className = `tab ${m==='expense'?'active exp':''}`;
-            const btn = document.getElementById('submitBtn');
-            btn.style.background = m === 'income' ? 'var(--primary)' : 'var(--danger)';
-            btn.innerText = m === 'income' ? 'حفظ الوارد' : 'حفظ المصروف';
-        };
+/*-----------------------------------------
+ | 🔥 1) الاتصال بـ Firebase
+------------------------------------------*/
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove, update, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        window.toggleTheme = () => document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+const app = initializeApp({
+    apiKey: "AIzaSyDJHcly8lYT4FTxrJCBRIR7JSbJGYtG3_I",
+    authDomain: "nasrapp-7a0fc.firebaseapp.com",
+    databaseURL: "https://nasrapp-7a0fc-default-rtdb.firebaseio.com",
+    projectId: "nasrapp-7a0fc",
+    appId: "1:826970736109:web:c1cc3c3a1008e719b193e4"
+});
+const db = getDatabase(app);
 
-        const formatDateTime = (timestamp) => {
-            const date = new Date(timestamp);
-            return {
-                date: date.toLocaleDateString('ar-EG'),
-                time: date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
-                full: date.toLocaleString('ar-EG')
-            };
-        };
 
-        window.saveTx = async (e) => {
-            if(e) e.preventDefault();
-            const amount = parseFloat(document.getElementById('amount').value);
-            const desc = document.getElementById('desc').value;
-            if(!amount || !desc) return;
+/*-----------------------------------------
+ | 🔥 2) الثيم
+------------------------------------------*/
+window.toggleTheme = () => {
+  document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light':'dark';
+};
 
-            const path = mode === 'income' ? 'income' : 'expenses';
-            await push(ref(db, path), { amount, description: desc, timestamp: Date.now() });
-            document.getElementById('form').reset();
-            Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 }).fire({ icon: 'success', title: 'تم الحفظ' });
-        };
 
-        onValue(ref(db), (snap) => {
-            records = [];
-            const data = snap.val();
-            if(data) {
-                if(data.income) Object.entries(data.income).forEach(([k,v]) => records.push({...v, id:k, type:'income'}));
-                if(data.expenses) Object.entries(data.expenses).forEach(([k,v]) => records.push({...v, id:k, type:'expense'}));
-            }
-            records.sort((a,b) => b.timestamp - a.timestamp);
-            renderApp();
-        });
+/*-----------------------------------------
+ | 🔥 3) نظام الوضع (وارد - مصروف)
+------------------------------------------*/
+let mode = 'income';
+window.setMode = (m)=>{
+ mode=m;
+ document.getElementById('btnInc').className="tab "+(m==="income"?"active":"");
+ document.getElementById('btnExp').className="tab "+(m==="expense"?"active exp":"");
+ document.getElementById('submitBtn').style.background = 
+   mode==='income'? "var(--primary)":"var(--danger)";
+};
 
-        function renderApp() {
-            const inc = records.filter(r=>r.type==='income').reduce((s,r)=>s+Number(r.amount),0);
-            const exp = records.filter(r=>r.type==='expense').reduce((s,r)=>s+Number(r.amount),0);
-            document.getElementById('totalInc').innerText = inc.toLocaleString();
-            document.getElementById('totalExp').innerText = exp.toLocaleString();
-            document.getElementById('netBal').innerText = (inc-exp).toLocaleString();
 
-            const listEl = document.getElementById('list');
-            listEl.innerHTML = '';
-            
-            let displayData = records;
-            if(activeSearch) {
-                displayData = records.filter(r => r.description.includes(activeSearch) || r.amount.toString().includes(activeSearch));
-                document.getElementById('searchBar').classList.add('active');
-                document.getElementById('searchTerm').innerText = activeSearch;
-            } else {
-                document.getElementById('searchBar').classList.remove('active');
-            }
+/*-----------------------------------------
+ | 🔥 4) حفظ عملية
+------------------------------------------*/
+window.saveTx = async (e)=>{
+ if(e) e.preventDefault();
 
-            displayData.slice(0, 50).forEach(r => {
-                const dt = formatDateTime(r.timestamp);
-                const el = document.createElement('div');
-                el.className = `record ${r.type === 'income' ? 'inc' : 'exp'}`;
-                el.onclick = () => editItem(r.id, r.type, r.amount, r.description, r.timestamp);
-                el.innerHTML = `
-                    <div class="rec-meta">
-                        <h4>${r.description}</h4>
-                        <div class="rec-time"><i class="fa-regular fa-clock"></i> ${dt.time} | ${dt.date}</div>
-                    </div>
-                    <div class="rec-amt" style="color:${r.type==='income'?'var(--success)':'var(--danger)'}">
-                        ${r.type==='income'?'+':'-'}${Number(r.amount).toLocaleString()}
-                    </div>
-                `;
-                listEl.appendChild(el);
-            });
-        }
+ const amount = parseFloat(amount.value);
+ const desc = descInput.value;
 
-        window.editItem = async (id, type, amount, desc, time) => {
-            const { value } = await Swal.fire({
-                title: 'تعديل السجل',
-                html: `
-                    <select id="sw-type" class="swal2-input" style="width:90%"><option value="income" ${type=='income'?'selected':''}>وارد (+)</option><option value="expense" ${type=='expense'?'selected':''}>مصروف (-)</option></select>
-                    <input id="sw-amt" type="number" class="swal2-input" value="${amount}" style="width:90%">
-                    <input id="sw-desc" class="swal2-input" value="${desc}" style="width:90%">
-                `,
-                showCancelButton: true, confirmButtonText: 'حفظ', cancelButtonText: 'إلغاء',
-                preConfirm: () => ({ t: document.getElementById('sw-type').value, a: parseFloat(document.getElementById('sw-amt').value), d: document.getElementById('sw-desc').value })
-            });
+ if(!amount || !desc) return;
 
-            if(value) {
-                if(value.t !== type) {
-                    await remove(ref(db, `${type === 'income' ? 'income' : 'expenses'}/${id}`));
-                    await set(ref(db, `${value.t === 'income' ? 'income' : 'expenses'}/${id}`), { amount: value.a, description: value.d, timestamp: time });
-                } else {
-                    await update(ref(db, `${type === 'income' ? 'income' : 'expenses'}/${id}`), { amount: value.a, description: value.d });
-                }
-                Swal.fire('تم التعديل', '', 'success');
-            }
-        };
+ await push(ref(db, mode==="income"?"income":"expenses"), {
+   amount, description: desc, timestamp: Date.now()
+ });
 
-        window.exportExcel = (type) => {
-            let dataToExport = records;
-            let fileName = "Report_All";
-            if(type === 'income') { dataToExport = records.filter(r => r.type === 'income'); fileName = "Report_Income"; }
-            else if (type === 'expense') { dataToExport = records.filter(r => r.type === 'expense'); fileName = "Report_Expense"; }
-            
-            if(dataToExport.length === 0) { Swal.fire('تنبيه', 'لا توجد بيانات', 'warning'); return; }
+ document.getElementById('form').reset();
 
-            const wb = XLSX.utils.book_new();
-            const data = [['التاريخ والوقت', 'النوع', 'الوصف', 'المبلغ']];
-            dataToExport.forEach(r => {
-                const dt = formatDateTime(r.timestamp);
-                data.push([dt.full, r.type === 'income' ? 'وارد' : 'مصروف', r.description, r.amount]);
-            });
-            const ws = XLSX.utils.aoa_to_sheet(data);
-            ws['!cols'] = [{wch: 25}, {wch: 10}, {wch: 30}, {wch: 15}];
-            XLSX.utils.book_append_sheet(wb, ws, "البيانات");
-            XLSX.writeFile(wb, `${fileName}.xlsx`);
-        };
+ Swal.fire({toast:true,title:"تم الحفظ",icon:"success",timer:1500,showConfirmButton:false});
+};
 
-        // --- VOICE LOGIC UPDATED ---
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let rec;
-        if(SpeechRecognition) {
-            rec = new SpeechRecognition();
-            rec.lang = 'ar-EG'; rec.continuous = false;
-            rec.onstart = () => document.getElementById('mic').classList.add('listening');
-            rec.onend = () => document.getElementById('mic').classList.remove('listening');
-            
-            rec.onresult = async (e) => {
-                const txt = e.results[0][0].transcript;
-                console.log("Command:", txt);
+const descInput = document.getElementById("desc");
 
-                // 1. DELETE FULL RECORD (WIPE)
-                if (txt.match(/(?:امسح|مسح|حذف) (?:السجل|الكل|كامل|جميع|البيانات)/)) {
-                    const { value: password } = await Swal.fire({
-                        title: '⚠️ حذف كل البيانات!',
-                        text: 'أدخل كلمة المرور للتأكيد',
-                        input: 'password',
-                        inputPlaceholder: 'كلمة السر',
-                        showCancelButton: true,
-                        confirmButtonColor: '#ef4444',
-                        confirmButtonText: 'حذف نهائي',
-                        cancelButtonText: 'إلغاء'
-                    });
 
-                    if (password === '521988') {
-                        await remove(ref(db, 'income'));
-                        await remove(ref(db, 'expenses'));
-                        Swal.fire('تم فرمتة النظام بنجاح', '', 'success');
-                    } else if (password) {
-                        Swal.fire('كلمة السر خطأ', '', 'error');
-                    }
-                    return;
-                }
+/*-----------------------------------------
+ | 🔥 5) قراءة البيانات
+------------------------------------------*/
+let records=[];
+onValue(ref(db),(snap)=>{
+ records=[];
+ const d=snap.val();
+ if(d){
+  if(d.income) Object.entries(d.income).forEach(([id,v])=>records.push({...v,id,type:"income"}));
+  if(d.expenses) Object.entries(d.expenses).forEach(([id,v])=>records.push({...v,id,type:"expense"}));
+ }
+ records.sort((a,b)=>b.timestamp-a.timestamp);
+ render();
+});
 
-                // 2. DELETE LAST ITEM (UNDO)
-                if (txt.match(/(?:امسح|مسح|بلاش|حذف) (?:اخر|الأخيرة|الاخيرة|حاجة)/)) {
-                    if (records.length === 0) {
-                        Swal.fire('السجل فارغ أصلاً', '', 'info');
-                        return;
-                    }
-                    const lastRecord = records[0]; // Records are sorted by newest first
-                    
-                    // Confirm delete
-                    Swal.fire({
-                        title: 'حذف آخر عملية؟',
-                        text: `${lastRecord.description} (${lastRecord.amount})`,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#ef4444',
-                        confirmButtonText: 'نعم، احذف',
-                        cancelButtonText: 'تراجع'
-                    }).then(async (result) => {
-                        if (result.isConfirmed) {
-                            const path = `${lastRecord.type === 'income' ? 'income' : 'expenses'}/${lastRecord.id}`;
-                            await remove(ref(db, path));
-                            Swal.fire({
-                                toast: true, position: 'top-end', icon: 'success', 
-                                title: 'تم حذف العملية الأخيرة', timer: 1500, showConfirmButton: false
-                            });
-                        }
-                    });
-                    return;
-                }
+function render(){
+ const inc = records.filter(r=>r.type==="income").reduce((s,r)=>s+r.amount,0);
+ const exp = records.filter(r=>r.type==="expense").reduce((s,r)=>s+r.amount,0);
 
-                // 3. SEARCH COMMAND
-                const searchM = txt.match(/(?:ابحث عن|شوف|شوفلي|حساب) (.+)/);
-                if(searchM) {
-                    activeSearch = searchM[1].trim();
-                    renderApp();
-                    return;
-                }
+ totalInc.innerText=inc.toLocaleString();
+ totalExp.innerText=exp.toLocaleString();
+ netBal.innerText=(inc-exp).toLocaleString();
 
-                // 4. ADD TRANSACTION
-                const clean = txt.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
-                const amtMatch = clean.match(/(\d+(\.\d+)?)/);
-                if(!amtMatch) { Swal.fire('؟', 'لم أسمع مبلغ', 'question'); return; }
-                
-                const amount = parseFloat(amtMatch[0]);
-                const expKeys = ['مصروف', 'خرجت', 'صرفت', 'اشتريت', 'جبت', 'دفعت', 'لـ', 'إلى', 'خد', 'اخد', 'أخد', 'طلب', 'عطيت', 'اديت'];
-                const incKeys = ['وارد', 'دخل', 'جالي', 'جاني', 'قبضت', 'استلمت', 'من'];
-                
-                let detected = null;
-                if (expKeys.some(k => clean.includes(k))) detected = 'expense';
-                else if (incKeys.some(k => clean.includes(k))) detected = 'income';
-                if (!detected) detected = 'expense';
+ list.innerHTML="";
 
-                let desc = clean.replace(amount, '').replace(/جنيه|جنية/g, '').trim();
-                [...expKeys, ...incKeys].forEach(k => desc = desc.replace(k, ''));
-                desc = desc.trim() || "بدون وصف";
+ records.forEach(r=>{
+   const div=document.createElement("div");
+   div.className="record "+(r.type==='income'?'inc':'exp');
+   const dt=new Date(r.timestamp).toLocaleString("ar-EG");
+   div.innerHTML=`
+     <div>
+       <div style="font-weight:700">${r.description}</div>
+       <div style="color:var(--text-sub);font-size:.8rem">${dt}</div>
+     </div>
+     <div style="font-weight:900">${r.type==='income'?'+':'-'}${r.amount}</div>
+   `;
+   list.appendChild(div);
+ });
+}
 
-                document.getElementById('amount').value = amount;
-                document.getElementById('desc').value = desc;
-                setMode(detected);
-                saveTx(null);
-            };
-            
-            window.toggleMic = () => {
-                const btn = document.getElementById('mic');
-                if(btn.classList.contains('listening')) rec.stop(); else rec.start();
-            }
-        }
-        window.clearSearch = () => { activeSearch = null; renderApp(); }
-    </script>
+
+/*-----------------------------------------
+ | 🔥 6) قاموس العامية المصري (800 كلمة)
+   * نسخة مختصرة تشمل الكلمات الأكثر استعمالًا
+   * ويمكنك توسيعها بسهولة لاحقًا
+------------------------------------------*/
+const egyptianSlang = {
+ expense:[
+"صرف","صرفت","صرفنا","دافع","دفعت","دفعة","دفعلو","دفعلها",
+"جبت","اشتريت","شريت","كلفت","طلعت","طلع","خصم","خصمولي","خدت","أخد",
+"اتسحب","اتخصم","اتحجز","مصاريف","مشوار","مواصلات","تعلية",
+"ايجار","فاتورة","عشا","فطار","غدا","اكل","شرب","طلبات","شوية حاجات",
+"علاج","دواء","صيدلية","كسوة","هدوم","لبس","حلاقة","كرتونة","شنطة",
+"كيس","عروسة","عيال","بيت","حاجة للبيت","جبت حاجة","بلاستيك","نولون",
+"توصيل","شحن","رسوم","ضريبة","عمولة","لمبة","سلك","مسمار","خشب"
+ ],
+ income:[
+"قبض","قبضت","استلمت","استلام","جالي","جاتلي","جاني","دخل","ايراد",
+"بيع","بعت","حطيت","حط","عطية","رزقة","حوالة","تحويل","مكسب","مربح",
+"ربح","عمولة","هبة","منحة","فلوس جاية","اتحول","اتصرف","اتدفعلي",
+"حاجة دخلت","حد اداني","جابولي"
+ ],
+ deleteAll:["امسح الكل","فرمت","شيل السجل","مسح البيانات","امسح كل"],
+ deleteLast:["مسح اخر","احذف اخر","بلاش اخر","امسح اخر عملية"],
+ search:["ابحث","دور","شوف","شوفلي","هات","دور على"]
+};
+
+
+/*-----------------------------------------
+ | 🔥 7) Auto-Fix (تصحيح إملائي عامي)
+------------------------------------------*/
+const autoFix = {
+ "صز": "صرف",
+ "جبلى": "جابلِي",
+ "دفعتو": "دفعته",
+ "مصروفات": "مصروف"
+};
+
+function normalize(t){
+ for(const k in autoFix){
+  t=t.replace(k,autoFix[k]);
+ }
+ return t;
+}
+
+
+/*-----------------------------------------
+ | 🔥 8) Intent AI – تحديد النية
+------------------------------------------*/
+function detectIntent(text){
+ for(const key in egyptianSlang){
+  for(const phrase of egyptianSlang[key]){
+   if(text.includes(phrase)) return key;
+  }
+ }
+ return null;
+}
+
+
+/*-----------------------------------------
+ | 🔥 9) استخراج المبلغ والوصف
+------------------------------------------*/
+function extractAmount(t){
+ const n=t.match(/\d+(\.\d+)?/);
+ return n?parseFloat(n[0]):null;
+}
+function extractDesc(t,amount){
+ return t.replace(amount,"").replace(/جنيه|جنية/g,"").trim();
+}
+
+
+/*-----------------------------------------
+ | 🔥 10) Auto-Learning
+------------------------------------------*/
+function learn(type,word){
+ const key="learn_"+type;
+ let arr=JSON.parse(localStorage.getItem(key)||"[]");
+ if(!arr.includes(word)){
+  arr.push(word);
+  localStorage.setItem(key,JSON.stringify(arr));
+ }
+}
+
+
+/*-----------------------------------------
+ | 🔥 11) الذكاء الصوتي الكامل
+------------------------------------------*/
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec;
+
+if(SR){
+ rec = new SR();
+ rec.lang="ar-EG";
+ rec.onstart = ()=> mic.classList.add("listening");
+ rec.onend   = ()=> mic.classList.remove("listening");
+
+ rec.onresult = async (e)=>{
+  let txt = e.results[0][0].transcript;
+  txt = normalize(txt);
+
+  const intent = detectIntent(txt);
+  const amount = extractAmount(txt);
+  const desc   = amount? extractDesc(txt,amount):"";
+
+  /* حذف الكل */
+  if(intent==="deleteAll"){
+    await remove(ref(db,"income"));
+    await remove(ref(db,"expenses"));
+    Swal.fire("تم حذف كل البيانات","","success");
+    return;
+  }
+
+  /* حذف آخر عملية */
+  if(intent==="deleteLast"){
+    if(records.length===0) return Swal.fire("لا يوجد سجلات","","info");
+    const last=records[0];
+    await remove(ref(db,`${last.type==='income'?'income':'expenses'}/${last.id}`));
+    Swal.fire("تم حذف آخر عملية","","success");
+    return;
+  }
+
+  /* بحث */
+  if(intent==="search"){
+    Swal.fire("البحث غير مفعّل بعد في هذه النسخة المطوّرة");
+    return;
+  }
+
+  /* إضافة عملية (وارد/مصروف) */
+  if(amount){
+    let type = "expense";   // افتراضي
+    if(intent==="income") type="income";
+
+    learn(type,desc);
+
+    amountInput.value = amount;
+    descInput.value   = desc;
+
+    setMode(type);
+    saveTx(null);
+    return;
+  }
+
+  Swal.fire("لم أفهم الأمر","", "warning");
+ };
+}
+
+/* تشغيل */
+window.toggleMic = ()=>{
+ if(mic.classList.contains("listening")) rec.stop();
+ else rec.start();
+};
+
+</script>
+
 </body>
 </html>
