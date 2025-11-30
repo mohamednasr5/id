@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>النظام المالي الذكي (Voice AI)</title>
+    <title>النظام المالي (Voice Control)</title>
     
-    <!-- مكتبات ضرورية -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -15,14 +14,12 @@
     <style>
         :root {
             --primary: #4f46e5;
-            --primary-dark: #3730a3;
             --success: #10b981;
             --danger: #ef4444;
-            --bg: #f1f5f9;
+            --bg: #f8fafc;
             --surface: #ffffff;
-            --text-main: #1e293b;
+            --text-main: #0f172a;
             --text-sub: #64748b;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
         [data-theme="dark"] {
@@ -30,411 +27,336 @@
             --surface: #1e293b;
             --text-main: #f8fafc;
             --text-sub: #94a3b8;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
         body { background-color: var(--bg); color: var(--text-main); padding: 15px; padding-bottom: 100px; transition: 0.3s; min-height: 100vh; }
+        .container { max-width: 800px; margin: 0 auto; }
 
-        .container { max-width: 1000px; margin: 0 auto; }
-
-        /* Header */
-        .header {
-            display: flex; justify-content: space-between; align-items: center;
-            background: var(--surface); padding: 15px 20px; border-radius: 16px;
-            box-shadow: var(--shadow); margin-bottom: 20px;
-        }
-        .header h1 { font-size: 1.4rem; font-weight: 800; background: linear-gradient(45deg, var(--primary), var(--success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .header h1 { font-weight: 900; font-size: 1.3rem; color: var(--primary); }
         
-        .controls { display: flex; gap: 10px; }
-        .icon-btn { background: var(--bg); border: none; width: 40px; height: 40px; border-radius: 12px; color: var(--text-main); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .icon-btn:active { transform: scale(0.95); }
+        .controls { display: flex; gap: 8px; align-items: center; }
+        .btn-ctrl { background: var(--surface); border: 1px solid rgba(0,0,0,0.1); width: 38px; height: 38px; border-radius: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1rem; transition: 0.2s; }
+        .btn-ctrl:hover { transform: translateY(-2px); background: #f1f5f9; }
 
-        /* Stats */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-card { background: var(--surface); padding: 15px; border-radius: 16px; text-align: center; box-shadow: var(--shadow); position: relative; overflow: hidden; }
-        .stat-card h3 { font-size: 0.8rem; color: var(--text-sub); margin-bottom: 5px; }
-        .stat-val { font-size: 1.3rem; font-weight: 800; }
-        .text-inc { color: var(--success); } .text-exp { color: var(--danger); } .text-bal { color: var(--primary); }
+        .search-bar { display: none; background: #fff7ed; border: 1px solid #fdba74; padding: 10px; border-radius: 12px; margin-bottom: 15px; justify-content: space-between; align-items: center; }
+        .search-bar.active { display: flex; }
 
-        /* Input Box */
-        .input-box { background: var(--surface); padding: 20px; border-radius: 20px; box-shadow: var(--shadow); margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.05); }
+        .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+        .stat-box { background: var(--surface); padding: 12px; border-radius: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .stat-val { font-size: 1.1rem; font-weight: 800; margin-top: 5px; direction: ltr; }
+
+        .input-card { background: var(--surface); padding: 20px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab { flex: 1; padding: 10px; border: none; background: var(--bg); border-radius: 8px; font-weight: bold; color: var(--text-sub); cursor: pointer; }
+        .tab.active { background: var(--primary); color: white; }
+        .tab.active.exp { background: var(--danger); }
         
-        .tabs { display: flex; background: var(--bg); padding: 4px; border-radius: 12px; margin-bottom: 15px; }
-        .tab { flex: 1; border: none; background: transparent; padding: 10px; border-radius: 8px; font-weight: 700; color: var(--text-sub); cursor: pointer; transition: 0.3s; }
-        .tab.active { background: var(--surface); color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .tab.active.exp { color: var(--danger); }
-
-        .form-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        input { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid var(--bg); background: var(--bg); color: var(--text-main); font-size: 1rem; outline: none; transition: 0.3s; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 2px solid var(--bg); background: var(--bg); color: var(--text-main); outline: none; }
         input:focus { border-color: var(--primary); background: var(--surface); }
         
-        .submit-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; color: white; font-weight: 700; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; }
-        .btn-inc { background: var(--primary); }
-        .btn-exp { background: var(--danger); }
-        .submit-btn:active { transform: scale(0.98); }
+        .save-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; font-size: 1rem; }
 
-        /* List */
-        .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .record { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 15px; border-radius: 14px; margin-bottom: 10px; transition: 0.2s; border-right: 4px solid transparent; }
+        .record { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 12px 15px; border-radius: 12px; margin-bottom: 10px; border-right: 4px solid #ccc; cursor: pointer; }
         .record.inc { border-right-color: var(--success); }
         .record.exp { border-right-color: var(--danger); }
         
-        .rec-info h4 { font-size: 0.95rem; margin-bottom: 2px; }
-        .rec-info p { font-size: 0.75rem; color: var(--text-sub); }
-        .rec-amount { font-weight: 800; font-size: 1.1rem; cursor: pointer; padding: 5px 10px; border-radius: 8px; }
-        .rec-amount:hover { background: var(--bg); }
+        .rec-meta { display: flex; flex-direction: column; gap: 2px; }
+        .rec-meta h4 { font-size: 0.95rem; margin: 0; }
+        .rec-time { font-size: 0.75rem; color: var(--text-sub); display: flex; align-items: center; gap: 5px; }
+        .rec-amt { font-weight: 800; font-size: 1rem; direction: ltr; }
 
-        /* Floating Mic */
-        .mic-fab { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, #F43F5E, #E11D48); color: white; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; box-shadow: 0 8px 20px rgba(225, 29, 72, 0.4); border: none; cursor: pointer; z-index: 100; transition: 0.3s; }
-        .mic-fab.listening { background: linear-gradient(135deg, #10B981, #059669); animation: pulse 1.5s infinite; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); }
-        
-        @keyframes pulse { 0% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.1); } 100% { transform: translateX(-50%) scale(1); } }
-
-        @media (max-width: 600px) {
-            .stats-grid { grid-template-columns: 1fr; }
-            .form-row { flex-direction: column; }
-        }
+        .mic-btn { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; border: none; font-size: 1.5rem; box-shadow: 0 10px 20px rgba(225, 29, 72, 0.3); z-index: 99; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.3s; }
+        .mic-btn.listening { background: #10b981; transform: translateX(-50%) scale(1.1); }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Header -->
         <div class="header">
-            <h1>المدير الذكي 🤖</h1>
+            <h1><i class="fa-solid fa-chart-pie"></i> المدير المالى (إهداء للحاج أحمد شطا )</h1>
             <div class="controls">
-                <button class="icon-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i></button>
-                <button class="icon-btn" onclick="exportExcel()"><i class="fa-solid fa-file-excel" style="color: #10B981;"></i></button>
+                <button class="btn-ctrl" onclick="exportExcel('all')" title="تصدير الكل">📄</button>
+                <button class="btn-ctrl" onclick="exportExcel('income')" title="وارد فقط" style="color: var(--success)">⬇️</button>
+                <button class="btn-ctrl" onclick="exportExcel('expense')" title="مصروف فقط" style="color: var(--danger)">⬆️</button>
+                <button class="btn-ctrl" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i></button>
             </div>
         </div>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card"><h3 id="incCount">0 وارد</h3><div class="stat-val text-inc" id="totalInc">0</div></div>
-            <div class="stat-card"><h3 id="expCount">0 مصروف</h3><div class="stat-val text-exp" id="totalExp">0</div></div>
-            <div class="stat-card"><h3>الصافي</h3><div class="stat-val text-bal" id="netBal">0</div></div>
+        <div id="searchBar" class="search-bar">
+            <span style="color:#c2410c; font-weight:bold;">🔎 بحث عن: <span id="searchTerm"></span></span>
+            <button onclick="clearSearch()" style="background:none; border:none; cursor:pointer;">❌</button>
         </div>
 
-        <!-- Input -->
-        <div class="input-box">
+        <div class="stats">
+            <div class="stat-box"><div style="font-size:0.8rem; color:var(--text-sub)">وارد</div><div class="stat-val" style="color:var(--success)" id="totalInc">0</div></div>
+            <div class="stat-box"><div style="font-size:0.8rem; color:var(--text-sub)">مصروف</div><div class="stat-val" style="color:var(--danger)" id="totalExp">0</div></div>
+            <div class="stat-box"><div style="font-size:0.8rem; color:var(--text-sub)">صافي</div><div class="stat-val" style="color:var(--primary)" id="netBal">0</div></div>
+        </div>
+
+        <div class="input-card">
             <div class="tabs">
-                <button class="tab active" onclick="setMode('income')" id="tabInc">وارد (+)</button>
-                <button class="tab" onclick="setMode('expense')" id="tabExp">مصروف (-)</button>
+                <button class="tab active" onclick="setMode('income')" id="btnInc">وارد (+)</button>
+                <button class="tab" onclick="setMode('expense')" id="btnExp">مصروف (-)</button>
             </div>
-            <form id="appForm" onsubmit="handleSubmit(event)">
-                <div class="form-row">
-                    <input type="number" id="amount" placeholder="المبلغ (0.00)" step="0.01" required>
-                    <input type="text" id="desc" placeholder="الوصف / الاسم" required>
-                </div>
-                <button type="submit" class="submit-btn btn-inc" id="mainBtn"><i class="fa-solid fa-check"></i> حفظ العملية</button>
+            <form id="form" onsubmit="saveTx(event)">
+                <input type="number" id="amount" placeholder="المبلغ" step="0.01" required>
+                <input type="text" id="desc" placeholder="الاسم / الوصف" required>
+                <button type="submit" class="save-btn" style="background:var(--primary);" id="submitBtn">حفظ العملية</button>
             </form>
         </div>
 
-        <!-- List -->
-        <div class="list-header">
-            <h3 style="font-size:1.1rem;">📝 السجل (آخر 50)</h3>
-            <small style="color:var(--text-sub);" id="statusText">اضغط على المبلغ للتعديل</small>
-        </div>
-        <div id="listContainer"></div>
-        
-        <!-- Chart -->
-        <div style="height: 250px; margin-top: 30px; background: var(--surface); padding: 15px; border-radius: 16px;">
-            <canvas id="myChart"></canvas>
-        </div>
+        <h4 style="margin-bottom:10px; color:var(--text-sub);">سجل العمليات</h4>
+        <div id="list"></div>
     </div>
 
-    <!-- Mic Button -->
-    <button class="mic-fab" id="micBtn" onclick="toggleMic()">
-        <i class="fa-solid fa-microphone"></i>
-    </button>
+    <button class="mic-btn" id="mic" onclick="toggleMic()"><i class="fa-solid fa-microphone"></i></button>
 
-    <!-- Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, onValue, remove, update, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // 1. Firebase Init
-        const firebaseConfig = {
+        const app = initializeApp({
             apiKey: "AIzaSyDJHcly8lYT4FTxrJCBRIR7JSbJGYtG3_I",
             authDomain: "nasrapp-7a0fc.firebaseapp.com",
             databaseURL: "https://nasrapp-7a0fc-default-rtdb.firebaseio.com",
-            projectId: "nasrapp-7a0fc",
-            storageBucket: "nasrapp-7a0fc.firebasestorage.app",
-            messagingSenderId: "826970736109",
+            projectId: "nasrapp-7a0fc", 
             appId: "1:826970736109:web:c1cc3c3a1008e719b193e4"
-        };
-        const app = initializeApp(firebaseConfig);
+        });
         const db = getDatabase(app);
-        const incRef = ref(db, 'income');
-        const expRef = ref(db, 'expenses');
 
-        // 2. Global Variables
-        let currentMode = 'income';
-        let allData = [];
-        let chartInstance = null;
+        let mode = 'income';
+        let records = [];
+        let activeSearch = null;
 
-        // 3. UI Functions
-        window.setMode = (mode) => {
-            currentMode = mode;
-            document.getElementById('tabInc').classList.toggle('active', mode === 'income');
-            document.getElementById('tabExp').classList.toggle('active', mode === 'expense');
-            document.getElementById('tabExp').classList.toggle('exp', mode === 'expense'); // Color fix
-            
-            const btn = document.getElementById('mainBtn');
-            const descInput = document.getElementById('desc');
-            
-            if(mode === 'income') {
-                btn.className = 'submit-btn btn-inc';
-                btn.innerHTML = '<i class="fa-solid fa-plus"></i> تسجيل وارد';
-                descInput.placeholder = 'اسم العميل / المصدر';
-            } else {
-                btn.className = 'submit-btn btn-exp';
-                btn.innerHTML = '<i class="fa-solid fa-minus"></i> تسجيل مصروف';
-                descInput.placeholder = 'تفاصيل المصروف / الجهة';
-            }
-        }
+        window.setMode = (m) => {
+            mode = m;
+            document.getElementById('btnInc').className = `tab ${m==='income'?'active':''}`;
+            document.getElementById('btnExp').className = `tab ${m==='expense'?'active exp':''}`;
+            const btn = document.getElementById('submitBtn');
+            btn.style.background = m === 'income' ? 'var(--primary)' : 'var(--danger)';
+            btn.innerText = m === 'income' ? 'حفظ الوارد' : 'حفظ المصروف';
+        };
 
-        window.toggleTheme = () => {
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        }
+        window.toggleTheme = () => document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
 
-        // 4. Form Handling
-        window.handleSubmit = async (e) => {
+        const formatDateTime = (timestamp) => {
+            const date = new Date(timestamp);
+            return {
+                date: date.toLocaleDateString('ar-EG'),
+                time: date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
+                full: date.toLocaleString('ar-EG')
+            };
+        };
+
+        window.saveTx = async (e) => {
             if(e) e.preventDefault();
             const amount = parseFloat(document.getElementById('amount').value);
             const desc = document.getElementById('desc').value;
-            
             if(!amount || !desc) return;
 
-            const path = currentMode === 'income' ? 'income' : 'expenses';
-            
-            try {
-                await push(ref(db, path), {
-                    amount,
-                    description: desc,
-                    timestamp: Date.now()
-                });
-                
-                playSuccessSound(currentMode);
-                document.getElementById('appForm').reset();
-                
-                const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
-                Toast.fire({ icon: 'success', title: `تم حفظ ${currentMode==='income'?'الوارد':'المصروف'}` });
-            } catch(err) {
-                Swal.fire('خطأ', 'تأكد من الانترنت', 'error');
-            }
-        }
+            const path = mode === 'income' ? 'income' : 'expenses';
+            await push(ref(db, path), { amount, description: desc, timestamp: Date.now() });
+            document.getElementById('form').reset();
+            Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 }).fire({ icon: 'success', title: 'تم الحفظ' });
+        };
 
-        function playSuccessSound(type) {
-            const url = type === 'income' 
-                ? 'https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3' 
-                : 'https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3';
-            new Audio(url).play().catch(()=>{});
-        }
-
-        // 5. Data Listener
         onValue(ref(db), (snap) => {
-            allData = [];
-            const d = snap.val();
-            if(d) {
-                if(d.income) Object.entries(d.income).forEach(([k,v]) => allData.push({...v, id:k, type:'income'}));
-                if(d.expenses) Object.entries(d.expenses).forEach(([k,v]) => allData.push({...v, id:k, type:'expense'}));
+            records = [];
+            const data = snap.val();
+            if(data) {
+                if(data.income) Object.entries(data.income).forEach(([k,v]) => records.push({...v, id:k, type:'income'}));
+                if(data.expenses) Object.entries(data.expenses).forEach(([k,v]) => records.push({...v, id:k, type:'expense'}));
             }
-            allData.sort((a,b) => b.timestamp - a.timestamp);
-            updateUI();
+            records.sort((a,b) => b.timestamp - a.timestamp);
+            renderApp();
         });
 
-        function updateUI() {
-            // Calc
-            const inc = allData.filter(x=>x.type=='income').reduce((a,b)=>a+Number(b.amount),0);
-            const exp = allData.filter(x=>x.type=='expense').reduce((a,b)=>a+Number(b.amount),0);
-            
+        function renderApp() {
+            const inc = records.filter(r=>r.type==='income').reduce((s,r)=>s+Number(r.amount),0);
+            const exp = records.filter(r=>r.type==='expense').reduce((s,r)=>s+Number(r.amount),0);
             document.getElementById('totalInc').innerText = inc.toLocaleString();
             document.getElementById('totalExp').innerText = exp.toLocaleString();
-            document.getElementById('netBal').innerText = (inc - exp).toLocaleString();
-            document.getElementById('incCount').innerText = allData.filter(x=>x.type=='income').length + ' وارد';
-            document.getElementById('expCount').innerText = allData.filter(x=>x.type=='expense').length + ' مصروف';
+            document.getElementById('netBal').innerText = (inc-exp).toLocaleString();
 
-            // List
-            const list = document.getElementById('listContainer');
-            list.innerHTML = '';
-            allData.slice(0, 50).forEach(item => {
-                const isInc = item.type === 'income';
-                const date = new Date(item.timestamp).toLocaleDateString('ar-EG');
-                
-                const div = document.createElement('div');
-                div.className = `record ${isInc ? 'inc' : 'exp'}`;
-                div.innerHTML = `
-                    <div class="rec-info">
-                        <h4>${item.description}</h4>
-                        <p>${date}</p>
+            const listEl = document.getElementById('list');
+            listEl.innerHTML = '';
+            
+            let displayData = records;
+            if(activeSearch) {
+                displayData = records.filter(r => r.description.includes(activeSearch) || r.amount.toString().includes(activeSearch));
+                document.getElementById('searchBar').classList.add('active');
+                document.getElementById('searchTerm').innerText = activeSearch;
+            } else {
+                document.getElementById('searchBar').classList.remove('active');
+            }
+
+            displayData.slice(0, 50).forEach(r => {
+                const dt = formatDateTime(r.timestamp);
+                const el = document.createElement('div');
+                el.className = `record ${r.type === 'income' ? 'inc' : 'exp'}`;
+                el.onclick = () => editItem(r.id, r.type, r.amount, r.description, r.timestamp);
+                el.innerHTML = `
+                    <div class="rec-meta">
+                        <h4>${r.description}</h4>
+                        <div class="rec-time"><i class="fa-regular fa-clock"></i> ${dt.time} | ${dt.date}</div>
                     </div>
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <div class="rec-amount ${isInc?'text-inc':'text-exp'}" 
-                             onclick="editItem('${item.id}', '${item.type}', ${item.amount})">
-                            ${Number(item.amount).toLocaleString()}
-                        </div>
-                        <i class="fa-solid fa-trash" style="color:#cbd5e1; cursor:pointer;" 
-                           onclick="deleteItem('${item.id}', '${item.type}')"></i>
+                    <div class="rec-amt" style="color:${r.type==='income'?'var(--success)':'var(--danger)'}">
+                        ${r.type==='income'?'+':'-'}${Number(r.amount).toLocaleString()}
                     </div>
                 `;
-                list.appendChild(div);
-            });
-
-            // Chart
-            const ctx = document.getElementById('myChart').getContext('2d');
-            if(chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['واردات', 'مصروفات'],
-                    datasets: [{ data: [inc, exp], backgroundColor: ['#10B981', '#EF4444'], borderWidth:0 }]
-                },
-                options: { maintainAspectRatio: false, plugins: { legend: { position: 'left' } } }
+                listEl.appendChild(el);
             });
         }
 
-        // 6. Edit & Delete
-        window.editItem = async (id, type, oldVal) => {
-            const { value: newVal } = await Swal.fire({
-                title: 'تعديل المبلغ', input: 'number', inputValue: oldVal, showCancelButton: true, confirmButtonText:'حفظ'
+        window.editItem = async (id, type, amount, desc, time) => {
+            const { value } = await Swal.fire({
+                title: 'تعديل السجل',
+                html: `
+                    <select id="sw-type" class="swal2-input" style="width:90%"><option value="income" ${type=='income'?'selected':''}>وارد (+)</option><option value="expense" ${type=='expense'?'selected':''}>مصروف (-)</option></select>
+                    <input id="sw-amt" type="number" class="swal2-input" value="${amount}" style="width:90%">
+                    <input id="sw-desc" class="swal2-input" value="${desc}" style="width:90%">
+                `,
+                showCancelButton: true, confirmButtonText: 'حفظ', cancelButtonText: 'إلغاء',
+                preConfirm: () => ({ t: document.getElementById('sw-type').value, a: parseFloat(document.getElementById('sw-amt').value), d: document.getElementById('sw-desc').value })
             });
-            if(newVal) update(ref(db, `${type === 'income' ? 'income' : 'expenses'}/${id}`), { amount: parseFloat(newVal) });
-        }
 
-        window.deleteItem = (id, type) => {
-            Swal.fire({
-                title: 'حذف؟', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'نعم'
-            }).then(r => {
-                if(r.isConfirmed) remove(ref(db, `${type === 'income' ? 'income' : 'expenses'}/${id}`));
-            });
-        }
+            if(value) {
+                if(value.t !== type) {
+                    await remove(ref(db, `${type === 'income' ? 'income' : 'expenses'}/${id}`));
+                    await set(ref(db, `${value.t === 'income' ? 'income' : 'expenses'}/${id}`), { amount: value.a, description: value.d, timestamp: time });
+                } else {
+                    await update(ref(db, `${type === 'income' ? 'income' : 'expenses'}/${id}`), { amount: value.a, description: value.d });
+                }
+                Swal.fire('تم التعديل', '', 'success');
+            }
+        };
 
-        window.exportExcel = () => {
+        window.exportExcel = (type) => {
+            let dataToExport = records;
+            let fileName = "Report_All";
+            if(type === 'income') { dataToExport = records.filter(r => r.type === 'income'); fileName = "Report_Income"; }
+            else if (type === 'expense') { dataToExport = records.filter(r => r.type === 'expense'); fileName = "Report_Expense"; }
+            
+            if(dataToExport.length === 0) { Swal.fire('تنبيه', 'لا توجد بيانات', 'warning'); return; }
+
             const wb = XLSX.utils.book_new();
-            const rows = [['التاريخ', 'النوع', 'الوصف', 'المبلغ']];
-            allData.forEach(r => rows.push([new Date(r.timestamp).toLocaleDateString(), r.type=='income'?'وارد':'مصروف', r.description, r.amount]));
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            XLSX.utils.book_append_sheet(wb, ws, "Report");
-            XLSX.writeFile(wb, "Finance_Report.xlsx");
-        }
-
-        // ==========================================
-        // 🧠 THE BRAIN: Advanced Voice Logic
-        // ==========================================
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition;
-
-        if(SpeechRecognition) {
-            recognition = new SpeechRecognition();
-            recognition.lang = 'ar-EG';
-            recognition.continuous = false;
-
-            recognition.onstart = () => {
-                document.getElementById('micBtn').classList.add('listening');
-                document.getElementById('micBtn').innerHTML = '<i class="fa-solid fa-wave-square"></i>';
-            };
-            recognition.onend = () => {
-                document.getElementById('micBtn').classList.remove('listening');
-                document.getElementById('micBtn').innerHTML = '<i class="fa-solid fa-microphone"></i>';
-            };
-
-            recognition.onresult = (e) => {
-                const text = e.results[0][0].transcript;
-                processSpeech(text);
-            };
-
-            window.toggleMic = () => {
-                if(document.getElementById('micBtn').classList.contains('listening')) recognition.stop();
-                else recognition.start();
-            }
-        } else {
-            alert('المتصفح لا يدعم الصوت');
-        }
-
-        function processSpeech(rawText) {
-            // 1. Normalize
-            let text = rawText.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)); // Arabic to English digits
-            console.log("Heard:", text);
-
-            // 2. Commands Check
-            if(text.includes('ليلي') || text.includes('مظلم')) { toggleTheme(); return; }
-            if(text.includes('تصدير') || text.includes('ملف')) { exportExcel(); return; }
-
-            // 3. Analyze Transaction
-            // Regex to find number (integer or decimal)
-            const amountMatch = text.match(/(\d+(\.\d+)?)/);
-            const amount = amountMatch ? parseFloat(amountMatch[0]) : 0;
-
-            if(amount === 0) {
-                Swal.fire('تنبيه', 'لم أسمع مبلغاً في كلامك: ' + text, 'info');
-                return;
-            }
-
-            // --- THE DICTIONARY (القاموس) ---
-            // كلمات تدل على الوارد
-            const incKeys = [
-                'من', 'جالي', 'جاني', 'دخل', 'قبضت', 'اخدت', 'أخدت', 'استلمت', 'وارد', 'إيراد',
-                'مكسب', 'تحويل لي', 'جاي من', 'من حساب', 'اضافة', 'حط', 'وديعة'
-            ];
-            // كلمات تدل على المصروف
-            const expKeys = [
-                'لـ', ' الي ', ' إلى ', 'عطيت', 'اديت', 'إديت', 'صرفت', 'خرجت', 'دفعت', 'طلعت',
-                'شريت', 'اشتريت', 'جبت', 'مصروف', 'سلف', 'سداد', 'خصم', 'سحبت', 'حولت ل',
-                'اشتراك', 'تجديد', 'بنزين', 'فاتورة', 'صيانة', 'مواصلات', 'أكل', 'غدا', 'عشا', 'فطار',
-                'ايجار', 'كهربا', 'مياه', 'غاز', 'نت', 'رصيد', 'علاج', 'دواء'
-            ];
-
-            let type = null;
-            // Check for Expense first (Specific usually overrides General)
-            if(expKeys.some(k => text.includes(k))) type = 'expense';
-            else if(incKeys.some(k => text.includes(k))) type = 'income';
-
-            // 4. Smart Description Cleaning
-            let desc = text;
-            
-            // Remove the number
-            desc = desc.replace(amountMatch[0], '');
-            
-            // Remove Common Filler Words
-            const noiseWords = ['جنيه', 'جنية', 'ريال', 'دولار', 'الف', 'مبلغ', 'قدره', 'حساب', 'يا', 'باشا', 'هندسة', 'لو سمحت', 'سجل', 'اكتب'];
-            noiseWords.forEach(w => desc = desc.replace(w, ''));
-            
-            // Remove Trigger Keywords (Optional: keeping them sometimes adds context, but let's clean specific prefixes)
-            const prefixesToRemove = ['من ', 'ل ', 'الى ', 'عطيت ', 'اديت ', 'جالي ', 'دفعت ', 'اشتريت ', 'جبت '];
-            prefixesToRemove.forEach(p => {
-                if(desc.trim().startsWith(p.trim())) desc = desc.replace(p, '');
+            const data = [['التاريخ والوقت', 'النوع', 'الوصف', 'المبلغ']];
+            dataToExport.forEach(r => {
+                const dt = formatDateTime(r.timestamp);
+                data.push([dt.full, r.type === 'income' ? 'وارد' : 'مصروف', r.description, r.amount]);
             });
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            ws['!cols'] = [{wch: 25}, {wch: 10}, {wch: 30}, {wch: 15}];
+            XLSX.utils.book_append_sheet(wb, ws, "البيانات");
+            XLSX.writeFile(wb, `${fileName}.xlsx`);
+        };
 
-            desc = desc.trim();
-            if(desc.length < 2) desc = "عملية صوتية"; // Default if description becomes empty
-
-            // 5. Action
-            document.getElementById('amount').value = amount;
-            document.getElementById('desc').value = desc;
+        // --- VOICE LOGIC UPDATED ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let rec;
+        if(SpeechRecognition) {
+            rec = new SpeechRecognition();
+            rec.lang = 'ar-EG'; rec.continuous = false;
+            rec.onstart = () => document.getElementById('mic').classList.add('listening');
+            rec.onend = () => document.getElementById('mic').classList.remove('listening');
             
-            if(type) {
-                setMode(type);
-                handleSubmit(null); // Auto Submit
-            } else {
-                // Ambiguous Case
-                Swal.fire({
-                    title: `المبلغ: ${amount}`,
-                    text: `الوصف: ${desc} - هل هذا وارد أم مصروف؟`,
-                    showDenyButton: true,
-                    showCancelButton: true,
-                    confirmButtonText: 'وارد (+)',
-                    denyButtonText: 'مصروف (-)',
-                    cancelButtonText: 'إلغاء'
-                }).then((res) => {
-                    if(res.isConfirmed) { setMode('income'); handleSubmit(null); }
-                    else if(res.isDenied) { setMode('expense'); handleSubmit(null); }
-                });
+            rec.onresult = async (e) => {
+                const txt = e.results[0][0].transcript;
+                console.log("Command:", txt);
+
+                // 1. DELETE FULL RECORD (WIPE)
+                if (txt.match(/(?:امسح|مسح|حذف) (?:السجل|الكل|كامل|جميع|البيانات)/)) {
+                    const { value: password } = await Swal.fire({
+                        title: '⚠️ حذف كل البيانات!',
+                        text: 'أدخل كلمة المرور للتأكيد',
+                        input: 'password',
+                        inputPlaceholder: 'كلمة السر',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        confirmButtonText: 'حذف نهائي',
+                        cancelButtonText: 'إلغاء'
+                    });
+
+                    if (password === '521988') {
+                        await remove(ref(db, 'income'));
+                        await remove(ref(db, 'expenses'));
+                        Swal.fire('تم فرمتة النظام بنجاح', '', 'success');
+                    } else if (password) {
+                        Swal.fire('كلمة السر خطأ', '', 'error');
+                    }
+                    return;
+                }
+
+                // 2. DELETE LAST ITEM (UNDO)
+                if (txt.match(/(?:امسح|مسح|بلاش|حذف) (?:اخر|الأخيرة|الاخيرة|حاجة)/)) {
+                    if (records.length === 0) {
+                        Swal.fire('السجل فارغ أصلاً', '', 'info');
+                        return;
+                    }
+                    const lastRecord = records[0]; // Records are sorted by newest first
+                    
+                    // Confirm delete
+                    Swal.fire({
+                        title: 'حذف آخر عملية؟',
+                        text: `${lastRecord.description} (${lastRecord.amount})`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        confirmButtonText: 'نعم، احذف',
+                        cancelButtonText: 'تراجع'
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+                            const path = `${lastRecord.type === 'income' ? 'income' : 'expenses'}/${lastRecord.id}`;
+                            await remove(ref(db, path));
+                            Swal.fire({
+                                toast: true, position: 'top-end', icon: 'success', 
+                                title: 'تم حذف العملية الأخيرة', timer: 1500, showConfirmButton: false
+                            });
+                        }
+                    });
+                    return;
+                }
+
+                // 3. SEARCH COMMAND
+                const searchM = txt.match(/(?:ابحث عن|شوف|شوفلي|حساب) (.+)/);
+                if(searchM) {
+                    activeSearch = searchM[1].trim();
+                    renderApp();
+                    return;
+                }
+
+                // 4. ADD TRANSACTION
+                const clean = txt.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
+                const amtMatch = clean.match(/(\d+(\.\d+)?)/);
+                if(!amtMatch) { Swal.fire('؟', 'لم أسمع مبلغ', 'question'); return; }
+                
+                const amount = parseFloat(amtMatch[0]);
+                const expKeys = ['مصروف', 'خرجت', 'صرفت', 'اشتريت', 'جبت', 'دفعت', 'لـ', 'إلى', 'خد', 'اخد', 'أخد', 'طلب', 'عطيت', 'اديت'];
+                const incKeys = ['وارد', 'دخل', 'جالي', 'جاني', 'قبضت', 'استلمت', 'من'];
+                
+                let detected = null;
+                if (expKeys.some(k => clean.includes(k))) detected = 'expense';
+                else if (incKeys.some(k => clean.includes(k))) detected = 'income';
+                if (!detected) detected = 'expense';
+
+                let desc = clean.replace(amount, '').replace(/جنيه|جنية/g, '').trim();
+                [...expKeys, ...incKeys].forEach(k => desc = desc.replace(k, ''));
+                desc = desc.trim() || "بدون وصف";
+
+                document.getElementById('amount').value = amount;
+                document.getElementById('desc').value = desc;
+                setMode(detected);
+                saveTx(null);
+            };
+            
+            window.toggleMic = () => {
+                const btn = document.getElementById('mic');
+                if(btn.classList.contains('listening')) rec.stop(); else rec.start();
             }
         }
+        window.clearSearch = () => { activeSearch = null; renderApp(); }
     </script>
 </body>
 </html>
