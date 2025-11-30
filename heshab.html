@@ -242,6 +242,17 @@
             box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
         }
 
+        .btn-reset {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            margin-top: 15px;
+        }
+
+        .btn-reset:hover {
+            background: linear-gradient(135deg, #991b1b, #7f1d1d);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 38, 38, 0.4);
+        }
+
         .search-section {
             background: white;
             padding: 30px;
@@ -483,6 +494,51 @@
             color: #667eea;
         }
 
+        .voice-search-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .voice-search-btn {
+            width: 60px;
+            height: 60px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 1.8em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .voice-search-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .voice-search-btn.recording {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            animation: pulse 1.5s infinite;
+        }
+
+        .voice-search-status {
+            flex: 1;
+            font-size: 1.1em;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .voice-search-status.listening {
+            color: #ef4444;
+            animation: blink 1s infinite;
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -598,6 +654,7 @@
                     </div>
                     <button type="submit" class="btn btn-expense">💸 إضافة مصروف</button>
                 </form>
+                <button class="btn btn-reset" onclick="resetAllData()">🗑️ تصفير كامل للحسابات</button>
             </div>
         </div>
 
@@ -614,6 +671,13 @@
                 <button class="btn-search" onclick="performSearch()">🔎 بحث</button>
                 <button class="btn-search" onclick="clearSearch()" style="background: linear-gradient(135deg, #6b7280, #4b5563);">🔄 مسح البحث</button>
             </div>
+            
+            <!-- Voice Search -->
+            <div class="voice-search-container">
+                <button class="voice-search-btn" id="voiceSearchBtn">🎤</button>
+                <div class="voice-search-status" id="voiceSearchStatus">اضغط على الميكروفون للبحث الصوتي</div>
+            </div>
+            
             <div id="searchResultsInfo" style="display: none; margin-top: 15px;"></div>
         </div>
 
@@ -645,12 +709,13 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getDatabase, ref, push, remove, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDJHcly8lYT4FTxrJCBRIR7JSbJGYtG3_I",
             authDomain: "nasrapp-7a0fc.firebaseapp.com",
+            databaseURL: "https://nasrapp-7a0fc-default-rtdb.firebaseio.com",
             projectId: "nasrapp-7a0fc",
             storageBucket: "nasrapp-7a0fc.firebasestorage.app",
             messagingSenderId: "826970736109",
@@ -660,11 +725,11 @@
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const database = getDatabase(app);
 
-        // Collections
-        const incomeCollection = collection(db, 'income');
-        const expenseCollection = collection(db, 'expenses');
+        // Database References
+        const incomeRef = ref(database, 'income');
+        const expenseRef = ref(database, 'expenses');
 
         // Global Variables
         let currentTab = 'all';
@@ -694,7 +759,6 @@
             const statusElement = document.getElementById(statusId);
             const micBtn = document.getElementById('mic' + inputId.charAt(0).toUpperCase() + inputId.slice(1));
 
-            // Start recognition
             recognition.start();
             micBtn.classList.add('recording');
             statusElement.textContent = '🎤 جاري الاستماع... تحدث الآن';
@@ -746,6 +810,58 @@
                 statusElement.classList.remove('listening');
             };
         }
+
+        // Voice Search Function
+        document.getElementById('voiceSearchBtn').addEventListener('click', () => {
+            if (!recognition) {
+                alert('متصفحك لا يدعم التعرف على الصوت. يرجى استخدام Chrome أو Edge');
+                return;
+            }
+
+            const btn = document.getElementById('voiceSearchBtn');
+            const status = document.getElementById('voiceSearchStatus');
+
+            recognition.start();
+            btn.classList.add('recording');
+            status.textContent = '🎤 جاري الاستماع... قل كلمة البحث';
+            status.classList.add('listening');
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript.trim();
+                status.textContent = '🔍 جاري البحث عن: ' + transcript;
+                
+                // Auto-search with voice input
+                document.getElementById('searchPerson').value = transcript;
+                document.getElementById('searchDetails').value = transcript;
+                
+                setTimeout(() => {
+                    performSearch();
+                    status.textContent = 'اضغط على الميكروفون للبحث الصوتي';
+                    status.classList.remove('listening');
+                }, 500);
+            };
+
+            recognition.onerror = (event) => {
+                btn.classList.remove('recording');
+                status.classList.remove('listening');
+                
+                if (event.error === 'no-speech') {
+                    status.textContent = '❌ لم يتم اكتشاف صوت. حاول مرة أخرى';
+                } else if (event.error === 'not-allowed') {
+                    status.textContent = '❌ يرجى السماح بالوصول للميكرفون';
+                } else {
+                    status.textContent = '❌ حدث خطأ في التعرف على الصوت';
+                }
+                
+                setTimeout(() => {
+                    status.textContent = 'اضغط على الميكروفون للبحث الصوتي';
+                }, 3000);
+            };
+
+            recognition.onend = () => {
+                btn.classList.remove('recording');
+            };
+        });
 
         // Convert Arabic numbers to English
         function convertArabicToEnglishNumbers(str) {
@@ -827,7 +943,6 @@
             document.getElementById('expenseDateTime').value = dateTime;
         }
 
-        // Update every second
         setInterval(updateDateTimeFields, 1000);
         updateDateTimeFields();
 
@@ -840,11 +955,11 @@
             const dateTime = document.getElementById('incomeDateTime').value;
             
             try {
-                await addDoc(incomeCollection, {
+                await push(incomeRef, {
                     amount: amount,
                     person: person,
                     dateTime: dateTime,
-                    timestamp: new Date().getTime(),
+                    timestamp: Date.now(),
                     type: 'income'
                 });
                 
@@ -874,11 +989,11 @@
             const dateTime = document.getElementById('expenseDateTime').value;
             
             try {
-                await addDoc(expenseCollection, {
+                await push(expenseRef, {
                     amount: amount,
                     details: details,
                     dateTime: dateTime,
-                    timestamp: new Date().getTime(),
+                    timestamp: Date.now(),
                     type: 'expense'
                 });
                 
@@ -899,37 +1014,85 @@
             }
         });
 
+        // Reset All Data
+        window.resetAllData = async function() {
+            const password = prompt('⚠️ تحذير: سيتم حذف جميع البيانات!\n\nأدخل كلمة السر للتأكيد:');
+            
+            if (password === '521988') {
+                const confirmDelete = confirm('هل أنت متأكد تماماً من حذف جميع الحسابات؟\n\nهذا الإجراء لا يمكن التراجع عنه!');
+                
+                if (confirmDelete) {
+                    try {
+                        // Delete all income records
+                        const incomeSnapshot = await get(incomeRef);
+                        if (incomeSnapshot.exists()) {
+                            const incomeData = incomeSnapshot.val();
+                            for (const key in incomeData) {
+                                await remove(ref(database, `income/${key}`));
+                            }
+                        }
+                        
+                        // Delete all expense records
+                        const expenseSnapshot = await get(expenseRef);
+                        if (expenseSnapshot.exists()) {
+                            const expenseData = expenseSnapshot.val();
+                            for (const key in expenseData) {
+                                await remove(ref(database, `expenses/${key}`));
+                            }
+                        }
+                        
+                        alert('✅ تم تصفير جميع الحسابات بنجاح!');
+                    } catch (error) {
+                        console.error('Error resetting data:', error);
+                        alert('❌ حدث خطأ أثناء تصفير البيانات');
+                    }
+                }
+            } else if (password !== null) {
+                alert('❌ كلمة السر غير صحيحة!');
+            }
+        };
+
         // Load and Display Records
-        async function loadRecords() {
-            try {
-                const incomeSnapshot = await getDocs(query(incomeCollection, orderBy('timestamp', 'desc')));
-                const expenseSnapshot = await getDocs(query(expenseCollection, orderBy('timestamp', 'desc')));
+        function loadRecords() {
+            allRecords = [];
+            
+            onValue(incomeRef, (snapshot) => {
+                allRecords = allRecords.filter(r => r.type !== 'income');
                 
-                allRecords = [];
-                
-                incomeSnapshot.forEach((doc) => {
-                    allRecords.push({
-                        id: doc.id,
-                        ...doc.data(),
-                        collectionType: 'income'
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    Object.keys(data).forEach(key => {
+                        allRecords.push({
+                            id: key,
+                            ...data[key],
+                            collectionType: 'income'
+                        });
                     });
-                });
-                
-                expenseSnapshot.forEach((doc) => {
-                    allRecords.push({
-                        id: doc.id,
-                        ...doc.data(),
-                        collectionType: 'expense'
-                    });
-                });
+                }
                 
                 allRecords.sort((a, b) => b.timestamp - a.timestamp);
-                
                 displayRecords();
                 updateStatistics();
-            } catch (error) {
-                console.error('Error loading records:', error);
-            }
+            });
+            
+            onValue(expenseRef, (snapshot) => {
+                allRecords = allRecords.filter(r => r.type !== 'expense');
+                
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    Object.keys(data).forEach(key => {
+                        allRecords.push({
+                            id: key,
+                            ...data[key],
+                            collectionType: 'expense'
+                        });
+                    });
+                }
+                
+                allRecords.sort((a, b) => b.timestamp - a.timestamp);
+                displayRecords();
+                updateStatistics();
+            });
         }
 
         // Perform Search
@@ -953,11 +1116,12 @@
 
                 if (searchDetails) {
                     const details = record.details || '';
-                    matches = matches && details.toLowerCase().includes(searchDetails);
+                    const person = record.person || '';
+                    matches = matches && (details.toLowerCase().includes(searchDetails) || person.toLowerCase().includes(searchDetails));
                 }
 
                 if (searchDate) {
-                    const recordDate = record.dateTime.split(' ')[0];
+                    const recordDate = record.dateTime;
                     matches = matches && recordDate.includes(searchDate);
                 }
 
@@ -969,7 +1133,7 @@
 
             const resultsInfo = document.getElementById('searchResultsInfo');
             resultsInfo.style.display = 'block';
-            resultsInfo.innerHTML = `<strong>✅ تم العثور على ${searchResults.length} نتيجة</strong>`;
+            resultsInfo.innerHTML = `<div class="search-results-info"><strong>✅ تم العثور على ${searchResults.length} نتيجة</strong></div>`;
         };
 
         // Clear Search
@@ -1057,9 +1221,8 @@
             }
             
             try {
-                const collectionRef = type === 'income' ? incomeCollection : expenseCollection;
-                await deleteDoc(doc(collectionRef, recordId));
-                await loadRecords();
+                const recordRef = ref(database, `${type === 'income' ? 'income' : 'expenses'}/${recordId}`);
+                await remove(recordRef);
             } catch (error) {
                 console.error('Error deleting record:', error);
                 alert('حدث خطأ أثناء حذف العملية');
@@ -1082,22 +1245,17 @@
             }
 
             const wb = XLSX.utils.book_new();
-            
-            // Prepare data for worksheet
             const wsData = [];
             
-            // Add title
             wsData.push(['نظام إدارة الحسابات - تقرير ' + (type === 'income' ? 'المبالغ الواردة' : type === 'expense' ? 'المصروفات' : 'الكل')]);
             wsData.push([]);
             
-            // Add headers
             if (type === 'income' || type === 'all') {
                 wsData.push(['تاريخ البيان الكامل', 'اسم الشخص', 'المبلغ', 'النوع']);
                 recordsToExport.filter(r => r.type === 'income').forEach(record => {
                     wsData.push([record.dateTime, record.person, record.amount, 'مبلغ وارد']);
                 });
                 
-                // Add totals for income
                 if (type === 'income') {
                     const totalIncome = recordsToExport.reduce((sum, r) => sum + r.amount, 0);
                     wsData.push([]);
@@ -1115,7 +1273,6 @@
                     wsData.push([record.dateTime, record.details, record.amount, 'مصروف']);
                 });
                 
-                // Add totals for expense
                 const totalExpense = recordsToExport.filter(r => r.type === 'expense').reduce((sum, r) => sum + r.amount, 0);
                 wsData.push([]);
                 wsData.push(['إجمالي المصروفات', '', totalExpense, '']);
@@ -1130,34 +1287,7 @@
             }
             
             const ws = XLSX.utils.aoa_to_sheet(wsData);
-            
-            // Apply styling
-            const range = XLSX.utils.decode_range(ws['!ref']);
-            for (let R = range.s.r; R <= range.e.r; ++R) {
-                for (let C = range.s.c; C <= range.e.c; ++C) {
-                    const cell_address = {c: C, r: R};
-                    const cell_ref = XLSX.utils.encode_cell(cell_address);
-                    
-                    if (!ws[cell_ref]) continue;
-                    
-                    ws[cell_ref].s = {
-                        font: { bold: R <= 1 || R === range.e.r, color: { rgb: 'FFFFFF' } },
-                        fill: {
-                            fgColor: { rgb: R === 0 ? '667eea' : R === 1 ? 'FFFFFF' : (wsData[R] && wsData[R][3] === 'مبلغ وارد') ? '10b981' : (wsData[R] && wsData[R][3] === 'مصروف') ? 'ef4444' : 'f0f0f0' }
-                        },
-                        alignment: { horizontal: 'center', vertical: 'center' },
-                        border: {
-                            top: { style: 'thin', color: { rgb: '000000' } },
-                            bottom: { style: 'thin', color: { rgb: '000000' } },
-                            left: { style: 'thin', color: { rgb: '000000' } },
-                            right: { style: 'thin', color: { rgb: '000000' } }
-                        }
-                    };
-                }
-            }
-            
-            // Set column widths
-            ws['!cols'] = [{ wch: 25 }, { wch: 20 }, { wch: 15 }, { wch: 15 }];
+            ws['!cols'] = [{ wch: 25 }, { wch: 25 }, { wch: 15 }, { wch: 15 }];
             
             XLSX.utils.book_append_sheet(wb, ws, 'البيانات');
             XLSX.writeFile(wb, `الحسابات_${new Date().toLocaleDateString('ar-EG')}.xlsx`);
@@ -1191,32 +1321,6 @@
             wsData.push(['إجمالي النتائج', '', totalAmount, '']);
             
             const ws = XLSX.utils.aoa_to_sheet(wsData);
-            
-            // Apply styling
-            const range = XLSX.utils.decode_range(ws['!ref']);
-            for (let R = range.s.r; R <= range.e.r; ++R) {
-                for (let C = range.s.c; C <= range.e.c; ++C) {
-                    const cell_address = {c: C, r: R};
-                    const cell_ref = XLSX.utils.encode_cell(cell_address);
-                    
-                    if (!ws[cell_ref]) continue;
-                    
-                    ws[cell_ref].s = {
-                        font: { bold: R <= 1 || R === range.e.r, color: { rgb: 'FFFFFF' } },
-                        fill: {
-                            fgColor: { rgb: R === 0 ? '8b5cf6' : R === 1 || R === range.e.r ? 'FFFFFF' : (wsData[R] && wsData[R][3] === 'مبلغ وارد') ? '10b981' : (wsData[R] && wsData[R][3] === 'مصروف') ? 'ef4444' : 'f0f0f0' }
-                        },
-                        alignment: { horizontal: 'center', vertical: 'center' },
-                        border: {
-                            top: { style: 'thin', color: { rgb: '000000' } },
-                            bottom: { style: 'thin', color: { rgb: '000000' } },
-                            left: { style: 'thin', color: { rgb: '000000' } },
-                            right: { style: 'thin', color: { rgb: '000000' } }
-                        }
-                    };
-                }
-            }
-            
             ws['!cols'] = [{ wch: 25 }, { wch: 25 }, { wch: 15 }, { wch: 15 }];
             
             XLSX.utils.book_append_sheet(wb, ws, 'نتائج البحث');
@@ -1233,15 +1337,6 @@
                     displayRecords();
                 }
             });
-        });
-
-        // Real-time Updates
-        onSnapshot(query(incomeCollection, orderBy('timestamp', 'desc')), () => {
-            loadRecords();
-        });
-
-        onSnapshot(query(expenseCollection, orderBy('timestamp', 'desc')), () => {
-            loadRecords();
         });
 
         // Initial Load
