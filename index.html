@@ -161,6 +161,14 @@
       font-size: 13px;
     }
     @keyframes pulseRed { from { box-shadow: 0 0 8px rgba(255,0,0,0.3); } to { box-shadow: 0 0 16px rgba(255,0,0,0.6); } }
+    
+    .verify-box {
+      background: #f0fff4; border: 2px solid #2ecc71; padding: 15px;
+      text-align: center; border-radius: 10px; animation: pulseGreen 0.7s infinite alternate;
+      font-size: 16px; font-weight: 700; color: #2ecc71;
+    }
+    @keyframes pulseGreen { from { box-shadow: 0 0 8px rgba(46,204,113,0.3); } to { box-shadow: 0 0 16px rgba(46,204,113,0.6); } }
+    
     .admin-list-container { 
       max-height: 150px; 
       overflow-y: auto; 
@@ -629,6 +637,7 @@
   </ul>
 
   <div class="container">
+    <!-- صفحة تسجيل الدخول -->
     <div class="card" id="auth-card">
       <h2>🔐 تسجيل دخول المندوب</h2>
       <div class="input-group">
@@ -641,6 +650,30 @@
       <div id="login-msg" class="msg"></div>
     </div>
     
+    <!-- صفحة التحقق من البطاقة فقط - كود 111111 -->
+    <div class="card hidden" id="verification-card">
+      <h2>🔍 التأكد من البطاقة سليمة</h2>
+      <p style="text-align: center; color: #666; font-size: 13px; margin-bottom: 15px;">
+        للتحقق من صحة البطاقة فقط - لا يتم التسجيل
+      </p>
+      
+      <div class="input-group">
+        <input id="verifyNatID" type="tel" maxlength="14" inputmode="numeric" placeholder=" ">
+        <label for="verifyNatID">الرقم القومي (14 رقم)</label>
+      </div>
+      <div class="id-card-visual-container">
+        <img src="https://raw.githubusercontent.com/mohamednasr5/id/e83438329b0f009f6eebf61b2797496d744589f2/5.png"
+             class="id-card-img" alt="مثال للبطاقة">
+      </div>
+      <button class="btn" onclick="checkCard()">✓ تحقق من البطاقة</button>
+      <div id="verify-msg" class="msg"></div>
+      
+      <div class="logout-link">
+        <small onclick="logout()">تسجيل خروج</small>
+      </div>
+    </div>
+    
+    <!-- صفحة المندوب العادي -->
     <div class="card hidden" id="main-card">
       <h2 id="welcome">مرحبًا</h2>
       
@@ -679,6 +712,7 @@
       </div>
     </div>
     
+    <!-- صفحة صلاحية المدير -->
     <div class="card hidden" id="stats-auth-card">
       <h2>🔒 صلاحية المدير</h2>
       <p class="stats-desc">أدخل كلمة مرور الإدارة</p>
@@ -691,6 +725,7 @@
       <button class="btn btn-danger" onclick="cancelStats()">إلغاء وعودة</button>
     </div>
     
+    <!-- لوحة التحكم -->
     <div class="card hidden" id="admin-panel-card">
       <h2>⚙️ لوحة التحكم</h2>
       <button class="btn btn-warning" onclick="location.href='stats.html'">
@@ -722,6 +757,7 @@
     </div>
   </div>
 
+  <!-- نافذة الرسائل -->
   <div class="messages-modal" id="messagesModal">
     <div class="messages-modal-content">
       <div class="messages-modal-header">
@@ -779,6 +815,7 @@
     let alarmInterval = null;
     let isFirstMessagesLoad = true;
     let currentMessagesSnapshot = null;
+    let isVerificationMode = false;  // للتعرف على وضع التحقق
 
     function playDuplicateAlarm() {
       stopDuplicateAlarm();
@@ -842,6 +879,7 @@
       alarm3.currentTime = 0;
     }
 
+    // دالة تسجيل الدخول المعدلة
     window.login = async function () {
       const code = document.getElementById("loginCode").value.trim();
       const msg = document.getElementById("login-msg");
@@ -853,6 +891,19 @@
         msg.classList.add("error");
         return;
       }
+      
+      // التحقق من كود التحقق الخاص 111111
+      if (code === "111111") {
+        isVerificationMode = true;
+        userID = code;
+        userPlace = "التأكد من البطاقة";
+        
+        document.getElementById("auth-card").classList.add("hidden");
+        document.getElementById("verification-card").classList.remove("hidden");
+        document.getElementById("verification-card").classList.add("fade-in");
+        return;
+      }
+      
       try {
         const snapshot = await get(child(ref(db), "login_codes/" + code));
         if (!snapshot.exists()) {
@@ -864,6 +915,7 @@
         userID = code;
         userPlace = data.place;
         userPlaceIdx = data.placeIdx || 0;
+        isVerificationMode = false;
 
         await enforceSessionLimit(code);
         await set(ref(db, `active_sessions/${code}/${currentDeviceId}`), {
@@ -881,6 +933,61 @@
         
       } catch (e) {
         msg.textContent = "خطأ في الاتصال: " + e.message;
+        msg.classList.add("error");
+      }
+    };
+
+    // دالة التحقق من البطاقة فقط - لا تسجل في قاعدة البيانات
+    window.checkCard = async function () {
+      const msg = document.getElementById("verify-msg");
+      msg.textContent = "";
+      msg.className = "msg";
+      
+      const natid = document.getElementById("verifyNatID").value.trim();
+      
+      if (!/^\d{14}$/.test(natid)) {
+        msg.textContent = "الرقم القومي يجب أن يكون 14 رقم";
+        msg.classList.add("error");
+        return;
+      }
+      
+      try {
+        const userRef = ref(db, "users/" + natid);
+        const snapshot = await get(userRef);
+        
+        if (snapshot.exists()) {
+          // البطاقة موجودة - إشعار أحمر
+          const data = snapshot.val();
+          
+          playDuplicateAlarm();
+          
+          msg.className = "duplicate-box";
+          msg.innerHTML = `
+            ⚠️ بطاقة مسجلة مسبقًا<br>
+            مسجلة في: <b>${data.place}</b><br>
+            بواسطة: <b>${data.repName}</b>
+          `;
+          
+          setTimeout(() => {
+            stopDuplicateAlarm();
+          }, 10000);
+          
+        } else {
+          // البطاقة غير موجودة - إشعار أخضر
+          stopDuplicateAlarm();
+          
+          msg.className = "verify-box";
+          msg.innerHTML = `
+            ✓ البطاقة صحيحة ويمكن تسجيلها<br>
+            <span style="font-size: 14px;">هذه البطاقة غير مسجلة في النظام</span>
+          `;
+        }
+        
+        document.getElementById("verifyNatID").value = "";
+        document.getElementById("verifyNatID").focus();
+        
+      } catch (e) {
+        msg.textContent = "خطأ: " + e.message;
         msg.classList.add("error");
       }
     };
@@ -911,7 +1018,7 @@
 
     window.logout = async function () {
       stopDuplicateAlarm();
-      if (userID) {
+      if (userID && !isVerificationMode) {
         await remove(ref(db, `active_sessions/${userID}/${currentDeviceId}`));
       }
       if (messagesListener) {
@@ -921,11 +1028,12 @@
     };
 
     function startMessagesListener() {
+      // لا يستقبل الرسائل في وضع التحقق
+      if (isVerificationMode) return;
       if (!userID || !userPlace) return;
       
       const messagesRef = ref(db, 'messages');
       
-      // استخدام onValue للاستماع الدائم للتحديثات الفورية
       messagesListener = onValue(messagesRef, (snapshot) => {
         if (!snapshot.exists()) {
           updateGeneralNotification([]);
@@ -942,7 +1050,6 @@
         Object.keys(allMessages).forEach(msgId => {
           const msg = allMessages[msgId];
           
-          // فحص إذا كانت الرسالة موجهة للمندوب
           const isForAll = msg.target === 'all';
           const isForPlace = msg.target === 'place:' + userPlace;
           const isForRep = msg.target === 'rep:' + userRepName && userRepName;
@@ -961,12 +1068,10 @@
 
         const unreadCount = relevantMessages.filter(m => !isMessageRead(m.id)).length;
         
-        // فقط عرض الإشعار المنبثق إذا لم يكن التحميل الأول وكان هناك رسائل جديدة
         if (!isFirstMessagesLoad && unreadCount > lastMessageCount && relevantMessages.length > 0) {
           const newMessage = relevantMessages[0];
           showPopupNotification(newMessage);
           
-          // تشغيل صوت الإشعار
           const messageSound = document.getElementById('messageSound');
           if (messageSound) {
             messageSound.play().catch(() => {});
@@ -1041,7 +1146,6 @@
 
       document.body.appendChild(notification);
 
-      // الاهتزاز إذا كان متاحاً
       if ('vibrate' in navigator) {
         navigator.vibrate([200, 100, 200]);
       }
@@ -1148,7 +1252,6 @@
         localStorage.setItem('read_messages', JSON.stringify(readMessages));
       }
       
-      // إعادة عرض الرسائل بعد تحديث حالة القراءة
       if (currentMessagesSnapshot) {
         displayMessagesInModal(currentMessagesSnapshot);
         updateGeneralNotification(currentMessagesSnapshot);
