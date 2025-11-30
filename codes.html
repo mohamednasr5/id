@@ -52,13 +52,7 @@
     .input-group input:focus {
       outline: none;
       border-color: #0072ff;
-      box-shadow: 0 0 0 3px rgba(0, 114, 255, 0.1);
-    }
-    .input-group .hint {
-      margin-top: 8px;
-      font-size: 13px;
-      color: #6c757d;
-      text-align: center;
+      box-shadow: 0 0 0 3px rgba(0,114,255,0.1);
     }
     .preview-box {
       background: linear-gradient(135deg, #e3f2fd, #bbdefb);
@@ -82,13 +76,7 @@
       margin-bottom: 15px;
       transition: transform 0.3s ease;
     }
-    button:hover {
-      transform: translateY(-2px);
-    }
-    button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
+    button:hover { transform: translateY(-2px); }
     .btn-secondary {
       background: linear-gradient(135deg, #43cea2, #185a9d) !important;
     }
@@ -144,301 +132,228 @@
 <body>
   <div class="card">
     <h1>⚙️ إضافة أكواد الدخول</h1>
-    
+
     <div class="special-code-notice">
       🔐 سيتم إضافة كود التحقق الخاص 111111 تلقائياً
     </div>
-    
+
     <div class="input-group">
       <label>🔢 بداية رقم الكود:</label>
-      <input 
-        type="number" 
-        id="startCode" 
-        value="800801" 
-        min="100000" 
-        max="999999"
-        oninput="updatePreview()"
-      >
-      <div class="hint">
-        أدخل رقم البداية (6 أرقام) - مثال: 800801
-      </div>
-      <div class="preview-box" id="previewBox">
-        📊 النطاق: 800801 → 800864 (64 كود)
-      </div>
+      <input type="number" id="startCode" value="800801" min="100000" max="999999" oninput="updatePreview()">
+      <div class="hint">أدخل رقم البداية (6 أرقام) - مثال: 800801</div>
+      <div class="preview-box" id="previewBox">📊 النطاق: 800801 → 800864 (64 كود)</div>
     </div>
-    
-    <button id="addCodesBtn" onclick="addLoginCodes()">
-      إضافة جميع الأكواد إلى Firebase
-    </button>
-    
-    <button onclick="viewCodes()" class="btn-secondary">
-      عرض الأكواد الحالية
-    </button>
-    
-    <button onclick="deleteAllCodes()" class="btn-danger">
-      ⚠️ حذف جميع الأكواد
-    </button>
-    
+
+    <button id="addCodesBtn" onclick="addLoginCodes()">إضافة جميع الأكواد إلى Firebase</button>
+    <button onclick="viewCodes()" class="btn-secondary">عرض الأكواد الحالية</button>
+    <button onclick="deleteAllCodes()" class="btn-danger">⚠️ حذف جميع الأكواد</button>
+
     <div id="status"></div>
     <div id="log"></div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-    
-    const firebaseConfig = {
-      apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
-      authDomain: "idmanazla.firebaseapp.com",
-      databaseURL: "https://idmanazla-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "idmanazla",
-      storageBucket: "idmanazla.firebasestorage.app",
-      messagingSenderId: "408446131276",
-      appId: "1:408446131276:web:976ae54181b5398de5a8e9"
-    };
-    
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-    const places = [
-      "المنزلة الجديدة 1 - كريم المرور",
-      "المنزلة الجديدة 2 - شريف التأمين الصحي",
-      "بحر البلد شارع الكابتن - شريف العزازي",
-      "مدرسة عبد العال شلبياية - اشرف الأباصيري",
-      "مصنع البصل - فؤاد حال",
-      "الكفر 1 - علي شطا",
-      "الكفر 2 تحت السكة - عادل جلال",
-      "سوق الجملة - السعيد شطا- على البياع",
-      "الفداء 1 - عمر الكيال",
-      "الفداء 2 - حماده الكيال",
-      "الحمزاوي - حماده السري",
-      "الجرن 1 - بوجي البرعي",
-      "الجرن 2 - إبراهيم فهيد",
-      "البر الثاني حي السلام - يحيى حبق",
-      "حي الأعجام - حماده ابو رشاد",
-      "العزبة منشية ناصر -حسان عطية",
-      "الطويل - أحمد عبد العظيم",
-      "البر الثاني 2 الهاويس - إبراهيم عبد المجيد",
-      "الفقاعي - محمد حبيب",
-      "بحر البلد 2 - السيد حراز",
-      "حي الجبانة - سعد الشلودي",
-      "الكفر 3 بجوار ملعب برشلونة - محمد البداية",
-      "أبو رشاد مقهى أبو سليمان - محمد رشاد",
-      "حي الزهراء - رشاد عبد الوهاب",
-      "بحر البلد 3 - منصور البدري",
-      "حي السلموني - حسن المناخلى",
-      "حى مزلفان العلمي -أبوعلاء",
-      "حي البصله حمود-عبد الحميد",
-      "حى الجرن 3 -قهوة النجدي محمد النجدي",
-      "الفروسات",
-      "أبو الأخضر",
-      "جديدة المنزلة",
-      "العامرة",
-      "مصر الجديدة",
-      "عرب زيدان",
-      "الستايتة",
-      "كفر حجاج",
-      "ميت خضير",
-      "المواجد",
-      "البصراط",
-      "ميت شريف",
-      "الطوابرة",
-      "العمارنة",
-      "اولاد بانا",
-      "اولاد حانا",
-      "بحر حادوث",
-      "القزاقزة",
-      "الحوتة",
-      "اولاد نور",
-      "الخلايفة",
-      "القطشة",
-      "الجماملة",
-      "قرية العزيزة",
-      "الأحمدية",
-      "العربان",
-      "اولاد علم",
-      "اولاد ناصر",
-      "بني هلال",
-      "الشبول",
-      "الرودة",
-      "النسايمة",
-      "المطرية",
-      "قرية العصافرة",
-      "قرية الضهير"
-    ];
+const firebaseConfig = {
+  apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
+  authDomain: "idmanazla.firebaseapp.com",
+  databaseURL: "https://idmanazla-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "idmanazla",
+  storageBucket: "idmanazla.appspot.com",
+  messagingSenderId: "408446131276",
+  appId: "1:408446131276:web:976ae54181b5398de5a8e9"
+};
 
-    // تحديث المعاينة
-    window.updatePreview = function() {
-      const startCode = parseInt(document.getElementById('startCode').value) || 800801;
-      const endCode = startCode + places.length - 1;
-      const totalCodes = places.length + 1; // +1 للكود 111111
-      
-      document.getElementById('previewBox').innerHTML = `
-        📊 النطاق: ${startCode} → ${endCode} (${places.length} كود)<br>
-        🔐 + كود التحقق: 111111<br>
-        📈 الإجمالي: ${totalCodes} كود
-      `;
-    };
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-    function addLog(message, isError = false) {
-      const logDiv = document.getElementById('log');
-      const logItem = document.createElement('div');
-      logItem.className = 'log-item';
-      logItem.style.color = isError ? '#dc3545' : '#28a745';
-      logItem.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
-      logDiv.appendChild(logItem);
-      logDiv.scrollTop = logDiv.scrollHeight;
+const places = [
+  "المنزلة الجديدة 1 - كريم المرور",
+  "المنزلة الجديدة 2 - شريف التأمين الصحي",
+  "بحر البلد شارع الكابتن - شريف العزازي",
+  "مدرسة عبد العال شلبياية - اشرف الأباصيري",
+  "مصنع البصل - فؤاد حال",
+  "الكفر 1 - علي شطا",
+  "الكفر 2 تحت السكة - عادل جلال",
+  "سوق الجملة - السعيد شطا- على البياع",
+  "الفداء 1 - عمر الكيال",
+  "الفداء 2 - حماده الكيال",
+  "الحمزاوي - حماده السري",
+  "الجرن 1 - بوجي البرعي",
+  "الجرن 2 - إبراهيم فهيد",
+  "البر الثاني حي السلام - يحيى حبق",
+  "حي الأعجام - حماده ابو رشاد",
+  "العزبة منشية ناصر -حسان عطية",
+  "الطويل - أحمد عبد العظيم",
+  "البر الثاني 2 الهاويس - إبراهيم عبد المجيد",
+  "الفقاعي - محمد حبيب",
+  "بحر البلد 2 - السيد حراز",
+  "حي الجبانة - سعد الشلودي",
+  "الكفر 3 بجوار ملعب برشلونة - محمد البداية",
+  "أبو رشاد مقهى أبو سليمان - محمد رشاد",
+  "حي الزهراء - رشاد عبد الوهاب",
+  "بحر البلد 3 - منصور البدري",
+  "حي السلموني - حسن المناخلى",
+  "حى مزلفان العلمي -أبوعلاء",
+  "حي البصله حمود-عبد الحميد",
+  "حى الجرن 3 -قهوة النجدي محمد النجدي",
+  "الفروسات",
+  "أبو الأخضر",
+  "جديدة المنزلة",
+  "العامرة",
+  "مصر الجديدة",
+  "عرب زيدان",
+  "الستايتة",
+  "كفر حجاج",
+  "ميت خضير",
+  "المواجد",
+  "البصراط",
+  "ميت شريف",
+  "الطوابرة",
+  "العمارنة",
+  "اولاد بانا",
+  "اولاد حانا",
+  "بحر حادوث",
+  "القزاقزة",
+  "الحوتة",
+  "اولاد نور",
+  "الخلايفة",
+  "القطشة",
+  "الجماملة",
+  "قرية العزيزة",
+  "الأحمدية",
+  "العربان",
+  "اولاد علم",
+  "اولاد ناصر",
+  "بني هلال",
+  "الشبول",
+  "الرودة",
+  "النسايمة",
+  "المطرية",
+  "قرية العصافرة",
+  "قرية الضهير"
+];
+
+window.updatePreview = function () {
+  const startCode = parseInt(document.getElementById('startCode').value) || 800801;
+  const endCode = startCode + places.length - 1;
+  const totalCodes = places.length + 1;
+
+  document.getElementById('previewBox').innerHTML = `
+    📊 النطاق: ${startCode} → ${endCode} (${places.length} كود)<br>
+    🔐 + كود التحقق: 111111<br>
+    📈 الإجمالي: ${totalCodes} كود
+  `;
+};
+
+function addLog(msg, error = false) {
+  const logDiv = document.getElementById('log');
+  const el = document.createElement('div');
+  el.className = 'log-item';
+  el.style.color = error ? '#dc3545' : '#28a745';
+  el.textContent = `${new Date().toLocaleTimeString()} - ${msg}`;
+  logDiv.appendChild(el);
+  logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+window.addLoginCodes = async function() {
+  const btn = document.getElementById('addCodesBtn');
+  const status = document.getElementById('status');
+  const logDiv = document.getElementById('log');
+
+  const startCode = parseInt(document.getElementById('startCode').value);
+  if (isNaN(startCode) || startCode < 100000 || startCode > 999999) {
+    return alert("❌ أدخل رقم بداية صحيح (6 أرقام)");
+  }
+
+  btn.disabled = true;
+  btn.textContent = "جاري الإضافة...";
+  status.style.display = "none";
+  logDiv.innerHTML = "";
+
+  try {
+    addLog("بدء إضافة الأكواد...");
+
+    await set(ref(db, "login_codes/111111"), {
+      place: "التأكد من البطاقة سليمة",
+      placeIdx: 0,
+      isVerificationCode: true
+    });
+
+    addLog("🔐 تم إضافة كود التحقق 111111");
+
+    for (let i = 0; i < places.length; i++) {
+      const code = String(startCode + i);
+      const place = places[i];
+
+      await set(ref(db, `login_codes/${code}`), {
+        place,
+        placeIdx: i + 1
+      });
+
+      addLog(`تم إضافة الكود ${code} - ${place}`);
     }
 
-    window.addLoginCodes = async function() {
-      const btn = document.getElementById('addCodesBtn');
-      const status = document.getElementById('status');
-      const logDiv = document.getElementById('log');
-      const startCode = parseInt(document.getElementById('startCode').value) || 800801;
-      
-      if (startCode < 100000 || startCode > 999999) {
-        alert('❌ الرجاء إدخال رقم بداية صحيح (6 أرقام)');
-        return;
-      }
-      
-      btn.disabled = true;
-      btn.textContent = 'جاري الإضافة...';
-      status.className = '';
-      status.style.display = 'none';
-      logDiv.innerHTML = '';
+    status.className = "success";
+    status.textContent = "تم إضافة جميع الأكواد بنجاح!";
+    status.style.display = "block";
 
-      try {
-        addLog('بدء عملية إضافة الأكواد...');
-        addLog(`🔢 رقم البداية: ${startCode}`);
-        addLog(`📍 إجمالي الأماكن: ${places.length}`);
-        
-        let successCount = 0;
-        let errorCount = 0;
+  } catch (err) {
+    addLog("خطأ: " + err.message, true);
+    status.className = "error";
+    status.textContent = "❌ حدث خطأ أثناء العملية";
+    status.style.display = "block";
+  }
 
-        // إضافة الكود الخاص 111111 أولاً
-        try {
-          await set(ref(db, 'login_codes/111111'), {
-            place: "التأكد من البطاقة سليمة",
-            placeIdx: 0,
-            isVerificationCode: true
-          });
-          addLog(`🔐 تم إضافة كود التحقق 111111 - التأكد من البطاقة سليمة`);
-          successCount++;
-        } catch (error) {
-          addLog(`❌ خطأ في إضافة كود التحقق 111111: ${error.message}`, true);
-          errorCount++;
-        }
+  btn.disabled = false;
+  btn.textContent = "إضافة جميع الأكواد إلى Firebase";
+};
 
-        // إضافة باقي الأكواد
-        for (let i = 0; i < places.length; i++) {
-          const code = String(startCode + i);
-          const place = places[i];
-          const placeIdx = i + 1;
+window.viewCodes = async function () {
+  const logDiv = document.getElementById('log');
+  logDiv.innerHTML = "<div class='log-item'>جاري التحميل...</div>";
 
-          try {
-            await set(ref(db, `login_codes/${code}`), {
-              place: place,
-              placeIdx: placeIdx
-            });
-            
-            addLog(`✅ تم إضافة الكود ${code} - ${place}`);
-            successCount++;
-            
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-          } catch (error) {
-            addLog(`❌ خطأ في إضافة ${code}: ${error.message}`, true);
-            errorCount++;
-          }
-        }
+  try {
+    const snapshot = await get(ref(db, "login_codes"));
+    if (!snapshot.exists()) return addLog("⚠️ لا توجد أكواد", true);
 
-        const totalCodes = places.length + 1;
-        addLog(`\n✨ اكتملت العملية: ${successCount} نجح، ${errorCount} فشل`);
-        
-        status.className = 'success';
-        status.textContent = `✅ تم إضافة ${successCount} كود بنجاح من أصل ${totalCodes}!`;
-        status.style.display = 'block';
+    const data = snapshot.val();
 
-      } catch (error) {
-        addLog(`❌ خطأ عام: ${error.message}`, true);
-        status.className = 'error';
-        status.textContent = '❌ حدث خطأ: ' + error.message;
-        status.style.display = 'block';
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'إضافة جميع الأكواد إلى Firebase';
-      }
-    };
+    logDiv.innerHTML = "<div class='log-item' style='font-weight:bold'>الأكواد الحالية:</div>";
 
-    window.viewCodes = async function() {
-      const logDiv = document.getElementById('log');
-      logDiv.innerHTML = '<div class="log-item">جاري تحميل الأكواد...</div>';
+    if (data["111111"]) {
+      addLog(`🔐 111111 → ${data["111111"].place}`);
+    }
 
-      try {
-        const snapshot = await get(ref(db, 'login_codes'));
-        
-        if (!snapshot.exists()) {
-          addLog('⚠️ لا توجد أكواد في قاعدة البيانات', true);
-          return;
-        }
+    Object.keys(data)
+      .filter(c => c !== "111111")
+      .sort((a, b) => a - b)
+      .forEach(c => addLog(`🔑 ${c} → ${data[c].place}`));
 
-        const codes = snapshot.val();
-        logDiv.innerHTML = '<div class="log-item" style="font-weight:bold;background:#e7f3ff;">الأكواد الموجودة حالياً:</div>';
-        
-        // عرض الكود الخاص أولاً
-        if (codes['111111']) {
-          addLog(`🔐 111111 → ${codes['111111'].place} (كود التحقق)`);
-        }
-        
-        // عرض باقي الأكواد مرتبة
-        Object.keys(codes)
-          .filter(code => code !== '111111')
-          .sort((a, b) => parseInt(a) - parseInt(b))
-          .forEach(code => {
-            addLog(`🔑 ${code} → ${codes[code].place}`);
-          });
-        
-        addLog(`\n📊 إجمالي الأكواد: ${Object.keys(codes).length}`);
+  } catch (err) {
+    addLog("❌ خطأ في قراءة البيانات: " + err.message, true);
+  }
+};
 
-      } catch (error) {
-        addLog(`❌ خطأ في عرض الأكواد: ${error.message}`, true);
-      }
-    };
+window.deleteAllCodes = async function () {
+  if (!confirm("هل أنت متأكد من الحذف؟")) return;
 
-    window.deleteAllCodes = async function() {
-      if (!confirm('⚠️ تحذير!\n\nهل أنت متأكد من حذف جميع الأكواد؟\n\nهذا الإجراء لا يمكن التراجع عنه!')) {
-        return;
-      }
-      
-      if (!confirm('تأكيد نهائي!\n\nاضغط موافق لحذف جميع أكواد الدخول نهائياً')) {
-        return;
-      }
-      
-      const logDiv = document.getElementById('log');
-      logDiv.innerHTML = '';
-      addLog('بدء عملية حذف جميع الأكواد...');
-      
-      try {
-        await remove(ref(db, 'login_codes'));
-        addLog('✅ تم حذف جميع الأكواد بنجاح');
-        
-        const status = document.getElementById('status');
-        status.className = 'success';
-        status.textContent = '✅ تم حذف جميع الأكواد من قاعدة البيانات';
-        status.style.display = 'block';
-        
-      } catch (error) {
-        addLog(`❌ خطأ في الحذف: ${error.message}`, true);
-        
-        const status = document.getElementById('status');
-        status.className = 'error';
-        status.textContent = '❌ حدث خطأ في عملية الحذف';
-        status.style.display = 'block';
-      }
-    };
+  try {
+    await remove(ref(db, "login_codes"));
+    addLog("تم حذف جميع الأكواد ✔️");
 
-    // تحديث المعاينة عند تحميل الصفحة
-    updatePreview();
-  </script>
+    const status = document.getElementById('status');
+    status.className = "success";
+    status.textContent = "تم حذف الأكواد بالكامل";
+    status.style.display = "block";
+  } catch (err) {
+    addLog("❌ خطأ أثناء الحذف: " + err.message, true);
+  }
+};
+
+updatePreview();
+</script>
 </body>
 </html>
