@@ -3,701 +3,364 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة الحسابات المتقدم</title>
+    <title>نظام الحسابات الذكي المتكامل</title>
     
-    <!-- مكتبة Excel المحدثة التي تدعم الألوان -->
+    <!-- مكتبات خارجية -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-    
-    <!-- خط Cairo الاحترافي -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
-            --primary: #4F46E5;       /* Indigo 600 */
-            --primary-light: #818CF8; /* Indigo 400 */
-            --primary-dark: #3730A3;  /* Indigo 800 */
-            --success: #10B981;       /* Emerald 500 */
-            --success-dark: #059669;  /* Emerald 600 */
-            --danger: #EF4444;        /* Red 500 */
-            --danger-dark: #DC2626;   /* Red 600 */
-            --bg-color: #F3F4F6;      /* Gray 100 */
-            --card-bg: #FFFFFF;
-            --text-primary: #1F2937;  /* Gray 800 */
-            --text-secondary: #6B7280;/* Gray 500 */
-            --border-radius: 16px;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --primary: #6366f1;
+            --primary-dark: #4338ca;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --glass: rgba(255, 255, 255, 0.95);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Cairo', sans-serif;
+        /* Dark Mode Variables */
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --glass: rgba(30, 41, 59, 0.95);
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; outline: none; }
+        
         body {
-            background-color: var(--bg-color);
-            background-image: radial-gradient(#E5E7EB 1px, transparent 1px);
-            background-size: 20px 20px;
-            color: var(--text-primary);
+            background-color: var(--bg);
+            color: var(--text-main);
+            transition: all 0.3s ease;
             min-height: 100vh;
-            padding: 20px;
-            line-height: 1.6;
+            padding-bottom: 80px; /* مسافة للشريط السفلي في الموبايل */
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            animation: fadeIn 0.5s ease-out;
+            padding: 20px;
         }
 
-        /* Header Styling */
-        .header {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-md);
-            text-align: center;
+        /* --- Header & Controls --- */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 30px;
-            border-top: 5px solid var(--primary);
-            position: relative;
-            overflow: hidden;
+            padding: 20px;
+            background: var(--surface);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
         }
 
-        .header h1 {
-            color: var(--primary-dark);
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 10px;
+        .logo-area h1 { font-weight: 900; font-size: 1.8rem; background: linear-gradient(to left, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .theme-toggle {
+            background: var(--bg);
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: var(--text-main);
+            font-size: 1.2rem;
+            transition: 0.3s;
         }
 
-        /* Stats Cards */
-        .stats-container {
+        /* --- Dashboard Stats --- */
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
 
         .stat-card {
-            background: var(--card-bg);
+            background: var(--surface);
             padding: 25px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-sm);
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s;
         }
 
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg);
+        .stat-card:hover { transform: translateY(-5px); }
+        
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; right: 0; width: 5px; height: 100%;
         }
+        .stat-card.income::before { background: var(--success); }
+        .stat-card.expense::before { background: var(--danger); }
+        .stat-card.balance::before { background: var(--primary); }
 
-        .stat-card h3 {
-            color: var(--text-secondary);
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
+        .stat-title { color: var(--text-sub); font-size: 0.9rem; font-weight: 600; }
+        .stat-value { font-size: 2rem; font-weight: 800; margin: 10px 0; }
 
-        .stat-value {
-            font-size: 2.2rem;
-            font-weight: 800;
-            margin-bottom: 5px;
-        }
-
-        .stat-card.income .stat-value { color: var(--success); }
-        .stat-card.expense .stat-value { color: var(--danger); }
-        .stat-card.balance .stat-value { color: var(--primary); }
-
-        /* Forms Grid */
-        .main-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 25px;
+        /* --- Input Section (The Magic Box) --- */
+        .magic-input-box {
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
             margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .form-card {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-md);
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .form-card h2 {
-            color: var(--text-primary);
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #E5E7EB;
-            font-size: 1.5rem;
+        .input-tabs {
             display: flex;
-            align-items: center;
             gap: 10px;
-        }
-
-        /* Inputs & Controls */
-        .form-group {
             margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--text-primary);
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .input-with-mic {
-            display: flex;
-            gap: 10px;
-            align-items: stretch;
-        }
-
-        input, textarea, select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #E5E7EB;
-            border-radius: 12px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background-color: #F9FAFB;
-        }
-
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            background-color: #fff;
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
-        }
-
-        .mic-btn {
-            width: 52px;
-            border: none;
-            border-radius: 12px;
-            background: var(--primary);
-            color: white;
-            font-size: 1.4rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .mic-btn:hover {
-            background: var(--primary-dark);
-            transform: scale(1.05);
-        }
-
-        .mic-btn.recording {
-            background: var(--danger);
-            animation: pulse 1.5s infinite;
-        }
-
-        /* Buttons */
-        .btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        }
-
-        .btn-income { background: linear-gradient(135deg, var(--success), var(--success-dark)); }
-        .btn-expense { background: linear-gradient(135deg, var(--danger), var(--danger-dark)); }
-        .btn-reset { 
-            background: #FFF; 
-            color: var(--danger); 
-            border: 2px solid var(--danger);
-            margin-top: 15px; 
-            box-shadow: none;
-        }
-        .btn-reset:hover { background: #FEF2F2; }
-
-        /* Search & Export Section */
-        .search-section {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-md);
-            margin-bottom: 30px;
-        }
-
-        .search-controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .btn-search {
-            background: var(--primary);
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .export-controls {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #E5E7EB;
-        }
-
-        .btn-export {
-            background: white;
-            color: var(--text-primary);
-            border: 1px solid #E5E7EB;
-            padding: 10px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-
-        .btn-export:hover {
-            background: #F9FAFB;
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        /* Records List */
-        .records-section {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-md);
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-            background: #F3F4F6;
+            background: var(--bg);
             padding: 5px;
             border-radius: 12px;
             width: fit-content;
         }
 
-        .tab {
+        .input-tab {
             padding: 10px 25px;
-            border: none;
-            background: transparent;
             border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            transition: all 0.2s;
-        }
-
-        .tab.active {
-            background: white;
-            color: var(--primary);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .records-list {
-            max-height: 600px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        .record-item {
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #E5E7EB;
-            border-right: 6px solid transparent;
-            transition: transform 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            /* جعل العنصر قابلاً للنقر */
-            cursor: pointer; 
-            position: relative;
-        }
-
-        .record-item:hover {
-            transform: translateX(-5px);
-            border-color: var(--primary-light);
-            background: #F9FAFB;
-        }
-
-        .record-item.income { border-right-color: var(--success); }
-        .record-item.expense { border-right-color: var(--danger); }
-
-        .record-info h4 {
-            font-size: 1.1rem;
-            margin-bottom: 5px;
-            color: var(--text-primary);
-        }
-
-        .record-date {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .record-amount {
-            font-size: 1.4rem;
-            font-weight: 800;
-            min-width: 120px;
-            text-align: left;
-        }
-
-        .record-amount.income { color: var(--success); }
-        .record-amount.expense { color: var(--danger); }
-
-        /* Voice Status & Animation */
-        .voice-status {
-            font-size: 0.9rem;
-            color: var(--primary);
-            margin-top: 8px;
-            min-height: 24px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .voice-status.listening {
-            color: var(--danger);
-        }
-
-        /* ---- Modal Styles (القائمة العائمة) ---- */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(5px);
-            animation: fadeIn 0.3s;
-        }
-
-        .modal-content {
-            background: white;
-            width: 90%;
-            max-width: 500px;
-            border-radius: 20px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            overflow: hidden;
-            position: relative;
-            animation: scaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .modal-header {
-            padding: 20px 25px;
-            border-bottom: 1px solid #E5E7EB;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #F9FAFB;
-        }
-
-        .modal-header h3 {
-            font-size: 1.4rem;
-            color: var(--text-primary);
-            font-weight: 700;
-        }
-
-        .modal-close {
-            background: none;
             border: none;
-            font-size: 1.8rem;
-            color: var(--text-secondary);
             cursor: pointer;
-            line-height: 1;
-            padding: 5px;
-            border-radius: 50%;
-            transition: all 0.2s;
-        }
-
-        .modal-close:hover {
-            background: #E5E7EB;
-            color: var(--danger);
-        }
-
-        .modal-body {
-            padding: 30px 25px;
-        }
-
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px dashed #E5E7EB;
-        }
-
-        .detail-row:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .detail-label {
-            color: var(--text-secondary);
-            font-weight: 600;
-        }
-
-        .detail-value {
-            color: var(--text-primary);
             font-weight: 700;
-            font-size: 1.1rem;
-            text-align: left;
+            background: transparent;
+            color: var(--text-sub);
+            transition: 0.3s;
         }
 
-        .amount-large {
-            font-size: 2rem;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 25px;
-            display: block;
-        }
+        .input-tab.active { background: var(--surface); color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .input-tab.active.expense-tab { color: var(--danger); }
 
-        @keyframes scaleUp {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 15px; align-items: end; }
+        
+        .input-wrapper { position: relative; }
+        .input-wrapper label { display: block; margin-bottom: 8px; font-size: 0.85rem; color: var(--text-sub); font-weight: 600; }
+        
+        .custom-input {
+            width: 100%;
+            padding: 14px 15px;
+            background: var(--bg);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: 0.3s;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .custom-input:focus { border-color: var(--primary); background: var(--surface); }
+
+        .action-btn {
+            padding: 14px 30px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            transition: 0.3s;
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: #C7C7CC; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #A1A1AA; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+        .btn-danger { background: linear-gradient(135deg, var(--danger), #b91c1c); }
+        .btn-success { background: linear-gradient(135deg, var(--success), #059669); }
+        .action-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+        /* --- Voice Assistant FAB --- */
+        .voice-assistant {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.8rem;
+            box-shadow: 0 10px 25px rgba(225, 29, 72, 0.4);
+            cursor: pointer;
+            z-index: 100;
+            transition: 0.3s;
+        }
+
+        .voice-assistant.listening {
+            animation: pulse-red 1.5s infinite;
+            background: linear-gradient(135deg, var(--success), #059669);
+        }
+
+        /* --- Records List --- */
+        .records-container { background: var(--surface); border-radius: 24px; padding: 20px; box-shadow: var(--shadow); }
+        
+        .record-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--bg);
+            transition: 0.2s;
+        }
+        
+        .record-row:hover { background: var(--bg); border-radius: 12px; }
+        .record-row:last-child { border-bottom: none; }
+
+        .record-main { display: flex; align-items: center; gap: 15px; }
+        .record-icon {
+            width: 45px; height: 45px; border-radius: 12px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 1.2rem;
+        }
+        .bg-income { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .bg-expense { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+        .record-details h4 { font-size: 1rem; margin-bottom: 4px; color: var(--text-main); }
+        .record-details span { font-size: 0.8rem; color: var(--text-sub); }
+
+        /* Editable Field */
+        .editable-amount {
+            font-weight: 800;
+            font-size: 1.1rem;
+            padding: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px dashed transparent;
+            transition: 0.3s;
+        }
+        .editable-amount:hover { background: var(--bg); border-color: var(--text-sub); }
+        .text-income { color: var(--success); }
+        .text-expense { color: var(--danger); }
+
+        /* Chart Section */
+        .chart-wrapper {
+            height: 300px;
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: 16px;
+        }
+
+        /* Animations */
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(244, 63, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+        }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .main-content { grid-template-columns: 1fr; }
-            .header h1 { font-size: 1.6rem; }
-            .stat-value { font-size: 1.8rem; }
-            .search-controls { grid-template-columns: 1fr; }
-            .btn-export { width: 100%; justify-content: center; }
+            .form-grid { grid-template-columns: 1fr; }
+            .action-btn { width: 100%; justify-content: center; margin-top: 10px; }
+            .voice-assistant { bottom: 20px; left: 20px; width: 55px; height: 55px; }
+            .stat-value { font-size: 1.6rem; }
         }
     </style>
 </head>
 <body>
+
     <div class="container">
         <!-- Header -->
-        <div class="header">
-            <h1>📊 نظام إدارة الحسابات المتقدم</h1>
-            <p style="color: var(--text-secondary); font-weight: 500;">نظام متكامل لإدارة الوارد والمصروف مع التصدير الذكي</p>
-        </div>
+        <header class="app-header">
+            <div class="logo-area">
+                <h1><i class="fa-solid fa-wallet"></i> المدير المالي الذكي</h1>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="theme-toggle" onclick="toggleTheme()" title="الوضع الليلي">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <button class="theme-toggle" onclick="exportData()" title="تصدير اكسل" style="color: var(--success);">
+                    <i class="fa-solid fa-file-excel"></i>
+                </button>
+            </div>
+        </header>
 
-        <!-- Statistics -->
-        <div class="stats-container">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
             <div class="stat-card income">
-                <h3>إجمالي الواردات</h3>
-                <div class="stat-value" id="totalIncome">0 <span style="font-size: 0.6em; opacity: 0.7;">ج.م</span></div>
-                <div id="incomeCount" style="font-size: 0.9em; color: var(--text-secondary);">0 عملية</div>
+                <div class="stat-title">إجمالي الواردات</div>
+                <div class="stat-value text-income" id="totalIncome">0</div>
+                <div style="font-size: 0.8rem; color: var(--text-sub);">العمليات: <span id="incomeCount">0</span></div>
             </div>
             <div class="stat-card expense">
-                <h3>إجمالي المصروفات</h3>
-                <div class="stat-value" id="totalExpense">0 <span style="font-size: 0.6em; opacity: 0.7;">ج.م</span></div>
-                <div id="expenseCount" style="font-size: 0.9em; color: var(--text-secondary);">0 عملية</div>
+                <div class="stat-title">إجمالي المصروفات</div>
+                <div class="stat-value text-expense" id="totalExpense">0</div>
+                <div style="font-size: 0.8rem; color: var(--text-sub);">العمليات: <span id="expenseCount">0</span></div>
             </div>
             <div class="stat-card balance">
-                <h3>صافي الرصيد</h3>
-                <div class="stat-value" id="balance">0 <span style="font-size: 0.6em; opacity: 0.7;">ج.م</span></div>
-                <div style="font-size: 0.9em; color: var(--text-secondary);">الحالة المالية</div>
+                <div class="stat-title">صافي الرصيد</div>
+                <div class="stat-value" id="netBalance">0</div>
+                <div style="font-size: 0.8rem; color: var(--text-sub);">الحالة المالية</div>
             </div>
         </div>
 
-        <!-- Forms -->
-        <div class="main-content">
-            <!-- Income Form -->
-            <div class="form-card">
-                <h2>➕ تسجيل وارد جديد</h2>
-                <form id="incomeForm">
-                    <div class="form-group">
-                        <label>المبلغ المالي *</label>
-                        <div class="input-with-mic">
-                            <input type="number" id="incomeAmount" step="0.01" required placeholder="أدخل المبلغ (مثال: 5000)">
-                            <button type="button" class="mic-btn" id="micIncomeAmount" title="إدخال صوتي">🎤</button>
-                        </div>
-                        <div class="voice-status" id="statusIncomeAmount"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>اسم العميل / المصدر *</label>
-                        <div class="input-with-mic">
-                            <input type="text" id="incomePerson" required placeholder="اسم الشخص أو الجهة">
-                            <button type="button" class="mic-btn" id="micIncomePerson" title="إدخال صوتي">🎤</button>
-                        </div>
-                        <div class="voice-status" id="statusIncomePerson"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>توقيت التسجيل</label>
-                        <input type="text" id="incomeDateTime" readonly style="background: #F3F4F6; cursor: default;">
-                    </div>
-                    <button type="submit" class="btn btn-income">حفظ العملية</button>
-                </form>
-            </div>
-
-            <!-- Expense Form -->
-            <div class="form-card">
-                <h2>➖ تسجيل مصروف جديد</h2>
-                <form id="expenseForm">
-                    <div class="form-group">
-                        <label>المبلغ المالي *</label>
-                        <div class="input-with-mic">
-                            <input type="number" id="expenseAmount" step="0.01" required placeholder="أدخل المبلغ">
-                            <button type="button" class="mic-btn" id="micExpenseAmount" title="إدخال صوتي">🎤</button>
-                        </div>
-                        <div class="voice-status" id="statusExpenseAmount"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>تفاصيل المصروف *</label>
-                        <div class="input-with-mic">
-                            <textarea id="expenseDetails" required placeholder="اكتب تفاصيل الصرف هنا..." rows="3"></textarea>
-                            <button type="button" class="mic-btn" id="micExpenseDetails" title="إدخال صوتي">🎤</button>
-                        </div>
-                        <div class="voice-status" id="statusExpenseDetails"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>توقيت التسجيل</label>
-                        <input type="text" id="expenseDateTime" readonly style="background: #F3F4F6; cursor: default;">
-                    </div>
-                    <button type="submit" class="btn btn-expense">حفظ المصروف</button>
-                </form>
-                <button class="btn btn-reset" onclick="resetAllData()">⚠️ تصفير جميع البيانات</button>
-            </div>
-        </div>
-
-        <!-- Search Section -->
-        <div class="search-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="font-size: 1.5rem; color: var(--text-primary);">🔍 البحث في السجلات</h2>
-                <button id="voiceSearchBtn" class="mic-btn" style="width: 45px; height: 45px; border-radius: 50%; background: var(--primary-dark);">🎤</button>
-            </div>
-            <div id="voiceSearchStatus" class="voice-status" style="margin-bottom: 10px; justify-content: center;"></div>
-            
-            <div class="search-controls">
-                <input type="number" id="searchAmount" placeholder="بحث بالمبلغ...">
-                <input type="text" id="searchPerson" placeholder="بحث بالاسم...">
-                <input type="text" id="searchDetails" placeholder="بحث في التفاصيل...">
-                <input type="date" id="searchDate">
+        <!-- Input Area -->
+        <div class="magic-input-box">
+            <div class="input-tabs">
+                <button class="input-tab active" onclick="setMode('income')">وارد (+)</button>
+                <button class="input-tab expense-tab" onclick="setMode('expense')">مصروف (-)</button>
             </div>
             
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="btn-search" onclick="performSearch()">تنفيذ البحث</button>
-                <button class="btn-search" onclick="clearSearch()" style="background: var(--text-secondary);">إلغاء الفلاتر</button>
-            </div>
-
-            <div id="searchResultsInfo" style="display: none; margin-top: 15px; padding: 10px; background: #EFF6FF; color: var(--primary-dark); border-radius: 8px;"></div>
-
-            <!-- Export Buttons -->
-            <div class="export-controls">
-                <button class="btn-export" onclick="exportToExcel('all')">
-                    <span>📄</span> تصدير الكل (ملون)
-                </button>
-                <button class="btn-export" onclick="exportToExcel('income')">
-                    <span style="color: var(--success);">⬇️</span> تصدير الواردات
-                </button>
-                <button class="btn-export" onclick="exportToExcel('expense')">
-                    <span style="color: var(--danger);">⬆️</span> تصدير المصروفات
-                </button>
-                <button class="btn-export" onclick="exportSearchResults()">
-                    <span>🔍</span> تصدير نتائج البحث
-                </button>
-            </div>
+            <form id="transactionForm" onsubmit="handleSubmit(event)">
+                <div class="form-grid">
+                    <div class="input-wrapper">
+                        <label>المبلغ المالي</label>
+                        <input type="number" id="amount" class="custom-input" placeholder="0.00" required step="0.01">
+                    </div>
+                    <div class="input-wrapper">
+                        <label id="descLabel">اسم العميل / المصدر</label>
+                        <input type="text" id="description" class="custom-input" placeholder="التفاصيل..." required>
+                    </div>
+                    <button type="submit" class="action-btn btn-primary" id="submitBtn">
+                        <i class="fa-solid fa-plus"></i> إضافة
+                    </button>
+                </div>
+            </form>
         </div>
 
-        <!-- Records Section -->
-        <div class="records-section">
-            <div class="tabs">
-                <button class="tab active" data-tab="all">كل العمليات</button>
-                <button class="tab" data-tab="income">الواردات</button>
-                <button class="tab" data-tab="expense">المصروفات</button>
+        <!-- Charts & Records -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <!-- Recent Records -->
+            <div class="records-container">
+                <h3 style="margin-bottom: 20px; color: var(--text-main);">📋 أحدث العمليات</h3>
+                <div id="recordsList">
+                    <!-- Records will appear here -->
+                    <div style="text-align: center; padding: 20px; color: var(--text-sub);">جاري التحميل...</div>
+                </div>
             </div>
-            <div class="records-list" id="recordsList">
-                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">جاري تحميل البيانات...</div>
-            </div>
-        </div>
-    </div>
 
-    <!-- تفاصيل السجل (Modal Popup) -->
-    <div id="recordModal" class="modal-overlay" onclick="if(event.target === this) closeModal()">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">تفاصيل العملية</h3>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <span id="modalAmount" class="amount-large"></span>
-                
-                <div class="detail-row">
-                    <span class="detail-label">نوع العملية:</span>
-                    <span class="detail-value" id="modalType"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">الاسم / الجهة:</span>
-                    <span class="detail-value" id="modalPerson"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">التاريخ والوقت:</span>
-                    <span class="detail-value" id="modalDate" style="font-size: 0.9rem; direction: ltr;"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">المعرّف (ID):</span>
-                    <span class="detail-value" id="modalId" style="font-size: 0.8rem; font-family: monospace;"></span>
+            <!-- Chart -->
+            <div class="records-container">
+                <h3 style="margin-bottom: 20px; color: var(--text-main);">📊 تحليل البيانات</h3>
+                <div class="chart-wrapper">
+                    <canvas id="financeChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- Voice Assistant Floating Button -->
+    <button class="voice-assistant" id="micBtn" onclick="toggleVoiceAssistant()">
+        <i class="fa-solid fa-microphone"></i>
+    </button>
+
+    <!-- Firebase & Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, remove, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDJHcly8lYT4FTxrJCBRIR7JSbJGYtG3_I",
             authDomain: "nasrapp-7a0fc.firebaseapp.com",
@@ -705,513 +368,321 @@
             projectId: "nasrapp-7a0fc",
             storageBucket: "nasrapp-7a0fc.firebasestorage.app",
             messagingSenderId: "826970736109",
-            appId: "1:826970736109:web:c1cc3c3a1008e719b193e4",
-            measurementId: "G-BHP6J4K9VN"
+            appId: "1:826970736109:web:c1cc3c3a1008e719b193e4"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
+        const db = getDatabase(app);
 
-        // Database References
-        const incomeRef = ref(database, 'income');
-        const expenseRef = ref(database, 'expenses');
-
-        // Global Variables
-        let currentTab = 'all';
+        // State
+        let currentMode = 'income';
         let allRecords = [];
-        let searchResults = [];
-        let isSearching = false;
+        let myChart = null;
 
-        // --- دالة التصدير المحسنة مع الألوان (طلبك الرئيسي) ---
-        window.exportToExcel = function(type) {
-            let recordsToExport = [];
-            let fileName = "";
-
-            if (isSearching && searchResults.length > 0) {
-                recordsToExport = searchResults;
-                fileName = "Search_Results";
+        // --- UI Logic ---
+        window.setMode = function(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.input-tab').forEach(t => t.classList.remove('active'));
+            if(mode === 'income') {
+                document.querySelector('.input-tab:nth-child(1)').classList.add('active');
+                document.getElementById('descLabel').textContent = 'اسم العميل / المصدر';
+                document.getElementById('submitBtn').className = 'action-btn btn-primary';
+                document.getElementById('submitBtn').innerHTML = '<i class="fa-solid fa-plus"></i> إضافة وارد';
             } else {
-                if (type === 'income') {
-                    recordsToExport = allRecords.filter(r => r.type === 'income');
-                    fileName = "Income_Report";
-                } else if (type === 'expense') {
-                    recordsToExport = allRecords.filter(r => r.type === 'expense');
-                    fileName = "Expense_Report";
-                } else {
-                    recordsToExport = allRecords;
-                    fileName = "Full_Financial_Report";
-                }
+                document.querySelector('.input-tab:nth-child(2)').classList.add('active');
+                document.getElementById('descLabel').textContent = 'تفاصيل المصروف';
+                document.getElementById('submitBtn').className = 'action-btn btn-danger';
+                document.getElementById('submitBtn').innerHTML = '<i class="fa-solid fa-minus"></i> إضافة مصروف';
             }
+        };
 
-            if (recordsToExport.length === 0) {
-                alert('⚠️ لا توجد بيانات للتصدير في الوقت الحالي');
+        window.toggleTheme = function() {
+            const body = document.body;
+            if(body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        };
+        // Load Theme
+        if(localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
+
+        // --- Core Functions ---
+        window.handleSubmit = async function(e) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('amount').value);
+            const description = document.getElementById('description').value;
+            
+            if(!amount || !description) return;
+
+            const path = currentMode === 'income' ? 'income' : 'expenses';
+            try {
+                await push(ref(db, path), {
+                    amount,
+                    description, // Unified field name for simpler logic
+                    date: new Date().toISOString(),
+                    timestamp: Date.now()
+                });
+                
+                document.getElementById('transactionForm').reset();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'تم الحفظ',
+                    text: `تم تسجيل ${currentMode === 'income' ? 'الوارد' : 'المصروف'} بنجاح`,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } catch (err) {
+                Swal.fire('خطأ', 'حدث خطأ أثناء الحفظ', 'error');
+            }
+        };
+
+        // --- Realtime Data Listener ---
+        const incomeRef = ref(db, 'income');
+        const expenseRef = ref(db, 'expenses');
+
+        function fetchData() {
+            onValue(ref(db), (snapshot) => {
+                allRecords = [];
+                const data = snapshot.val();
+                
+                if(data) {
+                    if(data.income) {
+                        Object.entries(data.income).forEach(([k, v]) => {
+                            allRecords.push({...v, id: k, type: 'income'});
+                        });
+                    }
+                    if(data.expenses) {
+                        Object.entries(data.expenses).forEach(([k, v]) => {
+                            allRecords.push({...v, id: k, type: 'expense'});
+                        });
+                    }
+                }
+                
+                allRecords.sort((a, b) => b.timestamp - a.timestamp);
+                renderApp();
+            });
+        }
+        fetchData();
+
+        function renderApp() {
+            updateStats();
+            renderList();
+            updateChart();
+        }
+
+        function updateStats() {
+            const income = allRecords.filter(r => r.type === 'income').reduce((s, r) => s + Number(r.amount), 0);
+            const expense = allRecords.filter(r => r.type === 'expense').reduce((s, r) => s + Number(r.amount), 0);
+            
+            document.getElementById('totalIncome').textContent = income.toLocaleString() + ' ج.م';
+            document.getElementById('totalExpense').textContent = expense.toLocaleString() + ' ج.م';
+            document.getElementById('netBalance').textContent = (income - expense).toLocaleString() + ' ج.م';
+            
+            document.getElementById('incomeCount').textContent = allRecords.filter(r => r.type === 'income').length;
+            document.getElementById('expenseCount').textContent = allRecords.filter(r => r.type === 'expense').length;
+        }
+
+        function renderList() {
+            const container = document.getElementById('recordsList');
+            container.innerHTML = '';
+
+            if(allRecords.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:20px;">لا توجد بيانات</div>';
                 return;
             }
 
-            const wb = XLSX.utils.book_new();
-            
-            // تعريف الأنماط (Styles)
-            const styles = {
-                title: {
-                    font: { bold: true, sz: 16, color: { rgb: "FFFFFF" }, name: "Cairo" },
-                    fill: { fgColor: { rgb: "4F46E5" } },
-                    alignment: { horizontal: "center", vertical: "center" }
-                },
-                header: {
-                    font: { bold: true, sz: 12, color: { rgb: "FFFFFF" }, name: "Cairo" },
-                    fill: { fgColor: { rgb: "3730A3" } },
-                    alignment: { horizontal: "center", vertical: "center" },
-                    border: {
-                        top: { style: "thin", color: { rgb: "FFFFFF" } },
-                        bottom: { style: "thin", color: { rgb: "FFFFFF" } },
-                        left: { style: "thin", color: { rgb: "FFFFFF" } },
-                        right: { style: "thin", color: { rgb: "FFFFFF" } }
-                    }
-                },
-                cellIncome: {
-                    font: { color: { rgb: "065F46" }, name: "Cairo" },
-                    fill: { fgColor: { rgb: "ECFDF5" } },
-                    alignment: { horizontal: "center", vertical: "center" },
-                    border: {
-                        bottom: { style: "thin", color: { rgb: "D1FAE5" } },
-                        left: { style: "thin", color: { rgb: "D1FAE5" } },
-                        right: { style: "thin", color: { rgb: "D1FAE5" } }
-                    }
-                },
-                cellExpense: {
-                    font: { color: { rgb: "991B1B" }, name: "Cairo" },
-                    fill: { fgColor: { rgb: "FEF2F2" } },
-                    alignment: { horizontal: "center", vertical: "center" },
-                    border: {
-                        bottom: { style: "thin", color: { rgb: "FECACA" } },
-                        left: { style: "thin", color: { rgb: "FECACA" } },
-                        right: { style: "thin", color: { rgb: "FECACA" } }
-                    }
-                },
-                totalRow: {
-                    font: { bold: true, sz: 13, color: { rgb: "000000" }, name: "Cairo" },
-                    fill: { fgColor: { rgb: "E5E7EB" } },
-                    alignment: { horizontal: "center", vertical: "center" },
-                    border: {
-                        top: { style: "medium", color: { rgb: "000000" } },
-                        bottom: { style: "double", color: { rgb: "000000" } }
-                    }
-                }
-            };
-
-            // بناء البيانات
-            let wsData = [
-                [{ v: 'تقرير الحسابات المالي', s: styles.title }, null, null, null],
-                [], // فاصل
-            ];
-
-            // دمج خلايا العنوان
-            const merges = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
-
-            // إضافة الرؤوس
-            const headers = ['التاريخ', 'الوصف / الجهة', 'المبلغ', 'النوع'];
-            const headerRow = headers.map(h => ({ v: h, s: styles.header }));
-            wsData.push(headerRow);
-
-            // إضافة الصفوف
-            recordsToExport.forEach(record => {
-                const isIncome = record.type === 'income';
-                const rowStyle = isIncome ? styles.cellIncome : styles.cellExpense;
+            allRecords.slice(0, 50).forEach(record => { // Show last 50
+                const isInc = record.type === 'income';
+                const div = document.createElement('div');
+                div.className = 'record-row';
                 
-                const row = [
-                    { v: record.dateTime, s: rowStyle },
-                    { v: isIncome ? record.person : record.details, s: rowStyle },
-                    { v: record.amount, t: 'n', s: rowStyle },
-                    { v: isIncome ? 'وارد' : 'مصروف', s: rowStyle }
-                ];
-                wsData.push(row);
+                const dateStr = new Date(record.timestamp).toLocaleDateString('ar-EG');
+                
+                // Inline Edit Logic implemented in onclick of the amount span
+                div.innerHTML = `
+                    <div class="record-main">
+                        <div class="record-icon ${isInc ? 'bg-income' : 'bg-expense'}">
+                            <i class="fa-solid ${isInc ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+                        </div>
+                        <div class="record-details">
+                            <h4>${record.description || record.person || record.details}</h4>
+                            <span>${dateStr}</span>
+                        </div>
+                    </div>
+                    <div style="text-align: left;">
+                        <div class="editable-amount ${isInc ? 'text-income' : 'text-expense'}" 
+                             onclick="editAmount('${record.id}', '${record.type}', ${record.amount})"
+                             title="اضغط للتعديل">
+                             ${isInc ? '+' : '-'} ${Number(record.amount).toLocaleString()}
+                        </div>
+                        <button onclick="deleteItem('${record.id}', '${record.type}')" style="border:none; background:none; color:#cbd5e1; cursor:pointer; margin-top:5px;">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // --- Inline Editing ---
+        window.editAmount = async function(id, type, oldAmount) {
+            const { value: newAmount } = await Swal.fire({
+                title: 'تعديل المبلغ',
+                input: 'number',
+                inputValue: oldAmount,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء'
             });
 
-            // حساب الإجمالي للصفوف المصدرة
-            const totalAmount = recordsToExport.reduce((sum, r) => {
-                // إذا كان مصروف نجعله سالب في الجمع الظاهري أو نجمعه كقيمة مطلقة حسب رغبتك
-                // هنا سنجمع القيمة المطلقة لبيان حجم التعامل
-                return sum + Number(r.amount);
-            }, 0);
-
-            // إضافة صف المجموع
-            const totalRowData = [
-                { v: 'الإجمالي العام', s: styles.totalRow },
-                { v: '', s: styles.totalRow },
-                { v: totalAmount, t: 'n', s: styles.totalRow },
-                { v: recordsToExport.length + ' عملية', s: styles.totalRow }
-            ];
-            wsData.push(totalRowData);
-
-            const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-            // تفعيل الفلتر
-            ws['!autofilter'] = { ref: "A3:D" + (wsData.length - 1) };
-
-            // عرض الأعمدة
-            ws['!cols'] = [
-                { wch: 25 }, // التاريخ
-                { wch: 40 }, // الوصف
-                { wch: 15 }, // المبلغ
-                { wch: 12 }  // النوع
-            ];
-
-            ws['!merges'] = merges;
-
-            XLSX.utils.book_append_sheet(wb, ws, "البيانات");
-            XLSX.writeFile(wb, `${fileName}_${new Date().toISOString().slice(0,10)}.xlsx`);
-        };
-
-        window.exportSearchResults = function() {
-            if (!isSearching) {
-                alert('قم بإجراء بحث أولاً لتصدير النتائج');
-                return;
+            if (newAmount) {
+                const path = type === 'income' ? `income/${id}` : `expenses/${id}`;
+                await update(ref(db, path), { amount: parseFloat(newAmount) });
+                Swal.fire('تم التعديل', '', 'success');
             }
-            window.exportToExcel('search');
         };
 
-        // --- Voice Recognition Setup (Original) ---
+        window.deleteItem = function(id, type) {
+            Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: "لا يمكن التراجع عن الحذف",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'نعم، احذف',
+                cancelButtonText: 'إلغاء'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const path = type === 'income' ? `income/${id}` : `expenses/${id}`;
+                    remove(ref(db, path));
+                }
+            });
+        };
+
+        // --- Charts ---
+        function updateChart() {
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            const income = allRecords.filter(r => r.type === 'income').reduce((s, r) => s + Number(r.amount), 0);
+            const expense = allRecords.filter(r => r.type === 'expense').reduce((s, r) => s + Number(r.amount), 0);
+
+            if(myChart) myChart.destroy();
+
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['الواردات', 'المصروفات'],
+                    datasets: [{
+                        data: [income, expense],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        // --- Advanced Voice Assistant (The Brain) ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition = null;
+        let recognition;
 
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
             recognition.lang = 'ar-EG';
             recognition.continuous = false;
-            recognition.interimResults = false;
-        }
 
-        function startVoiceInput(inputId, statusId, isNumber = false) {
-            if (!recognition) {
-                alert('متصفحك لا يدعم التعرف على الصوت. يرجى استخدام Chrome أو Edge');
-                return;
-            }
-
-            const inputElement = document.getElementById(inputId);
-            const statusElement = document.getElementById(statusId);
-            const micBtn = document.getElementById('mic' + inputId.charAt(0).toUpperCase() + inputId.slice(1));
-
-            recognition.start();
-            micBtn.classList.add('recording');
-            statusElement.textContent = '🎤 جاري الاستماع... تحدث الآن';
-            statusElement.classList.add('listening');
-
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                
-                if (isNumber) {
-                    const convertedNumber = convertArabicToEnglishNumbers(transcript);
-                    const numberValue = extractNumber(convertedNumber);
-                    if (numberValue) {
-                        inputElement.value = numberValue;
-                        statusElement.textContent = '✅ تم التعرف: ' + numberValue;
-                    } else {
-                        inputElement.value = transcript;
-                        statusElement.textContent = '✅ تم التعرف: ' + transcript;
-                    }
-                } else {
-                    inputElement.value = transcript;
-                    statusElement.textContent = '✅ تم التعرف بنجاح';
-                }
-                
-                setTimeout(() => {
-                    statusElement.textContent = '';
-                    statusElement.classList.remove('listening');
-                }, 3000);
-            };
-
-            recognition.onerror = (event) => {
-                micBtn.classList.remove('recording');
-                statusElement.classList.remove('listening');
-                statusElement.textContent = '❌ لم يتم اكتشاف صوت بوضوح';
-                setTimeout(() => { statusElement.textContent = ''; }, 3000);
+            recognition.onstart = () => {
+                document.getElementById('micBtn').classList.add('listening');
             };
 
             recognition.onend = () => {
-                micBtn.classList.remove('recording');
-                statusElement.classList.remove('listening');
+                document.getElementById('micBtn').classList.remove('listening');
             };
-        }
-
-        // Voice Search Logic
-        document.getElementById('voiceSearchBtn').addEventListener('click', () => {
-            if (!recognition) { alert('المتصفح لا يدعم الصوت'); return; }
-            const btn = document.getElementById('voiceSearchBtn');
-            const status = document.getElementById('voiceSearchStatus');
-
-            recognition.start();
-            btn.classList.add('recording');
-            status.textContent = '🎤 قل كلمة البحث...';
-            status.classList.add('listening');
 
             recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript.trim();
-                status.textContent = '🔍 جاري البحث عن: ' + transcript;
-                document.getElementById('searchPerson').value = transcript;
-                document.getElementById('searchDetails').value = transcript;
-                setTimeout(() => {
-                    performSearch();
-                    status.textContent = '';
-                    status.classList.remove('listening');
-                }, 800);
+                const transcript = event.results[0][0].transcript.toLowerCase();
+                processVoiceCommand(transcript);
             };
-            recognition.onend = () => { btn.classList.remove('recording'); };
-        });
-
-        // Helpers for Arabic Numbers
-        function convertArabicToEnglishNumbers(str) {
-            const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-            const englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-            let result = str;
-            for (let i = 0; i < 10; i++) {
-                result = result.replace(new RegExp(arabicNumbers[i], 'g'), englishNumbers[i]);
-            }
-            return result;
+        } else {
+            alert('المتصفح لا يدعم الأوامر الصوتية');
         }
 
-        function extractNumber(text) {
-            const numberMatch = text.match(/[\d.]+/);
-            if (numberMatch) return numberMatch[0];
-            return null;
-        }
-
-        // Mic Listeners
-        document.getElementById('micIncomeAmount').addEventListener('click', () => startVoiceInput('incomeAmount', 'statusIncomeAmount', true));
-        document.getElementById('micIncomePerson').addEventListener('click', () => startVoiceInput('incomePerson', 'statusIncomePerson', false));
-        document.getElementById('micExpenseAmount').addEventListener('click', () => startVoiceInput('expenseAmount', 'statusExpenseAmount', true));
-        document.getElementById('micExpenseDetails').addEventListener('click', () => startVoiceInput('expenseDetails', 'statusExpenseDetails', false));
-
-        // Date Time Logic
-        function updateDateTimeFields() {
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
-            const dateTime = now.toLocaleDateString('ar-EG', options);
-            document.getElementById('incomeDateTime').value = dateTime;
-            document.getElementById('expenseDateTime').value = dateTime;
-        }
-        setInterval(updateDateTimeFields, 1000);
-        updateDateTimeFields();
-
-        // Add Income
-        document.getElementById('incomeForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const amount = parseFloat(document.getElementById('incomeAmount').value);
-            const person = document.getElementById('incomePerson').value.trim();
-            const dateTime = document.getElementById('incomeDateTime').value;
-            
-            try {
-                await push(incomeRef, { amount, person, dateTime, timestamp: Date.now(), type: 'income' });
-                document.getElementById('incomeForm').reset();
-                updateDateTimeFields();
-                alert('✅ تم إضافة الوارد بنجاح');
-            } catch (error) { console.error(error); alert('خطأ في الإضافة'); }
-        });
-
-        // Add Expense
-        document.getElementById('expenseForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const amount = parseFloat(document.getElementById('expenseAmount').value);
-            const details = document.getElementById('expenseDetails').value.trim();
-            const dateTime = document.getElementById('expenseDateTime').value;
-            
-            try {
-                await push(expenseRef, { amount, details, dateTime, timestamp: Date.now(), type: 'expense' });
-                document.getElementById('expenseForm').reset();
-                updateDateTimeFields();
-                alert('✅ تم إضافة المصروف بنجاح');
-            } catch (error) { console.error(error); alert('خطأ في الإضافة'); }
-        });
-
-        // Reset Data
-        window.resetAllData = async function() {
-            const password = prompt('⚠️ تحذير: للحذف أدخل كلمة السر:');
-            if (password === '521988') {
-                if (confirm('هل أنت متأكد من حذف كل شيء؟')) {
-                    try {
-                        const incSnap = await get(incomeRef);
-                        if (incSnap.exists()) { const d = incSnap.val(); for(let k in d) await remove(ref(database, `income/${k}`)); }
-                        
-                        const expSnap = await get(expenseRef);
-                        if (expSnap.exists()) { const d = expSnap.val(); for(let k in d) await remove(ref(database, `expenses/${k}`)); }
-                        
-                        alert('✅ تم تصفير النظام');
-                    } catch (e) { alert('خطأ'); }
-                }
-            } else if (password !== null) { alert('❌ كلمة السر خطأ'); }
+        window.toggleVoiceAssistant = function() {
+            if(recognition) recognition.start();
         };
 
-        // Load Data
-        function loadRecords() {
-            allRecords = [];
+        function processVoiceCommand(text) {
+            // 1. Analyze Numbers
+            const amountMatch = text.match(/(\d+)/); // Simple regex for English digits
+            const arabicNumbers = text.match(/[\u0660-\u0669]+/); // Arabic digits
             
-            onValue(incomeRef, (snapshot) => {
-                allRecords = allRecords.filter(r => r.type !== 'income');
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    Object.keys(data).forEach(key => allRecords.push({ id: key, ...data[key], collectionType: 'income' }));
+            let amount = 0;
+            if(amountMatch) amount = parseFloat(amountMatch[0]);
+            // (Logic to convert Arabic numerals can be added here if needed)
+
+            // 2. Analyze Intent
+            if (text.includes('وارد') || text.includes('دخل') || text.includes('قبضت')) {
+                // Income Logic
+                if(amount > 0) {
+                    document.getElementById('amount').value = amount;
+                    document.getElementById('description').value = text.replace('تسجيل', '').replace('وارد', '').replace(amount, '').trim() || 'وارد صوتي';
+                    setMode('income');
+                    handleSubmit({preventDefault:()=>{}});
+                } else {
+                    setMode('income');
+                    Swal.fire('🎤', 'تم تحويل الوضع إلى: وارد', 'info');
                 }
-                processRecords();
-            });
-            
-            onValue(expenseRef, (snapshot) => {
-                allRecords = allRecords.filter(r => r.type !== 'expense');
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    Object.keys(data).forEach(key => allRecords.push({ id: key, ...data[key], collectionType: 'expense' }));
+            } 
+            else if (text.includes('مصروف') || text.includes('صرفت') || text.includes('شريت')) {
+                // Expense Logic
+                if(amount > 0) {
+                    document.getElementById('amount').value = amount;
+                    document.getElementById('description').value = text.replace('تسجيل', '').replace('مصروف', '').replace(amount, '').trim() || 'مصروف صوتي';
+                    setMode('expense');
+                    handleSubmit({preventDefault:()=>{}});
+                } else {
+                    setMode('expense');
+                    Swal.fire('🎤', 'تم تحويل الوضع إلى: مصروف', 'info');
                 }
-                processRecords();
-            });
+            }
+            else if (text.includes('ليلي') || text.includes('مظلم')) {
+                toggleTheme();
+            }
+            else if (text.includes('تصدير')) {
+                exportData();
+            }
+            else {
+                Swal.fire('🤔', 'لم أفهم الأمر: ' + text, 'question');
+            }
         }
 
-        function processRecords() {
-            allRecords.sort((a, b) => b.timestamp - a.timestamp);
-            if (isSearching) performSearch(); else displayRecords(allRecords);
-            updateStatistics();
-        }
-
-        // Display Records (Updated with Click Event)
-        function displayRecords(records) {
-            const list = document.getElementById('recordsList');
-            list.innerHTML = '';
+        // --- Export Function ---
+        window.exportData = function() {
+            const wb = XLSX.utils.book_new();
             
-            let filtered = records;
-            if (currentTab !== 'all' && !isSearching) {
-                filtered = records.filter(r => r.type === currentTab);
-            }
-
-            if (filtered.length === 0) {
-                list.innerHTML = '<div style="text-align:center; padding:30px; color:#999;">لا توجد سجلات للعرض</div>';
-                return;
-            }
-
-            filtered.forEach(r => {
-                const isInc = r.type === 'income';
-                const div = document.createElement('div');
-                div.className = `record-item ${isInc ? 'income' : 'expense'}`;
-                
-                // إضافة حدث النقر هنا
-                div.onclick = () => showRecordDetails(r);
-                div.title = "اضغط لعرض التفاصيل";
-
-                div.innerHTML = `
-                    <div class="record-info">
-                        <h4>${isInc ? r.person : r.details}</h4>
-                        <div class="record-date">${r.dateTime}</div>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:15px;">
-                        <div class="record-amount ${isInc ? 'income' : 'expense'}">
-                            ${isInc ? '+' : '-'} ${r.amount.toLocaleString()}
-                        </div>
-                        <!-- زر الحذف مع منع انتشار الحدث حتى لا يفتح القائمة -->
-                        <button onclick="event.stopPropagation(); deleteRecord('${r.id}', '${r.collectionType}')" style="background:#FEE2E2; color:#DC2626; border:none; padding:8px; border-radius:8px; cursor:pointer; z-index: 2;">🗑️</button>
-                    </div>
-                `;
-                list.appendChild(div);
-            });
-        }
-
-        // New Functions for Modal Interaction
-        window.showRecordDetails = function(r) {
-            const isInc = r.type === 'income';
-            const modal = document.getElementById('recordModal');
-            
-            // تعبئة البيانات
-            document.getElementById('modalTitle').innerText = isInc ? 'تفاصيل الوارد' : 'تفاصيل المصروف';
-            
-            const amountEl = document.getElementById('modalAmount');
-            amountEl.innerText = (isInc ? '+' : '-') + Number(r.amount).toLocaleString() + ' ج.م';
-            amountEl.style.color = isInc ? 'var(--success)' : 'var(--danger)';
-            
-            document.getElementById('modalType').innerText = isInc ? 'وارد (Income)' : 'مصروف (Expense)';
-            document.getElementById('modalPerson').innerText = isInc ? r.person : r.details;
-            document.getElementById('modalDate').innerText = r.dateTime;
-            document.getElementById('modalId').innerText = r.id;
-            
-            // إظهار القائمة
-            modal.style.display = 'flex';
-        };
-
-        window.closeModal = function() {
-            document.getElementById('recordModal').style.display = 'none';
-        };
-
-        window.deleteRecord = async function(id, type) {
-            if(confirm('حذف هذا السجل؟')) {
-                await remove(ref(database, type === 'income' ? `income/${id}` : `expenses/${id}`));
-            }
-        };
-
-        // Statistics
-        function updateStatistics() {
-            const income = allRecords.filter(r => r.type === 'income').reduce((a, b) => a + Number(b.amount), 0);
-            const expense = allRecords.filter(r => r.type === 'expense').reduce((a, b) => a + Number(b.amount), 0);
-            
-            document.getElementById('totalIncome').innerText = income.toLocaleString();
-            document.getElementById('incomeCount').innerText = allRecords.filter(r => r.type === 'income').length + ' عملية';
-            
-            document.getElementById('totalExpense').innerText = expense.toLocaleString();
-            document.getElementById('expenseCount').innerText = allRecords.filter(r => r.type === 'expense').length + ' عملية';
-            
-            document.getElementById('balance').innerText = (income - expense).toLocaleString();
-        }
-
-        // Search
-        window.performSearch = function() {
-            const sAmount = document.getElementById('searchAmount').value;
-            const sPerson = document.getElementById('searchPerson').value.toLowerCase().trim();
-            const sDetails = document.getElementById('searchDetails').value.toLowerCase().trim();
-            const sDate = document.getElementById('searchDate').value;
-
-            if (!sAmount && !sPerson && !sDetails && !sDate) {
-                isSearching = false;
-                document.getElementById('searchResultsInfo').style.display = 'none';
-                displayRecords(allRecords);
-                return;
-            }
-
-            isSearching = true;
-            searchResults = allRecords.filter(r => {
-                let match = true;
-                if (sAmount) match = match && r.amount == sAmount;
-                if (sPerson) {
-                    const txt = r.person || '';
-                    match = match && txt.toLowerCase().includes(sPerson);
-                }
-                if (sDetails) {
-                    const txt = r.details || r.person || '';
-                    match = match && txt.toLowerCase().includes(sDetails);
-                }
-                // يمكن إضافة فلترة التاريخ هنا إذا رغبت
-                return match;
+            // Prepare Data
+            const data = [['التاريخ', 'النوع', 'الوصف', 'المبلغ']];
+            allRecords.forEach(r => {
+                data.push([
+                    new Date(r.timestamp).toLocaleDateString('ar-EG'),
+                    r.type === 'income' ? 'وارد' : 'مصروف',
+                    r.description || r.person || r.details,
+                    Number(r.amount)
+                ]);
             });
 
-            document.getElementById('searchResultsInfo').style.display = 'block';
-            document.getElementById('searchResultsInfo').textContent = `تم العثور على ${searchResults.length} نتيجة`;
-            displayRecords(searchResults);
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb, ws, "البيانات المالية");
+            XLSX.writeFile(wb, `Financial_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
         };
-
-        window.clearSearch = function() {
-            document.getElementById('searchAmount').value = '';
-            document.getElementById('searchPerson').value = '';
-            document.getElementById('searchDetails').value = '';
-            document.getElementById('searchDate').value = '';
-            performSearch();
-        };
-
-        // Tabs
-        document.querySelectorAll('.tab').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                currentTab = e.target.dataset.tab;
-                displayRecords(isSearching ? searchResults : allRecords);
-            });
-        });
-
-        // Start App
-        loadRecords();
-
     </script>
 </body>
 </html>
