@@ -25,6 +25,50 @@
       margin-bottom: 30px;
       font-size: 22px;
     }
+    .input-group {
+      margin-bottom: 20px;
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 15px;
+      border: 2px solid #e9ecef;
+    }
+    .input-group label {
+      display: block;
+      margin-bottom: 10px;
+      color: #495057;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ced4da;
+      border-radius: 10px;
+      font-size: 18px;
+      font-family: 'Cairo', sans-serif;
+      text-align: center;
+      font-weight: bold;
+    }
+    .input-group input:focus {
+      outline: none;
+      border-color: #0072ff;
+      box-shadow: 0 0 0 3px rgba(0, 114, 255, 0.1);
+    }
+    .input-group .hint {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #6c757d;
+      text-align: center;
+    }
+    .preview-box {
+      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+      color: #0d47a1;
+    }
     button {
       width: 100%;
       padding: 15px;
@@ -44,6 +88,12 @@
     button:disabled {
       background: #ccc;
       cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: linear-gradient(135deg, #43cea2, #185a9d) !important;
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, #ff416c, #ff4b2b) !important;
     }
     #status {
       padding: 15px;
@@ -79,18 +129,54 @@
       padding: 5px;
       border-bottom: 1px solid #ddd;
     }
+    .special-code-notice {
+      background: linear-gradient(135deg, #fff3cd, #ffe69c);
+      border: 2px solid #ffc107;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: bold;
+      color: #856404;
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>⚙️ إضافة أكواد الدخول (800801 - 800864)</h1>
+    <h1>⚙️ إضافة أكواد الدخول</h1>
+    
+    <div class="special-code-notice">
+      🔐 سيتم إضافة كود التحقق الخاص 111111 تلقائياً
+    </div>
+    
+    <div class="input-group">
+      <label>🔢 بداية رقم الكود:</label>
+      <input 
+        type="number" 
+        id="startCode" 
+        value="800801" 
+        min="100000" 
+        max="999999"
+        oninput="updatePreview()"
+      >
+      <div class="hint">
+        أدخل رقم البداية (6 أرقام) - مثال: 800801
+      </div>
+      <div class="preview-box" id="previewBox">
+        📊 النطاق: 800801 → 800864 (64 كود)
+      </div>
+    </div>
     
     <button id="addCodesBtn" onclick="addLoginCodes()">
-      إضافة جميع الأكواد إلى Firebase (64 كود)
+      إضافة جميع الأكواد إلى Firebase
     </button>
     
-    <button onclick="viewCodes()" style="background: linear-gradient(135deg, #43cea2, #185a9d);">
+    <button onclick="viewCodes()" class="btn-secondary">
       عرض الأكواد الحالية
+    </button>
+    
+    <button onclick="deleteAllCodes()" class="btn-danger">
+      ⚠️ حذف جميع الأكواد
     </button>
     
     <div id="status"></div>
@@ -99,7 +185,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
     
     const firebaseConfig = {
       apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
@@ -181,6 +267,19 @@
       "قرية الضهير"
     ];
 
+    // تحديث المعاينة
+    window.updatePreview = function() {
+      const startCode = parseInt(document.getElementById('startCode').value) || 800801;
+      const endCode = startCode + places.length - 1;
+      const totalCodes = places.length + 1; // +1 للكود 111111
+      
+      document.getElementById('previewBox').innerHTML = `
+        📊 النطاق: ${startCode} → ${endCode} (${places.length} كود)<br>
+        🔐 + كود التحقق: 111111<br>
+        📈 الإجمالي: ${totalCodes} كود
+      `;
+    };
+
     function addLog(message, isError = false) {
       const logDiv = document.getElementById('log');
       const logItem = document.createElement('div');
@@ -195,6 +294,12 @@
       const btn = document.getElementById('addCodesBtn');
       const status = document.getElementById('status');
       const logDiv = document.getElementById('log');
+      const startCode = parseInt(document.getElementById('startCode').value) || 800801;
+      
+      if (startCode < 100000 || startCode > 999999) {
+        alert('❌ الرجاء إدخال رقم بداية صحيح (6 أرقام)');
+        return;
+      }
       
       btn.disabled = true;
       btn.textContent = 'جاري الإضافة...';
@@ -204,13 +309,29 @@
 
       try {
         addLog('بدء عملية إضافة الأكواد...');
-        addLog(`إجمالي الأماكن: ${places.length}`);
+        addLog(`🔢 رقم البداية: ${startCode}`);
+        addLog(`📍 إجمالي الأماكن: ${places.length}`);
         
         let successCount = 0;
         let errorCount = 0;
 
+        // إضافة الكود الخاص 111111 أولاً
+        try {
+          await set(ref(db, 'login_codes/111111'), {
+            place: "التأكد من البطاقة سليمة",
+            placeIdx: 0,
+            isVerificationCode: true
+          });
+          addLog(`🔐 تم إضافة كود التحقق 111111 - التأكد من البطاقة سليمة`);
+          successCount++;
+        } catch (error) {
+          addLog(`❌ خطأ في إضافة كود التحقق 111111: ${error.message}`, true);
+          errorCount++;
+        }
+
+        // إضافة باقي الأكواد
         for (let i = 0; i < places.length; i++) {
-          const code = String(800801 + i);
+          const code = String(startCode + i);
           const place = places[i];
           const placeIdx = i + 1;
 
@@ -231,10 +352,11 @@
           }
         }
 
+        const totalCodes = places.length + 1;
         addLog(`\n✨ اكتملت العملية: ${successCount} نجح، ${errorCount} فشل`);
         
         status.className = 'success';
-        status.textContent = `✅ تم إضافة ${successCount} كود بنجاح من أصل ${places.length}!`;
+        status.textContent = `✅ تم إضافة ${successCount} كود بنجاح من أصل ${totalCodes}!`;
         status.style.display = 'block';
 
       } catch (error) {
@@ -244,7 +366,7 @@
         status.style.display = 'block';
       } finally {
         btn.disabled = false;
-        btn.textContent = 'إضافة جميع الأكواد إلى Firebase (64 كود)';
+        btn.textContent = 'إضافة جميع الأكواد إلى Firebase';
       }
     };
 
@@ -263,9 +385,18 @@
         const codes = snapshot.val();
         logDiv.innerHTML = '<div class="log-item" style="font-weight:bold;background:#e7f3ff;">الأكواد الموجودة حالياً:</div>';
         
-        Object.keys(codes).sort().forEach(code => {
-          addLog(`🔑 ${code} → ${codes[code].place}`);
-        });
+        // عرض الكود الخاص أولاً
+        if (codes['111111']) {
+          addLog(`🔐 111111 → ${codes['111111'].place} (كود التحقق)`);
+        }
+        
+        // عرض باقي الأكواد مرتبة
+        Object.keys(codes)
+          .filter(code => code !== '111111')
+          .sort((a, b) => parseInt(a) - parseInt(b))
+          .forEach(code => {
+            addLog(`🔑 ${code} → ${codes[code].place}`);
+          });
         
         addLog(`\n📊 إجمالي الأكواد: ${Object.keys(codes).length}`);
 
@@ -273,6 +404,41 @@
         addLog(`❌ خطأ في عرض الأكواد: ${error.message}`, true);
       }
     };
+
+    window.deleteAllCodes = async function() {
+      if (!confirm('⚠️ تحذير!\n\nهل أنت متأكد من حذف جميع الأكواد؟\n\nهذا الإجراء لا يمكن التراجع عنه!')) {
+        return;
+      }
+      
+      if (!confirm('تأكيد نهائي!\n\nاضغط موافق لحذف جميع أكواد الدخول نهائياً')) {
+        return;
+      }
+      
+      const logDiv = document.getElementById('log');
+      logDiv.innerHTML = '';
+      addLog('بدء عملية حذف جميع الأكواد...');
+      
+      try {
+        await remove(ref(db, 'login_codes'));
+        addLog('✅ تم حذف جميع الأكواد بنجاح');
+        
+        const status = document.getElementById('status');
+        status.className = 'success';
+        status.textContent = '✅ تم حذف جميع الأكواد من قاعدة البيانات';
+        status.style.display = 'block';
+        
+      } catch (error) {
+        addLog(`❌ خطأ في الحذف: ${error.message}`, true);
+        
+        const status = document.getElementById('status');
+        status.className = 'error';
+        status.textContent = '❌ حدث خطأ في عملية الحذف';
+        status.style.display = 'block';
+      }
+    };
+
+    // تحديث المعاينة عند تحميل الصفحة
+    updatePreview();
   </script>
 </body>
 </html>
