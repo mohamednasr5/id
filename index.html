@@ -768,6 +768,112 @@
     </div>
   </div>
 
+  
+
+  <!-- كود JavaScript مع التحديثات -->
+  <script>
+    // قائمة الأماكن المحدثة (67 مكان)
+    const places = [
+      "المنزلة الجديدة 1 - كريم المرور", "المنزلة الجديدة 2 - شريف التأمين الصحي",
+      "بحر البلد شارع الكابتن - شريف العزازي", "مدرسة عبد العال شلبياية - اشرف الأباصيري",
+      "مصنع البصل - فؤاد حال", "الكفر 1 - علي شطا", "الكفر 2 تحت السكة - عادل جلال",
+      "سوق الجملة - السعيد شطا- على البياع", "الفداء 1 - عمر الكيال", "الفداء 2 - حماده الكيال",
+      "الحمزاوي - حماده السري", "الجرن 1 - بوجي البرعي", "الجرن 2 - إبراهيم فهيد",
+      "البر الثاني حي السلام - يحيى حبق", "حي الأعجام - حماده ابو رشاد",
+      "العزبة منشية ناصر -حسان عطية", "الطويل - أحمد عبد العظيم",
+      "البر الثاني 2 الهاويس - إبراهيم عبد المجيد", "الفقاعي - محمد حبيب",
+      "بحر البلد 2 - السيد حراز", "حي الجبانة - سعد الشلودي",
+      "الكفر 3 بجوار ملعب برشلونة - محمد البداية", "أبو رشاد مقهى أبو سليمان - محمد رشاد",
+      "حي الزهراء - رشاد عبد الوهاب", "بحر البلد 3 - منصور البدري",
+      "حي السلموني - حسن المناخلى", "حى مزلفان العلمي -أبوعلاء",
+      "حي البصله حمود-عبد الحميد", "حى الجرن 3 -قهوة النجدي محمد النجدي",
+      "المزرعة", "أمن الدولة",
+      "الفروسات", "أبو الأخضر", "جديدة المنزلة", "العامرة", "مصر الجديدة",
+      "عرب زيدان", "الستايتة", "كفر حجاج", "ميت خضير", "المواجد",
+      "البصراط", "ميت شريف", "الطوابرة", "العمارنة", "اولاد بانا",
+      "اولاد حانا", "بحر حادوث", "القزاقزة", "الحوتة", "اولاد نور",
+      "الخلايفة", "القطشة", "الجماملة", "قرية العزيزة", "الأحمدية",
+      "العربان", "اولاد علم", "اولاد ناصر", "بني هلال", "الشبول",
+      "الرودة", "النسايمة", "المطرية", "قرية العصافرة", "قرية الضهير"
+    ];
+
+    // أكواد تسجيل الدخول من 900901 إلى 900967 + كود التحقق 111111
+    const loginCodes = {
+      "900901": { place: places[0], placeIdx: 1 },
+      "900902": { place: places[1], placeIdx: 2 },
+      "900903": { place: places[2], placeIdx: 3 },
+      "900904": { place: places[3], placeIdx: 4 },
+      "900905": { place: places[4], placeIdx: 5 },
+      "900906": { place: places[5], placeIdx: 6 },
+      "900907": { place: places[6], placeIdx: 7 },
+      "900908": { place: places[7], placeIdx: 8 },
+      "900909": { place: places[8], placeIdx: 9 },
+      "900910": { place: places[9], placeIdx: 10 },
+      "900911": { place: places[10], placeIdx: 11 },
+      "900912": { place: places[11], placeIdx: 12 },
+      "900913": { place: places[12], placeIdx: 13 },
+      "900914": { place: places[13], placeIdx: 14 },
+      "900915": { place: places[14], placeIdx: 15 },
+      "900916": { place: places[15], placeIdx: 16 },
+      "900917": { place: places[16], placeIdx: 17 },
+      "900918": { place: places[17], placeIdx: 18 },
+      "900919": { place: places[18], placeIdx: 19 },
+      "900920": { place: places[19], placeIdx: 20 },
+      "900921": { place: places[20], placeIdx: 21 },
+      "900922": { place: places[21], placeIdx: 22 },
+      "900923": { place: places[22], placeIdx: 23 },
+      "900924": { place: places[23], placeIdx: 24 },
+      "900925": { place: places[24], placeIdx: 25 },
+      "900926": { place: places[25], placeIdx: 26 },
+      "900927": { place: places[26], placeIdx: 27 },
+      "900928": { place: places[27], placeIdx: 28 },
+      "900929": { place: places[28], placeIdx: 29 },
+      "900930": { place: places[29], placeIdx: 30 },
+      "900931": { place: places[30], placeIdx: 31 },
+      "900932": { place: places[31], placeIdx: 32 },
+      "900933": { place: places[32], placeIdx: 33 },
+      "900934": { place: places[33], placeIdx: 34 },
+      "900935": { place: places[34], placeIdx: 35 },
+      "900936": { place: places[35], placeIdx: 36 },
+      "900937": { place: places[36], placeIdx: 37 },
+      "900938": { place: places[37], placeIdx: 38 },
+      "900939": { place: places[38], placeIdx: 39 },
+      "900940": { place: places[39], placeIdx: 40 },
+      "900941": { place: places[40], placeIdx: 41 },
+      "900942": { place: places[41], placeIdx: 42 },
+      "900943": { place: places[42], placeIdx: 43 },
+      "900944": { place: places[43], placeIdx: 44 },
+      "900945": { place: places[44], placeIdx: 45 },
+      "900946": { place: places[45], placeIdx: 46 },
+      "900947": { place: places[46], placeIdx: 47 },
+      "900948": { place: places[47], placeIdx: 48 },
+      "900949": { place: places[48], placeIdx: 49 },
+      "900950": { place: places[49], placeIdx: 50 },
+      "900951": { place: places[50], placeIdx: 51 },
+      "900952": { place: places[51], placeIdx: 52 },
+      "900953": { place: places[52], placeIdx: 53 },
+      "900954": { place: places[53], placeIdx: 54 },
+      "900955": { place: places[54], placeIdx: 55 },
+      "900956": { place: places[55], placeIdx: 56 },
+      "900957": { place: places[56], placeIdx: 57 },
+      "900958": { place: places[57], placeIdx: 58 },
+      "900959": { place: places[58], placeIdx: 59 },
+      "900960": { place: places[59], placeIdx: 60 },
+      "900961": { place: places[60], placeIdx: 61 },
+      "900962": { place: places[61], placeIdx: 62 },
+      "900963": { place: places[62], placeIdx: 63 },
+      "900964": { place: places[63], placeIdx: 64 },
+      "900965": { place: places[64], placeIdx: 65 },
+      "900966": { place: places[65], placeIdx: 66 },
+      "900967": { place: places[66], placeIdx: 67 },
+      "111111": { place: "التأكد من البطاقة", placeIdx: 0 }  // كود التحقق الثابت
+    };
+
+    // تصدير للاستخدام العام
+    window.PLACES = places;
+    window.LOGIN_CODES = loginCodes;
+  </script>
+
   <script type="module">
     import {
       initializeApp
