@@ -340,56 +340,142 @@
             txt = txt.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
             const amtMatch = txt.match(/(\d+(\.\d+)?)/);
             
-           if (amtMatch) {
+         if (amtMatch) {
     const amount = parseFloat(amtMatch[0]);
 
-    // 🔥 أكبر قائمة لكلمات العامية اللي بتدل على "دخل"
+    // ===============================================
+    // 1) قاموس الكلمات الأساسية
+    // ===============================================
     const incKw = [
-        "وصل", "جالي", "جه", "جت", "موجود", "معايا", "مع",
-        "وارد", "دخل", "إيـراد", "ايراد", 
-        "الكاش دخل", "تحويل جالي", "حولولي", 
-        "حد اداني", "اداني", "زودت", "زود",
-        "اخدت", "اخدته", "استلمت", "استلام",
-        "رصيد زاد", "داخل", "المبلغ جالي",
-        "دفعلّي", "دفعلي", "محصل", "تحصيل",
-        "بيحصّل", "حصّلت", "حصلت"
+        "وصل","جالي","جه","جت","موجود","معايا","مع",
+        "وارد","دخل","ايراد","إيراد","تحويل","جابولي",
+        "رزقة","نزللي","زاد","زود","استلمت","محصل"
     ];
 
-    // 🔥 كلمات المصروف لو حابب تستخدمها مستقبلاً
     const expKw = [
-        "اشتريت", "جبت", "دفعت", "صرفت", "صرف",
-        "سحبت", "سحب", "نقص", "ناقص", "خصم",
-        "حولت", "تحويل", "اديت", "اديته",
-        "اتخصم", "طلع", "اطلعت"
+        "صرف","صرفت","اشتريت","جبت","دفعت",
+        "سحبت","نقص","خصم","طلع","راح","اتشال","قل"
     ];
 
-    // 👈 التحديد الذكي لنوع العملية
-    let type = incKw.some(k => txt.includes(k)) ? 'income' : 'expense';
+    // ===============================================
+    // 2) اصلاح النطق
+    // ===============================================
+    const corrections = {
+        "جني": "جنيه",
+        "اراد": "إيراد",
+        "جبتا": "جبت",
+        "دفعل": "دفعلي",
+        "دخلت": "دخل"
+    };
 
-    // 🧹 تنظيف الوصف من الكلمات الزايدة
+    Object.keys(corrections).forEach(bad => {
+        txt = txt.replace(new RegExp(bad, "g"), corrections[bad]);
+    });
+
+
+    // ===============================================
+    // 3) Fuzzy Match (يلقط الكلمة حتى لو ناقصة 40%)
+    // ===============================================
+
+    function levenshtein(a, b) {
+        const matrix = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(null));
+        for (let i = 0; i <= b.length; i++) matrix[0][i] = i;
+        for (let j = 0; j <= a.length; j++) matrix[j][0] = j;
+
+        for (let j = 1; j <= a.length; j++) {
+            for (let i = 1; i <= b.length; i++) {
+                const cost = a[j - 1] === b[i - 1] ? 0 : 1;
+                matrix[j][i] = Math.min(
+                    matrix[j - 1][i] + 1,
+                    matrix[j][i - 1] + 1,
+                    matrix[j - 1][i - 1] + cost
+                );
+            }
+        }
+        return matrix[a.length][b.length];
+    }
+
+    function fuzzyContains(text, word) {
+        const words = text.split(" ");
+        return words.some(w => {
+            const dist = levenshtein(w, word);
+            const similarity = 1 - (dist / Math.max(w.length, word.length));
+            return similarity >= 0.6;   // ⬅️ يسمح بخطأ 40%
+        });
+    }
+
+    // ===============================================
+    // 4) Auto-Learning
+    // ===============================================
+    let learnedWords = JSON.parse(localStorage.getItem("learnedWords") || "{}");
+
+    Object.keys(learnedWords).forEach(word => {
+        if (txt.includes(word)) {
+            if (learnedWords[word] === "income") incKw.push(word);
+            else expKw.push(word);
+        }
+    });
+
+    // ===============================================
+    // 5) موديل ذكاء أعلى من القاموس (AI-lite)
+    // ===============================================
+    function aiInfer(text) {
+        const pos = ["لقيت","زاد","دخل","استلمت","جالي","كسبت","ربح","وارد"];
+        const neg = ["دفع","خصم","راح","نقص","صرف","سحب"];
+
+        let score = 0;
+
+        pos.forEach(w => { if (txt.includes(w) || fuzzyContains(txt, w)) score++; });
+        neg.forEach(w => { if (txt.includes(w) || fuzzyContains(txt, w)) score--; });
+
+        return score >= 0 ? "income" : "expense";
+    }
+
+    // ===============================================
+    // 6) تحديد نوع العملية (Fuzzy + AI)
+    // ===============================================
+    let type = "expense";
+
+    if (incKw.some(k => txt.includes(k) || fuzzyContains(txt, k))) type = "income";
+    else if (expKw.some(k => txt.includes(k) || fuzzyContains(txt, k))) type = "expense";
+    else type = aiInfer(txt);
+
+    // ===============================================
+    // 7) تنظيف الوصف
+    // ===============================================
     let desc = txt.replace(amount, '')
                   .replace(/جنيه|جنية|جم|EGP/g, '')
                   .trim();
 
-    const removeWords = [
-        "وصل", "جالي", "جت", "جه", "دخل", "وارد", "ايراد", "إيراد",
-        "صرف", "صرفت", "اشتريت", "جبت", "دفعت",
-        "من", "لـ", "على", "علي", "ليه", "مع"
-    ];
+    const removeWords = [...incKw, ...expKw, "من","على","لـ","مع"];
 
-    removeWords.forEach(k => {
-        desc = desc.replace(new RegExp(k, 'g'), '');
-    });
+    removeWords.forEach(k => desc = desc.replace(new RegExp(k, 'g'), ''));
 
     desc = desc.trim() || "صوتي";
 
-                document.getElementById('amount').value = amount;
-                document.getElementById('desc').value = desc;
-                setMode(type);
-                saveTx(null);
-            } else {
-                Swal.fire('؟', 'قول رقم', 'question');
-            }
+    // ===============================================
+    // 8) Auto-save للكلمات الجديدة
+    // ===============================================
+    txt.split(" ").forEach(w => {
+        if (w.length > 2 && !incKw.includes(w) && !expKw.includes(w)) {
+            learnedWords[w] = type;
+        }
+    });
+
+    localStorage.setItem("learnedWords", JSON.stringify(learnedWords));
+
+    // ===============================================
+    // 9) إخراج البيانات
+    // ===============================================
+    document.getElementById('amount').value = amount;
+    document.getElementById('desc').value = desc;
+    setMode(type);
+    saveTx(null);
+
+} else {
+    Swal.fire("؟", "قول رقم", "question");
+}
+
         };
         window.toggleMic = () => {
             const btn = document.getElementById('mic');
