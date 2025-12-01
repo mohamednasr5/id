@@ -7,6 +7,7 @@
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -42,10 +43,64 @@
         .btn-icon:hover { transform: scale(1.05); background: var(--primary); color: white; }
         .btn-icon:active { transform: scale(0.95); }
 
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
-        .stat-card { background: var(--surface); padding: 15px 5px; border-radius: 15px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .stat-label { font-size: 0.75rem; color: #94a3b8; margin-bottom: 5px; }
-        .stat-val { font-size: 1.3rem; font-weight: 800; }
+        /* Stats Grid - محسّنة */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        
+        .stat-card { 
+            background: var(--surface); 
+            padding: 20px 15px; 
+            border-radius: 16px; 
+            text-align: center; 
+            position: relative; 
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+
+        .stat-card.income { border-color: var(--success); background: linear-gradient(135deg, rgba(16,185,129,0.05), rgba(16,185,129,0.02)); }
+        .stat-card.expense { border-color: var(--danger); background: linear-gradient(135deg, rgba(239,68,68,0.05), rgba(239,68,68,0.02)); }
+        .stat-card.net { border-color: var(--primary); background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(99,102,241,0.02)); }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, currentColor, transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+
+        .stat-icon { font-size: 1.8rem; margin-bottom: 8px; }
+        .stat-label { font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .stat-val { 
+            font-size: 2rem; 
+            font-weight: 900; 
+            font-family: 'Roboto', monospace;
+            letter-spacing: 1px;
+            animation: countUp 0.6s ease-out;
+        }
+
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .stat-val.income { color: var(--success); }
+        .stat-val.expense { color: var(--danger); }
+        .stat-val.net { color: var(--primary); }
 
         .input-box { background: var(--surface); padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; transition: 0.3s; }
         .input-box.hidden { display: none; }
@@ -83,8 +138,7 @@
         .rec-info h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
         .rec-date { font-size: 0.75rem; color: #94a3b8; display: flex; gap: 5px; align-items: center; }
 
-        .rec-amt { font-weight: 800; font-size: 1.1rem; min-width: 80px; text-align: left; }
-        .rec-amt.edit-mode { background: var(--bg); padding: 5px 8px; border-radius: 6px; border: 1px solid #e2e8f0; }
+        .rec-amt { font-weight: 800; font-size: 1.1rem; min-width: 80px; text-align: left; font-family: 'Roboto', monospace; }
 
         .mic-container { position: fixed; bottom: 30px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 100; }
         .mic-btn { width: 75px; height: 75px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); font-size: 2rem; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
@@ -102,6 +156,7 @@
         @media (max-width: 480px) {
             .container { padding: 0; }
             .stats-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+            .stat-val { font-size: 1.6rem; }
             .record { padding: 10px; gap: 10px; }
             .rec-amt { font-size: 1rem; min-width: 70px; }
         }
@@ -130,7 +185,7 @@
                 <i class="fa-solid fa-moon"></i>
             </button>
 
-            <button class="btn-icon" onclick="deleteAllRecords()" title="حذف الكل">
+            <button class="btn-icon" onclick="deleteAllRecordsPrompt()" title="حذف الكل">
                 <i class="fa-solid fa-trash" style="color:#ef4444"></i>
             </button>
         </div>
@@ -146,21 +201,24 @@
         </button>
     </div>
 
-    <!-- Stats -->
+    <!-- Stats - محسّنة -->
     <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-label">وارد</div>
-            <div class="stat-val" style="color:var(--success)" id="totalInc">0</div>
+        <div class="stat-card income">
+            <div class="stat-icon">✓</div>
+            <div class="stat-label">الدخل</div>
+            <div class="stat-val income" id="totalInc">0</div>
         </div>
 
-        <div class="stat-card">
-            <div class="stat-label">مصروف</div>
-            <div class="stat-val" style="color:var(--danger)" id="totalExp">0</div>
+        <div class="stat-card expense">
+            <div class="stat-icon">✕</div>
+            <div class="stat-label">المصروفات</div>
+            <div class="stat-val expense" id="totalExp">0</div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card net">
+            <div class="stat-icon">=</div>
             <div class="stat-label">الصافي</div>
-            <div class="stat-val" style="color:var(--primary)" id="netBal">0</div>
+            <div class="stat-val net" id="netBal">0</div>
         </div>
     </div>
 
@@ -311,18 +369,99 @@ async function AI_GetNames(text) {
    5) القاموس المصري
 ================================ */
 const EG_DICT = {
-    income_phrases: ["خدت من", "اخدت من", "استلمت من", "قبضت من", "جالي من"],
-    income_words: ["خدت", "اخدت", "جالي", "دخل", "وارد", "ايراد", "ربح"],
-    expense_phrases: ["خد مني", "اخد مني", "دفعت ل", "صرفت في"],
-    expense_words: ["صرف", "صرفت", "طلع", "خرج", "دفعت", "مصروف"],
-    delete_words: ["امسح", "احذف", "اشطب", "بلاش"],
-    delete_last_words: ["اخر", "الاخيرة", "الاخر", "بلاشي"],
+
+    /* ======================================================
+       1) عبارات الدخل — الأكثر شيوعًا + توسعات ذكية
+    ====================================================== */
+    income_phrases: [
+        "خدت من", "اخدت من", "جالي من", "وصلني من",
+        "استلمت من", "اداني", "ادتهالي", "جاتلي", "جتلي",
+        "دهالي", "جابلي", "جاب لي", "حولي", "تحويل جالي",
+        "دخللي", "دخل لي", "وصل", "وصلي", "جالي", "جه ليا",
+        "دفعولي", "دفع لي", "دوني", "استخلاص", "حصيلة",
+        "ايراد جالي", "عمولة جت", "قبضت", "استلام فلوس",
+        "العربية دخلت", "الفلوس جات", "الرزق جه"
+    ],
+
+    /* ======================================================
+       2) كلمات الدخل — مرنة وتلتقط كلمات غير كاملة
+    ====================================================== */
+    income_words: [
+        "خدت", "اخدت", "استلمت", "وصلني", "جالي", "جه",
+        "دخل", "وارد", "ايراد", "ايرادات", "كسبت", "ربح",
+        "كسب", "عمولة", "محصل", "حول", "حولي", "وصل",
+        "قبض", "قبضت", "استلام", "محصّل", "محصلة"
+    ],
+
+    /* ======================================================
+       3) عبارات المصروف — تشمل العامي والتصرفات والأخطاء اللفظية
+    ====================================================== */
+    expense_phrases: [
+        "صرفت في", "دفعت في", "دفعت ل", "اديته", "اديت",
+        "دفعت", "خسرت", "خرجت", "طلع مني", "طلع ل",
+        "صرفته", "صرفتها", "حطيت في", "ديت ل", "ديتله",
+        "دفعت عليه", "اكلت مني", "راحت ل", "راحت مني",
+        "طارت فلوس", "فلوسي راحت", "دفعت من جيبي",
+        "خدت مني", "اشترت", "اشتريت", "جبت", "جاب",
+        "العربية خرجت", "الفلوس خرجت", "اتسحبت", "اتخصمت"
+    ],
+
+    /* ======================================================
+       4) كلمات المصروف السريعة المنتشرة في الكلام
+    ====================================================== */
+    expense_words: [
+        "صرف", "صرفت", "طلع", "خرج", "خصم", "دفع", "دفعت",
+        "مصروف", "شراء", "اشتريت", "جبت", "اتخصم", "خصموا",
+        "سحب", "سحبوا", "سحبت"
+    ],
+
+    /* ======================================================
+       5) أوامر الحذف (ذكاء أعلى)
+    ====================================================== */
+    delete_words: [
+        "امسح", "احذف", "اشطب", "شيل", "لغيه", "بلاش ده",
+        "امسحه", "احذف العملية", "احذف دي", "شيل اخر حاجة"
+    ],
+
+    delete_last_words: [
+        "اخر", "الاخيرة", "الاخر", "اخر عملية", "اخر واحدة",
+        "اللي فاتت", "اللي قبل دي", "قبل كده", "اللي فوق"
+    ],
+
+    delete_all_words: [
+        "مسح كل شيء", "احذف الكل", "حذف الجميع", "امسح السجل",
+        "احذف السجل", "صفر", "صفر الكل", "صفر البيانات",
+        "شيل كل حاجة", "امسح كله"
+    ],
+
+    /* ======================================================
+       6) توسيع فهم الأرقام الشعبية المصرية
+    ====================================================== */
     numbers: {
-        "واحد":1, "اتنين":2, "تلاتة":3, "اربعة":4, "خمسة":5, "ستة":6,
-        "سبعة":7, "تمانية":8, "تسعة":9, "عشرة":10, "مية":100, "الف":1000
+        "واحد":1, "اتنين":2, "تلاتة":3, "اربعة":4, "خمسة":5,
+        "ستة":6, "سبعة":7, "تمانية":8, "تسعة":9, "عشرة":10,
+        "حداشر":11, "اتناشر":12,
+        "عشرين":20, "تلاتين":30, "اربعين":40,
+        "خمسين":50, "ستين":60, "سبعين":70, "تمانين":80, "تسعين":90,
+        "مية":100, "ميه":100, "مية وخمسين":150,
+        "ميتين":200, "ثلاثمية":300, "تلتومية":300,
+        "ربعميت":400, "خمسمية":500,
+        "الف":1000, "ألف":1000,
+        "الفين":2000, "تلتلاف":3000, "اربعلاف":4000,
+        "نص":0.5, "نصهم":0.5, "ربع":0.25, "ثلث":0.333
     },
-    stopwords: ["جنيه","جنية","دولار","ريال","من","الى","لـ","لي","في","على","مع"]
+
+    /* ======================================================
+       7) الكلمات اللي يتم حذفها من الوصف
+    ====================================================== */
+    stopwords: [
+        "جنيه", "جنية", "جنيهات",
+        "دولار", "ريال", "يورو",
+        "من", "الى", "إلى", "لـ", "لي", "ل", "في", "على", "عن", "مع",
+        "كذا", "كذا كذا", "بتوع", "بتاعة", "بتاع"
+    ]
 };
+
 
 
 /* ================================
@@ -370,25 +509,29 @@ window.clearSearch = () => {
 };
 
 
-window.deleteAllRecords = async () => {
+/* ================================
+   7) دالة Delete All مع كلمة السر
+================================ */
+window.deleteAllRecordsPrompt = async () => {
     const { value: password } = await Swal.fire({
         title: "حذف جميع السجلات",
         input: "password",
         inputPlaceholder: "أدخل كلمة المرور",
         showCancelButton: true,
-        confirmButtonText: "تأكيد",
-        cancelButtonText: "إلغاء"
+        confirmButtonText: "التالي",
+        cancelButtonText: "إلغاء",
+        confirmButtonColor: "var(--primary)"
     });
 
     if (password === "521988") {
         const { isConfirmed } = await Swal.fire({
             title: "تنبيه",
-            text: "هل أنت متأكد من حذف جميع السجلات؟",
+            html: `<strong style="color:var(--danger); font-size:1.2rem;">هل أنت متأكد من حذف جميع السجلات؟</strong><br><small style="color:#94a3b8;">هذه العملية لا يمكن التراجع عنها</small>`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonText: "نعم، احذف الكل",
             cancelButtonText: "إلغاء",
-            confirmButtonColor: "#ef4444"
+            confirmButtonColor: "var(--danger)"
         });
 
         if (isConfirmed) {
@@ -396,7 +539,7 @@ window.deleteAllRecords = async () => {
             await remove(ref(db, "expenses"));
             Swal.fire({
                 icon: "success",
-                title: "تم حذف جميع السجلات",
+                title: "✓ تم حذف جميع السجلات",
                 timer: 1500,
                 showConfirmButton: false
             });
@@ -404,7 +547,7 @@ window.deleteAllRecords = async () => {
     } else if (password) {
         Swal.fire({
             icon: "error",
-            title: "كلمة المرور غير صحيحة",
+            title: "✕ كلمة المرور غير صحيحة",
             timer: 1500,
             showConfirmButton: false
         });
@@ -413,7 +556,7 @@ window.deleteAllRecords = async () => {
 
 
 /* ================================
-   7) حفظ عملية
+   8) حفظ عملية
 ================================ */
 window.saveTx = async (e) => {
     if (e) e.preventDefault();
@@ -451,7 +594,7 @@ window.saveTx = async (e) => {
 
 
 /* ================================
-   8) عرض البيانات
+   9) عرض البيانات مع Animation
 ================================ */
 onValue(ref(db), (snap) => {
     records = [];
@@ -473,7 +616,6 @@ onValue(ref(db), (snap) => {
 function render() {
     let data = records;
 
-    // تطبيق البحث
     if (searchTerm) {
         data = data.filter(r =>
             r.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -481,7 +623,6 @@ function render() {
         );
     }
 
-    // تطبيق الفلتر
     if (filter !== "all") {
         data = data.filter(r => r.type === filter);
     }
@@ -492,9 +633,12 @@ function render() {
     const exp = records.filter(r => r.type==="expense")
                        .reduce((s,r)=>s+r.amount,0);
 
-    document.getElementById("totalInc").innerText = inc.toLocaleString('ar-EG');
-    document.getElementById("totalExp").innerText = exp.toLocaleString('ar-EG');
-    document.getElementById("netBal").innerText = (inc - exp).toLocaleString('ar-EG');
+    const net = inc - exp;
+
+    // تحديث الأرقام بـ Animation
+    animateNumber("totalInc", inc);
+    animateNumber("totalExp", exp);
+    animateNumber("netBal", net);
 
     const list = document.getElementById("list");
     list.innerHTML = "";
@@ -525,7 +669,7 @@ function render() {
                 </div>
             </div>
             <div class="rec-amt" style="color:${r.type==='income'?'var(--success)':'var(--danger)'}">
-                ${r.type==='income'?'+':'-'}${Number(r.amount).toLocaleString('ar-EG')}
+                ${r.type==='income'?'+':'-'}${Number(r.amount).toLocaleString('en-US', {minimumFractionDigits: 2})}
             </div>
         `;
 
@@ -533,14 +677,26 @@ function render() {
     });
 }
 
+// دالة التحريك للأرقام
+function animateNumber(elementId, targetValue) {
+    const el = document.getElementById(elementId);
+    el.classList.remove("income", "expense", "net");
+    
+    if (elementId === "totalInc") el.classList.add("income");
+    else if (elementId === "totalExp") el.classList.add("expense");
+    else el.classList.add("net");
+
+    el.textContent = Number(targetValue).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
 
 /* ================================
-   9) إدارة عملية واحدة
+   10) إدارة عملية واحدة
 ================================ */
 window.manageRecord = async (r) => {
     const { isDenied, isConfirmed } = await Swal.fire({
         title: r.description,
-        html: `<strong style="font-size:1.3rem;">${Number(r.amount).toLocaleString('ar-EG')}</strong> جنيه`,
+        html: `<strong style="font-size:1.3rem;">${Number(r.amount).toLocaleString('en-US', {minimumFractionDigits: 2})}</strong> جنيه`,
         showDenyButton: true,
         showCancelButton: true,
         confirmButtonText: "تعديل",
@@ -586,7 +742,7 @@ window.manageRecord = async (r) => {
 
 
 /* ================================
-   10) استخراج مبلغ
+   11) استخراج مبلغ
 ================================ */
 function normalizeText(text) {
     return text.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
@@ -605,7 +761,7 @@ function extractAmount(text) {
 
 
 /* ================================
-   11) تحديد نوع العملية
+   12) تحديد نوع العملية
 ================================ */
 function detectTransactionType(text) {
     for (let p of EG_DICT.expense_phrases)
@@ -630,7 +786,7 @@ function detectTransactionType(text) {
 
 
 /* ================================
-   12) تنظيف الوصف
+   13) تنظيف الوصف
 ================================ */
 function cleanDescription(text, type) {
     let desc = text;
@@ -648,7 +804,7 @@ function cleanDescription(text, type) {
 
 
 /* ================================
-   13) نظام الصوت
+   14) نظام الصوت
 ================================ */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -697,7 +853,7 @@ if (SR) {
 
 
 /* ================================
-   14) معالجة الأوامر (الذكاء الكامل)
+   15) معالجة الأوامر (الذكاء الكامل)
 ================================ */
 async function processCommand(text) {
     text = normalizeText(text);
@@ -705,6 +861,14 @@ async function processCommand(text) {
 
     const intent = await AI_GetIntent(text);
     const names = await AI_GetNames(text);
+
+    // أوامر حذف الكل
+    for (let phrase of EG_DICT.delete_all_words) {
+        if (text.includes(phrase)) {
+            await deleteAllRecordsPrompt();
+            return;
+        }
+    }
 
     // أوامر البحث
     const searchKeywords = ["بحث", "ابحث", "دور", "شوف", "شوفلي", "حساب"];
@@ -726,12 +890,6 @@ async function processCommand(text) {
         return;
     }
 
-    // حذف السجل كاملة
-    if (text.includes("امسح السجل كامل") || text.includes("احذف السجل كامل")) {
-        await deleteAllRecords();
-        return;
-    }
-
     // حذف آخر عملية
     const deleteLastKeywords = ["امسح", "احذف", "اشطب"];
     const lastKeywords = ["اخر", "الاخيرة", "الاخر", "بلاشي", "اخر حاجة", "الاخيرة"];
@@ -741,7 +899,7 @@ async function processCommand(text) {
             const last = records[0];
             const { isConfirmed } = await Swal.fire({
                 title: "حذف آخر عملية",
-                html: `<strong>${last.description}</strong><br>${Number(last.amount).toLocaleString('ar-EG')} جنيه`,
+                html: `<strong>${last.description}</strong><br>${Number(last.amount).toLocaleString('en-US', {minimumFractionDigits: 2})} جنيه`,
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonText: "حذف",
@@ -780,13 +938,145 @@ async function processCommand(text) {
 
         Swal.fire({
             icon: type==="income"?"success":"warning",
-            title: type==="income"?"✅ وارد":"⚠️ مصروف",
-            html:`<strong style="font-size:1.2rem;">${Number(amount).toLocaleString('ar-EG')}</strong> جنيه<br><small>${desc}</small>`,
+            title: type==="income"?"✓ وارد":"✕ مصروف",
+            html:`<strong style="font-size:1.2rem;">${Number(amount).toLocaleString('en-US', {minimumFractionDigits: 2})}</strong> جنيه<br><small>${desc}</small>`,
             timer:2000, showConfirmButton:false
         });
 
         setTimeout(() => saveTx(null), 500);
     }
+}
+
+
+/* ================================
+   16) دالة Excel Export محسّنة
+================================ */
+window.exportExcel = async () => {
+    const inc = records.filter(r => r.type==="income");
+    const exp = records.filter(r => r.type==="expense");
+    const incTotal = inc.reduce((s,r)=>s+r.amount,0);
+    const expTotal = exp.reduce((s,r)=>s+r.amount,0);
+    const netTotal = incTotal - expTotal;
+
+    const wb = XLSX.utils.book_new();
+
+    // ==================== جدول الدخل ====================
+    const incomeData = [
+        ["الدخل", "", ""]
+    ];
+    inc.forEach((r, i) => {
+        const date = new Date(r.timestamp).toLocaleDateString('ar-EG');
+        incomeData.push([r.description, r.amount, date]);
+    });
+    incomeData.push(["الإجمالي", incTotal, ""]);
+
+    const incomeWS = XLSX.utils.aoa_to_sheet(incomeData);
+    setExcelStyles(incomeWS, "income", incomeData.length);
+    XLSX.utils.book_append_sheet(wb, incomeWS, "الدخل");
+
+    // ==================== جدول المصروفات ====================
+    const expenseData = [
+        ["المصروفات", "", ""]
+    ];
+    exp.forEach((r, i) => {
+        const date = new Date(r.timestamp).toLocaleDateString('ar-EG');
+        expenseData.push([r.description, r.amount, date]);
+    });
+    expenseData.push(["الإجمالي", expTotal, ""]);
+
+    const expenseWS = XLSX.utils.aoa_to_sheet(expenseData);
+    setExcelStyles(expenseWS, "expense", expenseData.length);
+    XLSX.utils.book_append_sheet(wb, expenseWS, "المصروفات");
+
+    // ==================== جدول الملخص ====================
+    const summaryData = [
+        ["الملخص", ""],
+        ["الدخل الإجمالي", incTotal],
+        ["المصروفات الإجمالية", expTotal],
+        ["الرصيد النهائي", netTotal]
+    ];
+
+    const summaryWS = XLSX.utils.aoa_to_sheet(summaryData);
+    setSummaryStyles(summaryWS);
+    XLSX.utils.book_append_sheet(wb, summaryWS, "الملخص");
+
+    // حفظ الملف
+    const now = new Date();
+    const filename = `النظام_المالي_${now.toLocaleDateString('ar-EG').replace(/\//g, '-')}.xlsx`;
+    XLSX.writeFile(wb, filename);
+
+    Swal.fire({
+        toast: true,
+        icon: "success",
+        title: "تم تصدير الملف",
+        position: "top",
+        timer: 1500,
+        showConfirmButton: false
+    });
+};
+
+// دالة تنسيق جداول الدخل والمصروفات
+function setExcelStyles(ws, type, rowCount) {
+    const color = type === "income" ? "10B981" : "EF4444";
+    const headerColor = type === "income" ? "ECFDF5" : "FEF2F2";
+    const borderStyle = { style: "thick", color: { rgb: color } };
+
+    for (let i = 1; i <= rowCount; i++) {
+        const cellA = ws[`A${i}`];
+        const cellB = ws[`B${i}`];
+        const cellC = ws[`C${i}`];
+
+        if (i === 1) {
+            // Header
+            cellA.fill = { fgColor: { rgb: color }, patternType: "solid" };
+            cellA.font = { bold: true, color: { rgb: "FFFFFF" }, size: 14 };
+            cellA.alignment = { horizontal: "center", vertical: "center" };
+        } else if (i === rowCount) {
+            // Footer (Total)
+            cellA.fill = { fgColor: { rgb: headerColor }, patternType: "solid" };
+            cellB.fill = { fgColor: { rgb: headerColor }, patternType: "solid" };
+            cellA.font = { bold: true, size: 12 };
+            cellB.font = { bold: true, size: 12, color: { rgb: color } };
+        } else {
+            // Data rows
+            cellA.fill = { fgColor: { rgb: headerColor }, patternType: "solid" };
+            cellB.alignment = { horizontal: "right" };
+        }
+
+        // Borders
+        if (cellA) cellA.border = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
+        if (cellB) cellB.border = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
+        if (cellC) cellC.border = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
+    }
+
+    ws["!cols"] = [{ wch: 20 }, { wch: 15 }, { wch: 15 }];
+}
+
+// دالة تنسيق جدول الملخص
+function setSummaryStyles(ws) {
+    const summaryColor = "6366F1";
+    const borderStyle = { style: "thick", color: { rgb: summaryColor } };
+
+    // Header
+    ws["A1"].fill = { fgColor: { rgb: summaryColor }, patternType: "solid" };
+    ws["A1"].font = { bold: true, color: { rgb: "FFFFFF" }, size: 14 };
+    ws["B1"].fill = { fgColor: { rgb: summaryColor }, patternType: "solid" };
+
+    // Data rows
+    for (let i = 2; i <= 5; i++) {
+        const cellA = ws[`A${i}`];
+        const cellB = ws[`B${i}`];
+
+        cellA.fill = { fgColor: { rgb: "F0F4FF" }, patternType: "solid" };
+        cellB.fill = { fgColor: { rgb: "F0F4FF" }, patternType: "solid" };
+        cellA.font = { bold: true, size: 12 };
+        cellB.font = { bold: true, size: 12, color: { rgb: i === 5 ? summaryColor : "000000" } };
+
+        cellA.border = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
+        cellB.border = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
+    }
+
+    ws["!cols"] = [{ wch: 20 }, { wch: 15 }];
 }
 
 </script>
