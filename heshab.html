@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>النظام المالي الذكي | Gemini AI</title>
+    <title>النظام المالي | AI Free</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Roboto:wght@500;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,74 +11,70 @@
 
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-rgb: 99, 102, 241;
-            --success: #10b981;
-            --danger: #ef4444;
-            --bg: #f8fafc;
-            --surface: #ffffff;
-            --text: #1e293b;
+            --primary: #6366f1; --primary-rgb: 99, 102, 241;
+            --success: #10b981; --danger: #ef4444;
+            --bg: #f8fafc; --surface: #ffffff; --text: #1e293b;
         }
-        [data-theme="dark"] {
-            --bg: #0f172a; --surface: #1e293b; --text: #f8fafc;
-        }
+        [data-theme="dark"] { --bg: #0f172a; --surface: #1e293b; --text: #f8fafc; }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
         body { background: var(--bg); color: var(--text); padding: 15px; padding-bottom: 120px; min-height: 100vh; transition: 0.3s; }
         .container { max-width: 600px; margin: 0 auto; }
 
-        /* Header */
+        /* الهيدر */
         .header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 15px 20px; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
         .btn-icon { background: transparent; border: none; width: 45px; height: 45px; border-radius: 12px; font-size: 1.3rem; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
         .btn-icon:hover { background: rgba(var(--primary-rgb), 0.1); transform: translateY(-2px); }
-        
-        /* Stats */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .stat-card { background: var(--surface); padding: 20px 10px; border-radius: 18px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.05); }
-        .stat-icon { font-size: 1.5rem; margin-bottom: 10px; display: inline-block; width: 40px; height: 40px; line-height: 40px; border-radius: 50%; }
+
+        /* البطاقات */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-card { background: var(--surface); padding: 15px 5px; border-radius: 18px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.05); }
+        .stat-icon { font-size: 1.4rem; margin-bottom: 8px; display: inline-block; width: 35px; height: 35px; line-height: 35px; border-radius: 50%; }
         .income .stat-icon { background: rgba(16,185,129,0.1); color: var(--success); }
         .expense .stat-icon { background: rgba(239,68,68,0.1); color: var(--danger); }
         .net .stat-icon { background: rgba(99,102,241,0.1); color: var(--primary); }
-        .stat-label { font-size: 0.8rem; color: #64748b; font-weight: 700; }
-        .stat-val { font-size: 1.6rem; font-weight: 800; font-family: 'Roboto', sans-serif; }
+        .stat-label { font-size: 0.75rem; color: #64748b; font-weight: 700; }
+        .stat-val { font-size: 1.4rem; font-weight: 800; font-family: 'Roboto', sans-serif; }
         .stat-val.income { color: var(--success); } .stat-val.expense { color: var(--danger); } .stat-val.net { color: var(--primary); }
-        
-        /* Inputs */
+
+        /* النموذج */
+        .toggle-input-btn { width: 100%; background: linear-gradient(135deg, var(--primary), #4f46e5); color: white; padding: 15px; border-radius: 16px; border: none; cursor: pointer; font-weight: 700; font-size: 1.1rem; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 5px 15px rgba(99,102,241,0.3); }
         .input-box { background: var(--surface); padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .input-box.hidden { display: none; }
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; background: var(--bg); padding: 5px; border-radius: 16px; }
-        .tab { flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; background: transparent; color: #94a3b8; }
+        .tab { flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; background: transparent; color: #94a3b8; transition: 0.2s; }
         .tab.active { background: var(--surface); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .tab.active.inc { color: var(--success); } .tab.active.exp { color: var(--danger); }
+        
         .input-group { position: relative; margin-bottom: 15px; }
         .input-group input { width: 100%; padding: 16px 50px 16px 20px; border: 2px solid var(--bg); border-radius: 16px; font-size: 1.1rem; background: var(--bg); color: var(--text); font-weight: 600; }
         .input-group i { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
-        .save-btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        
-        /* Records */
+        .save-btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .save-btn:hover { transform: translateY(-2px); }
+
+        /* القائمة */
         .filter-btns { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .filter-btn { padding: 8px 20px; border-radius: 20px; border: 1px solid transparent; background: rgba(148, 163, 184, 0.1); color: var(--text); font-weight: 700; cursor: pointer; white-space: nowrap; }
+        .filter-btn { padding: 8px 20px; border-radius: 20px; border: 1px solid transparent; background: rgba(148, 163, 184, 0.1); color: var(--text); font-weight: 700; cursor: pointer; white-space: nowrap; transition: 0.2s; }
         .filter-btn.active { background: var(--text); color: var(--bg); }
-        .record { background: var(--surface); padding: 15px; border-radius: 16px; display: flex; align-items: center; gap: 15px; margin-bottom: 12px; cursor: pointer; border: 1px solid rgba(0,0,0,0.03); position: relative; overflow: hidden; }
+        
+        .record { background: var(--surface); padding: 15px; border-radius: 16px; display: flex; align-items: center; gap: 15px; margin-bottom: 12px; cursor: pointer; border: 1px solid rgba(0,0,0,0.03); position: relative; overflow: hidden; transition: 0.2s; }
+        .record:hover { transform: translateX(-5px); }
         .record::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 6px; }
         .record.inc::before { background: var(--success); } .record.exp::before { background: var(--danger); }
         .rec-info h4 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
         .rec-date { font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
         .rec-amt { font-weight: 900; font-size: 1.2rem; margin-right: auto; font-family: 'Roboto', sans-serif; }
-        
-        /* Mic & Key */
-        .toggle-input-btn { width: 100%; background: linear-gradient(135deg, var(--primary), #4f46e5); color: white; padding: 15px; border-radius: 16px; border: none; cursor: pointer; font-weight: 700; font-size: 1.1rem; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .mic-container { position: fixed; bottom: 30px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 100; pointer-events: none; }
-        .mic-btn { pointer-events: auto; width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; border: none; box-shadow: 0 10px 30px rgba(225, 29, 72, 0.4); font-size: 1.8rem; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.3s; }
-        .mic-btn.listening { animation: pulse 1.5s infinite; background: #22c55e; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
-        
+
+        /* الذكاء والصوت */
         .ai-status { position: fixed; top: 110px; left: 50%; transform: translateX(-50%); background: rgba(15,23,42,0.95); backdrop-filter: blur(10px); color: white; padding: 12px 25px; border-radius: 50px; display: none; z-index: 999; font-weight: 600; align-items: center; gap: 10px; white-space: nowrap; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .ai-status.active { display: flex; animation: slideDown 0.3s; }
         .spinner { width: 18px; height: 18px; border: 3px solid #fff; border-bottom-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        .key-btn { width: 32px; height: 32px; border-radius: 50%; background: rgba(99,102,241,0.1); border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; color: var(--primary); font-size: 0.9rem; transition: 0.2s; }
-        .key-btn:hover { background: var(--primary); color: white; }
+
+        .mic-container { position: fixed; bottom: 30px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 100; pointer-events: none; }
+        .mic-btn { pointer-events: auto; width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; border: none; box-shadow: 0 10px 30px rgba(225, 29, 72, 0.4); font-size: 1.8rem; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.3s; }
+        .mic-btn.listening { animation: pulse 1.5s infinite; background: #22c55e; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
     </style>
 </head>
 <body>
@@ -87,16 +83,11 @@
     <div class="header">
         <div style="display:flex; align-items:center; gap:12px;">
             <div style="width:45px; height:45px; background:rgba(99,102,241,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center;">
-                <i class="fa-solid fa-robot" style="color:var(--primary); font-size:1.4rem;"></i>
+                <i class="fa-solid fa-brain" style="color:var(--primary); font-size:1.4rem;"></i>
             </div>
             <div>
                 <h2 style="font-weight:900; font-size:1.2rem; margin-bottom:2px;">المالية الذكية</h2>
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:0.75rem; color:#64748b; font-weight:600;">الحاج أحمد شطا</span>
-                    <button class="key-btn" onclick="askForApiKey()" title="إدخال مفتاح API">
-                        <i class="fa-solid fa-key"></i>
-                    </button>
-                </div>
+                <span style="font-size:0.75rem; color:#64748b; font-weight:600;">الحاج أحمد شطا</span>
             </div>
         </div>
         <div style="display:flex; gap:5px;">
@@ -184,36 +175,7 @@ const app = initializeApp({
 const db = getDatabase(app);
 
 // =============================================
-// 1. إدارة مفتاح API (Secure)
-// =============================================
-let USER_GEMINI_KEY = localStorage.getItem("gemini_key_secure");
-
-window.askForApiKey = async () => {
-    const { value: key } = await Swal.fire({
-        title: 'إعداد مفتاح Gemini',
-        input: 'text',
-        inputLabel: 'أدخل مفتاح API الذي نسخته',
-        inputValue: USER_GEMINI_KEY || "",
-        inputPlaceholder: 'AIzaSy...',
-        text: 'سيتم حفظه في جهازك فقط.',
-        showCancelButton: true,
-        confirmButtonText: 'حفظ وبدء الاستخدام',
-        confirmButtonColor: 'var(--primary)'
-    });
-
-    if (key) {
-        localStorage.setItem("gemini_key_secure", key.trim());
-        USER_GEMINI_KEY = key.trim();
-        Swal.fire({icon: 'success', title: 'تم الحفظ', timer: 1500, showConfirmButton: false});
-    }
-};
-
-if (!USER_GEMINI_KEY) {
-    setTimeout(askForApiKey, 1500);
-}
-
-// =============================================
-// 2. Logic
+// المتغيرات والتهيئة
 // =============================================
 let mode = "income";
 let records = [];
@@ -244,6 +206,9 @@ window.toggleInputForm = () => {
     document.getElementById("inputBox").classList.toggle("hidden");
 };
 
+// =============================================
+// Firebase Data Handling
+// =============================================
 window.saveTx = async (e, directData = null) => {
     if (e) e.preventDefault();
     let amt, txt, type;
@@ -297,6 +262,7 @@ function render() {
     const exp = records.filter(r => r.type==="expense").reduce((s,r)=>s+r.amount,0);
     const net = inc - exp;
 
+    // عرض الأرقام بدون كسور
     document.getElementById("totalInc").innerText = inc.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
     document.getElementById("totalExp").innerText = exp.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
     document.getElementById("netBal").innerText = net.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
@@ -329,7 +295,7 @@ function render() {
 }
 
 // =============================================
-// 4. الذكاء الاصطناعي (Gemini Pro) - FIXED
+// AI Function (Pollinations.ai) - Free, No Key
 // =============================================
 function setAIStatus(msg, isLoading = false) {
     const el = document.getElementById("aiStatus");
@@ -344,61 +310,39 @@ function setAIStatus(msg, isLoading = false) {
     }
 }
 
-async function analyzeTextWithGemini(text) {
-    if (!USER_GEMINI_KEY) {
-        Swal.fire({icon: "warning", title: "مطلوب مفتاح API", text: "اضغط على زر المفتاح لإدخاله أولاً."});
-        askForApiKey();
-        setAIStatus(null);
-        return null;
-    }
-
+async function analyzeTextWithAI(text) {
     setAIStatus("جاري تحليل الكلام...", true);
 
-    // استخدام gemini-pro لحل مشكلة Not Found
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${USER_GEMINI_KEY}`;
+    // Prompt مهيأ ليستخرج JSON بدقة
+    const prompt = `You are a financial API. Analyze this Arabic text: "${text}".
+    Extract: 
+    - amount (number only)
+    - description (Arabic text, remove numbers)
+    - type (either 'income' or 'expense')
     
-    const prompt = `
-        You are a smart financial assistant. 
-        Analyze this Arabic sentence: "${text}".
-        Extract: 
-        1. 'amount' (number, ignore currency text).
-        2. 'description' (clean Arabic text).
-        3. 'type' (income or expense).
-        
-        Rules:
-        - "صرفت", "اشتريت", "دفعت", "جبت" -> expense.
-        - "قبضت", "خدت", "جالي", "استلمت" -> income.
-        
-        Return RAW JSON ONLY. No markdown.
-        Example: {"amount": 50, "description": "بنزين", "type": "expense"}
-    `;
+    Rules:
+    - Income: قبضت, خدت, جالي, وارد, مكسب
+    - Expense: دفعت, صرفت, اشتريت, جبت, خرج
+    
+    Return ONLY valid JSON. No markdown. Example: {"amount": 50, "description": "بنزين", "type": "expense"}`;
 
     try {
-        const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        // استخدام خدمة Pollinations المجانية (تعمل كبروكسي لـ GPT)
+        const response = await fetch('https://text.pollinations.ai/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain',
+            },
+            body: prompt
         });
 
-        if (!response.ok) {
-            const errData = await response.json();
-            console.error("Gemini Error:", errData);
-            let msg = "خطأ في الاتصال";
-            if (errData.error?.message) msg = errData.error.message;
-            if (errData.error?.status === 'PERMISSION_DENIED') msg = "مفتاح API غير صحيح";
-            
-            Swal.fire({icon: 'error', title: 'خطأ', text: msg});
-            setAIStatus(null);
-            return null;
-        }
-
-        const data = await response.json();
-        let aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!response.ok) throw new Error("Network error");
         
-        if (!aiText) throw new Error("Empty response");
-
-        // تنظيف JSON
+        let aiText = await response.text();
+        
+        // تنظيف النص المستلم
         aiText = aiText.replace(/```json/g, "").replace(/```/g, "").trim();
+        
         const start = aiText.indexOf('{');
         const end = aiText.lastIndexOf('}');
         if (start !== -1 && end !== -1) {
@@ -410,15 +354,19 @@ async function analyzeTextWithGemini(text) {
         return result;
 
     } catch (error) {
-        console.error("Parsing Error:", error);
-        Swal.fire({icon: 'error', title: 'عفواً', text: "لم أستطع فهم الجملة. حاول مرة أخرى."});
+        console.error("AI Error:", error);
+        Swal.fire({
+            icon: 'error', 
+            title: 'خطأ', 
+            text: 'لم أتمكن من تحليل الجملة، حاول مرة أخرى.'
+        });
         setAIStatus(null);
         return null;
     }
 }
 
 // =============================================
-// 5. الصوت
+// Voice Logic
 // =============================================
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (SR) {
@@ -440,17 +388,13 @@ if (SR) {
         const text = e.results[e.results.length-1][0].transcript;
         setAIStatus(`سمعت: "${text}"`, true);
         
-        const data = await analyzeTextWithGemini(text);
+        const data = await analyzeTextWithAI(text);
         if (data && data.amount) {
             await saveTx(null, data);
         }
     };
 
     window.toggleMic = () => {
-        if (!USER_GEMINI_KEY) {
-            askForApiKey();
-            return;
-        }
         isListening ? rec.stop() : rec.start();
     };
 } else {
@@ -458,7 +402,7 @@ if (SR) {
 }
 
 // =============================================
-// 6. Tools
+// Tools (Delete, Edit, Excel)
 // =============================================
 window.manageRecord = async (r) => {
     const { isDenied, isConfirmed } = await Swal.fire({
