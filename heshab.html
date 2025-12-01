@@ -79,6 +79,12 @@
         /* Mic Button */
         .mic-btn { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; border: 4px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-size: 1.8rem; cursor: pointer; z-index: 100; display: flex; justify-content: center; align-items: center; transition: 0.3s; }
         .mic-btn.listening { background: #10b981; transform: translateX(-50%) scale(1.1); }
+
+        /* Voice Feedback */
+        .voice-feedback { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px 30px; border-radius: 20px; text-align: center; z-index: 1000; display: none; }
+        .voice-feedback.active { display: block; }
+        .voice-text { font-size: 1.2rem; margin-bottom: 15px; }
+        .voice-confidence { font-size: 0.9rem; opacity: 0.8; }
     </style>
 </head>
 <body>
@@ -155,6 +161,12 @@
     <div id="list"></div>
 </div>
 
+<!-- Voice Feedback -->
+<div class="voice-feedback" id="voiceFeedback">
+    <div class="voice-text" id="voiceText">بيستمع لك...</div>
+    <div class="voice-confidence" id="voiceConfidence"></div>
+</div>
+
 <button class="mic-btn" id="mic" onclick="toggleMic()">
     <i class="fa-solid fa-microphone"></i>
 </button>
@@ -175,6 +187,86 @@
     let mode = 'income';
     let records = [];
     let searchTerm = null;
+
+    // ===============================================
+    // قاموس موسع للهجة المصرية
+    // ===============================================
+    const egyptianDictionary = {
+        // كلمات الدخل
+        income: [
+            "دخل", "وارد", "جاب", "جالي", "جت", "معايا", "استلمت", "اخدت", "قبضت", "محصل",
+            "ورايا", "اتجمع", "اتحول", "نزل", "زود", "زاد", "ربح", "كسب", "ربحنا", "ربحت",
+            "فلوس جديدة", "مرتب", "راتب", "علاوة", "مكافأة", "حوافز", "عمولة", "ارباح",
+            "تأمين", "معاش", "منحة", "هدية", "هبة", "عطية", "تعويض", "تعويضات"
+        ],
+        
+        // كلمات المصروف
+        expense: [
+            "صرف", "صرفت", "دفعت", "طلعت", "روحت", "خلصت", "خلص", "نفذ", "خلصوا", "سحبت",
+            "سحب", "سحبو", "طلعتهم", "طلعتو", "طلعتهم", "دفع", "دفعوا", "دفعو", "دفعتهم",
+            "دفعتو", "دفعتهم", "اخرج", "خرج", "خرجوا", "خرجو", "خرجت", "نفقت", "نفقة",
+            "مصاريف", "فاتورة", "بوفيه", "اكل", "شرب", "مواصلات", "بنزين", "تاكسي", "اوبر",
+            "كراء", "إيجار", "عمار", "كهربا", "كهرباء", "ميه", "مياه", "تليفون", "نت",
+            "انترنت", "مدرسة", "دراسة", "جامعة", "كتب", "دروس", "دواء", "دوا", "صيدلية",
+            "عيادة", "دكتور", "ملابس", "هدوم", "شوز", "حذاء", "تسالي", "سناكس", "كافيه",
+            "مطعم", "سوبرماركت", "هايبر", "سوق", "خضار", "لحمة", "فراخ", "اسماك", "خبز",
+            "عيش", "جبن", "لبن", "زبادي", "سجائر", "سيجارة", "شيشة", "معسل"
+        ],
+        
+        // أرقام مصرية
+        numbers: {
+            "واحد": 1, "اتنين": 2, "تلاتة": 3, "اربعة": 4, "خمسة": 5,
+            "ستة": 6, "سبعة": 7, "تمانية": 8, "تسعة": 9, "عشرة": 10,
+            "حداش": 11, "طناش": 12, "تلتاشر": 13, "اربعتاشر": 14, "خمستاشر": 15,
+            "ستاشر": 16, "سبعتاشر": 17, "تمنتاشر": 18, "تسعتاشر": 19,
+            "عشرين": 20, "تلاتين": 30, "اربعين": 40, "خمسين": 50,
+            "ستين": 60, "سبعين": 70, "تمانين": 80, "تسعين": 90,
+            "مية": 100, "ميتين": 200, "الف": 1000, "الفين": 2000,
+            "عشر": 10, "مية الف": 100000, "مليون": 1000000
+        },
+        
+        // عملات
+        currencies: [
+            "جنيه", "جنية", "جنيهات", "قرش", "قروش", "دولار", "دولارات", "يورو", "ريال"
+        ],
+        
+        // كلمات التوكيد والنفي
+        modifiers: [
+            "جد", "جداً", "قوي", "مرة", "مرتين", "كذا", "كده", "على بعض", "كلهم",
+            "مش", "لا", "ما", "منغير", "بدون"
+        ],
+        
+        // أسماء أشخاص شائعة
+        people: [
+            "محمد", "احمد", "علي", "محمود", "مصطفى", "خالد", "ياسر", "حسام", "اسامة",
+            "ايمن", "عمر", "اسماء", "فاطمة", "مريم", "خديجة", "هناء", "منى", "سارة"
+        ]
+    };
+
+    // ===============================================
+    // نظام التعلم الآلي البسيط
+    // ===============================================
+    let learnedWords = JSON.parse(localStorage.getItem("learnedWords") || "{}");
+    
+    function learnWord(word, type) {
+        if (!learnedWords[word]) {
+            learnedWords[word] = { type, count: 1 };
+        } else {
+            learnedWords[word].count++;
+            // إذا تم استخدام الكلمة بنفس النوع مرات كثيرة، نؤكد تصنيفها
+            if (learnedWords[word].count > 3) {
+                learnedWords[word].type = type;
+            }
+        }
+        localStorage.setItem("learnedWords", JSON.stringify(learnedWords));
+    }
+    
+    function getWordType(word) {
+        if (learnedWords[word]) {
+            return learnedWords[word].type;
+        }
+        return null;
+    }
 
     window.toggleTheme = () => document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
 
@@ -308,179 +400,199 @@
         XLSX.writeFile(wb, "Finance_Report.xlsx");
     };
 
-    // --- Smart Voice ---
+    // ===============================================
+    // نظام التعرف على اللهجة المصرية المحسن
+    // ===============================================
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if(SR) {
         const rec = new SR();
         rec.lang = "ar-EG";
-        rec.onstart = () => document.getElementById('mic').classList.add('listening');
-        rec.onend = () => document.getElementById('mic').classList.remove('listening');
+        rec.continuous = false;
+        rec.interimResults = true;
+        
+        rec.onstart = () => {
+            document.getElementById('mic').classList.add('listening');
+            document.getElementById('voiceFeedback').classList.add('active');
+            document.getElementById('voiceText').innerText = "بيستمع لك...";
+        };
+        
+        rec.onend = () => {
+            document.getElementById('mic').classList.remove('listening');
+            document.getElementById('voiceFeedback').classList.remove('active');
+        };
         
         rec.onresult = async (e) => {
-            let txt = e.results[0][0].transcript;
+            let finalTranscript = '';
+            let interimTranscript = '';
             
-            // Search
-            const searchMatch = txt.match(/(?:ابحث عن|شوف|حساب) (.+)/);
-            if(searchMatch) {
-                searchTerm = searchMatch[1].trim();
-                document.getElementById('searchBox').classList.add('active');
-                document.getElementById('searchKey').innerText = searchTerm;
-                render();
-                return;
+            for (let i = e.resultIndex; i < e.results.length; ++i) {
+                if (e.results[i].isFinal) {
+                    finalTranscript += e.results[i][0].transcript;
+                } else {
+                    interimTranscript += e.results[i][0].transcript;
+                }
             }
-
-            // Delete All
-            if(txt.includes("امسح الكل")) {
-                const {value} = await Swal.fire({title:'كلمة السر', input:'password'});
-                if(value==='521988') { await remove(ref(db,'income')); await remove(ref(db,'expenses')); }
-                return;
-            }
-
-            // Add Transaction
-            txt = txt.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
-            const amtMatch = txt.match(/(\d+(\.\d+)?)/);
             
-         if (amtMatch) {
-    const amount = parseFloat(amtMatch[0]);
-
-    // ===============================================
-    // 1) قاموس الكلمات الأساسية
-    // ===============================================
-    const incKw = [
-        "وصل","جالي","جه","جت","موجود","معايا","مع",
-        "وارد","دخل","ايراد","إيراد","تحويل","جابولي",
-        "رزقة","نزللي","زاد","زود","استلمت","محصل"
-    ];
-
-    const expKw = [
-        "صرف","صرفت","اشتريت","جبت","دفعت",
-        "سحبت","نقص","خصم","طلع","راح","اتشال","قل"
-    ];
-
-    // ===============================================
-    // 2) اصلاح النطق
-    // ===============================================
-    const corrections = {
-        "جني": "جنيه",
-        "اراد": "إيراد",
-        "جبتا": "جبت",
-        "دفعل": "دفعلي",
-        "دخلت": "دخل"
-    };
-
-    Object.keys(corrections).forEach(bad => {
-        txt = txt.replace(new RegExp(bad, "g"), corrections[bad]);
-    });
-
-
-    // ===============================================
-    // 3) Fuzzy Match (يلقط الكلمة حتى لو ناقصة 40%)
-    // ===============================================
-
-    function levenshtein(a, b) {
-        const matrix = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(null));
-        for (let i = 0; i <= b.length; i++) matrix[0][i] = i;
-        for (let j = 0; j <= a.length; j++) matrix[j][0] = j;
-
-        for (let j = 1; j <= a.length; j++) {
-            for (let i = 1; i <= b.length; i++) {
-                const cost = a[j - 1] === b[i - 1] ? 0 : 1;
-                matrix[j][i] = Math.min(
-                    matrix[j - 1][i] + 1,
-                    matrix[j][i - 1] + 1,
-                    matrix[j - 1][i - 1] + cost
-                );
+            if (interimTranscript) {
+                document.getElementById('voiceText').innerText = interimTranscript;
+                document.getElementById('voiceConfidence').innerText = "جاري التحليل...";
             }
-        }
-        return matrix[a.length][b.length];
-    }
-
-    function fuzzyContains(text, word) {
-        const words = text.split(" ");
-        return words.some(w => {
-            const dist = levenshtein(w, word);
-            const similarity = 1 - (dist / Math.max(w.length, word.length));
-            return similarity >= 0.6;   // ⬅️ يسمح بخطأ 40%
-        });
-    }
-
-    // ===============================================
-    // 4) Auto-Learning
-    // ===============================================
-    let learnedWords = JSON.parse(localStorage.getItem("learnedWords") || "{}");
-
-    Object.keys(learnedWords).forEach(word => {
-        if (txt.includes(word)) {
-            if (learnedWords[word] === "income") incKw.push(word);
-            else expKw.push(word);
-        }
-    });
-
-    // ===============================================
-    // 5) موديل ذكاء أعلى من القاموس (AI-lite)
-    // ===============================================
-    function aiInfer(text) {
-        const pos = ["لقيت","زاد","دخل","استلمت","جالي","كسبت","ربح","وارد"];
-        const neg = ["دفع","خصم","راح","نقص","صرف","سحب"];
-
-        let score = 0;
-
-        pos.forEach(w => { if (txt.includes(w) || fuzzyContains(txt, w)) score++; });
-        neg.forEach(w => { if (txt.includes(w) || fuzzyContains(txt, w)) score--; });
-
-        return score >= 0 ? "income" : "expense";
-    }
-
-    // ===============================================
-    // 6) تحديد نوع العملية (Fuzzy + AI)
-    // ===============================================
-    let type = "expense";
-
-    if (incKw.some(k => txt.includes(k) || fuzzyContains(txt, k))) type = "income";
-    else if (expKw.some(k => txt.includes(k) || fuzzyContains(txt, k))) type = "expense";
-    else type = aiInfer(txt);
-
-    // ===============================================
-    // 7) تنظيف الوصف
-    // ===============================================
-    let desc = txt.replace(amount, '')
-                  .replace(/جنيه|جنية|جم|EGP/g, '')
-                  .trim();
-
-    const removeWords = [...incKw, ...expKw, "من","على","لـ","مع"];
-
-    removeWords.forEach(k => desc = desc.replace(new RegExp(k, 'g'), ''));
-
-    desc = desc.trim() || "صوتي";
-
-    // ===============================================
-    // 8) Auto-save للكلمات الجديدة
-    // ===============================================
-    txt.split(" ").forEach(w => {
-        if (w.length > 2 && !incKw.includes(w) && !expKw.includes(w)) {
-            learnedWords[w] = type;
-        }
-    });
-
-    localStorage.setItem("learnedWords", JSON.stringify(learnedWords));
-
-    // ===============================================
-    // 9) إخراج البيانات
-    // ===============================================
-    document.getElementById('amount').value = amount;
-    document.getElementById('desc').value = desc;
-    setMode(type);
-    saveTx(null);
-
-} else {
-    Swal.fire("؟", "قول رقم", "question");
-}
-
+            
+            if (finalTranscript) {
+                document.getElementById('voiceText').innerText = finalTranscript;
+                await processVoiceCommand(finalTranscript);
+            }
         };
+        
         window.toggleMic = () => {
             const btn = document.getElementById('mic');
-            if(btn.classList.contains('listening')) rec.stop(); else rec.start();
+            if(btn.classList.contains('listening')) {
+                rec.stop();
+            } else {
+                rec.start();
+            }
         }
+    }
+
+    // ===============================================
+    // معالجة الأوامر الصوتية
+    // ===============================================
+    async function processVoiceCommand(txt) {
+        document.getElementById('voiceConfidence').innerText = "جاري المعالجة...";
+        
+        // تحويل الأرقام العربية إلى إنجليزية
+        txt = txt.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
+        
+        // البحث
+        const searchMatch = txt.match(/(?:ابحث عن|شوف|دور على|حساب) (.+)/i);
+        if(searchMatch) {
+            searchTerm = searchMatch[1].trim();
+            document.getElementById('searchBox').classList.add('active');
+            document.getElementById('searchKey').innerText = searchTerm;
+            render();
+            document.getElementById('voiceConfidence').innerText = "تم البحث عن: " + searchTerm;
+            setTimeout(() => {
+                document.getElementById('voiceFeedback').classList.remove('active');
+            }, 2000);
+            return;
+        }
+
+        // مسح الكل
+        if(txt.includes("امسح الكل") || txt.includes("احذف كل حاجة") || txt.includes("شيل الكل")) {
+            const {value} = await Swal.fire({title:'كلمة السر', input:'password', text:'عشان تتأكد إنك مش بتعمل ده بالغلط'});
+            if(value==='521988') { 
+                await remove(ref(db,'income')); 
+                await remove(ref(db,'expenses')); 
+                document.getElementById('voiceConfidence').innerText = "تم مسح كل البيانات";
+            } else {
+                document.getElementById('voiceConfidence').innerText = "كلمة السر غلط";
+            }
+            setTimeout(() => {
+                document.getElementById('voiceFeedback').classList.remove('active');
+            }, 2000);
+            return;
+        }
+
+        // إضافة معاملة
+        const processed = processEgyptianText(txt);
+        if (processed.amount) {
+            document.getElementById('amount').value = processed.amount;
+            document.getElementById('desc').value = processed.description;
+            setMode(processed.type);
+            
+            document.getElementById('voiceConfidence').innerText = 
+                `تم التعرف: ${processed.type === 'income' ? 'دخل' : 'مصروف'} - ${processed.amount} - ${processed.description}`;
+            
+            // حفظ الكلمات المستخدمة للنظام التعليمي
+            processed.words.forEach(word => {
+                learnWord(word, processed.type);
+            });
+            
+            setTimeout(() => {
+                saveTx(null);
+                document.getElementById('voiceFeedback').classList.remove('active');
+            }, 1500);
+        } else {
+            document.getElementById('voiceConfidence').innerText = "مش فاهم، حاول تاني";
+            setTimeout(() => {
+                document.getElementById('voiceFeedback').classList.remove('active');
+            }, 3000);
+        }
+    }
+
+    // ===============================================
+    // معالجة النص المصري
+    // ===============================================
+    function processEgyptianText(text) {
+        let amount = 0;
+        let type = 'expense';
+        let description = '';
+        let words = text.split(' ');
+        
+        // البحث عن المبلغ
+        const amountRegex = /(\d+(?:\.\d+)?)(?:\s*(?:جنيه|جنية|قرش|دولار|يورو|ريال))?/i;
+        const amountMatch = text.match(amountRegex);
+        
+        if (amountMatch) {
+            amount = parseFloat(amountMatch[1]);
+            text = text.replace(amountMatch[0], '').trim();
+        } else {
+            // محاولة فهم الأرقام بالكلمات
+            for (const [word, value] of Object.entries(egyptianDictionary.numbers)) {
+                if (text.includes(word)) {
+                    amount += value;
+                    text = text.replace(word, '');
+                }
+            }
+        }
+        
+        // تحديد النوع (دخل أو مصروف)
+        let incomeScore = 0;
+        let expenseScore = 0;
+        
+        // فحص الكلمات المعروفة
+        egyptianDictionary.income.forEach(word => {
+            if (text.includes(word)) incomeScore++;
+        });
+        
+        egyptianDictionary.expense.forEach(word => {
+            if (text.includes(word)) expenseScore++;
+        });
+        
+        // فحص الكلمات المتعلمة
+        words.forEach(word => {
+            const learnedType = getWordType(word);
+            if (learnedType === 'income') incomeScore += 2; // وزن أكبر للكلمات المتعلمة
+            if (learnedType === 'expense') expenseScore += 2;
+        });
+        
+        // تحليل السياق
+        if (text.includes('من') || text.includes('عند') || text.includes('ليا')) {
+            incomeScore += 1;
+        }
+        
+        if (text.includes('على') || text.includes('في') || text.includes('عشان')) {
+            expenseScore += 1;
+        }
+        
+        type = incomeScore >= expenseScore ? 'income' : 'expense';
+        
+        // إنشاء الوصف
+        description = text
+            .replace(/\b(?:و|في|على|من|الى|إلى|دا|ده|دي|دول)\b/g, '') // إزالة الكلمات الشائعة
+            .replace(/\s+/g, ' ') // إزالة المسافات الزائدة
+            .trim();
+        
+        if (!description) {
+            description = type === 'income' ? 'دخل' : 'مصروف';
+        }
+        
+        return {
+            amount,
+            type,
+            description,
+            words: words.filter(word => word.length > 2) // تجاهل الكلمات القصيرة
+        };
     }
 </script>
 </body>
