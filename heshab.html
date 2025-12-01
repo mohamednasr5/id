@@ -1,602 +1,314 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>النظام المالي | إهداء للحاج أحمد شطا</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    
-    <!-- الخطوط والأيقونات -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- المكتبات الخارجية -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<meta charset="UTF-8">
+<title>مصاريفي | إهداء للحاج أحمد شطا</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <style>
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --success: #10b981;
-            --danger: #ef4444;
-            --bg: #f8fafc;
-            --surface: #ffffff;
-            --text: #0f172a;
-            --border: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        [data-theme="dark"] {
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --text: #f1f5f9;
-            --border: #334155;
-            --primary: #818cf8;
-            --primary-dark: #6366f1;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
-        
-        body { background: var(--bg); color: var(--text); padding: 15px; padding-bottom: 100px; min-height: 100vh; transition: background 0.3s, color 0.3s; }
-        .container { max-width: 600px; margin: 0 auto; }
-
-        /* --- Header --- */
-        .header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 16px; border-radius: 20px; margin-bottom: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-        .brand { display: flex; align-items: center; gap: 12px; }
-        .brand i { font-size: 1.8rem; color: var(--primary); }
-        .brand h1 { font-size: 1.4rem; font-weight: 800; margin: 0; }
-        
-        .action-btn { width: 42px; height: 42px; border-radius: 12px; border: none; background: var(--bg); color: var(--text); font-size: 1.1rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
-        .action-btn:hover { background: var(--border); transform: translateY(-2px); }
-
-        /* --- Stats --- */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 25px; }
-        .stat-card { background: var(--surface); padding: 16px 10px; border-radius: 18px; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; overflow: hidden; }
-        
-        .stat-card i.bg-icon { position: absolute; bottom: -10px; right: -10px; font-size: 3.5rem; opacity: 0.05; transform: rotate(-15deg); }
-        
-        .stat-value { font-size: 1.2rem; font-weight: 900; margin-top: 5px; direction: ltr; font-variant-numeric: tabular-nums; }
-        .stat-title { font-size: 0.85rem; color: #64748b; font-weight: 700; }
-
-        /* --- Input Area --- */
-        .input-card { background: var(--surface); padding: 20px; border-radius: 24px; box-shadow: var(--shadow); margin-bottom: 25px; border: 1px solid var(--border); transition: 0.3s; }
-        
-        .type-toggle { display: flex; background: var(--bg); padding: 5px; border-radius: 16px; margin-bottom: 15px; }
-        .toggle-btn { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 12px; font-weight: 700; color: #64748b; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        
-        .toggle-btn.active.inc { background: var(--surface); color: var(--success); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .toggle-btn.active.exp { background: var(--surface); color: var(--danger); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-
-        .input-group { margin-bottom: 12px; position: relative; }
-        .input-group input { width: 100%; padding: 16px 20px; padding-left: 50px; border: 2px solid var(--border); border-radius: 16px; background: var(--bg); color: var(--text); font-size: 1rem; transition: 0.3s; font-weight: 600; }
-        .input-group input:focus { border-color: var(--primary); background: var(--surface); }
-        .input-group i { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.2rem; }
-
-        .submit-btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-size: 1.1rem; font-weight: 800; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); }
-        .submit-btn:active { transform: scale(0.98); }
-
-        /* --- List & Search --- */
-        .search-bar { display: none; align-items: center; background: #fff7ed; border: 1px solid #fdba74; color: #c2410c; padding: 12px 20px; border-radius: 16px; margin-bottom: 20px; animation: slideDown 0.3s ease; }
-        .search-bar.active { display: flex; justify-content: space-between; }
-        @keyframes slideDown { from {opacity:0; transform:translateY(-10px);} to {opacity:1; transform:translateY(0);} }
-
-        .tx-list { display: flex; flex-direction: column; gap: 12px; }
-        .tx-item { background: var(--surface); padding: 16px; border-radius: 18px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border); transition: 0.2s; cursor: pointer; }
-        .tx-item:active { transform: scale(0.98); background: var(--bg); }
-        
-        .tx-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
-        .tx-content { flex: 1; overflow: hidden; }
-        .tx-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .tx-meta { font-size: 0.75rem; color: #64748b; display: flex; align-items: center; gap: 6px; }
-        .tx-amount { font-weight: 800; font-size: 1.1rem; direction: ltr; }
-
-        /* --- Voice Button --- */
-        .mic-wrapper { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 100; }
-        .mic-btn { width: 75px; height: 75px; border-radius: 50%; border: none; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; font-size: 1.8rem; cursor: pointer; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); display: flex; align-items: center; justify-content: center; transition: 0.3s; position: relative; }
-        
-        .mic-btn::after { content: ''; position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px; border-radius: 50%; border: 2px solid var(--primary); opacity: 0; animation: pulse 1.5s infinite; }
-        .mic-btn.listening { background: var(--danger); box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4); }
-        .mic-btn.listening::after { border-color: var(--danger); opacity: 1; }
-
-        @keyframes pulse { 0% {transform: scale(1); opacity: 0.8;} 100% {transform: scale(1.5); opacity: 0;} }
-
-        /* --- Voice HUD --- */
-        .voice-hud { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; backdrop-filter: blur(5px); }
-        .voice-hud.active { display: flex; }
-        .hud-waves { display: flex; gap: 5px; height: 40px; align-items: center; margin-bottom: 20px; }
-        .wave { width: 6px; background: var(--success); border-radius: 10px; animation: wave 0.5s infinite ease-in-out alternate; }
-        .wave:nth-child(2) { animation-delay: 0.1s; height: 50%; }
-        .wave:nth-child(3) { animation-delay: 0.2s; height: 70%; }
-        .wave:nth-child(4) { animation-delay: 0.3s; height: 40%; }
-        @keyframes wave { 0% {height: 20%;} 100% {height: 100%;} }
-        
-        .hud-text { color: white; font-size: 1.5rem; font-weight: 700; max-width: 80%; line-height: 1.5; }
-        .hud-sub { color: #94a3b8; margin-top: 10px; font-size: 0.9rem; }
-
-    </style>
+<style>
+:root{--primary:#6366f1;--primary-dark:#4f46e5;--success:#10b981;--danger:#ef4444;--bg:#f8fafc;--surface:#fff;--text:#0f172a;--border:#e2e8f0;}
+[data-theme="dark"]{--bg:#0f172a;--surface:#1e293b;--text:#f1f5f9;--border:#334155;}
+body{background:var(--bg);color:var(--text);font-family:'Cairo',sans-serif;padding:15px;padding-bottom:120px;transition:.3s;}
+.container{max-width:600px;margin:auto;}
+.header{display:flex;justify-content:space-between;align-items:center;background:var(--surface);padding:16px;border-radius:20px;margin-bottom:20px;border:1px solid var(--border);box-shadow:0 3px 8px rgba(0,0,0,.1);}
+.action-btn{width:42px;height:42px;border:none;border-radius:12px;background:var(--bg);cursor:pointer;}
+.type-toggle{display:flex;background:var(--bg);padding:5px;border-radius:16px;margin-bottom:15px;}
+.toggle-btn{flex:1;border:none;padding:12px;border-radius:12px;font-weight:700;cursor:pointer;color:#64748b;}
+.toggle-btn.active.inc{background:var(--surface);color:var(--success);}
+.toggle-btn.active.exp{background:var(--surface);color:var(--danger);}
+.input-card{background:var(--surface);padding:20px;border-radius:20px;border:1px solid var(--border);margin-bottom:25px;}
+.input-group{position:relative;margin-bottom:12px;}
+.input-group input{width:100%;padding:16px 50px 16px 20px;border:2px solid var(--border);border-radius:16px;background:var(--bg);font-weight:700;}
+.tx-list{display:flex;flex-direction:column;gap:12px;}
+.tx-item{background:var(--surface);padding:16px;border-radius:18px;display:flex;align-items:center;gap:15px;border:1px solid var(--border);}
+.mic-wrapper{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);}
+.mic-btn{width:75px;height:75px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;font-size:1.8rem;cursor:pointer;}
+.voice-hud{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,.9);display:none;align-items:center;justify-content:center;flex-direction:column;color:#fff;z-index:500;}
+.voice-hud.active{display:flex;}
+</style>
 </head>
+
 <body>
-
 <div class="container">
-    <!-- Header -->
-    <header class="header">
-        <div class="brand">
-            <i class="fa-solid fa-wallet"></i>
-            <h1>مصاريفي</h1>
-        </div>
-        <div style="display:flex; gap:8px;">
-            <button class="action-btn" onclick="exportExcel()" title="تصدير إكسيل"><i class="fa-solid fa-file-excel" style="color:#10b981"></i></button>
-            <button class="action-btn" onclick="toggleTheme()" title="الوضع الليلي"><i class="fa-solid fa-moon"></i></button>
-        </div>
-    </header>
 
-    <!-- Search Status -->
-    <div id="searchBar" class="search-bar">
-        <div>
-            <i class="fa-solid fa-filter"></i>&nbsp;
-            نتائج البحث عن: <b id="searchKeyword"></b>
-        </div>
-        <i class="fa-solid fa-xmark" onclick="clearSearch()" style="cursor:pointer; font-size:1.2rem;"></i>
-    </div>
+<header class="header">
+<div style="display:flex;align-items:center;gap:10px;">
+<i class="fa-solid fa-wallet" style="color:var(--primary);font-size:1.7rem"></i>
+<h2 style="margin:0;font-weight:800;">مصاريفي</h2>
+</div>
+<div style="display:flex;gap:8px;">
+<button class="action-btn" onclick="exportExcel()"><i class="fa-solid fa-file-excel" style="color:#10b981"></i></button>
+<button class="action-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i></button>
+</div>
+</header>
 
-    <!-- Statistics -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <i class="fa-solid fa-arrow-trend-up bg-icon" style="color:var(--success)"></i>
-            <div class="stat-title">وارد</div>
-            <div class="stat-value" id="valInc" style="color:var(--success)">0</div>
-        </div>
-        <div class="stat-card">
-            <i class="fa-solid fa-arrow-trend-down bg-icon" style="color:var(--danger)"></i>
-            <div class="stat-title">مصروف</div>
-            <div class="stat-value" id="valExp" style="color:var(--danger)">0</div>
-        </div>
-        <div class="stat-card">
-            <i class="fa-solid fa-scale-balanced bg-icon" style="color:var(--primary)"></i>
-            <div class="stat-title">الصافي</div>
-            <div class="stat-value" id="valBal" style="color:var(--primary)">0</div>
-        </div>
-    </div>
-
-    <!-- Input Form -->
-    <div class="input-card">
-        <div class="type-toggle">
-            <button id="btnInc" class="toggle-btn" onclick="setMode('income')">
-                <i class="fa-solid fa-plus-circle"></i> دخل
-            </button>
-            <button id="btnExp" class="toggle-btn active exp" onclick="setMode('expense')">
-                <i class="fa-solid fa-minus-circle"></i> صرف
-            </button>
-        </div>
-
-        <form onsubmit="saveTransaction(event)" id="mainForm">
-            <div class="input-group">
-                <input type="number" id="inpAmount" placeholder="المبلغ (كام؟)" step="any" required>
-                <i class="fa-solid fa-coins"></i>
-            </div>
-            <div class="input-group">
-                <input type="text" id="inpDesc" placeholder="الوصف (ايه / مين؟)" required>
-                <i class="fa-solid fa-pen"></i>
-            </div>
-            <button type="submit" class="submit-btn" id="btnSubmit" style="background:var(--danger)">
-                <i class="fa-solid fa-check"></i> تسجيل العملية
-            </button>
-        </form>
-    </div>
-
-    <!-- Transactions List -->
-    <div class="tx-list" id="txList">
-        <!-- Items injected here -->
-    </div>
+<div class="stats-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;">
+<div class="stat-card" style="background:var(--surface);padding:16px;border-radius:18px;border:1px solid var(--border);text-align:center;">
+<div style="color:#64748b;font-weight:700">وارد</div>
+<div id="valInc" style="font-size:1.3rem;font-weight:900;color:var(--success)">0</div>
 </div>
 
-<!-- Voice Button -->
+<div class="stat-card" style="background:var(--surface);padding:16px;border-radius:18px;border:1px solid var(--border);text-align:center;">
+<div style="color:#64748b;font-weight:700">مصروف</div>
+<div id="valExp" style="font-size:1.3rem;font-weight:900;color:var(--danger)">0</div>
+</div>
+
+<div class="stat-card" style="background:var(--surface);padding:16px;border-radius:18px;border:1px solid var(--border);text-align:center;">
+<div style="color:#64748b;font-weight:700">الصافي</div>
+<div id="valBal" style="font-size:1.3rem;font-weight:900;color:var(--primary)">0</div>
+</div>
+</div>
+
+<div class="input-card">
+<div class="type-toggle">
+<button id="btnInc" class="toggle-btn" onclick="setMode('income')">دخل</button>
+<button id="btnExp" class="toggle-btn active exp" onclick="setMode('expense')">صرف</button>
+</div>
+
+<form onsubmit="saveTransaction(event)">
+<div class="input-group">
+<input id="inpAmount" type="number" required placeholder="المبلغ">
+</div>
+<div class="input-group">
+<input id="inpDesc" required placeholder="الوصف">
+</div>
+<button id="btnSubmit" style="width:100%;padding:16px;border:none;border-radius:12px;background:var(--danger);color:#fff;font-weight:800;">
+تسجيل العملية
+</button>
+</form>
+</div>
+
+<div id="txList" class="tx-list"></div>
+
+</div>
+
 <div class="mic-wrapper">
-    <button class="mic-btn" id="micBtn" onclick="toggleVoice()">
-        <i class="fa-solid fa-microphone"></i>
-    </button>
+<button class="mic-btn" id="micBtn" onclick="toggleVoice()">
+<i class="fa-solid fa-microphone"></i>
+</button>
 </div>
 
-<!-- Voice Overlay HUD -->
 <div class="voice-hud" id="voiceHud">
-    <div class="hud-waves">
-        <div class="wave"></div><div class="wave"></div><div class="wave"></div><div class="wave"></div>
-    </div>
-    <div class="hud-text" id="hudText">سامعك...</div>
-    <div class="hud-sub" id="hudSub">قول "صرفت 50 مواصلات" أو "حساب احمد"</div>
+<h2 id="hudText">سامعك…</h2>
+<p id="hudSub" style="color:#ddd;margin-top:10px;">قول "صرفت 50 مواصلات"</p>
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // --- إعدادات فايربيس ---
-    const app = initializeApp({
-        apiKey: "AIzaSyDJHcly8lYT4FTxrJCBRIR7JSbJGYtG3_I",
-        authDomain: "nasrapp-7a0fc.firebaseapp.com",
-        databaseURL: "https://nasrapp-7a0fc-default-rtdb.firebaseio.com",
-        projectId: "nasrapp-7a0fc",
-        appId: "1:826970736109:web:c1cc3c3a1008e719b193e4"
-    });
-    const db = getDatabase(app);
+/* =========================================================
+   Firebase
+========================================================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // --- المتغيرات العامة ---
-    let currentMode = 'expense';
-    let transactions = [];
-    let searchFilter = '';
-    let recognition = null;
+const app = initializeApp({
+ apiKey:"AIzaSyDJH...",authDomain:"nasrapp-7a0fc.firebaseapp.com",
+ databaseURL:"https://nasrapp-7a0fc-default-rtdb.firebaseio.com",
+ projectId:"nasrapp-7a0fc",appId:"1:826970736109:web:c1cc3c3a1008e719b193e4"
+});
+const db = getDatabase(app);
 
-    // --- عناصر الواجهة ---
-    const UI = {
-        incBtn: document.getElementById('btnInc'),
-        expBtn: document.getElementById('btnExp'),
-        submitBtn: document.getElementById('btnSubmit'),
-        amount: document.getElementById('inpAmount'),
-        desc: document.getElementById('inpDesc'),
-        list: document.getElementById('txList'),
-        hud: document.getElementById('voiceHud'),
-        hudText: document.getElementById('hudText'),
-        hudSub: document.getElementById('hudSub'),
-        micBtn: document.getElementById('micBtn')
-    };
+/* =========================================================
+   القواميس الأساسية
+========================================================= */
+const EG_DICT = {
+ numbers:{
+   "نص":0.5,"ربع":0.25,"واحد":1,"اتنين":2,"تلاتة":3,"خمسة":5,
+   "عشرة":10,"عشرين":20,"خمسين":50,"مية":100,"الف":1000
+ },
+ income:[
+    "جالي","جتلي","اديوني","اداني","جابلي","استلمت","وقعتلي فلوس","رزق جه",
+    "حد اداني","واحد جابلي","دخل","وارد","حول","جه رزق","جالي فلوس",
+    "خدت","اخدت","جالي حساب","حد جاب فلوس","رزق من ربنا"
+],
 
-    const EG_DICT = {
+expense: [
+    // الصرف والكلام الشعبي
+    "صرفت","دفعت","جبت","اشتريت","دفعت للدكتور","جبت هدوم","جبت جزمة",
+    "مشاوير","مواصلات","اكل","شرب","الحساب ولّع",
+    "العربية طلبت","البيت طلب","العيال عايزة","جبت حاجات البيت",
 
-  // ------------------------------------
-  // 1) كلام الشارع الشعبي المباشر
-  // ------------------------------------
-  street_basic: [
-    "جالي", "جتلي", "اديوني", "خدت", "اخدت", "استلمت",
-    "وقعتلي فلوس", "رزق جه", "حد اداني", "واحد جابلي",
-    "دفعت", "صرفت", "طارت فلوسي", "راحت الفلوس",
-    "العيشة ولعت", "الاسعار نار", "جبت حاجات البيت",
-    "مشاوير", "مواصلات", "اكل", "شرب", "الحساب ولّع",
-    "العربية طلبت", "البيت طلب", "العيال عايزة",
-    "اشتريت", "جبت", "خدت من حد", "دفعت للدكتور",
-    "اشتريت دواء", "جبت هدوم", "جبت جزمة"
-  ],
-
-  // ------------------------------------
-  // 2) كلام ناس قليلة التعليم (كلام ركيك)
-  // ------------------------------------
-  low_educated: [
-    "الفلوس جهولي", "الفلوس جتني", "حد رمّالي قرشين",
-    "الفلوس بقت معايا", "معايا شوية", "اخدتلي شوية",
-    "دفعوني", "صرفوني", "الفلوس طارت مني",
-    "السوق ولع", "الغلا دبح", "العيشة صعبة",
-    "رحت اشتري شوية حاجات", "رحت ادفع", 
-    "جبت بتاعي", "دفعت حق الحاجة", 
-    "وقعت في حساب", "دفعت غصب",
-    "العيال طلّبوا", "البيت بيزوّن"
-  ],
-
-  // ------------------------------------
-  // 3) كلام الريف (دلتا + قرى)
-  // ------------------------------------
-  countryside: [
-    "جالي رزق ربنا", "حد رمى عليّا فلوس", "جاني قُرَيش",
-    "الفلوس نزلتلي", "الفلوس دخلت البيت",
-    "ودّيت فلوس", "عطّيت فلوس", "حطّيت فلوس",
-    "اشتريت شوية حاجات للدار", "جبت للعيال",
-    "المصاريف كتير", "العيشة صعبانة", "الزمن غالي",
-    "رُحنا المصلحة", "دفعت للعيال المدارس",
-    "جبت محاصيل", "جبت غِلّة", "صلّحت الجرار"
-  ],
-
-  // ------------------------------------
-  // 4) كلام الصعيد (لهجة جنوب)
-  // ------------------------------------
-  upper_egypt: [
-    "جاني حقّي", "وصل لي رزق", "جاتني قسمة",
-    "الفلوس جاتني من فوق", "ربنا بعدلي رزق",
-    "دفعت القسط", "سددت", "بعته", "جبتلي حاجات",
-    "صرفت في الفرح", "صرفنا على العزا",
-    "البيت طلب", "الولاد طلبوا",
-    "الغلا لاعيب", "السوق مولّع",
-    "اشتريت حاجات من الديرة", "رحت السوق"
-  ],
-
-  // ------------------------------------
-  // 5) كلام الناس البسيطة جدًا (بدائي)
-  // ------------------------------------
-  primitive: [
-    "فلوس جه", "انا اخد فلوس", "انا دفع فلوس",
-    "فلوس يطير", "فلوس يروح", "مافيش فلوس",
-    "انا جاب", "انا جيب", "جيب اكل", "جيب شرب",
-    "بيت عايز", "عيال عايز", "انا راح سوق",
-    "انا راح اشتري", "انا دفع كتير", "انا خلص فلوس",
-    "حد اداني فلوس", "حد عطاني", "فلوس جيه عليا"
-  ],
-
-  // ------------------------------------
-  // 6) طبقة الأخطاء الإملائية (Needed for NLP)
-  // ------------------------------------
-  misspellings: [
-    "خدت", "خت", "خدت", "خدت", "اخت", "اخدت", "اقبت", "جالي", "جالي", "جاليي",
-    "صرقت", "صرفت", "صرف", "دفعتت", "دفعة", "دفعه", "جبتت", "جبت", "جبتا",
-    "اشتريتت", "اشترت", "اشري", "اكل", "اكلت", "كلت", "شرب", "شربت",
-    "مصاريف", "مصريف", "مصاريفف", "حساب", "حسابب", "حسااب",
-    "مواصلاات", "موسلات", "مواصلاط", "اجار", "يجار", "ايجار", "ايجر"
-  ]
+    // الأخطاء الإملائية
+    "خت","خدت","اخت","اخدت","اقبت","جاليي",
+    "صرقت","صرف","دفعتت","دفعة","دفعه",
+    "جبتت","جبتا","اشترت","اكلت","كلت",
+    "شربت","مصريف","حسااب","مواصلاط",
+    "يجار","ايجر","اجار"
+]
 };
-        numbers: {
-            "نص": 0.5, "ربع": 0.25, "واحد": 1, "اتنين": 2, "تلاتة": 3, "اربعة": 4, "خمسة": 5,
-            "ستة": 6, "سبعة": 7, "تمانية": 8, "تسعة": 9, "عشرة": 10, "عشرين": 20, "تلاتين": 30,
-            "اربعين": 40, "خمسين": 50, "ستين": 60, "سبعين": 70, "تمانين": 80, "تسعين": 90,
-            "مية": 100, "ميتين": 200, "تلتمية": 300, "ربعمية": 400, "خمسمية": 500, "الف": 1000
-        }
-    };
 
-    // --- الوظائف الأساسية ---
-    window.setMode = (mode) => {
-        currentMode = mode;
-        if(mode === 'income') {
-            UI.incBtn.className = 'toggle-btn active inc';
-            UI.expBtn.className = 'toggle-btn';
-            UI.submitBtn.style.background = 'var(--success)';
-            UI.submitBtn.innerHTML = '<i class="fa-solid fa-plus"></i> تسجيل الدخل';
-        } else {
-            UI.incBtn.className = 'toggle-btn active exp';
-            UI.expBtn.className = 'toggle-btn';
-            UI.submitBtn.style.background = 'var(--danger)';
-            UI.submitBtn.innerHTML = '<i class="fa-solid fa-minus"></i> تسجيل المصروف';
-        }
-    };
+/* =========================================================
+   Auto-Learning
+========================================================= */
+let learned = JSON.parse(localStorage.getItem("learnedWords")||"{}");
+function saveLearned(){localStorage.setItem("learnedWords",JSON.stringify(learned));}
+function learnWord(word,type){
+ if(!word || word.length<2) return;
+ if(!learned[type]) learned[type]=[];
+ if(!learned[type].includes(word)){learned[type].push(word);saveLearned();}
+}
 
-    // دالة الحفظ المباشر (الجوهرية)
-    async function saveDataDirectly(amount, description, type) {
-        if(!amount || !description) return false;
-        
-        try {
-            // إظهار رسالة جاري الحفظ
-            if(UI.hud.classList.contains('active')) {
-                UI.hudText.innerText = "جاري الحفظ في السيرفر...";
-            }
+/* =========================================================
+   Fuzzy Matching (40%)
+========================================================= */
+function fuzzy(a,b){
+ let mismatches=0;
+ for(let i=0;i<Math.min(a.length,b.length);i++){
+   if(a[i]!==b[i]) mismatches++;
+ }
+ return 1-(mismatches/Math.max(a.length,b.length));
+}
 
-            await push(ref(db, type === 'income' ? 'income' : 'expenses'), {
-                amount: parseFloat(amount),
-                description: description,
-                timestamp: Date.now()
-            });
-            return true;
-        } catch(err) {
-            console.error(err);
-            // إظهار الخطأ على شاشة الميكروفون
-            if(UI.hud.classList.contains('active')) {
-                UI.hudText.innerText = "خطأ! تأكد من النت";
-                UI.hudText.style.color = "#ef4444";
-            }
-            return false;
-        }
-    }
+/* =========================================================
+   Intent AI — تحليل الجملة
+========================================================= */
+function analyze(text){
+ const original=text;
+ let amount=0, desc=text, type="expense";
 
-    // دالة الفورم العادية
-    window.saveTransaction = async (e) => {
-        if(e) e.preventDefault();
-        const val = UI.amount.value;
-        const txt = UI.desc.value.trim();
-        
-        if(!val || !txt) {
-            return Swal.fire({icon:'warning', title:'بيانات ناقصة', text:'اكتب المبلغ والوصف'});
-        }
+ // استخراج رقم
+ const n=text.match(/(\d+(\.\d+)?)/);
+ if(n){amount=parseFloat(n[0]);desc=desc.replace(n[0],"");}
 
-        const success = await saveDataDirectly(val, txt, currentMode);
-        if(success) {
-            UI.amount.value = '';
-            UI.desc.value = '';
-            const toast = Swal.mixin({toast: true, position: 'top-end', showConfirmButton: false, timer: 2000});
-            toast.fire({icon: 'success', title: 'تم التسجيل'});
-        } else {
-            Swal.fire('خطأ', 'لم يتم الحفظ، تأكد من الإنترنت', 'error');
-        }
-    };
+ // استخراج رقم بالكلمة
+ if(!amount){
+   for(const[w,v] of Object.entries(EG_DICT.numbers)){
+     if(text.includes(w)){amount=v;desc=desc.replace(w,"");break;}
+   }
+ }
 
-    // --- الاستماع للبيانات (Realtime) ---
-    onValue(ref(db), (snapshot) => {
-        const data = snapshot.val() || {};
-        transactions = [];
-        if(data.income) Object.entries(data.income).forEach(([k,v]) => transactions.push({...v, id:k, type:'income'}));
-        if(data.expenses) Object.entries(data.expenses).forEach(([k,v]) => transactions.push({...v, id:k, type:'expense'}));
-        
-        transactions.sort((a,b) => b.timestamp - a.timestamp);
-        render();
-    });
+ // تحديد النوع
+ let incScore=0, expScore=0;
 
-    function render() {
-        let viewData = transactions;
-        if(searchFilter) {
-            viewData = transactions.filter(t => t.description.includes(searchFilter) || t.amount.toString().includes(searchFilter));
-            document.getElementById('searchBar').classList.add('active');
-            document.getElementById('searchKeyword').innerText = searchFilter;
-        } else {
-            document.getElementById('searchBar').classList.remove('active');
-        }
+ [...EG_DICT.income, ...(learned.income||[])].forEach(w=>{
+   if(text.includes(w)) incScore++;
+   else if(fuzzy(word(text),word(w)) > 0.4) incScore+=0.5;
+ });
 
-        const inc = transactions.filter(t=>t.type==='income').reduce((a,b)=>a+Number(b.amount),0);
-        const exp = transactions.filter(t=>t.type==='expense').reduce((a,b)=>a+Number(b.amount),0);
-        
-        document.getElementById('valInc').innerText = inc.toLocaleString();
-        document.getElementById('valExp').innerText = exp.toLocaleString();
-        document.getElementById('valBal').innerText = (inc - exp).toLocaleString();
+ [...EG_DICT.expense, ...(learned.expense||[])].forEach(w=>{
+   if(text.includes(w)) expScore++;
+   else if(fuzzy(word(text),word(w)) > 0.4) expScore+=0.5;
+ });
 
-        UI.list.innerHTML = viewData.map(t => `
-            <div class="tx-item" onclick="deleteItem('${t.id}', '${t.type}', '${t.description}')">
-                <div class="tx-icon" style="background:${t.type==='income'?'#dcfce7':'#fee2e2'}; color:${t.type==='income'?'var(--success)':'var(--danger)'}">
-                    <i class="fa-solid ${t.type==='income'?'fa-arrow-down':'fa-arrow-up'}"></i>
-                </div>
-                <div class="tx-content">
-                    <div class="tx-title">${t.description}</div>
-                    <div class="tx-meta">
-                        <i class="fa-regular fa-clock"></i> ${new Date(t.timestamp).toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'})}
-                    </div>
-                </div>
-                <div class="tx-amount" style="color:${t.type==='income'?'var(--success)':'var(--danger)'}">
-                    ${Number(t.amount).toLocaleString()}
-                </div>
-            </div>
-        `).join('');
-    }
+ function word(t){return t.trim().split(" ")[0]||"";}
 
-    window.deleteItem = (id, type, name) => {
-        Swal.fire({title: `حذف "${name}"؟`, icon: 'warning', showCancelButton: true, confirmButtonText: 'نعم', cancelButtonText: 'لا'}).then((res) => {
-            if(res.isConfirmed) remove(ref(db, `${type==='income'?'income':'expenses'}/${id}`));
-        });
-    };
-    
-    window.clearSearch = () => { searchFilter = ''; render(); };
-    window.exportExcel = () => {
-        /* كود التصدير نفسه السابق */
-        const wb = XLSX.utils.book_new();
-        const wsData = [["التاريخ", "النوع", "الوصف", "المبلغ"], ...transactions.map(t => [new Date(t.timestamp).toLocaleDateString('ar-EG'), t.type==='income'?'وارد':'مصروف', t.description, t.amount])];
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
-        XLSX.utils.book_append_sheet(wb, ws, "المالية");
-        XLSX.writeFile(wb, "Finance_Report.xlsx");
-    };
-    window.toggleTheme = () => document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+ type = incScore>expScore ? "income":"expense";
 
-    // ===============================================
-    // 🎤 نظام الصوت المطور (Fix Logic)
-    // ===============================================
-    
-    async function processVoiceInput(text) {
-        // تحويل الأرقام العربية
-        text = text.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
-        
-        // أوامر المسح
-        if(text.includes("امسح الكل")) {
-            handleDeleteAll();
-            return;
-        }
+ // auto-learn
+ desc.split(" ").forEach(w=>learnWord(w,type));
 
-        // أوامر البحث
-        if(text.startsWith("ابحث عن") || text.startsWith("شوف") || text.startsWith("حساب")) {
-            searchFilter = text.replace(/ابحث عن|شوف|حساب/g, "").trim();
-            render();
-            finishVoice(`تم البحث عن: ${searchFilter}`, false);
-            return;
-        }
+ desc = desc.trim() || (type==="income"?"وارد":"مصروف");
+ return {amount,desc,type};
+}
 
-        // معالجة المعاملة
-        let amount = 0;
-        let desc = text;
-        let type = 'expense'; // الافتراضي مصروف
+/* =========================================================
+   حفظ المعاملة
+========================================================= */
+async function saveDirect(a,d,t){
+ return await push(ref(db,t==='income'?'income':'expenses'),{
+   amount:a,description:d,timestamp:Date.now()
+ });
+}
 
-        // 1. محاولة استخراج رقم مباشر
-        const numMatch = text.match(/(\d+(\.\d+)?)/);
-        if(numMatch) {
-            amount = parseFloat(numMatch[0]);
-            desc = desc.replace(numMatch[0], "");
-        } else {
-            // 2. محاولة استخراج رقم مكتوب (خمسين، مية)
-            for(let [word, val] of Object.entries(EG_DICT.numbers)) {
-                if(text.includes(word)) {
-                    amount = val;
-                    desc = desc.replace(word, "");
-                    break; // نأخذ أول رقم نلاقيه للتبسيط
-                }
-            }
-        }
+/* =========================================================
+   Voice Processing
+========================================================= */
+async function processVoice(t){
+ const {amount,desc,type}=analyze(t);
+ if(!amount){hudText.innerText="مش سامع رقم واضح…";return;}
 
-        // 3. تحديد النوع
-        let incScore = 0;
-        let expScore = 0;
-        EG_DICT.income.forEach(w => { if(text.includes(w)) incScore++; });
-        EG_DICT.expense.forEach(w => { if(text.includes(w)) expScore++; });
-        
-        if(incScore > expScore) type = 'income';
-        if(text.includes("من")) type = 'income'; // جالي فلوس "من" فلان
-        if(text.includes("لـ") || text.includes("لى")) type = 'expense'; // دفعت "لـ" فلان
+ document.getElementById("inpAmount").value=amount;
+ document.getElementById("inpDesc").value=desc;
+ setMode(type);
 
-        // 4. تنظيف الوصف
-        desc = desc.replace(/(جنيه|جنية|ريال|دولار|يا|عم|بقولك|عشان|اللي|و|في|على)/g, "").trim();
-        if(!desc) desc = type === 'income' ? "وارد عام" : "مصروفات";
+ await saveDirect(amount,desc,type);
+ finishVoice("✔ تمت الإضافة");
+}
 
-        if(amount > 0) {
-            // تحديث الواجهة ليرى المستخدم ماذا حدث
-            UI.amount.value = amount;
-            UI.desc.value = desc;
-            setMode(type);
+function finishVoice(msg){
+ hudText.innerText=msg;
+ setTimeout(()=>{voiceHud.classList.remove("active");micBtn.classList.remove("listening");},1500);
+}
 
-            // الحفظ المباشر (تجاوز الفورم لتجنب المشاكل)
-            const saved = await saveDataDirectly(amount, desc, type);
-            
-            if(saved) {
-                finishVoice(`👍 سجلت ${amount} ${desc}`, true);
-            } else {
-                finishVoice(`❌ فشل الحفظ، تأكد من النت`, true);
-            }
-        } else {
-            UI.hudText.innerText = "مش سامع رقم.. قول تاني؟";
-        }
-    }
+/* =========================================================
+   Speech Recognition
+========================================================= */
+const micBtn=document.getElementById("micBtn");
+const voiceHud=document.getElementById("voiceHud");
+const hudText=document.getElementById("hudText");
 
-    // دالة لإنهاء وضع الصوت وإغلاق النافذة
-    function finishVoice(msg, autoClose) {
-        UI.hudText.innerText = msg;
-        UI.hudText.style.color = msg.includes("❌") ? "#ef4444" : "#fff";
-        
-        if(autoClose) {
-            setTimeout(() => {
-                UI.hud.classList.remove('active');
-                UI.micBtn.classList.remove('listening');
-                UI.hudText.style.color = "#fff"; // Reset color
-            }, 2000);
-        }
-    }
+if(window.webkitSpeechRecognition){
+ const R=new webkitSpeechRecognition();
+ R.lang="ar-EG";R.continuous=false;
 
-    async function handleDeleteAll() {
-        const {value: pass} = await Swal.fire({title:'كلمة السر', input:'password'});
-        if(pass === '521988') {
-            await remove(ref(db, 'income'));
-            await remove(ref(db, 'expenses'));
-            finishVoice("تم مسح كل البيانات", true);
-        } else {
-            finishVoice("كلمة السر غلط", true);
-        }
-    }
+ R.onstart=()=>{micBtn.classList.add("listening");voiceHud.classList.add("active");hudText.innerText="سامعك…";};
+ R.onresult=e=>processVoice(e.results[0][0].transcript);
+ R.onerror=()=>finishVoice("❌ المايك مش شغال!");
+ R.onend=()=>{};
+ window.toggleVoice=()=>{micBtn.classList.contains("listening")?R.stop():R.start();}
+}else{
+ micBtn.style.display="none";
+}
 
-    // إعداد الميكروفون
-    if(window.SpeechRecognition || window.webkitSpeechRecognition) {
-        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-        recognition = new SR();
-        recognition.lang = 'ar-EG';
-        recognition.continuous = false;
-        recognition.interimResults = false;
+/* =========================================================
+   UI + Firebase Sync
+========================================================= */
+window.setMode=m=>{
+ currentMode=m;
+ btnInc.classList.remove("active");btnExp.classList.remove("active");
+ (m==="income"?btnInc:btnExp).classList.add("active");
+ btnSubmit.style.background=m==="income"?"var(--success)":"var(--danger)";
+};
 
-        recognition.onstart = () => {
-            UI.micBtn.classList.add('listening');
-            UI.hud.classList.add('active');
-            UI.hudText.innerText = "سامعك...";
-            UI.hudSub.innerText = "قول المبلغ والوصف (مثلاً: 50 مواصلات)";
-        };
+window.saveTransaction=async e=>{
+ e.preventDefault();
+ const a=+inpAmount.value, d=inpDesc.value.trim();
+ if(!a||!d)return;
+ await saveDirect(a,d,currentMode);
+ inpAmount.value="";inpDesc.value="";
+};
 
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            UI.hudText.innerText = transcript;
-            processVoiceInput(transcript);
-        };
+onValue(ref(db),(s)=>{
+ const data=s.val()||{};
+ transactions=[];
+ if(data.income)Object.entries(data.income).forEach(([k,v])=>transactions.push({...v,id:k,type:"income"}));
+ if(data.expenses)Object.entries(data.expenses).forEach(([k,v])=>transactions.push({...v,id:k,type:"expense"}));
+ transactions.sort((a,b)=>b.timestamp-a.timestamp);
+ render();
+});
 
-        recognition.onend = () => {
-            // لو المستخدم متكلمش أو خلص كلام ومفيش عملية معالجة شغالة، نقفل
-            if(UI.hudText.innerText === "سامعك...") {
-                UI.hud.classList.remove('active');
-                UI.micBtn.classList.remove('listening');
-            }
-        };
-        
-        recognition.onerror = () => {
-            finishVoice("حصل خطأ في المايك", true);
-        };
+function render(){
+ const inc=transactions.filter(t=>t.type==="income").reduce((a,b)=>a+b.amount,0);
+ const exp=transactions.filter(t=>t.type==="expense").reduce((a,b)=>a+b.amount,0);
+ valInc.innerText=inc.toLocaleString();
+ valExp.innerText=exp.toLocaleString();
+ valBal.innerText=(inc-exp).toLocaleString();
 
-        window.toggleVoice = () => {
-            if(UI.micBtn.classList.contains('listening')) recognition.stop();
-            else recognition.start();
-        };
-    } else {
-        UI.micBtn.style.display = 'none';
-        alert("متصفحك لا يدعم الأوامر الصوتية");
-    }
+ txList.innerHTML=transactions.map(t=>`
+ <div class="tx-item">
+ <div style="width:45px;height:45px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+ background:${t.type==='income'?'#dcfce7':'#fee2e2'};color:${t.type==='income'?'var(--success)':'var(--danger)'}">
+ <i class="fa-solid ${t.type==='income'?'fa-arrow-down':'fa-arrow-up'}"></i>
+ </div>
+ <div style="flex:1">
+ <div style="font-weight:700">${t.description}</div>
+ <div style="font-size:.8rem;color:#64748b">${new Date(t.timestamp).toLocaleString('ar-EG')}</div>
+ </div>
+ <div style="font-weight:900;color:${t.type==='income'?'var(--success)':'var(--danger)'}">${t.amount.toLocaleString()}</div>
+ </div>`).join("");
+}
+
+window.toggleTheme=()=>document.body.dataset.theme=document.body.dataset.theme==="dark"?"light":"dark";
+
+window.exportExcel=()=>{
+ const wb=XLSX.utils.book_new();
+ const ws=XLSX.utils.json_to_sheet(transactions);
+ XLSX.utils.book_append_sheet(wb,ws,"Data");
+ XLSX.writeFile(wb,"Finance.xlsx");
+};
+
 </script>
-
 </body>
 </html>
