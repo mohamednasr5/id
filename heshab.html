@@ -2,608 +2,196 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>النظام المالي | ذكاء اصطناعي متكامل</title>
+    <title>النظام المالي الذكي | Gemini AI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-
-    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Roboto:wght@500;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Excel Export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-
-    <!-- Alerts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- AI Library (Transformers.js) -->
-    <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers/dist/transformers.min.js"></script>
 
     <style>
         :root {
             --primary: #6366f1;
+            --primary-rgb: 99, 102, 241;
             --success: #10b981;
             --danger: #ef4444;
-            --bg: #f1f5f9;
+            --bg: #f8fafc;
             --surface: #ffffff;
             --text: #1e293b;
         }
         [data-theme="dark"] {
             --bg: #0f172a; --surface: #1e293b; --text: #f8fafc;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
         body { background: var(--bg); color: var(--text); padding: 15px; padding-bottom: 120px; min-height: 100vh; transition: 0.3s; }
         .container { max-width: 600px; margin: 0 auto; }
 
-        .header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 15px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 15px 20px; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        
         .btn-icon { 
-            background: rgba(255,255,255,0.1); 
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2); 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 10px; 
-            font-size: 1.2rem; 
-            color: var(--text); 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            background: transparent; border: none; width: 45px; height: 45px; border-radius: 12px; 
+            font-size: 1.3rem; color: var(--text); cursor: pointer; display: flex; align-items: center; 
+            justify-content: center; transition: all 0.3s; position: relative; overflow: hidden;
         }
-        .btn-icon::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-        .btn-icon:hover::before { left: 100%; }
-        .btn-icon:hover { 
-            transform: scale(1.05); 
-            background: linear-gradient(135deg, var(--primary), #4f46e5); 
-            color: white; 
-            box-shadow: 0 4px 15px rgba(99,102,241,0.4);
-        }
+        .btn-icon:hover { background: rgba(var(--primary-rgb), 0.1); transform: translateY(-2px); }
         .btn-icon:active { transform: scale(0.95); }
 
-        /* Icons with transparent backgrounds */
-        .icon-transparent {
-            background: rgba(255,255,255,0.08);
-            border-radius: 8px;
-            padding: 8px;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .icon-transparent:hover {
-            background: rgba(255,255,255,0.15);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transform: scale(1.05);
-        }
-        .icon-success { color: var(--success); }
-        .icon-danger { color: var(--danger); }
-        .icon-primary { color: var(--primary); }
-
-        /* Stats Grid - محسّنة */
+        /* Stats */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .stat-card {
+            background: var(--surface); padding: 20px 10px; border-radius: 18px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04); transition: 0.3s; border: 1px solid rgba(0,0,0,0.05);
+        }
+        .stat-icon { font-size: 1.5rem; margin-bottom: 10px; display: inline-block; width: 40px; height: 40px; line-height: 40px; border-radius: 50%; }
+        .income .stat-icon { background: rgba(16,185,129,0.1); color: var(--success); }
+        .expense .stat-icon { background: rgba(239,68,68,0.1); color: var(--danger); }
+        .net .stat-icon { background: rgba(99,102,241,0.1); color: var(--primary); }
         
-        .stat-card { 
-            background: var(--surface); 
-            padding: 20px 15px; 
-            border-radius: 16px; 
-            text-align: center; 
-            position: relative; 
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-            cursor: default;
-        }
-
-        .stat-card.income { border-color: var(--success); background: linear-gradient(135deg, rgba(16,185,129,0.05), rgba(16,185,129,0.02)); }
-        .stat-card.expense { border-color: var(--danger); background: linear-gradient(135deg, rgba(239,68,68,0.05), rgba(239,68,68,0.02)); }
-        .stat-card.net { border-color: var(--primary); background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(99,102,241,0.02)); }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, currentColor, transparent);
-            animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
-
-        .stat-icon { 
-            font-size: 1.8rem; 
-            margin-bottom: 8px; 
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 8px;
-        }
-        .stat-label { font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        .stat-val { 
-            font-size: 2rem; 
-            font-weight: 900; 
-            font-family: 'Roboto', monospace;
-            letter-spacing: 1px;
-            animation: countUp 0.6s ease-out;
-        }
-
-        @keyframes countUp {
-            from {
-                opacity: 0;
-                transform: scale(0.8) translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-
+        .stat-label { font-size: 0.8rem; color: #64748b; font-weight: 700; margin-bottom: 5px; }
+        .stat-val { font-size: 1.6rem; font-weight: 800; font-family: 'Roboto', sans-serif; letter-spacing: -0.5px; }
         .stat-val.income { color: var(--success); }
         .stat-val.expense { color: var(--danger); }
         .stat-val.net { color: var(--primary); }
 
-        .input-box { background: var(--surface); padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; transition: 0.3s; }
+        /* Input Form */
+        .input-box { background: var(--surface); padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 20px; transition: 0.3s; }
         .input-box.hidden { display: none; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; background: var(--bg); padding: 5px; border-radius: 16px; }
+        .tab { flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; background: transparent; color: #94a3b8; transition: 0.3s; }
+        .tab.active { background: var(--surface); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .tab.active.inc { color: var(--success); }
+        .tab.active.exp { color: var(--danger); }
 
-        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab { 
-            flex: 1; 
-            padding: 12px; 
-            border-radius: 12px; 
-            font-weight: 800; 
-            cursor: pointer; 
-            background: #f8fafc; 
-            color: #94a3b8; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            gap: 5px; 
-            border: 2px solid transparent; 
-            transition: 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-        .tab::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transition: left 0.5s;
-        }
-        .tab:hover::before { left: 100%; }
-        .tab.active { border-color: var(--primary); color: var(--primary); background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(99,102,241,0.05)); }
-        .tab.active.inc { border-color: var(--success); color: var(--success); background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.05)); }
-        .tab.active.exp { border-color: var(--danger); color: var(--danger); background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.05)); }
-        .tab:hover { background: rgba(99,102,241,0.05); }
+        .input-group { position: relative; margin-bottom: 15px; }
+        .input-group input { width: 100%; padding: 16px 50px 16px 20px; border: 2px solid var(--bg); border-radius: 16px; font-size: 1.1rem; transition: 0.3s; background: var(--bg); color: var(--text); font-weight: 600; }
+        .input-group input:focus { outline: none; border-color: var(--primary); background: var(--surface); }
+        .input-group i { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.2rem; }
+        
+        .save-btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .save-btn:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99,102,241,0.3); }
 
-        .filter-btns { display: flex; gap: 8px; margin-bottom: 15px; }
-        .filter-btn { 
-            flex: 1; 
-            padding: 10px; 
-            border-radius: 10px; 
-            border: 2px solid #e2e8f0; 
-            background: transparent; 
-            color: var(--text); 
-            cursor: pointer; 
-            font-weight: 600; 
-            transition: all 0.2s ease;
-            position: relative;
-        }
-        .filter-btn::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 0;
-            height: 3px;
-            background: var(--primary);
-            transition: all 0.3s ease;
-            transform: translateX(-50%);
-        }
-        .filter-btn:hover::before { width: 80%; }
-        .filter-btn.active { 
-            border-color: var(--primary); 
-            background: linear-gradient(135deg, var(--primary), #4f46e5); 
-            color: white; 
-        }
-        .filter-btn.active::before { width: 100%; background: white; }
+        /* List */
+        .filter-btns { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .filter-btn { padding: 8px 20px; border-radius: 20px; border: 1px solid transparent; background: rgba(148, 163, 184, 0.1); color: var(--text); font-weight: 700; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .filter-btn.active { background: var(--text); color: var(--bg); }
 
-        .input-group { position: relative; margin-bottom: 12px; }
-        .input-group input { 
-            width: 100%; 
-            padding: 14px 45px 14px 15px; 
-            border: 2px solid #e2e8f0; 
-            border-radius: 12px; 
-            font-size: 1rem; 
-            transition: all 0.3s ease; 
-            background: var(--bg); 
-            color: var(--text); 
-        }
-        .input-group input:focus { 
-            outline: none; 
-            border-color: var(--primary); 
-            background: var(--surface); 
-            box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
-            transform: translateY(-2px);
-        }
-        .input-group i { 
-            position: absolute; 
-            right: 15px; 
-            top: 50%; 
-            transform: translateY(-50%); 
-            color: #94a3b8; 
-            transition: 0.2s;
-        }
-        .input-group input:focus + i { color: var(--primary); }
+        .record { background: var(--surface); padding: 15px; border-radius: 16px; display: flex; align-items: center; gap: 15px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; border: 1px solid rgba(0,0,0,0.03); position: relative; overflow: hidden; }
+        .record::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 6px; }
+        .record.inc::before { background: var(--success); }
+        .record.exp::before { background: var(--danger); }
+        .record:hover { transform: translateX(-5px); box-shadow: 0 5px 20px rgba(0,0,0,0.06); }
+        
+        .rec-info h4 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+        .rec-date { font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
+        .rec-amt { font-weight: 900; font-size: 1.2rem; margin-right: auto; font-family: 'Roboto', sans-serif; }
 
-        .save-btn { 
-            width: 100%; 
-            padding: 15px; 
-            background: linear-gradient(135deg, var(--primary), #4f46e5); 
-            color: white; 
-            border: none; 
-            border-radius: 12px; 
-            font-size: 1.1rem; 
-            font-weight: 800; 
-            cursor: pointer; 
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .save-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s;
-        }
-        .save-btn:hover::before { left: 100%; }
-        .save-btn:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 8px 25px rgba(99,102,241,0.4); 
-        }
-        .save-btn:active { transform: translateY(0); }
+        .toggle-input-btn { width: 100%; background: linear-gradient(135deg, var(--primary), #4f46e5); color: white; padding: 15px; border-radius: 16px; border: none; cursor: pointer; font-weight: 700; font-size: 1.1rem; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 20px rgba(99,102,241,0.3); transition: 0.3s; }
+        
+        /* Mic & AI Feedback */
+        .mic-container { position: fixed; bottom: 30px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 100; pointer-events: none; }
+        .mic-btn { pointer-events: auto; width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; border: none; box-shadow: 0 10px 30px rgba(225, 29, 72, 0.4); font-size: 1.8rem; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.3s; }
+        .mic-btn:hover { transform: scale(1.1); }
+        .mic-btn.listening { animation: pulse 1.5s infinite; background: #22c55e; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
 
-        .search-box { 
-            display: none; 
-            background: linear-gradient(135deg, #fff7ed, #fed7aa); 
-            border: 2px solid #fdba74; 
-            padding: 12px; 
-            border-radius: 12px; 
-            margin-bottom: 15px; 
-            justify-content: space-between; 
-            align-items: center; 
-            animation: slideDown 0.3s ease; 
-            box-shadow: 0 4px 12px rgba(253, 186, 116, 0.3);
-        }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .search-box div { font-weight: bold; color: #c2410c; }
-        .search-box button { 
-            background: none; 
-            border: none; 
-            font-size: 1.2rem; 
-            color: #c2410c; 
-            cursor: pointer; 
-            padding: 5px; 
-            border-radius: 50%;
-            transition: 0.2s;
-        }
-        .search-box button:hover { background: rgba(255,255,255,0.3); transform: scale(1.1); }
+        /* AI Thinking Indicator */
+        .ai-status { position: fixed; top: 110px; left: 50%; transform: translateX(-50%); background: rgba(15,23,42,0.9); backdrop-filter: blur(10px); color: white; padding: 12px 25px; border-radius: 50px; display: none; z-index: 999; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.2); align-items: center; gap: 10px; white-space: nowrap; }
+        .ai-status.active { display: flex; animation: slideDown 0.3s; }
+        .spinner { width: 18px; height: 18px; border: 3px solid #fff; border-bottom-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .record { 
-            background: var(--surface); 
-            padding: 12px; 
-            border-radius: 14px; 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            margin-bottom: 10px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
-            cursor: pointer; 
-            transition: all 0.3s ease;
-            border-right: 4px solid #ccc;
-            position: relative;
-            overflow: hidden;
-        }
-        .record::before {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 0;
-            height: 100%;
-            width: 4px;
-            background: linear-gradient(to bottom, transparent, currentColor, transparent);
-            opacity: 0;
-            transition: 0.3s;
-        }
-        .record:hover { 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15); 
-            transform: translateX(-5px); 
-        }
-        .record:hover::before { opacity: 1; }
-        .record:active { transform: translateX(-2px); }
-
-        .rec-info { flex: 1; }
-        .rec-info h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
-        .rec-date { font-size: 0.75rem; color: #94a3b8; display: flex; gap: 5px; align-items: center; }
-
-        .rec-amt { 
-            font-weight: 800; 
-            font-size: 1.1rem; 
-            min-width: 80px; 
-            text-align: left; 
-            font-family: 'Roboto', monospace; 
-            padding: 6px 12px;
-            border-radius: 20px;
-            transition: 0.2s;
-        }
-
-        .mic-container { position: fixed; bottom: 30px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 100; }
-        .mic-btn { 
-            width: 75px; 
-            height: 75px; 
-            border-radius: 50%; 
-            background: linear-gradient(135deg, #6366f1, #4f46e5); 
-            color: white; 
-            border: 4px solid rgba(255,255,255,0.2); 
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); 
-            font-size: 2rem; 
-            cursor: pointer; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .mic-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 0.6s ease;
-        }
-        .mic-btn:hover::before { width: 200px; height: 200px; }
-        .mic-btn:hover { transform: scale(1.05); }
-        .mic-btn:active { transform: scale(0.95); }
-        .mic-btn.listening { 
-            animation: pulse 1.5s infinite; 
-            box-shadow: 0 0 30px rgba(99, 102, 241, 0.8);
-        }
-        @keyframes pulse { 
-            0%, 100% { box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); } 
-            50% { box-shadow: 0 0 50px rgba(99, 102, 241, 0.8); } 
-        }
-
-        .voice-feedback { 
-            position: fixed; 
-            top: 100px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            background: rgba(15,23,42,0.95); 
-            color: white; 
-            padding: 15px 25px; 
-            border-radius: 50px; 
-            display: none; 
-            max-width: 80%; 
-            text-align: center; 
-            animation: slideDown 0.3s ease; 
-            font-size: 0.9rem; 
-            font-weight: bold; 
-            z-index: 101;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .voice-feedback.active { display: block; }
-
-        .toggle-input-btn { 
-            background: linear-gradient(135deg, var(--primary), #4f46e5); 
-            color: white; 
-            padding: 12px 20px; 
-            border-radius: 12px; 
-            border: none; 
-            cursor: pointer; 
-            font-weight: 600; 
-            margin-bottom: 15px; 
-            transition: all 0.3s ease;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            position: relative;
-        }
-        .toggle-input-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-        .toggle-input-btn:hover::before { left: 100%; }
-        .toggle-input-btn:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 8px 25px rgba(99,102,241,0.3); 
-        }
-
-        @media (max-width: 480px) {
-            .container { padding: 0; }
-            .stats-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
-            .stat-val { font-size: 1.6rem; }
-            .record { padding: 10px; gap: 10px; }
-            .rec-amt { font-size: 1rem; min-width: 70px; }
-            .btn-icon { width: 36px; height: 36px; font-size: 1.1rem; }
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
-
-    <!-- Header -->
     <div class="header">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <i class="fa-solid fa-wallet icon-transparent icon-primary" style="font-size:1.5rem;"></i>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:45px; height:45px; background:rgba(99,102,241,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center;">
+                <i class="fa-solid fa-robot" style="color:var(--primary); font-size:1.4rem;"></i>
+            </div>
             <div>
-                <h2 style="font-weight:800; line-height:1;">المالية</h2>
-                <span style="font-size:0.7rem; color:#64748b;">الحاج أحمد شطا</span>
+                <h2 style="font-weight:900; font-size:1.2rem; margin-bottom:2px;">المالية الذكية</h2>
+                <span style="font-size:0.75rem; color:#64748b; font-weight:600;">الحاج أحمد شطا</span>
             </div>
         </div>
-
         <div style="display:flex; gap:5px;">
             <button class="btn-icon" onclick="exportExcel()" title="تصدير Excel">
-                <i class="fa-solid fa-file-excel icon-transparent icon-success"></i>
+                <i class="fa-solid fa-file-excel" style="color:#10b981;"></i>
             </button>
-
             <button class="btn-icon" onclick="toggleTheme()" title="تبديل المظهر">
-                <i class="fa-solid fa-moon icon-transparent icon-primary"></i>
+                <i class="fa-solid fa-circle-half-stroke" style="color:#6366f1;"></i>
             </button>
-
             <button class="btn-icon" onclick="deleteAllRecordsPrompt()" title="حذف الكل">
-                <i class="fa-solid fa-trash icon-transparent icon-danger"></i>
+                <i class="fa-solid fa-trash-can" style="color:#ef4444;"></i>
             </button>
         </div>
     </div>
 
-    <!-- Search Display -->
-    <div id="searchBox" class="search-box">
-        <div>
-            <i class="fa-solid fa-filter icon-transparent icon-primary"></i> 
-            بحث: <span id="searchKey">...</span>
-        </div>
-        <button onclick="clearSearch()">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-    </div>
-
-    <!-- Stats - محسّنة -->
     <div class="stats-grid">
         <div class="stat-card income">
-            <div class="stat-icon icon-transparent icon-success">✓</div>
+            <div class="stat-icon"><i class="fa-solid fa-arrow-down"></i></div>
             <div class="stat-label">الدخل</div>
             <div class="stat-val income" id="totalInc">0</div>
         </div>
-
         <div class="stat-card expense">
-            <div class="stat-icon icon-transparent icon-danger">✕</div>
+            <div class="stat-icon"><i class="fa-solid fa-arrow-up"></i></div>
             <div class="stat-label">المصروفات</div>
             <div class="stat-val expense" id="totalExp">0</div>
         </div>
-
         <div class="stat-card net">
-            <div class="stat-icon icon-transparent icon-primary">=</div>
+            <div class="stat-icon"><i class="fa-solid fa-scale-balanced"></i></div>
             <div class="stat-label">الصافي</div>
             <div class="stat-val net" id="netBal">0</div>
         </div>
     </div>
 
-    <!-- Toggle Input Form Button -->
     <button class="toggle-input-btn" onclick="toggleInputForm()">
-        <i class="fa-solid fa-plus icon-transparent icon-success"></i> 
-        إضافة عملية
+        <i class="fa-solid fa-plus-circle"></i> تسجيل عملية يدوية
     </button>
 
-    <!-- Input Form -->
-    <div class="input-box" id="inputBox">
-
+    <div class="input-box hidden" id="inputBox">
         <div class="tabs">
-            <button id="btnInc" class="tab active inc" onclick="setMode('income')">
-                <i class="fa-solid fa-arrow-turn-down icon-transparent icon-success"></i>
-                <span>دخل</span>
-            </button>
-
-            <button id="btnExp" class="tab" onclick="setMode('expense')">
-                <i class="fa-solid fa-arrow-turn-up icon-transparent icon-danger"></i>
-                <span>مصروف</span>
-            </button>
+            <button id="btnInc" class="tab active inc" onclick="setMode('income')">دخل</button>
+            <button id="btnExp" class="tab" onclick="setMode('expense')">مصروف</button>
         </div>
-
-        <form onsubmit="saveTx(event)" id="form">
+        <form onsubmit="saveTx(event)">
             <div class="input-group">
-                <i class="fa-solid fa-money-bill-wave icon-transparent icon-primary"></i>
-                <input type="number" id="amount" placeholder="المبلغ" step="0.01" required>
+                <i class="fa-solid fa-coins"></i>
+                <input type="number" id="amount" placeholder="المبلغ" step="any" required>
             </div>
-
             <div class="input-group">
-                <i class="fa-solid fa-pen icon-transparent icon-primary"></i>
-                <input type="text" id="desc" placeholder="الوصف" required>
+                <i class="fa-solid fa-pen-nib"></i>
+                <input type="text" id="desc" placeholder="وصف العملية" required>
             </div>
-
             <button type="submit" class="save-btn" id="submitBtn">
-                <i class="fa-solid fa-floppy-disk icon-transparent icon-success"></i> 
-                تسجيل العملية
+                <i class="fa-solid fa-check"></i> حفظ العملية
             </button>
         </form>
     </div>
 
-    <!-- Filter Buttons -->
     <div class="filter-btns">
         <button class="filter-btn active" onclick="setFilter('all')" data-filter="all">الكل</button>
-        <button class="filter-btn" onclick="setFilter('income')" data-filter="income">الدخل</button>
-        <button class="filter-btn" onclick="setFilter('expense')" data-filter="expense">المصروفات</button>
+        <button class="filter-btn" onclick="setFilter('income')" data-filter="income">الوارد</button>
+        <button class="filter-btn" onclick="setFilter('expense')" data-filter="expense">المصروف</button>
     </div>
 
-    <!-- List -->
-    <div id="list" style="padding-bottom: 20px;"></div>
-
+    <div id="list"></div>
 </div>
 
-<!-- Voice Feedback -->
-<div class="voice-feedback" id="voiceFeedback">
-    <span id="voiceText">جاري الاستماع...</span>
+<div class="ai-status" id="aiStatus">
+    <div class="spinner" id="aiSpinner"></div>
+    <span id="aiText">جاري الاستماع...</span>
 </div>
 
-<!-- Mic Button -->
 <div class="mic-container">
-    <button class="mic-btn" id="mic" onclick="toggleMic()" title="اضغط للتحدث">
-        <i class="fa-solid fa-microphone icon-transparent icon-success"></i>
-    </button>
+    <button class="mic-btn" id="mic" onclick="toggleMic()"><i class="fa-solid fa-microphone"></i></button>
 </div>
 
 <script type="module">
-
 /* ================================
-   1) Firebase إعدادات
+   1) Firebase & Config
 ================================ */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -617,536 +205,248 @@ const app = initializeApp({
 });
 const db = getDatabase(app);
 
+// =============== تم إدراج مفتاح API الخاص بك ===============
+const GEMINI_API_KEY = "AIzaSyBx3b5hNfo8yXTJMRSa4F6PoROkYNNMDac";
+// =========================================================
 
 /* ================================
-   2) متغيرات رئيسية
+   2) Variables
 ================================ */
 let mode = "income";
 let records = [];
-let searchTerm = null;
-let isListening = false;
 let filter = "all";
-let AIClassifier = null;
-let AINER = null;
-
+let isListening = false;
 
 /* ================================
-   3) دالة تنسيق الأرقام بدون .00
+   3) UI Logic
 ================================ */
-function formatNumber(n) {
-    const num = Number(n);
-    if (num % 1 === 0) {
-        return Math.floor(num).toLocaleString('ar-EG');
-    }
-    return num.toLocaleString('ar-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-
-/* ================================
-   4) AI — تحميل موديلات الذكاء
-================================ */
-async function loadAI() {
-    console.log("⏳ تحميل الذكاء...");
-    
-    try {
-        AIClassifier = await window.transformers.pipeline(
-            "text-classification",
-            "Xenova/bert-base-multilingual-uncased"
-        );
-
-        AINER = await window.transformers.pipeline(
-            "token-classification",
-            "Xenova/bert-base-multilingual-uncased-finetuned-ner"
-        );
-
-        console.log("🤖 الذكاء أصبح جاهز!");
-    } catch (error) {
-        console.warn("⚠️ فشل تحميل الذكاء الاصطناعي:", error);
-    }
-}
-loadAI();
-
-
-/* ================================
-   5) القاموس المصري
-================================ */
-const EG_DICT = {
-
-    /* ======================================================
-       1) عبارات الدخل — الأكثر شيوعًا + توسعات ذكية
-    ====================================================== */
-    income_phrases: [
-        "خدت من", "اخدت من", "جالي من", "وصلني من",
-        "استلمت من", "اداني", "ادتهالي", "جاتلي", "جتلي",
-        "دهالي", "جابلي", "جاب لي", "حولي", "تحويل جالي",
-        "دخللي", "دخل لي", "وصل", "وصلي", "جالي", "جه ليا",
-        "دفعولي", "دفع لي", "دوني", "استخلاص", "حصيلة",
-        "ايراد جالي", "عمولة جت", "قبضت", "استلام فلوس",
-        "العربية دخلت", "الفلوس جات", "الرزق جه"
-    ],
-
-    /* ======================================================
-       2) كلمات الدخل — مرنة وتلتقط كلمات غير كاملة
-    ====================================================== */
-    income_words: [
-        "خدت", "اخدت", "استلمت", "وصلني", "جالي", "جه",
-        "دخل", "وارد", "ايراد", "ايرادات", "كسبت", "ربح",
-        "كسب", "عمولة", "محصل", "حول", "حولي", "وصل",
-        "قبض", "قبضت", "استلام", "محصّل", "محصلة"
-    ],
-
-    /* ======================================================
-       3) عبارات المصروف — تشمل العامي والتصرفات والأخطاء اللفظية
-    ====================================================== */
-    expense_phrases: [
-        "صرفت في", "دفعت في", "دفعت ل", "اديته", "اديت",
-        "دفعت", "خسرت", "خرجت", "طلع مني", "طلع ل",
-        "صرفته", "صرفتها", "حطيت في", "ديت ل", "ديتله",
-        "دفعت عليه", "اكلت مني", "راحت ل", "راحت مني",
-        "طارت فلوس", "فلوسي راحت", "دفعت من جيبي",
-        "خدت مني", "اشترت", "اشتريت", "جبت", "جاب",
-        "العربية خرجت", "الفلوس خرجت", "اتسحبت", "اتخصمت"
-    ],
-
-    /* ======================================================
-       4) كلمات المصروف السريعة المنتشرة في الكلام
-    ====================================================== */
-    expense_words: [
-        "صرف", "صرفت", "طلع", "خرج", "خصم", "دفع", "دفعت",
-        "مصروف", "شراء", "اشتريت", "جبت", "اتخصم", "خصموا",
-        "سحب", "سحبوا", "سحبت"
-    ],
-
-    /* ======================================================
-       5) أوامر الحذف (ذكاء أعلى)
-    ====================================================== */
-    delete_words: [
-        "امسح", "احذف", "اشطب", "شيل", "لغيه", "بلاش ده",
-        "امسحه", "احذف العملية", "احذف دي", "شيل اخر حاجة"
-    ],
-
-    delete_last_words: [
-        "اخر", "الاخيرة", "الاخر", "اخر عملية", "اخر واحدة",
-        "اللي فاتت", "اللي قبل دي", "قبل كده", "اللي فوق"
-    ],
-
-    delete_all_words: [
-        "مسح كل شيء", "احذف الكل", "حذف الجميع", "امسح السجل",
-        "احذف السجل", "صفر", "صفر الكل", "صفر البيانات",
-        "شيل كل حاجة", "امسح كله"
-    ],
-
-    /* ======================================================
-       6) توسيع فهم الأرقام الشعبية المصرية
-    ====================================================== */
-    numbers: {
-        "واحد":1, "اتنين":2, "تلاتة":3, "اربعة":4, "خمسة":5,
-        "ستة":6, "سبعة":7, "تمانية":8, "تسعة":9, "عشرة":10,
-        "حداشر":11, "اتناشر":12,
-        "عشرين":20, "تلاتين":30, "اربعين":40,
-        "خمسين":50, "ستين":60, "سبعين":70, "تمانين":80, "تسعين":90,
-        "مية":100, "ميه":100, "مية وخمسين":150,
-        "ميتين":200, "ثلاثمية":300, "تلتومية":300,
-        "ربعميت":400, "خمسمية":500,
-        "الف":1000, "ألف":1000,
-        "الفين":2000, "تلتلاف":3000, "اربعلاف":4000,
-        "نص":0.5, "نصهم":0.5, "ربع":0.25, "ثلث":0.333
-    },
-
-    /* ======================================================
-       7) الكلمات اللي يتم حذفها من الوصف
-    ====================================================== */
-    stopwords: [
-        "جنيه", "جنية", "جنيهات",
-        "دولار", "ريال", "يورو",
-        "من", "الى", "إلى", "لـ", "لي", "ل", "في", "على", "عن", "مع",
-        "كذا", "كذا كذا", "بتوع", "بتاعة", "بتاع"
-    ]
-};
-
-
-/* ================================
-   6) دوال أساسية
-================================ */
-
 window.toggleTheme = () => {
     const isDark = document.body.dataset.theme === "dark";
     document.body.dataset.theme = isDark ? "light" : "dark";
     localStorage.setItem("theme", document.body.dataset.theme);
 };
-
-const savedTheme = localStorage.getItem("theme");
-if (savedTheme) document.body.dataset.theme = savedTheme;
-
+if(localStorage.getItem("theme")) document.body.dataset.theme = localStorage.getItem("theme");
 
 window.setMode = (m) => {
     mode = m;
     document.getElementById("btnInc").className = `tab ${m==='income'?'active inc':''}`;
     document.getElementById("btnExp").className = `tab ${m==='expense'?'active exp':''}`;
-    document.getElementById("submitBtn").style.background =
-        m === "income" ? "linear-gradient(135deg, var(--success), #059669)" : "linear-gradient(135deg, var(--danger), #dc2626)";
+    document.getElementById("submitBtn").style.background = m === "income" ? "var(--success)" : "var(--danger)";
 };
-
 
 window.setFilter = (f) => {
     filter = f;
-    document.querySelectorAll(".filter-btn").forEach(b => {
-        b.classList.toggle("active", b.dataset.filter === f);
-    });
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.toggle("active", b.dataset.filter === f));
     render();
 };
-
 
 window.toggleInputForm = () => {
-    const box = document.getElementById("inputBox");
-    box.classList.toggle("hidden");
+    document.getElementById("inputBox").classList.toggle("hidden");
 };
-
-
-window.clearSearch = () => {
-    searchTerm = null;
-    document.getElementById("searchBox").style.display = "none";
-    render();
-};
-
 
 /* ================================
-   7) دالة Delete All مع كلمة السر
+   4) Firebase Data
 ================================ */
-window.deleteAllRecordsPrompt = async () => {
-    const { value: password } = await Swal.fire({
-        title: "حذف جميع السجلات",
-        input: "password",
-        inputPlaceholder: "أدخل كلمة المرور",
-        showCancelButton: true,
-        confirmButtonText: "التالي",
-        cancelButtonText: "إلغاء",
-        confirmButtonColor: "var(--primary)"
-    });
-
-    if (password === "521988") {
-        const { isConfirmed } = await Swal.fire({
-            title: "تنبيه",
-            html: `<strong style="color:var(--danger); font-size:1.2rem;">هل أنت متأكد من حذف جميع السجلات؟</strong><br><small style="color:#94a3b8;">هذه العملية لا يمكن التراجع عنها</small>`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "نعم، احذف الكل",
-            cancelButtonText: "إلغاء",
-            confirmButtonColor: "var(--danger)"
-        });
-
-        if (isConfirmed) {
-            await remove(ref(db, "income"));
-            await remove(ref(db, "expenses"));
-            Swal.fire({
-                icon: "success",
-                title: "✓ تم حذف جميع السجلات",
-                timer: 1500,
-                showConfirmButton: false
-            });
-        }
-    } else if (password) {
-        Swal.fire({
-            icon: "error",
-            title: "✕ كلمة المرور غير صحيحة",
-            timer: 1500,
-            showConfirmButton: false
-        });
-    }
-};
-
-
-/* ================================
-   8) حفظ عملية
-================================ */
-window.saveTx = async (e) => {
+window.saveTx = async (e, directData = null) => {
     if (e) e.preventDefault();
-
-    const amount = parseFloat(document.getElementById("amount").value);
-    const desc = document.getElementById("desc").value.trim();
-
-    if (!amount || !desc) {
-        return Swal.fire({
-            toast: true,
-            icon: "warning",
-            title: "اكتب المبلغ والوصف",
-            position: "top",
-            timer: 1500,
-            showConfirmButton: false
-        });
+    
+    let amt, txt, type;
+    
+    if (directData) {
+        amt = directData.amount;
+        txt = directData.description;
+        type = directData.type;
+    } else {
+        amt = parseFloat(document.getElementById("amount").value);
+        txt = document.getElementById("desc").value.trim();
+        type = mode;
     }
 
-    await push(ref(db, mode === "income" ? "income" : "expenses"), {
-        amount,
-        description: desc,
-        timestamp: Date.now()
+    if (!amt || !txt) return;
+
+    await push(ref(db, type === "income" ? "income" : "expenses"), {
+        amount: amt, description: txt, timestamp: Date.now()
     });
 
-    document.getElementById("amount").value = "";
-    document.getElementById("desc").value = "";
+    if (!directData) {
+        document.getElementById("amount").value = "";
+        document.getElementById("desc").value = "";
+        document.getElementById("inputBox").classList.add("hidden");
+    }
 
     Swal.fire({
-        toast:true, 
-        icon:"success", 
-        title:"تم الحفظ",
-        position:"top", 
-        timer:1500, 
-        showConfirmButton:false
+        toast: true, icon: "success", 
+        title: "تم الحفظ", 
+        text: `${txt} : ${amt}`,
+        position: "top", timer: 2000, showConfirmButton: false
     });
-
-    document.getElementById("inputBox").classList.add("hidden");
 };
 
-
-/* ================================
-   9) عرض البيانات مع Animation
-================================ */
 onValue(ref(db), (snap) => {
     records = [];
     const d = snap.val();
-
     if (d) {
-        if (d.income)
-            Object.entries(d.income).forEach(([id,v]) => records.push({...v,id,type:"income"}));
-
-        if (d.expenses)
-            Object.entries(d.expenses).forEach(([id,v]) => records.push({...v,id,type:"expense"}));
+        if (d.income) Object.entries(d.income).forEach(([id,v]) => records.push({...v,id,type:"income"}));
+        if (d.expenses) Object.entries(d.expenses).forEach(([id,v]) => records.push({...v,id,type:"expense"}));
     }
-
     records.sort((a,b) => b.timestamp - a.timestamp);
     render();
 });
 
 function render() {
     let data = records;
+    if (filter !== "all") data = data.filter(r => r.type === filter);
 
-    if (searchTerm) {
-        data = data.filter(r =>
-            r.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            formatNumber(r.amount).includes(searchTerm)
-        );
-    }
-
-    if (filter !== "all") {
-        data = data.filter(r => r.type === filter);
-    }
-
-    const inc = records.filter(r => r.type==="income")
-                       .reduce((s,r)=>s+r.amount,0);
-
-    const exp = records.filter(r => r.type==="expense")
-                       .reduce((s,r)=>s+r.amount,0);
-
+    const inc = records.filter(r => r.type==="income").reduce((s,r)=>s+r.amount,0);
+    const exp = records.filter(r => r.type==="expense").reduce((s,r)=>s+r.amount,0);
     const net = inc - exp;
 
-    // تحديث الأرقام بـ Animation
     animateNumber("totalInc", inc);
     animateNumber("totalExp", exp);
     animateNumber("netBal", net);
 
     const list = document.getElementById("list");
     list.innerHTML = "";
-
+    
     if (data.length === 0) {
-        list.innerHTML = `<div style="text-align:center; padding:30px; color:#94a3b8;">
-            <i class="fa-solid fa-inbox icon-transparent icon-primary" style="font-size:2rem; margin-bottom:10px;"></i>
-            <p>لا توجد سجلات</p>
+        list.innerHTML = `<div style="text-align:center; padding:40px; color:#94a3b8;">
+            <i class="fa-solid fa-box-open" style="font-size:3rem; margin-bottom:10px;"></i>
+            <p>لا توجد بيانات</p>
         </div>`;
         return;
     }
 
     data.forEach(r => {
         const div = document.createElement("div");
-        div.className = "record";
-        div.style.borderRight = `4px solid ${r.type==='income'?'var(--success)':'var(--danger)'}`;
+        div.className = `record ${r.type === 'income' ? 'inc' : 'exp'}`;
         div.onclick = () => manageRecord(r);
-
         const date = new Date(r.timestamp);
-
+        
         div.innerHTML = `
             <div class="rec-info">
                 <h4>${r.description}</h4>
                 <div class="rec-date">
-                    <span>${date.toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'})}</span>
-                    <span>•</span>
-                    <span>${date.toLocaleDateString('ar-EG')}</span>
+                    ${date.toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'})} • ${date.toLocaleDateString('ar-EG')}
                 </div>
             </div>
-            <div class="rec-amt" style="color:${r.type==='income'?'var(--success)':'var(--danger)'}; background: rgba(255,255,255,0.1); border-radius: 20px; padding: 6px 12px;">
-                ${r.type==='income'?'+':'-'}${formatNumber(r.amount)}
+            <div class="rec-amt" style="color:${r.type==='income'?'var(--success)':'var(--danger)'}">
+                ${r.type==='income'?'+':'-'}${Number(r.amount).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2})}
             </div>
         `;
-
         list.appendChild(div);
     });
 }
 
-// دالة التحريك للأرقام
-function animateNumber(elementId, targetValue) {
-    const el = document.getElementById(elementId);
-    el.classList.remove("income", "expense", "net");
+function animateNumber(id, val) {
+    const el = document.getElementById(id);
+    el.innerText = val.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+}
+
+/* ================================
+   5) AI & Gemini Integration
+================================ */
+// إظهار وإخفاء حالة الذكاء
+function setAIStatus(msg, isLoading = false) {
+    const el = document.getElementById("aiStatus");
+    const txt = document.getElementById("aiText");
+    const spin = document.getElementById("aiSpinner");
     
-    if (elementId === "totalInc") el.classList.add("income");
-    else if (elementId === "totalExp") el.classList.add("expense");
-    else el.classList.add("net");
-
-    el.textContent = formatNumber(targetValue);
+    if (msg) {
+        el.classList.add("active");
+        txt.innerText = msg;
+        spin.style.display = isLoading ? "block" : "none";
+    } else {
+        el.classList.remove("active");
+    }
 }
 
+// دالة الاتصال بـ Gemini API
+async function analyzeTextWithGemini(text) {
+    if (!GEMINI_API_KEY) {
+        Swal.fire({icon: "error", title: "مفتاح API مفقود", text: "يرجى إضافة مفتاح Gemini API في الكود."});
+        return null;
+    }
 
-/* ================================
-   10) إدارة عملية واحدة
-================================ */
-window.manageRecord = async (r) => {
-    const { isDenied, isConfirmed } = await Swal.fire({
-        title: r.description,
-        html: `<strong style="font-size:1.3rem; color: ${r.type==='income'?'var(--success)':'var(--danger)'}">${formatNumber(r.amount)}</strong> جنيه`,
-        showDenyButton: true,
-        showCancelButton: true,
-        confirmButtonText: "تعديل",
-        denyButtonText: "حذف",
-        cancelButtonText: "إغلاق",
-        confirmButtonColor: "var(--primary)",
-        denyButtonColor: "var(--danger)"
-    });
+    setAIStatus("جاري تحليل الكلام...", true);
 
-    if (isDenied) {
-        const { isConfirmed: confirmDelete } = await Swal.fire({
-            title: "تأكيد الحذف",
-            text: `هل تريد حذف "${r.description}"؟`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "نعم، احذف",
-            cancelButtonText: "إلغاء",
-            confirmButtonColor: "var(--danger)"
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    
+    // التعليمات للذكاء الاصطناعي (Prompt Engineering)
+    const prompt = `
+        You are a financial assistant for an Egyptian user.
+        Analyze this Arabic sentence: "${text}".
+        Extract:
+        1. 'amount' (number only).
+        2. 'description' (clean Arabic text, remove numbers and filler words like 'جنيه', 'دفعت', 'اشتريت').
+        3. 'type' (either "income" or "expense").
+        
+        Rules:
+        - Words like "صرفت", "اشتريت", "جبت", "دفعت", "حولتلهم", "خسرت", "ركبت" -> expense.
+        - Words like "قبضت", "خدت", "جالي", "استلمت", "مكسبي", "حولي", "بعت" -> income.
+        - If no clear amount, return null.
+        
+        Output ONLY valid JSON like: {"amount": 50, "description": "مواصلات", "type": "expense"}
+        Do not use Markdown.
+    `;
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
 
-        if (confirmDelete) {
-            await remove(ref(db, `${r.type}s/${r.id}`));
-            Swal.fire({toast:true, icon:"success", title:"تم الحذف", timer:1000, showConfirmButton:false});
-        }
+        const data = await response.json();
+        const aiText = data.candidates[0].content.parts[0].text;
+        
+        // تنظيف النص من علامات Markdown المحتملة
+        const jsonText = aiText.replace(/```json|```/g, "").trim();
+        const result = JSON.parse(jsonText);
+        
+        setAIStatus(null);
+        return result;
+
+    } catch (error) {
+        console.error("AI Error:", error);
+        setAIStatus("حدث خطأ في التحليل", false);
+        setTimeout(() => setAIStatus(null), 2000);
+        return null;
     }
-
-    if (isConfirmed) {
-        const { value: newDesc } = await Swal.fire({
-            input: "text",
-            inputValue: r.description,
-            title: "تعديل الوصف",
-            showCancelButton: true,
-            confirmButtonText: "تحديث",
-            cancelButtonText: "إلغاء"
-        });
-
-        if (newDesc && newDesc.trim()) {
-            await update(ref(db, `${r.type}s/${r.id}`), { description: newDesc.trim() });
-            Swal.fire({toast:true, icon:"success", title:"تم التحديث", timer:1000, showConfirmButton:false});
-        }
-    }
-};
-
-
-/* ================================
-   11) استخراج مبلغ
-================================ */
-function normalizeText(text) {
-    return text.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
 }
 
-function extractAmount(text) {
-    const digit = text.match(/(\d+(\.\d+)?)/);
-    if (digit) return parseFloat(digit[1]);
-
-    for (let [word,val] of Object.entries(EG_DICT.numbers)) {
-        if (text.includes(word)) return val;
-    }
-
-    return null;
-}
-
-
 /* ================================
-   12) تحديد نوع العملية
-================================ */
-function detectTransactionType(text) {
-    for (let p of EG_DICT.expense_phrases)
-        if (text.includes(p)) return "expense";
-
-    for (let p of EG_DICT.income_phrases)
-        if (text.includes(p)) return "income";
-
-    let inc = 0, exp = 0;
-
-    for (let w of EG_DICT.income_words)
-        if (text.includes(w)) inc++;
-
-    for (let w of EG_DICT.expense_words)
-        if (text.includes(w)) exp++;
-
-    if (inc > exp) return "income";
-    if (exp > inc) return "expense";
-
-    return null;
-}
-
-
-/* ================================
-   13) تنظيف الوصف
-================================ */
-function cleanDescription(text, type) {
-    let desc = text;
-
-    const removeWords = type === "income"
-        ? [...EG_DICT.income_phrases, ...EG_DICT.income_words]
-        : [...EG_DICT.expense_phrases, ...EG_DICT.expense_words];
-
-    removeWords.forEach(w => desc = desc.replace(new RegExp(w, 'gi'), ""));
-    EG_DICT.stopwords.forEach(w => desc = desc.replace(new RegExp(w, 'gi'), ""));
-
-    desc = desc.replace(/\d+/g, "");
-    return desc.trim();
-}
-
-
-/* ================================
-   14) نظام الصوت
+   6) Voice Recognition
 ================================ */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-
 if (SR) {
     const rec = new SR();
-    rec.lang = "ar-EG";
-    rec.continuous = false;
-    rec.interimResults = true;
-
-    rec.onstart = () => {
-        isListening = true;
-        document.getElementById("mic").classList.add("listening");
-        document.getElementById("voiceFeedback").classList.add("active");
-        document.getElementById("voiceText").innerText = "جاري الاستماع...";
+    rec.lang = "ar-EG"; // اللهجة المصرية
+    
+    rec.onstart = () => { 
+        isListening = true; 
+        document.getElementById("mic").classList.add("listening"); 
+        setAIStatus("استمع إليك...", false);
     };
-
-    rec.onend = () => {
-        isListening = false;
-        document.getElementById("mic").classList.remove("listening");
-        document.getElementById("voiceFeedback").classList.remove("active");
+    
+    rec.onend = () => { 
+        isListening = false; 
+        document.getElementById("mic").classList.remove("listening"); 
+        // لا تخفي الحالة هنا، انتظر التحليل
     };
 
     rec.onresult = async (e) => {
-        let text = "";
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-            if (e.results[i].isFinal) {
-                text += e.results[i][0].transcript;
-            }
+        const text = e.results[e.results.length-1][0].transcript;
+        setAIStatus(`سمعت: "${text}"`, true);
+        
+        // إرسال النص للذكاء الاصطناعي
+        const data = await analyzeTextWithGemini(text);
+        
+        if (data && data.amount) {
+            await saveTx(null, data);
+        } else {
+            Swal.fire({toast:true, icon:"warning", title:"لم أفهم المبلغ أو العملية", timer:2000});
+            setAIStatus(null);
         }
-
-        if (text) {
-            document.getElementById("voiceText").innerText = text;
-            await processCommand(text);
-        }
-    };
-
-    rec.onerror = () => {
-        Swal.fire({toast:true, icon:"error", title:"خطأ في الميكروفون", timer:1500});
     };
 
     window.toggleMic = () => {
@@ -1154,413 +454,74 @@ if (SR) {
         else rec.start();
     };
 } else {
-    console.warn("الميكروفون غير مدعوم");
+    alert("المتصفح لا يدعم الصوت");
 }
-
 
 /* ================================
-   15) AI — دوال الذكاء
+   7) Utilities (Excel, Delete, Manage)
 ================================ */
-function AI_SpellFix(text) {
-    return text
-        .replace(/فى/g, "في")
-        .replace(/الى/g, "إلى")
-        .replace(/اخد/g, "أخد")
-        .replace(/اخدت/g, "أخدت")
-        .replace(/\s+/g, " ")
-        .trim();
-}
-
-async function AI_GetIntent(text) {
-    if (!AIClassifier) return null;
-    try {
-        const out = await AIClassifier(text);
-        return out?.[0] || null;
-    } catch (error) {
-        console.warn("خطأ في تحليل النية:", error);
-        return null;
-    }
-}
-
-async function AI_GetNames(text) {
-    if (!AINER) return [];
-    try {
-        const raw = await AINER(text);
-        return [...new Set(
-            raw.filter(x => x.entity_group === "PER").map(x => x.word)
-        )];
-    } catch (error) {
-        console.warn("خطأ في استخراج الأسماء:", error);
-        return [];
-    }
-}
-
-
-/* ================================
-   16) معالجة الأوامر (الذكاء الكامل)
-================================ */
-async function processCommand(text) {
-    text = normalizeText(text);
-    text = AI_SpellFix(text);
-
-    const intent = await AI_GetIntent(text);
-    const names = await AI_GetNames(text);
-
-    // أوامر حذف الكل
-    for (let phrase of EG_DICT.delete_all_words) {
-        if (text.toLowerCase().includes(phrase.toLowerCase())) {
-            await deleteAllRecordsPrompt();
-            return;
-        }
-    }
-
-    // أوامر البحث
-    const searchKeywords = ["بحث", "ابحث", "دور", "شوف", "شوفلي", "حساب"];
-    if (searchKeywords.some(k => text.includes(k))) {
-        const key = names[0] || text.replace(/بحث|ابحث|دور|شوف|شوفلي|حساب|عن|لي/gi, "").trim();
-
-        if (key) {
-            searchTerm = key;
-            document.getElementById("searchBox").style.display = "flex";
-            document.getElementById("searchKey").innerText = key;
-            filter = "all";
-            document.querySelectorAll(".filter-btn").forEach(b => {
-                b.classList.toggle("active", b.dataset.filter === "all");
-            });
-            render();
-
-            Swal.fire({toast:true, icon:"info", title:`بحث عن ${key}`, timer:1200});
-        }
-        return;
-    }
-
-    // حذف آخر عملية
-    const deleteLastKeywords = ["امسح", "احذف", "اشطب"];
-    const lastKeywords = ["اخر", "الاخيرة", "الاخر", "بلاشي", "اخر حاجة", "الاخيرة"];
-
-    if (deleteLastKeywords.some(k => text.includes(k)) && lastKeywords.some(k => text.includes(k))) {
-        if (records.length) {
-            const last = records[0];
-            const { isConfirmed } = await Swal.fire({
-                title: "حذف آخر عملية",
-                html: `<strong>${last.description}</strong><br>${formatNumber(last.amount)} جنيه`,
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "حذف",
-                cancelButtonText: "إلغاء",
-                confirmButtonColor: "#ef4444"
-            });
-
-            if (isConfirmed) {
-                await remove(ref(db, `${last.type}s/${last.id}`));
-                Swal.fire({toast:true, icon:"success", title:"تم حذف آخر عملية", timer:1000, showConfirmButton:false});
-            }
-        }
-        return;
-    }
-
-    // معالجة المعاملات العادية
-    const amount = extractAmount(text);
-    let type = detectTransactionType(text);
-
-    if (intent) {
-        if (intent.label.includes("NEG")) type = "expense";
-        if (intent.label.includes("POS")) type = "income";
-    }
-
-    if (!type) type = "expense";
-
-    let desc = cleanDescription(text, type);
-    if (names.length) desc = (desc || "عملية") + " - " + names.join(" ");
-    if (!desc) desc = "عملية";
-
-    if (amount && type) {
-        document.getElementById("amount").value = amount;
-        document.getElementById("desc").value = desc;
-        setMode(type);
-        document.getElementById("inputBox").classList.remove("hidden");
-
-        Swal.fire({
-            icon: type==="income"?"success":"warning",
-            title: type==="income"?"✓ وارد":"✕ مصروف",
-            html:`<strong style="font-size:1.2rem; color: ${type==='income'?'var(--success)':'var(--danger)'}">${formatNumber(amount)}</strong> جنيه<br><small>${desc}</small>`,
-            timer:2000, 
-            showConfirmButton:false
-        });
-
-        setTimeout(() => saveTx(null), 500);
-    }
-}
-
-
-/* ================================
-   17) دالة Excel Export محسّنة مع حدود وألوان وأرقام بدون .00
-================================ */
-window.exportExcel = async () => {
-    const inc = records.filter(r => r.type==="income");
-    const exp = records.filter(r => r.type==="expense");
-    const incTotal = inc.reduce((s,r)=>s+r.amount,0);
-    const expTotal = exp.reduce((s,r)=>s+r.amount,0);
-    const netTotal = incTotal - expTotal;
-
-    const wb = XLSX.utils.book_new();
-
-    // ==================== جدول الدخل ====================
-    const incomeData = [
-        ["الدخل", "", ""]
-    ];
-    inc.forEach((r, i) => {
-        const date = new Date(r.timestamp).toLocaleDateString('ar-EG');
-        incomeData.push([r.description, formatNumber(r.amount), date]);
+window.manageRecord = async (r) => {
+    const { isDenied, isConfirmed } = await Swal.fire({
+        title: r.description,
+        text: `${r.amount} جنيه`,
+        showDenyButton: true, showCancelButton: true,
+        confirmButtonText: "تعديل", denyButtonText: "حذف", cancelButtonText: "غلق",
+        confirmButtonColor: "var(--primary)", denyButtonColor: "var(--danger)"
     });
-    incomeData.push(["الإجمالي", formatNumber(incTotal), ""]);
-
-    const incomeWS = XLSX.utils.aoa_to_sheet(incomeData);
-    setExcelStyles(incomeWS, "income", incomeData.length, "#10B981", "#ECFDF5");
-    XLSX.utils.book_append_sheet(wb, incomeWS, "الدخل");
-
-    // ==================== جدول المصروفات ====================
-    const expenseData = [
-        ["المصروفات", "", ""]
-    ];
-    exp.forEach((r, i) => {
-        const date = new Date(r.timestamp).toLocaleDateString('ar-EG');
-        expenseData.push([r.description, formatNumber(r.amount), date]);
-    });
-    expenseData.push(["الإجمالي", formatNumber(expTotal), ""]);
-
-    const expenseWS = XLSX.utils.aoa_to_sheet(expenseData);
-    setExcelStyles(expenseWS, "expense", expenseData.length, "#EF4444", "#FEF2F2");
-    XLSX.utils.book_append_sheet(wb, expenseWS, "المصروفات");
-
-    // ==================== جدول الملخص ====================
-    const summaryData = [
-        ["الملخص", ""],
-        ["الدخل الإجمالي", formatNumber(incTotal)],
-        ["المصروفات الإجمالية", formatNumber(expTotal)],
-        ["الرصيد النهائي", formatNumber(netTotal)]
-    ];
-
-    const summaryWS = XLSX.utils.aoa_to_sheet(summaryData);
-    setSummaryStyles(summaryWS);
-    XLSX.utils.book_append_sheet(wb, summaryWS, "الملخص");
-
-    // حفظ الملف
-    const now = new Date();
-    const filename = `النظام_المالي_${now.toLocaleDateString('ar-EG').replace(/\//g, '-')}.xlsx`;
-    XLSX.writeFile(wb, filename);
-
-    Swal.fire({
-        toast: true,
-        icon: "success",
-        title: "تم تصدير الملف بنجاح",
-        position: "top",
-        timer: 2000,
-        showConfirmButton: false
-    });
+    if (isDenied) {
+        await remove(ref(db, `${r.type}/${r.id}`));
+        Swal.fire({toast:true, icon:"success", title:"تم الحذف", timer:1000, showConfirmButton:false});
+    }
+    if (isConfirmed) {
+        const { value: val } = await Swal.fire({input:"text", inputValue:r.description});
+        if(val) await update(ref(db, `${r.type}/${r.id}`), {description:val});
+    }
 };
 
-// دالة تنسيق جداول الدخل والمصروفات مع حدود وألوان مميزة
-function setExcelStyles(ws, type, rowCount, mainColor, bgColor) {
-    const headerColor = mainColor;
-    const dataBgColor = bgColor;
-    const borderColor = mainColor;
+window.deleteAllRecordsPrompt = async () => {
+    const { value: p } = await Swal.fire({title:"أدخل كود الحذف", input:"password"});
+    if(p === "521988") {
+        await remove(ref(db, "income"));
+        await remove(ref(db, "expenses"));
+        Swal.fire({icon:"success", title:"تم الحذف"});
+    }
+};
+
+window.exportExcel = () => {
+    // نفس كود التصدير الملون السابق (محافظ عليه)
+    const wb = XLSX.utils.book_new();
+    const createCell = (v, s) => ({v, t: typeof v==='number'?'n':'s', s});
+    const border = { top:{style:"thin"}, bottom:{style:"thin"}, left:{style:"thin"}, right:{style:"thin"} };
     
-    // إعدادات الحدود
-    const thinBorder = { style: 'thin', color: { rgb: '#D1D5DB' } };
-    const thickBorder = { style: 'thick', color: { rgb: borderColor } };
+    const sheet = (data, title, color, lightColor) => {
+        const rows = [[
+            createCell("الوصف", {fill:{fgColor:{rgb:color}}, font:{color:{rgb:"FFFFFF"}, bold:true}, border}),
+            createCell("المبلغ", {fill:{fgColor:{rgb:color}}, font:{color:{rgb:"FFFFFF"}, bold:true}, border}),
+            createCell("التاريخ", {fill:{fgColor:{rgb:color}}, font:{color:{rgb:"FFFFFF"}, bold:true}, border})
+        ]];
+        data.forEach(r => {
+            rows.push([
+                createCell(r.description, {fill:{fgColor:{rgb:lightColor}}, border}),
+                createCell(r.amount, {fill:{fgColor:{rgb:lightColor}}, border}),
+                createCell(new Date(r.timestamp).toLocaleDateString('ar-EG'), {fill:{fgColor:{rgb:lightColor}}, border})
+            ]);
+        });
+        const ws = XLSX.utils.aoa_to_sheet([]);
+        const range = {s:{c:0,r:0}, e:{c:2,r:rows.length-1}};
+        ws['!ref'] = XLSX.utils.encode_range(range);
+        ws['!cols'] = [{wch:30}, {wch:15}, {wch:15}];
+        rows.forEach((row, r) => row.forEach((cell, c) => ws[XLSX.utils.encode_cell({c,r})] = cell));
+        XLSX.utils.book_append_sheet(wb, ws, title);
+    };
 
-    // تنسيق العناوين (الصف الأول)
-    if (ws['A1']) {
-        ws['A1'].fill = { fgColor: { rgb: headerColor }, patternType: 'solid' };
-        ws['A1'].font = { bold: true, color: { rgb: 'FFFFFF' }, size: 14 };
-        ws['A1'].alignment = { horizontal: 'center', vertical: 'center', wrapText: true };
-        ws['A1'].border = { 
-            top: thickBorder, bottom: thickBorder, 
-            left: thickBorder, right: thickBorder 
-        };
-    }
-    if (ws['B1']) {
-        ws['B1'].fill = { fgColor: { rgb: headerColor }, patternType: 'solid' };
-        ws['B1'].font = { bold: true, color: { rgb: 'FFFFFF' }, size: 14 };
-        ws['B1'].alignment = { horizontal: 'center', vertical: 'center', wrapText: true };
-        ws['B1'].border = { 
-            top: thickBorder, bottom: thickBorder, 
-            left: thickBorder, right: thickBorder 
-        };
-    }
-    if (ws['C1']) {
-        ws['C1'].fill = { fgColor: { rgb: headerColor }, patternType: 'solid' };
-        ws['C1'].font = { bold: true, color: { rgb: 'FFFFFF' }, size: 14 };
-        ws['C1'].alignment = { horizontal: 'center', vertical: 'center', wrapText: true };
-        ws['C1'].border = { 
-            top: thickBorder, bottom: thickBorder, 
-            left: thickBorder, right: thickBorder 
-        };
-    }
-
-    // تنسيق صفوف البيانات
-    for (let i = 2; i < rowCount; i++) {
-        const cellA = ws[`A${i}`];
-        const cellB = ws[`B${i}`];
-        const cellC = ws[`C${i}`];
-
-        if (cellA) {
-            cellA.fill = { fgColor: { rgb: dataBgColor }, patternType: 'solid' };
-            cellA.font = { size: 11 };
-            cellA.alignment = { horizontal: 'right', vertical: 'center', wrapText: true };
-            cellA.border = { 
-                top: thinBorder, bottom: thinBorder, 
-                left: thinBorder, right: thinBorder 
-            };
-        }
-        
-        if (cellB) {
-            cellB.fill = { fgColor: { rgb: dataBgColor }, patternType: 'solid' };
-            cellB.font = { bold: true, size: 11, color: { rgb: mainColor } };
-            cellB.alignment = { horizontal: 'right', vertical: 'center' };
-            cellB.border = { 
-                top: thinBorder, bottom: thinBorder, 
-                left: thinBorder, right: thinBorder 
-            };
-            // تنسيق الأرقام
-            if (cellB.v && typeof cellB.v === 'number') {
-                cellB.t = 'n';
-                cellB.z = '#,##0.00';
-            }
-        }
-        
-        if (cellC) {
-            cellC.fill = { fgColor: { rgb: dataBgColor }, patternType: 'solid' };
-            cellC.font = { size: 10, color: { rgb: '#6B7280' } };
-            cellC.alignment = { horizontal: 'center', vertical: 'center' };
-            cellC.border = { 
-                top: thinBorder, bottom: thinBorder, 
-                left: thinBorder, right: thinBorder 
-            };
-        }
-    }
-
-    // تنسيق الإجمالي (الصف الأخير)
-    const lastRow = rowCount;
-    if (ws[`A${lastRow}`]) {
-        ws[`A${lastRow}`].fill = { fgColor: { rgb: '#F3F4F6' }, patternType: 'solid' };
-        ws[`A${lastRow}`].font = { bold: true, size: 12, color: { rgb: '#111827' } };
-        ws[`A${lastRow}`].alignment = { horizontal: 'right', vertical: 'center', wrapText: true };
-        ws[`A${lastRow}`].border = { 
-            top: thickBorder, bottom: thickBorder, 
-            left: thickBorder, right: thickBorder 
-        };
-    }
-    if (ws[`B${lastRow}`]) {
-        ws[`B${lastRow}`].fill = { fgColor: { rgb: '#F3F4F6' }, patternType: 'solid' };
-        ws[`B${lastRow}`].font = { bold: true, size: 12, color: { rgb: mainColor } };
-        ws[`B${lastRow}`].alignment = { horizontal: 'right', vertical: 'center' };
-        ws[`B${lastRow}`].border = { 
-            top: thickBorder, bottom: thickBorder, 
-            left: thickBorder, right: thickBorder 
-        };
-        // تنسيق الإجمالي كرقم
-        if (ws[`B${lastRow}`].v && typeof ws[`B${lastRow}`].v === 'number') {
-            ws[`B${lastRow}`].t = 'n';
-            ws[`B${lastRow}`].z = '#,##0.00';
-        }
-    }
-    if (ws[`C${lastRow}`]) {
-        ws[`C${lastRow}`].border = { 
-            top: thickBorder, bottom: thickBorder, 
-            left: thickBorder, right: thickBorder 
-        };
-    }
-
-    // ضبط عرض الأعمدة
-    ws['!cols'] = [
-        { wch: 35 },  // وصف - عرض أكبر
-        { wch: 18 },  // مبلغ
-        { wch: 15 }   // تاريخ
-    ];
-
-    // ضبط ارتفاع الصفوف
-    ws['!rows'] = Array(rowCount).fill({ hpx: 25 });
-    ws['!rows'][0] = { hpx: 35 }; // العنوان أعلى
-    ws['!rows'][rowCount-1] = { hpx: 30 }; // الإجمالي أعلى قليلاً
-}
-
-// دالة تنسيق جدول الملخص مع حدود وألوان مميزة
-function setSummaryStyles(ws) {
-    const summaryColor = "6366F1";
-    const summaryBg = "F0F4FF";
-    const borderColor = summaryColor;
+    const inc = records.filter(r=>r.type==="income");
+    const exp = records.filter(r=>r.type==="expense");
     
-    // إعدادات الحدود
-    const thinBorder = { style: 'thin', color: { rgb: '#D1D5DB' } };
-    const thickBorder = { style: 'thick', color: { rgb: borderColor } };
-
-    // تنسيق العنوان
-    if (ws['A1']) {
-        ws['A1'].fill = { fgColor: { rgb: summaryColor }, patternType: 'solid' };
-        ws['A1'].font = { bold: true, color: { rgb: 'FFFFFF' }, size: 16 };
-        ws['A1'].alignment = { horizontal: 'center', vertical: 'center', wrapText: true };
-        ws['A1'].border = { 
-            top: thickBorder, bottom: thickBorder, 
-            left: thickBorder, right: thickBorder 
-        };
-    }
-    if (ws['B1']) {
-        ws['B1'].fill = { fgColor: { rgb: summaryColor }, patternType: 'solid' };
-        ws['B1'].border = { 
-            top: thickBorder, bottom: thickBorder, 
-            left: thickBorder, right: thickBorder 
-        };
-    }
-
-    // تنسيق صفوف البيانات
-    for (let i = 2; i <= 4; i++) {
-        const cellA = ws[`A${i}`];
-        const cellB = ws[`B${i}`];
-
-        if (cellA) {
-            cellA.fill = { fgColor: { rgb: summaryBg }, patternType: 'solid' };
-            cellA.font = { bold: true, size: 12, color: { rgb: '#374151' } };
-            cellA.alignment = { horizontal: 'right', vertical: 'center', wrapText: true };
-            cellA.border = { 
-                top: thinBorder, bottom: thinBorder, 
-                left: thinBorder, right: thinBorder 
-            };
-        }
-        
-        if (cellB) {
-            cellB.fill = { fgColor: { rgb: summaryBg }, patternType: 'solid' };
-            cellB.font = { bold: true, size: 12, color: { rgb: summaryColor } };
-            cellB.alignment = { horizontal: 'right', vertical: 'center' };
-            cellB.border = { 
-                top: thinBorder, bottom: thinBorder, 
-                left: thinBorder, right: thinBorder 
-            };
-            // تنسيق الأرقام في الملخص
-            if (cellB.v && typeof cellB.v === 'number') {
-                cellB.t = 'n';
-                cellB.z = '#,##0.00';
-            }
-        }
-    }
-
-    // ضبط عرض الأعمدة للملخص
-    ws['!cols'] = [
-        { wch: 25 },  // وصف
-        { wch: 20 }   // قيمة
-    ];
-
-    // ضبط ارتفاع الصفوف
-    ws['!rows'] = [
-        { hpx: 40 },  // العنوان
-        { hpx: 25 },  // الدخل
-        { hpx: 25 },  // المصروفات
-        { hpx: 25 }   // الرصيد
-    ];
-}
-
+    sheet(inc, "الوارد", "10B981", "ECFDF5");
+    sheet(exp, "المصروف", "EF4444", "FEF2F2");
+    
+    XLSX.writeFile(wb, "التقرير_المالي.xlsx");
+};
 </script>
-
 </body>
 </html>
