@@ -2,11 +2,10 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>المدير المالي الذكي Pro</title>
+    <title>النظام المالي | إهداء للحاج أحمد شطا </title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     
-    <!-- الخطوط والمكتبات -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -14,104 +13,111 @@
     <style>
         :root {
             --primary: #6366f1;
-            --primary-dark: #4338ca;
-            --danger: #ef4444;
             --success: #10b981;
+            --danger: #ef4444;
             --bg: #f1f5f9;
             --surface: #ffffff;
-            --text-main: #1e293b;
-            --text-sub: #64748b;
-            --shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --text: #1e293b;
         }
-
         [data-theme="dark"] {
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
+            --bg: #0f172a; --surface: #1e293b; --text: #f8fafc;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; outline: none; -webkit-tap-highlight-color: transparent; }
-
-        body { background: var(--bg); color: var(--text-main); padding: 20px; padding-bottom: 100px; transition: 0.3s ease; min-height: 100vh; }
-        
+        body { background: var(--bg); color: var(--text); padding: 15px; padding-bottom: 90px; min-height: 100vh; }
         .container { max-width: 600px; margin: 0 auto; }
 
         /* Header */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: var(--surface); padding: 15px 20px; border-radius: 16px; box-shadow: var(--shadow); }
-        .header h1 { font-size: 1.2rem; font-weight: 800; background: linear-gradient(to left, var(--primary), #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .action-btn { background: transparent; border: none; font-size: 1.2rem; color: var(--text-sub); cursor: pointer; padding: 8px; transition: 0.3s; border-radius: 8px; }
-        .action-btn:hover { background: var(--bg); color: var(--primary); }
+        .header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 15px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .btn-icon { background: #f1f5f9; border: none; width: 40px; height: 40px; border-radius: 10px; font-size: 1.2rem; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
         /* Stats Cards */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 25px; }
-        .stat-card { background: var(--surface); padding: 15px; border-radius: 16px; text-align: center; box-shadow: var(--shadow); position: relative; overflow: hidden; }
-        .stat-card::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; }
-        .stat-card.inc::after { background: var(--success); }
-        .stat-card.exp::after { background: var(--danger); }
-        .stat-card.bal::after { background: var(--primary); }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+        .stat-card { background: var(--surface); padding: 15px 5px; border-radius: 15px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
-        .stat-label { font-size: 0.8rem; color: var(--text-sub); margin-bottom: 5px; font-weight: 600; }
-        .stat-val { font-size: 1.2rem; font-weight: 800; direction: ltr; }
+        /* Background Icons inside Stats */
+        .stat-bg-icon { position: absolute; bottom: -5px; left: -5px; font-size: 3rem; opacity: 0.1; transform: rotate(15deg); pointer-events: none; }
+        
+        .stat-val { font-size: 1.1rem; font-weight: 800; direction: ltr; z-index: 2; position: relative; }
+        .stat-label { font-size: 0.8rem; color: #64748b; font-weight: 700; z-index: 2; position: relative; }
 
         /* Input Section */
-        .input-box { background: var(--surface); padding: 20px; border-radius: 20px; box-shadow: var(--shadow); margin-bottom: 25px; }
-        .tabs { display: flex; gap: 8px; margin-bottom: 15px; background: var(--bg); padding: 5px; border-radius: 12px; }
-        .tab { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; background: transparent; color: var(--text-sub); transition: 0.3s; }
-        .tab.active { background: var(--surface); color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .tab.active.exp-mode { color: var(--danger); }
+        .input-box { background: var(--surface); padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab { flex: 1; padding: 12px; border: 2px solid transparent; border-radius: 12px; font-weight: 800; cursor: pointer; background: #f8fafc; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: 0.2s; }
+        .tab i { font-size: 1.5rem; }
+        
+        .tab.active.inc { background: #dcfce7; color: #166534; border-color: #166534; }
+        .tab.active.exp { background: #fee2e2; color: #991b1b; border-color: #991b1b; }
 
-        input { width: 100%; padding: 14px; border: 2px solid var(--bg); background: var(--bg); border-radius: 12px; margin-bottom: 12px; font-size: 1rem; color: var(--text-main); transition: 0.3s; }
-        input:focus { border-color: var(--primary); background: var(--surface); }
+        /* Input Fields with Icons */
+        .input-group { position: relative; margin-bottom: 12px; }
+        .input-group i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.1rem; }
+        .input-group input { width: 100%; padding: 14px 45px 14px 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: var(--bg); color: var(--text); }
+        .input-group input:focus { border-color: var(--primary); background: var(--surface); }
 
-        .save-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3); transition: 0.3s; }
-        .save-btn:active { transform: scale(0.98); }
+        .save-btn { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
+
+        /* Search Bar */
+        .search-box { display: none; background: #fff7ed; border: 2px solid #fdba74; padding: 12px; border-radius: 12px; margin-bottom: 15px; justify-content: space-between; align-items: center; }
+        .search-box.active { display: flex; }
 
         /* List */
-        .list-title { font-size: 0.95rem; color: var(--text-sub); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .record { background: var(--surface); padding: 15px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); border-right: 5px solid transparent; transition: transform 0.2s; cursor: pointer; }
-        .record:hover { transform: translateX(-5px); }
-        .record.inc { border-right-color: var(--success); }
-        .record.exp { border-right-color: var(--danger); }
+        .record { background: var(--surface); padding: 12px; border-radius: 14px; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); cursor: pointer; }
         
-        .rec-info h4 { font-size: 0.95rem; margin-bottom: 4px; }
-        .rec-date { font-size: 0.75rem; color: var(--text-sub); }
-        .rec-amount { font-weight: 800; font-size: 1.1rem; direction: ltr; }
-        .text-inc { color: var(--success); }
-        .text-exp { color: var(--danger); }
+        .rec-icon { width: 45px; height: 45px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; flex-shrink: 0; }
+        .rec-icon.inc { background: #dcfce7; color: #166534; }
+        .rec-icon.exp { background: #fee2e2; color: #991b1b; }
+
+        .rec-info { flex: 1; }
+        .rec-info h4 { font-size: 1rem; margin-bottom: 2px; }
+        .rec-date { font-size: 0.75rem; color: #64748b; display: flex; align-items: center; gap: 4px; }
+        
+        .rec-amt { font-weight: 800; font-size: 1.1rem; direction: ltr; }
 
         /* Mic Button */
-        .mic-btn { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, #f43f5e, #e11d48); border: none; color: white; font-size: 1.6rem; cursor: pointer; box-shadow: 0 10px 25px rgba(225, 29, 72, 0.4); display: flex; justify-content: center; align-items: center; z-index: 100; transition: 0.3s; }
-        .mic-btn.listening { background: linear-gradient(135deg, #10b981, #059669); animation: pulse 1.5s infinite; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4); }
-        
-        @keyframes pulse { 0% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.1); } 100% { transform: translateX(-50%) scale(1); } }
+        .mic-btn { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; border: 4px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-size: 1.8rem; cursor: pointer; z-index: 100; display: flex; justify-content: center; align-items: center; transition: 0.3s; }
+        .mic-btn.listening { background: #10b981; transform: translateX(-50%) scale(1.1); }
     </style>
 </head>
 <body>
 
 <div class="container">
-
     <!-- Header -->
     <div class="header">
-        <h1><i class="fa-solid fa-wallet"></i> المدير المالي</h1>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <i class="fa-solid fa-sack-dollar" style="color:var(--primary); font-size:1.5rem;"></i>
+            <h2 style="font-weight:800;">المالية</h2>
+        </div>
         <div style="display:flex; gap:5px;">
-            <button class="action-btn" onclick="exportExcel()" title="تصدير Excel"><i class="fa-solid fa-file-csv" style="color:#10b981"></i></button>
-            <button class="action-btn" onclick="toggleTheme()" title="الوضع الليلي"><i class="fa-solid fa-moon"></i></button>
+            <button class="btn-icon" onclick="exportExcel()"><i class="fa-solid fa-file-excel" style="color:#10b981"></i></button>
+            <button class="btn-icon" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
         </div>
     </div>
 
-    <!-- Statistics -->
+    <!-- Search Display -->
+    <div id="searchBox" class="search-box">
+        <div style="font-weight:bold; color:#c2410c;">
+            <i class="fa-solid fa-magnifying-glass"></i> <span id="searchKey">...</span>
+        </div>
+        <button onclick="clearSearch()" style="background:none; border:none; font-size:1.2rem; color:#c2410c;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- Stats -->
     <div class="stats-grid">
-        <div class="stat-card inc">
+        <div class="stat-card">
+            <i class="fa-solid fa-hand-holding-dollar stat-bg-icon" style="color:var(--success)"></i>
             <div class="stat-label">وارد</div>
-            <div class="stat-val text-inc" id="totalInc">0</div>
+            <div class="stat-val" style="color:var(--success)" id="totalInc">0</div>
         </div>
-        <div class="stat-card exp">
+        <div class="stat-card">
+            <i class="fa-solid fa-money-bill-transfer stat-bg-icon" style="color:var(--danger)"></i>
             <div class="stat-label">مصروف</div>
-            <div class="stat-val text-exp" id="totalExp">0</div>
+            <div class="stat-val" style="color:var(--danger)" id="totalExp">0</div>
         </div>
-        <div class="stat-card bal">
+        <div class="stat-card">
+            <i class="fa-solid fa-scale-balanced stat-bg-icon" style="color:var(--primary)"></i>
             <div class="stat-label">الصافي</div>
             <div class="stat-val" style="color:var(--primary)" id="netBal">0</div>
         </div>
@@ -120,27 +126,38 @@
     <!-- Input Form -->
     <div class="input-box">
         <div class="tabs">
-            <button id="btnInc" class="tab active" onclick="setMode('income')">وارد (+)</button>
-            <button id="btnExp" class="tab" onclick="setMode('expense')">مصروف (-)</button>
+            <button id="btnInc" class="tab active inc" onclick="setMode('income')">
+                <i class="fa-solid fa-circle-arrow-down"></i>
+                <span>دخلت</span>
+            </button>
+            <button id="btnExp" class="tab" onclick="setMode('expense')">
+                <i class="fa-solid fa-circle-arrow-up"></i>
+                <span>خرجت</span>
+            </button>
         </div>
 
-        <form id="form" onsubmit="saveTx(event)">
-            <input type="number" id="amount" placeholder="المبلغ (مثال: 500)" step="0.01" required>
-            <input type="text" id="desc" placeholder="الوصف (مثال: فاتورة نت)" required>
-            <button class="save-btn" id="submitBtn"><i class="fa-solid fa-check"></i> حفظ العملية</button>
+        <form onsubmit="saveTx(event)" id="form">
+            <div class="input-group">
+                <i class="fa-solid fa-coins"></i>
+                <input type="number" id="amount" placeholder="المبلغ (كام؟)" step="0.01" required>
+            </div>
+            <div class="input-group">
+                <i class="fa-solid fa-pen-to-square"></i>
+                <input type="text" id="desc" placeholder="الوصف (ايه؟ / مين؟)" required>
+            </div>
+            <button class="save-btn" id="submitBtn">
+                <i class="fa-solid fa-check"></i> حفظ
+            </button>
         </form>
     </div>
 
     <!-- List -->
-    <div class="list-title">
-        <span>📝 آخر العمليات</span>
-        <span style="font-size:0.8rem">اضغط للتعديل</span>
-    </div>
     <div id="list"></div>
-
 </div>
 
-<button class="mic-btn" id="mic" onclick="toggleMic()"><i class="fa-solid fa-microphone"></i></button>
+<button class="mic-btn" id="mic" onclick="toggleMic()">
+    <i class="fa-solid fa-microphone"></i>
+</button>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -155,223 +172,197 @@
     });
     const db = getDatabase(app);
 
-    // --- Global Variables ---
     let mode = 'income';
     let records = [];
+    let searchTerm = null;
 
-    // --- UI Logic ---
     window.toggleTheme = () => document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
 
     window.setMode = (m) => {
         mode = m;
-        document.getElementById('btnInc').className = "tab " + (m === "income" ? "active" : "");
-        document.getElementById('btnExp').className = "tab " + (m === "expense" ? "active exp-mode" : "");
-        const btn = document.getElementById('submitBtn');
-        btn.style.background = m === 'income' ? 'var(--primary)' : 'var(--danger)';
-        btn.innerHTML = m === 'income' ? '<i class="fa-solid fa-plus"></i> حفظ الوارد' : '<i class="fa-solid fa-minus"></i> حفظ المصروف';
+        const bInc = document.getElementById('btnInc');
+        const bExp = document.getElementById('btnExp');
+        const sBtn = document.getElementById('submitBtn');
+
+        if(m === 'income') {
+            bInc.className = "tab active inc";
+            bExp.className = "tab";
+            sBtn.style.background = "var(--primary)";
+        } else {
+            bInc.className = "tab";
+            bExp.className = "tab active exp";
+            sBtn.style.background = "var(--danger)";
+        }
     };
 
-    // --- Save Transaction ---
+    window.clearSearch = () => {
+        searchTerm = null;
+        document.getElementById('searchBox').classList.remove('active');
+        render();
+    };
+
+    // --- Save ---
     window.saveTx = async (e) => {
         if(e) e.preventDefault();
-        const amountIn = document.getElementById('amount');
-        const descIn = document.getElementById('desc');
-        
-        const amount = parseFloat(amountIn.value);
-        const desc = descIn.value;
-
+        const amount = parseFloat(document.getElementById('amount').value);
+        const desc = document.getElementById('desc').value;
         if(!amount || !desc) return;
 
-        await push(ref(db, mode === "income" ? "income" : "expenses"), {
-            amount, description: desc, timestamp: Date.now()
-        });
-
+        await push(ref(db, mode === 'income' ? 'income' : 'expenses'), { amount, description: desc, timestamp: Date.now() });
         document.getElementById('form').reset();
-        Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 }).fire({ icon: 'success', title: 'تم الحفظ' });
+        Swal.fire({toast:true, icon:'success', title:'👍 تم الحفظ', position:'top', showConfirmButton:false, timer:1500});
     };
 
-    // --- Realtime Listener ---
+    // --- Listen ---
     onValue(ref(db), (snap) => {
         records = [];
         const d = snap.val();
         if(d) {
-            if(d.income) Object.entries(d.income).forEach(([id, v]) => records.push({...v, id, type: "income"}));
-            if(d.expenses) Object.entries(d.expenses).forEach(([id, v]) => records.push({...v, id, type: "expense"}));
+            if(d.income) Object.entries(d.income).forEach(([id, v]) => records.push({...v, id, type: 'income'}));
+            if(d.expenses) Object.entries(d.expenses).forEach(([id, v]) => records.push({...v, id, type: 'expense'}));
         }
         records.sort((a, b) => b.timestamp - a.timestamp);
         render();
     });
 
     function render() {
+        let displayData = records;
+        if(searchTerm) {
+            displayData = records.filter(r => 
+                r.description.includes(searchTerm) || 
+                r.amount.toString().includes(searchTerm) ||
+                new Date(r.timestamp).toLocaleDateString('ar-EG').includes(searchTerm)
+            );
+        }
+
         const inc = records.filter(r => r.type === "income").reduce((s, r) => s + Number(r.amount), 0);
         const exp = records.filter(r => r.type === "expense").reduce((s, r) => s + Number(r.amount), 0);
-
         document.getElementById('totalInc').innerText = inc.toLocaleString();
         document.getElementById('totalExp').innerText = exp.toLocaleString();
         document.getElementById('netBal').innerText = (inc - exp).toLocaleString();
 
         const list = document.getElementById('list');
         list.innerHTML = "";
-
-        records.slice(0, 50).forEach(r => {
+        
+        displayData.slice(0, 50).forEach(r => {
             const div = document.createElement("div");
-            div.className = "record " + (r.type === 'income' ? 'inc' : 'exp');
-            div.onclick = () => deleteOrEdit(r);
+            div.className = "record";
+            div.onclick = () => manageRecord(r);
             
-            const dateObj = new Date(r.timestamp);
-            const dateStr = dateObj.toLocaleDateString('ar-EG');
-            const timeStr = dateObj.toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
-
+            const date = new Date(r.timestamp);
+            const isInc = r.type === 'income';
+            
             div.innerHTML = `
+                <div class="rec-icon ${isInc ? 'inc' : 'exp'}">
+                    <i class="fa-solid ${isInc ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+                </div>
                 <div class="rec-info">
                     <h4>${r.description}</h4>
-                    <div class="rec-date"><i class="fa-regular fa-clock"></i> ${timeStr} | ${dateStr}</div>
+                    <div class="rec-date">
+                        <i class="fa-regular fa-clock"></i> 
+                        ${date.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}
+                        - ${date.toLocaleDateString('ar-EG')}
+                    </div>
                 </div>
-                <div class="rec-amount ${r.type === 'income' ? 'text-inc' : 'text-exp'}">
-                    ${r.type === 'income' ? '+' : '-'}${Number(r.amount).toLocaleString()}
+                <div class="rec-amt" style="color:${isInc ? 'var(--success)' : 'var(--danger)'}">
+                    ${isInc ? '+' : '-'}${Number(r.amount).toLocaleString()}
                 </div>
             `;
             list.appendChild(div);
         });
     }
 
-    window.deleteOrEdit = (r) => {
-        Swal.fire({
-            title: 'خيارات السجل',
-            text: `${r.description} (${r.amount})`,
-            showDenyButton: true,
-            showCancelButton: true,
-            confirmButtonText: 'تعديل',
-            denyButtonText: 'حذف',
-            cancelButtonText: 'إلغاء'
-        }).then(async (result) => {
-            if (result.isDenied) {
-                await remove(ref(db, `${r.type === 'income' ? 'income' : 'expenses'}/${r.id}`));
-                Swal.fire('تم الحذف', '', 'success');
-            } else if (result.isConfirmed) {
-                // Edit logic could be added here
-                Swal.fire('التعديل قيد التطوير في النسخة القادمة', '', 'info');
-            }
+    window.manageRecord = async (r) => {
+        const { isDenied } = await Swal.fire({
+            title: r.description, 
+            text: `${r.amount}`, 
+            icon: r.type === 'income' ? 'success' : 'error',
+            showDenyButton: true, 
+            showCancelButton: true, 
+            confirmButtonText: '✏️ تعديل', 
+            denyButtonText: '🗑️ حذف',
+            cancelButtonText: 'إغلاق'
         });
+
+        if(isDenied) {
+            await remove(ref(db, `${r.type === 'income' ? 'income' : 'expenses'}/${r.id}`));
+            Swal.fire('تم الحذف', '', 'success');
+        }
     };
 
-    // --- EXCEL EXPORT WITH COLORS & BORDERS ---
     window.exportExcel = () => {
-        if(records.length === 0) { Swal.fire('لا توجد بيانات', '', 'warning'); return; }
-
         const wb = XLSX.utils.book_new();
-        
-        // 1. Define Styles
-        const styleHeader = {
-            font: { bold: true, color: { rgb: "FFFFFF" }, sz: 12 },
-            fill: { fgColor: { rgb: "4F46E5" } }, // Indigo
-            alignment: { horizontal: "center", vertical: "center" },
-            border: { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} }
-        };
-
-        const styleInc = {
-            fill: { fgColor: { rgb: "DCFCE7" } }, // Light Green
-            font: { color: { rgb: "166534" } }, // Dark Green
-            border: { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} }
-        };
-
-        const styleExp = {
-            fill: { fgColor: { rgb: "FEE2E2" } }, // Light Red
-            font: { color: { rgb: "991B1B" } }, // Dark Red
-            border: { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} }
-        };
-
-        // 2. Build Data
-        const wsData = [
-            [
-                {v: "التاريخ", s: styleHeader},
-                {v: "الوقت", s: styleHeader},
-                {v: "النوع", s: styleHeader},
-                {v: "الوصف", s: styleHeader},
-                {v: "المبلغ", s: styleHeader}
-            ]
-        ];
-
+        const data = [[ "التاريخ", "الوقت", "النوع", "الوصف", "المبلغ" ]];
         records.forEach(r => {
-            const dt = new Date(r.timestamp);
-            const rowStyle = r.type === 'income' ? styleInc : styleExp;
-            
-            wsData.push([
-                {v: dt.toLocaleDateString('ar-EG'), s: rowStyle},
-                {v: dt.toLocaleTimeString('ar-EG'), s: rowStyle},
-                {v: r.type === 'income' ? 'وارد' : 'مصروف', s: rowStyle},
-                {v: r.description, s: rowStyle},
-                {v: Number(r.amount), t: 'n', s: rowStyle}
+            const d = new Date(r.timestamp);
+            data.push([
+                d.toLocaleDateString('ar-EG'),
+                d.toLocaleTimeString('ar-EG'),
+                r.type==='income'?'وارد':'مصروف',
+                r.description,
+                Number(r.amount)
             ]);
         });
-
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
-        
-        // Column Widths
-        ws['!cols'] = [{wch:15}, {wch:15}, {wch:10}, {wch:30}, {wch:15}];
-
-        XLSX.utils.book_append_sheet(wb, ws, "تقرير مالي");
-        XLSX.writeFile(wb, `Financial_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        XLSX.utils.book_append_sheet(wb, ws, "Report");
+        XLSX.writeFile(wb, "Finance_Report.xlsx");
     };
 
-    // --- Voice Logic (Smart) ---
+    // --- Smart Voice ---
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if(SR) {
         const rec = new SR();
         rec.lang = "ar-EG";
-        rec.onstart = () => document.getElementById('mic').classList.add("listening");
-        rec.onend = () => document.getElementById('mic').classList.remove("listening");
+        rec.onstart = () => document.getElementById('mic').classList.add('listening');
+        rec.onend = () => document.getElementById('mic').classList.remove('listening');
         
         rec.onresult = async (e) => {
             let txt = e.results[0][0].transcript;
             
-            // Normalize digits
-            txt = txt.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
-
-            // Commands
-            if(txt.includes("امسح الكل") || txt.includes("حذف الكل")) {
-                const {value:pass} = await Swal.fire({title:'ادخل كود الحذف', input:'password'});
-                if(pass === '521988') {
-                    await remove(ref(db, 'income'));
-                    await remove(ref(db, 'expenses'));
-                    Swal.fire('تم التصفير', '', 'success');
-                }
+            // Search
+            const searchMatch = txt.match(/(?:ابحث عن|شوف|حساب) (.+)/);
+            if(searchMatch) {
+                searchTerm = searchMatch[1].trim();
+                document.getElementById('searchBox').classList.add('active');
+                document.getElementById('searchKey').innerText = searchTerm;
+                render();
                 return;
             }
 
-            // Transaction Parsing
-            const amountMatch = txt.match(/(\d+(\.\d+)?)/);
-            if(amountMatch) {
-                const amount = parseFloat(amountMatch[0]);
-                let desc = txt.replace(amount, '').replace(/جنيه|جنية/g, '').trim();
-                
-                // Detect Type
-                const expKw = ["صرفت","اشتريت","جبت","دفعت","لـ","مصروف","خرجت"];
-                const incKw = ["قبضت","جالي","اخدت","وارد","دخل","من"];
-                
-                let type = 'expense'; // Default
-                if(incKw.some(k => txt.includes(k))) type = 'income';
-                
-                // Clean Desc
-                [...expKw, ...incKw].forEach(k => desc = desc.replace(k, ''));
-                desc = desc.trim() || "بدون وصف";
+            // Delete All
+            if(txt.includes("امسح الكل")) {
+                const {value} = await Swal.fire({title:'كلمة السر', input:'password'});
+                if(value==='521988') { await remove(ref(db,'income')); await remove(ref(db,'expenses')); }
+                return;
+            }
 
-                // Fill & Save
+            // Add Transaction
+            txt = txt.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
+            const amtMatch = txt.match(/(\d+(\.\d+)?)/);
+            
+            if(amtMatch) {
+                const amount = parseFloat(amtMatch[0]);
+                const incKw = ["وصل", "جالي", "جه", "موجود", "مع", "وارد", "دخل"];
+                let type = 'expense'; 
+                if(incKw.some(k => txt.includes(k))) type = 'income';
+
+                let desc = txt.replace(amount, '').replace(/جنيه|جنية/g, '').trim();
+                ["وصل","جالي","صرفت","اشتريت","من","لـ"].forEach(k => desc = desc.replace(k, ''));
+                desc = desc.trim() || "صوتي";
+
                 document.getElementById('amount').value = amount;
                 document.getElementById('desc').value = desc;
                 setMode(type);
                 saveTx(null);
             } else {
-                Swal.fire('لم أسمع مبلغاً', txt, 'question');
+                Swal.fire('؟', 'قول رقم', 'question');
             }
         };
-
         window.toggleMic = () => {
             const btn = document.getElementById('mic');
-            if(btn.classList.contains("listening")) rec.stop(); else rec.start();
-        };
+            if(btn.classList.contains('listening')) rec.stop(); else rec.start();
+        }
     }
 </script>
-
 </body>
 </html>
