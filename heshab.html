@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>النظام المالي الذكي | اللهجة المصرية</title>
+    <title>النظام المالي | تحكم صوتي دقيق</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
@@ -41,7 +41,6 @@
         /* Input Section */
         .input-box { background: var(--surface); padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; transition: 0.3s; }
         .input-box.recording { border: 2px solid #ef4444; animation: pulse 1.5s infinite; }
-        
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
         .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
@@ -80,7 +79,6 @@
         .mic-container { position: fixed; bottom: 30px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 100; pointer-events: none; }
         .mic-btn { width: 75px; height: 75px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); font-size: 2rem; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.3s; pointer-events: auto; }
         .mic-btn.listening { background: #ef4444; transform: scale(1.15); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0.2); }
-        .mic-btn i { transition: 0.3s; }
 
         /* Voice Feedback */
         .voice-feedback { position: fixed; top: 100px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.95); color: white; padding: 15px 25px; border-radius: 50px; z-index: 1000; display: none; backdrop-filter: blur(10px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); white-space: nowrap; }
@@ -103,7 +101,7 @@
             <i class="fa-solid fa-wallet" style="color:var(--primary); font-size:1.5rem;"></i>
             <div>
                 <h2 style="font-weight:800; line-height:1;">المالية</h2>
-                <span style="font-size:0.7rem; color:#64748b;">إهداء للحاج أحمد شطا</span>
+                <span style="font-size:0.7rem; color:#64748b;">الحاج أحمد شطا</span>
             </div>
         </div>
         <div style="display:flex; gap:5px;">
@@ -115,7 +113,7 @@
     <!-- Search Display -->
     <div id="searchBox" class="search-box">
         <div style="font-weight:bold; color:#c2410c;">
-            <i class="fa-solid fa-filter"></i> نتيجة البحث: <span id="searchKey">...</span>
+            <i class="fa-solid fa-filter"></i> بحث: <span id="searchKey">...</span>
         </div>
         <button onclick="clearSearch()" style="background:none; border:none; font-size:1.2rem; color:#c2410c;"><i class="fa-solid fa-xmark"></i></button>
     </div>
@@ -133,7 +131,7 @@
             <div class="stat-val" style="color:var(--danger)" id="totalExp">0</div>
         </div>
         <div class="stat-card">
-            <i class="fa-solid fa-sack-dollar stat-bg-icon" style="color:var(--primary)"></i>
+            <i class="fa-solid fa-scale-balanced stat-bg-icon" style="color:var(--primary)"></i>
             <div class="stat-label">الصافي</div>
             <div class="stat-val" style="color:var(--primary)" id="netBal">0</div>
         </div>
@@ -205,28 +203,28 @@
     let isListening = false;
 
     // ===============================================
-    //  قاموس اللهجة المصرية (إعدادات المستخدم)
+    //  قاموس اللهجة المصرية (المحدث)
     // ===============================================
     const EG_DICT = {
-        // العبارات والجمل الدالة على الدخل (الأولوية للجمل الطويلة)
+        // العبارات التي تدل على الدخل (فلوس دخلت الجيب)
         income_phrases: [
-            "جالي دلوقتي", "اخدت منهم", "خدت منهم", "جالي من", "اخدت من", "استلمت من", "قبضت من"
+            "خدت من", "اخدت من", "استلمت من", "قبضت من", "جالي من", "جالى من"
         ],
-        // الكلمات الفردية للدخل
+        // كلمات الدخل الفردية
         income_words: [
-            "دخلى", "دخل", "جه", "جالي", "اجانى", "اخدت", "عطاني", "اعطاني", "خدت", "ايراد", "ربح", "داخلى", "وارد", "من"
+            "خدت", "اخدت", "جالي", "جالى", "دخل", "وارد", "ايراد", "ربح", "هات", "استلام"
         ],
         
-        // العبارات والجمل الدالة على المصروف
+        // العبارات التي تدل على المصروف (فلوس خرجت)
         expense_phrases: [
-            "خد مني", "اخد مني", "راح ل", "دفعت ل", "عشان خاطر", "دفعت عشان"
+            "خد مني", "اخد مني", "خد منى", "اخد منى", "راح ل", "دفعت ل", "طلع ل", "اديت ل"
         ],
-        // الكلمات الفردية للمصروف
+        // كلمات المصروف الفردية
         expense_words: [
-            "صرف", "صرفت", "طلع", "طلعت", "لي", "اخد", "خرج", "خروج", "خرجت", "اتصرف", "مصاريف", "ثمن", "تمن", "ل", "علشان", "عشان"
+            "صرف", "صرفت", "طلع", "خرج", "دفعت", "مصروف", "شريت", "اشتريت", "جبت", "حساب"
         ],
 
-        // أرقام مكتوبة
+        // أرقام
         numbers: {
             "واحد":1, "اتنين":2, "تلاتة":3, "اربعة":4, "خمسة":5, "ستة":6, "سبعة":7, "تمانية":8, "تسعة":9, "عشرة":10,
             "عشرين":20, "تلاتين":30, "اربعين":40, "خمسين":50, "ستين":60, "سبعين":70, "تمانين":80, "تسعين":90,
@@ -239,9 +237,7 @@
     window.toggleTheme = () => {
         const isDark = document.body.dataset.theme === 'dark';
         document.body.dataset.theme = isDark ? 'light' : 'dark';
-        localStorage.setItem('theme', isDark ? 'light' : 'dark');
     };
-    if(localStorage.getItem('theme') === 'dark') document.body.dataset.theme = 'dark';
 
     window.setMode = (m) => {
         mode = m;
@@ -249,7 +245,6 @@
         document.getElementById('btnExp').className = `tab ${m==='expense'?'active exp':''}`;
         const btn = document.getElementById('submitBtn');
         btn.style.background = m === 'income' ? 'var(--primary)' : 'var(--danger)';
-        btn.innerHTML = m === 'income' ? '<i class="fa-solid fa-download"></i> تسجيل دخل' : '<i class="fa-solid fa-upload"></i> تسجيل صرف';
     };
 
     window.clearSearch = () => {
@@ -267,24 +262,14 @@
 
         if(!amount || !desc) return Swal.fire({toast:true, icon:'warning', title:'اكتب المبلغ والوصف', position:'top'});
 
-        const btn = document.getElementById('submitBtn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
-        
-        try {
-            await push(ref(db, mode === 'income' ? 'income' : 'expenses'), { 
-                amount, 
-                description: desc, 
-                timestamp: Date.now() 
-            });
-            amountInp.value = '';
-            descInp.value = '';
-            Swal.fire({toast:true, icon:'success', title:'تم الحفظ بنجاح', position:'top', timer:2000, showConfirmButton:false});
-        } catch(err) {
-            Swal.fire({icon:'error', title:'خطأ', text: err.message});
-        } finally {
-            btn.innerHTML = originalText;
-        }
+        await push(ref(db, mode === 'income' ? 'income' : 'expenses'), { 
+            amount, 
+            description: desc, 
+            timestamp: Date.now() 
+        });
+        amountInp.value = '';
+        descInp.value = '';
+        Swal.fire({toast:true, icon:'success', title:'تم الحفظ', position:'top', timer:1500, showConfirmButton:false});
     };
 
     // --- استماع للبيانات ---
@@ -309,13 +294,14 @@
             );
         }
 
-        const inc = records.filter(r => r.type === "income").reduce((s, r) => s + Number(r.amount), 0);
-        const exp = records.filter(r => r.type === "expense").reduce((s, r) => s + Number(r.amount), 0);
-        
-        // انيميشن للعدادات
-        animateValue("totalInc", parseFloat(document.getElementById('totalInc').innerText.replace(/,/g,'')), inc);
-        animateValue("totalExp", parseFloat(document.getElementById('totalExp').innerText.replace(/,/g,'')), exp);
-        animateValue("netBal", parseFloat(document.getElementById('netBal').innerText.replace(/,/g,'')), inc - exp);
+        // حساب المجاميع مع الحماية من NaN
+        const inc = records.filter(r => r.type === "income").reduce((s, r) => s + (Number(r.amount) || 0), 0);
+        const exp = records.filter(r => r.type === "expense").reduce((s, r) => s + (Number(r.amount) || 0), 0);
+        const net = inc - exp;
+
+        document.getElementById('totalInc').innerText = inc.toLocaleString();
+        document.getElementById('totalExp').innerText = exp.toLocaleString();
+        document.getElementById('netBal').innerText = net.toLocaleString(); // الآن هذا رقم صحيح وليس NaN
 
         const list = document.getElementById('list');
         list.innerHTML = "";
@@ -347,43 +333,20 @@
         });
     }
 
-    function animateValue(id, start, end) {
-        const obj = document.getElementById(id);
-        if (start === end) return;
-        const range = end - start;
-        let current = start;
-        const increment = end > start ? Math.ceil(range / 20) : Math.floor(range / 20);
-        const step = () => {
-            current += increment;
-            if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
-                obj.innerText = end.toLocaleString();
-            } else {
-                obj.innerText = current.toLocaleString();
-                requestAnimationFrame(step);
-            }
-        };
-        step();
-    }
-
     window.manageRecord = async (r) => {
         const { isDenied, isConfirmed } = await Swal.fire({
             title: r.description, 
-            html: `<h2 style="color:${r.type==='income'?'green':'red'}">${r.amount}</h2>`, 
+            text: `${r.amount}`, 
             showDenyButton: true, 
             showCancelButton: true, 
-            confirmButtonText: 'تعديل الوصف', 
-            denyButtonText: 'حذف السجل',
+            confirmButtonText: 'تعديل', 
+            denyButtonText: 'حذف',
             cancelButtonText: 'إغلاق'
         });
 
         if(isDenied) {
-            // حذف فقط بعد التأكيد بكلمة سر إذا كان المبلغ كبير
-            if(r.amount > 1000) {
-                 const {value: pass} = await Swal.fire({input:'password', title:'كلمة السر للحذف', text:'للمبالغ الكبيرة'});
-                 if(pass !== '521988') return Swal.fire('كلمة السر غلط', '', 'error');
-            }
             await remove(ref(db, `${r.type === 'income' ? 'income' : 'expenses'}/${r.id}`));
-            Swal.fire('تم الحذف', '', 'success');
+            Swal.fire({toast:true, icon:'success', title:'تم الحذف', position:'top', timer:1000, showConfirmButton:false});
         } else if(isConfirmed) {
             const {value: newDesc} = await Swal.fire({input:'text', inputValue: r.description, title:'تعديل الوصف'});
             if(newDesc) {
@@ -406,23 +369,18 @@
         });
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.aoa_to_sheet(data);
-        
-        // تنسيق بسيط للإكسيل
-        const wscols = [{wch:15}, {wch:15}, {wch:10}, {wch:40}, {wch:15}];
-        ws['!cols'] = wscols;
-        
-        XLSX.utils.book_append_sheet(wb, ws, "Transactions");
+        XLSX.utils.book_append_sheet(wb, ws, "Report");
         XLSX.writeFile(wb, "Finance_Report.xlsx");
     };
 
     // ===============================================
-    //  نظام الذكاء الاصطناعي الصوتي المطور
+    //  نظام الذكاء الاصطناعي الصوتي
     // ===============================================
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if(SR) {
         const rec = new SR();
         rec.lang = "ar-EG";
-        rec.continuous = false; // إيقاف تلقائي بعد الجملة
+        rec.continuous = false;
         rec.interimResults = true;
         
         rec.onstart = () => {
@@ -449,7 +407,6 @@
                 document.getElementById('voiceText').innerText = finalTranscript;
                 await processCommand(finalTranscript);
             } else {
-                // عرض النص المؤقت
                 document.getElementById('voiceText').innerText = e.results[e.resultIndex][0].transcript;
             }
         };
@@ -457,128 +414,131 @@
         window.toggleMic = () => {
             if(isListening) rec.stop(); else rec.start();
         }
-    } else {
-        alert("المتصفح لا يدعم الأوامر الصوتية");
     }
 
-    // معالج النصوص الذكي
     async function processCommand(text) {
-        // 1. تنظيف النص وتحويل الأرقام العربية
         text = text.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
-        console.log("Processing:", text);
+        console.log("Voice:", text);
 
-        // 2. أوامر النظام الخاصة
+        // 1. أوامر البحث
         if(text.match(/بحث عن|شوف|حساب/)) {
             const key = text.replace(/بحث عن|شوف|حساب|لي/g, '').trim();
             searchTerm = key;
             document.getElementById('searchBox').classList.add('active');
             document.getElementById('searchKey').innerText = key;
             render();
-            return playSound('success');
+            return;
         }
 
-        if(text.includes("امسح اخر حاجة") || text.includes("امسح الاخيرة")) {
+        // 2. أوامر المسح (حذف آخر عملية)
+        if(text.includes("امسح الاخيرة") || text.includes("بلاش الاخيرة") || text.includes("امسح اخر حاجة")) {
             if(records.length > 0) {
                 const last = records[0]; // المصفوفة مرتبة بالأحدث
-                await manageRecord(last); // فتح نافذة التأكيد
+                await remove(ref(db, `${last.type === 'income' ? 'income' : 'expenses'}/${last.id}`));
+                Swal.fire({
+                    icon: 'info',
+                    title: 'تم الحذف',
+                    text: `مسحت آخر حاجة: ${last.description} (${last.amount})`,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({icon:'warning', title:'مفيش عمليات عشان امسحها'});
             }
             return;
         }
 
-        // 3. تحليل العملية المالية
+        // 3. أمر المسح الشامل (تصفير النظام)
+        if(text.includes("امسح كل حاجة") || text.includes("صفر الكل") || text.includes("حذف الكل")) {
+            const { value: password } = await Swal.fire({
+                title: 'تصفير النظام بالكامل',
+                input: 'password',
+                inputLabel: 'دخل الباسورد عشان تأكد',
+                inputPlaceholder: 'كلمة السر',
+                showCancelButton: true
+            });
+
+            if (password === '521988') {
+                await remove(ref(db, 'income'));
+                await remove(ref(db, 'expenses'));
+                Swal.fire('تم التصفير', 'النظام رجع جديد', 'success');
+            } else if (password) {
+                Swal.fire('الباسورد غلط', 'مقدرش امسح البيانات', 'error');
+            }
+            return;
+        }
+
+        // 4. معالجة العمليات المالية
         let amount = 0;
-        let type = null; // لم يتم التحديد بعد
+        let type = null; 
         let desc = text;
 
-        // أ. استخراج المبلغ (أرقام أو كلمات)
-        // محاولة استخراج رقم صريح أولاً
+        // استخراج المبلغ
         const numMatch = text.match(/(\d+(\.\d+)?)/);
         if(numMatch) {
             amount = parseFloat(numMatch[0]);
-            desc = desc.replace(numMatch[0], '').trim(); // إزالة الرقم من الوصف
+            desc = desc.replace(numMatch[0], '').trim();
         } else {
-            // محاولة استخراج رقم مكتوب
             for(let [k, v] of Object.entries(EG_DICT.numbers)) {
                 if(text.includes(k)) {
                     amount = v;
                     desc = desc.replace(k, '').trim();
-                    break; // أخذ أول رقم يظهر
+                    break;
                 }
             }
         }
 
-        // ب. تحديد النوع (دخل/مصروف) بناءً على الأولويات
-        
-        // الأولوية 1: فحص الجمل المركبة
-        for(let phrase of EG_DICT.income_phrases) {
-            if(text.includes(phrase)) { type = 'income'; break; }
+        // تحديد النوع (تعديل المنطق حسب طلبك)
+        // الأولوية 1: "خد مني" / "اخد مني" = مصروف
+        if(text.includes("خد مني") || text.includes("اخد مني") || text.includes("خد منى") || text.includes("اخد منى")) {
+            type = 'expense';
+        } 
+        // الأولوية 2: "خدت" / "اخدت" = إيراد (لأنك أنت اللي خدت)
+        else if(text.includes("خدت") || text.includes("اخدت")) {
+            type = 'income';
         }
-        if(!type) {
-            for(let phrase of EG_DICT.expense_phrases) {
-                if(text.includes(phrase)) { type = 'expense'; break; }
+        // الأولوية 3: باقي القواميس
+        else {
+            for(let phrase of EG_DICT.income_phrases) { if(text.includes(phrase)) { type = 'income'; break; } }
+            if(!type) {
+                for(let phrase of EG_DICT.expense_phrases) { if(text.includes(phrase)) { type = 'expense'; break; } }
+            }
+            if(!type) {
+                let incScore = 0, expScore = 0;
+                EG_DICT.income_words.forEach(w => { if(text.includes(w)) incScore++; });
+                EG_DICT.expense_words.forEach(w => { if(text.includes(w)) expScore++; });
+                if(incScore > 0 && incScore >= expScore) type = 'income';
+                else if(expScore > 0) type = 'expense';
             }
         }
 
-        // الأولوية 2: فحص الكلمات الفردية (إذا لم يتم التحديد بعد)
-        if(!type) {
-            // حساب نقاط لكل نوع
-            let incScore = 0, expScore = 0;
-            EG_DICT.income_words.forEach(w => { if(text.includes(w)) incScore++; });
-            EG_DICT.expense_words.forEach(w => { if(text.includes(w)) expScore++; });
-
-            if(incScore > 0 && incScore >= expScore) type = 'income';
-            else if(expScore > 0) type = 'expense';
-        }
-
-        // ج. التنظيف النهائي للوصف
-        // إزالة الكلمات الدالة من الوصف ليبقى الاسم الصافي
+        // تنظيف الوصف
         if(type) {
             const wordsToRemove = type === 'income' ? 
                 [...EG_DICT.income_phrases, ...EG_DICT.income_words] : 
                 [...EG_DICT.expense_phrases, ...EG_DICT.expense_words];
             
-            wordsToRemove.forEach(w => {
-                desc = desc.replace(w, '');
-            });
-            
-            desc = desc.replace(/جنيه|جنية|دولار|ريال/g, '') // إزالة العملة
-                       .replace(/\s+/g, ' ') // إزالة المسافات الزائدة
-                       .trim();
+            wordsToRemove.forEach(w => desc = desc.replace(w, ''));
+            desc = desc.replace(/جنيه|جنية|دولار|ريال|من|الى|لـ|لي/g, '').replace(/\s+/g, ' ').trim();
         }
 
-        // 4. التنفيذ
         if(amount > 0 && type) {
-            // تعبئة الحقول
             document.getElementById('amount').value = amount;
             document.getElementById('desc').value = desc || (type==='income'?'وارد متنوع':'مصروفات');
             setMode(type);
 
-            // الحفظ التلقائي
             Swal.fire({
-                title: `تم التعرف: ${type==='income'?'وارد':'مصروف'}`,
+                title: `تم: ${type==='income'?'وارد':'مصروف'}`,
                 text: `${amount} - ${desc}`,
                 icon: 'success',
-                timer: 1500,
+                timer: 1000,
                 showConfirmButton: false
             });
-            
             setTimeout(() => saveTx(null), 500);
-            playSound('success');
-
         } else {
-            Swal.fire({
-                title: 'لم أفهم العملية',
-                text: 'حاول تقول: 50 جنيه لفلان (أو) خد مني 100',
-                icon: 'question',
-                timer: 2000
-            });
+            Swal.fire({title: '؟', text: 'قول المبلغ والوصف (مثلاً: 50 جنيه مواصلات)', timer: 2000, showConfirmButton: false});
         }
     }
-
-    function playSound(type) {
-        // يمكن إضافة مؤثرات صوتية هنا مستقبلاً
-    }
-
 </script>
 </body>
 </html>
