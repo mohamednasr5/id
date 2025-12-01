@@ -39,9 +39,62 @@
         .container { max-width: 600px; margin: 0 auto; }
 
         .header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 15px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .btn-icon { background: #f1f5f9; border: none; width: 40px; height: 40px; border-radius: 10px; font-size: 1.2rem; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .btn-icon:hover { transform: scale(1.05); background: var(--primary); color: white; }
+        .btn-icon { 
+            background: rgba(255,255,255,0.1); 
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2); 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 10px; 
+            font-size: 1.2rem; 
+            color: var(--text); 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-icon:hover::before { left: 100%; }
+        .btn-icon:hover { 
+            transform: scale(1.05); 
+            background: linear-gradient(135deg, var(--primary), #4f46e5); 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(99,102,241,0.4);
+        }
         .btn-icon:active { transform: scale(0.95); }
+
+        /* Icons with transparent backgrounds */
+        .icon-transparent {
+            background: rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 8px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .icon-transparent:hover {
+            background: rgba(255,255,255,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: scale(1.05);
+        }
+        .icon-success { color: var(--success); }
+        .icon-danger { color: var(--danger); }
+        .icon-primary { color: var(--primary); }
 
         /* Stats Grid - محسّنة */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
@@ -76,7 +129,19 @@
 
         @keyframes shimmer { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
 
-        .stat-icon { font-size: 1.8rem; margin-bottom: 8px; }
+        .stat-icon { 
+            font-size: 1.8rem; 
+            margin-bottom: 8px; 
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+        }
         .stat-label { font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         
         .stat-val { 
@@ -106,52 +171,300 @@
         .input-box.hidden { display: none; }
 
         .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab { flex: 1; padding: 12px; border-radius: 12px; font-weight: 800; cursor: pointer; background: #f8fafc; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 5px; border: 2px solid transparent; transition: 0.2s; }
-        .tab.active { border-color: var(--primary); color: var(--primary); }
-        .tab.active.inc { border-color: var(--success); color: var(--success); }
-        .tab.active.exp { border-color: var(--danger); color: var(--danger); }
+        .tab { 
+            flex: 1; 
+            padding: 12px; 
+            border-radius: 12px; 
+            font-weight: 800; 
+            cursor: pointer; 
+            background: #f8fafc; 
+            color: #94a3b8; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 5px; 
+            border: 2px solid transparent; 
+            transition: 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+        .tab:hover::before { left: 100%; }
+        .tab.active { border-color: var(--primary); color: var(--primary); background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(99,102,241,0.05)); }
+        .tab.active.inc { border-color: var(--success); color: var(--success); background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.05)); }
+        .tab.active.exp { border-color: var(--danger); color: var(--danger); background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.05)); }
         .tab:hover { background: rgba(99,102,241,0.05); }
 
         .filter-btns { display: flex; gap: 8px; margin-bottom: 15px; }
-        .filter-btn { flex: 1; padding: 10px; border-radius: 10px; border: 2px solid #e2e8f0; background: transparent; color: var(--text); cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .filter-btn.active { border-color: var(--primary); background: var(--primary); color: white; }
+        .filter-btn { 
+            flex: 1; 
+            padding: 10px; 
+            border-radius: 10px; 
+            border: 2px solid #e2e8f0; 
+            background: transparent; 
+            color: var(--text); 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .filter-btn::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: var(--primary);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        .filter-btn:hover::before { width: 80%; }
+        .filter-btn.active { 
+            border-color: var(--primary); 
+            background: linear-gradient(135deg, var(--primary), #4f46e5); 
+            color: white; 
+        }
+        .filter-btn.active::before { width: 100%; background: white; }
 
         .input-group { position: relative; margin-bottom: 12px; }
-        .input-group input { width: 100%; padding: 14px 45px 14px 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; transition: 0.2s; background: var(--bg); color: var(--text); }
-        .input-group input:focus { outline: none; border-color: var(--primary); background: var(--surface); }
-        .input-group i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .input-group input { 
+            width: 100%; 
+            padding: 14px 45px 14px 15px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 12px; 
+            font-size: 1rem; 
+            transition: all 0.3s ease; 
+            background: var(--bg); 
+            color: var(--text); 
+        }
+        .input-group input:focus { 
+            outline: none; 
+            border-color: var(--primary); 
+            background: var(--surface); 
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+            transform: translateY(-2px);
+        }
+        .input-group i { 
+            position: absolute; 
+            right: 15px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            color: #94a3b8; 
+            transition: 0.2s;
+        }
+        .input-group input:focus + i { color: var(--primary); }
 
-        .save-btn { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.2s; }
-        .save-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(99,102,241,0.3); }
+        .save-btn { 
+            width: 100%; 
+            padding: 15px; 
+            background: linear-gradient(135deg, var(--primary), #4f46e5); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 1.1rem; 
+            font-weight: 800; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .save-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        .save-btn:hover::before { left: 100%; }
+        .save-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(99,102,241,0.4); 
+        }
         .save-btn:active { transform: translateY(0); }
 
-        .search-box { display: none; background: #fff7ed; border: 2px solid #fdba74; padding: 12px; border-radius: 12px; margin-bottom: 15px; justify-content: space-between; align-items: center; animation: slideDown 0.3s ease; }
+        .search-box { 
+            display: none; 
+            background: linear-gradient(135deg, #fff7ed, #fed7aa); 
+            border: 2px solid #fdba74; 
+            padding: 12px; 
+            border-radius: 12px; 
+            margin-bottom: 15px; 
+            justify-content: space-between; 
+            align-items: center; 
+            animation: slideDown 0.3s ease; 
+            box-shadow: 0 4px 12px rgba(253, 186, 116, 0.3);
+        }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         .search-box div { font-weight: bold; color: #c2410c; }
-        .search-box button { background: none; border: none; font-size: 1.2rem; color: #c2410c; cursor: pointer; padding: 5px; }
+        .search-box button { 
+            background: none; 
+            border: none; 
+            font-size: 1.2rem; 
+            color: #c2410c; 
+            cursor: pointer; 
+            padding: 5px; 
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+        .search-box button:hover { background: rgba(255,255,255,0.3); transform: scale(1.1); }
 
-        .record { background: var(--surface); padding: 12px; border-radius: 14px; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); cursor: pointer; transition: 0.2s; border-right: 4px solid #ccc; }
-        .record:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.1); transform: translateX(-3px); }
-        .record:active { transform: translateX(-1px); }
+        .record { 
+            background: var(--surface); 
+            padding: 12px; 
+            border-radius: 14px; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            margin-bottom: 10px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            border-right: 4px solid #ccc;
+            position: relative;
+            overflow: hidden;
+        }
+        .record::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(to bottom, transparent, currentColor, transparent);
+            opacity: 0;
+            transition: 0.3s;
+        }
+        .record:hover { 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15); 
+            transform: translateX(-5px); 
+        }
+        .record:hover::before { opacity: 1; }
+        .record:active { transform: translateX(-2px); }
 
         .rec-info { flex: 1; }
         .rec-info h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
         .rec-date { font-size: 0.75rem; color: #94a3b8; display: flex; gap: 5px; align-items: center; }
 
-        .rec-amt { font-weight: 800; font-size: 1.1rem; min-width: 80px; text-align: left; font-family: 'Roboto', monospace; }
+        .rec-amt { 
+            font-weight: 800; 
+            font-size: 1.1rem; 
+            min-width: 80px; 
+            text-align: left; 
+            font-family: 'Roboto', monospace; 
+            padding: 6px 12px;
+            border-radius: 20px;
+            transition: 0.2s;
+        }
 
         .mic-container { position: fixed; bottom: 30px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 100; }
-        .mic-btn { width: 75px; height: 75px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); font-size: 2rem; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+        .mic-btn { 
+            width: 75px; 
+            height: 75px; 
+            border-radius: 50%; 
+            background: linear-gradient(135deg, #6366f1, #4f46e5); 
+            color: white; 
+            border: 4px solid rgba(255,255,255,0.2); 
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); 
+            font-size: 2rem; 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .mic-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.6s ease;
+        }
+        .mic-btn:hover::before { width: 200px; height: 200px; }
         .mic-btn:hover { transform: scale(1.05); }
         .mic-btn:active { transform: scale(0.95); }
-        .mic-btn.listening { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); } 50% { box-shadow: 0 10px 50px rgba(99, 102, 241, 0.7); } }
+        .mic-btn.listening { 
+            animation: pulse 1.5s infinite; 
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.8);
+        }
+        @keyframes pulse { 
+            0%, 100% { box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); } 
+            50% { box-shadow: 0 0 50px rgba(99, 102, 241, 0.8); } 
+        }
 
-        .voice-feedback { position: fixed; top: 100px; left: 50%; transform: translateX(-50%); background: rgba(15,23,42,0.95); color: white; padding: 15px 25px; border-radius: 50px; display: none; max-width: 80%; text-align: center; animation: slideDown 0.3s ease; font-size: 0.9rem; font-weight: bold; z-index: 101; }
+        .voice-feedback { 
+            position: fixed; 
+            top: 100px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: rgba(15,23,42,0.95); 
+            color: white; 
+            padding: 15px 25px; 
+            border-radius: 50px; 
+            display: none; 
+            max-width: 80%; 
+            text-align: center; 
+            animation: slideDown 0.3s ease; 
+            font-size: 0.9rem; 
+            font-weight: bold; 
+            z-index: 101;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
         .voice-feedback.active { display: block; }
 
-        .toggle-input-btn { background: var(--primary); color: white; padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; margin-bottom: 15px; transition: 0.2s; }
-        .toggle-input-btn:hover { opacity: 0.9; }
+        .toggle-input-btn { 
+            background: linear-gradient(135deg, var(--primary), #4f46e5); 
+            color: white; 
+            padding: 12px 20px; 
+            border-radius: 12px; 
+            border: none; 
+            cursor: pointer; 
+            font-weight: 600; 
+            margin-bottom: 15px; 
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+        }
+        .toggle-input-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .toggle-input-btn:hover::before { left: 100%; }
+        .toggle-input-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(99,102,241,0.3); 
+        }
 
         @media (max-width: 480px) {
             .container { padding: 0; }
@@ -159,6 +472,7 @@
             .stat-val { font-size: 1.6rem; }
             .record { padding: 10px; gap: 10px; }
             .rec-amt { font-size: 1rem; min-width: 70px; }
+            .btn-icon { width: 36px; height: 36px; font-size: 1.1rem; }
         }
     </style>
 </head>
@@ -169,7 +483,7 @@
     <!-- Header -->
     <div class="header">
         <div style="display:flex; align-items:center; gap:10px;">
-            <i class="fa-solid fa-wallet" style="color:var(--primary); font-size:1.5rem;"></i>
+            <i class="fa-solid fa-wallet icon-transparent icon-primary" style="font-size:1.5rem;"></i>
             <div>
                 <h2 style="font-weight:800; line-height:1;">المالية</h2>
                 <span style="font-size:0.7rem; color:#64748b;">الحاج أحمد شطا</span>
@@ -178,15 +492,15 @@
 
         <div style="display:flex; gap:5px;">
             <button class="btn-icon" onclick="exportExcel()" title="تصدير Excel">
-                <i class="fa-solid fa-file-excel" style="color:#10b981"></i>
+                <i class="fa-solid fa-file-excel icon-transparent icon-success"></i>
             </button>
 
             <button class="btn-icon" onclick="toggleTheme()" title="تبديل المظهر">
-                <i class="fa-solid fa-moon"></i>
+                <i class="fa-solid fa-moon icon-transparent icon-primary"></i>
             </button>
 
             <button class="btn-icon" onclick="deleteAllRecordsPrompt()" title="حذف الكل">
-                <i class="fa-solid fa-trash" style="color:#ef4444"></i>
+                <i class="fa-solid fa-trash icon-transparent icon-danger"></i>
             </button>
         </div>
     </div>
@@ -194,7 +508,8 @@
     <!-- Search Display -->
     <div id="searchBox" class="search-box">
         <div>
-            <i class="fa-solid fa-filter"></i> بحث: <span id="searchKey">...</span>
+            <i class="fa-solid fa-filter icon-transparent icon-primary"></i> 
+            بحث: <span id="searchKey">...</span>
         </div>
         <button onclick="clearSearch()">
             <i class="fa-solid fa-xmark"></i>
@@ -204,19 +519,19 @@
     <!-- Stats - محسّنة -->
     <div class="stats-grid">
         <div class="stat-card income">
-            <div class="stat-icon">✓</div>
+            <div class="stat-icon icon-transparent icon-success">✓</div>
             <div class="stat-label">الدخل</div>
             <div class="stat-val income" id="totalInc">0</div>
         </div>
 
         <div class="stat-card expense">
-            <div class="stat-icon">✕</div>
+            <div class="stat-icon icon-transparent icon-danger">✕</div>
             <div class="stat-label">المصروفات</div>
             <div class="stat-val expense" id="totalExp">0</div>
         </div>
 
         <div class="stat-card net">
-            <div class="stat-icon">=</div>
+            <div class="stat-icon icon-transparent icon-primary">=</div>
             <div class="stat-label">الصافي</div>
             <div class="stat-val net" id="netBal">0</div>
         </div>
@@ -224,7 +539,8 @@
 
     <!-- Toggle Input Form Button -->
     <button class="toggle-input-btn" onclick="toggleInputForm()">
-        <i class="fa-solid fa-plus"></i> إضافة عملية
+        <i class="fa-solid fa-plus icon-transparent icon-success"></i> 
+        إضافة عملية
     </button>
 
     <!-- Input Form -->
@@ -232,29 +548,30 @@
 
         <div class="tabs">
             <button id="btnInc" class="tab active inc" onclick="setMode('income')">
-                <i class="fa-solid fa-arrow-turn-down"></i>
+                <i class="fa-solid fa-arrow-turn-down icon-transparent icon-success"></i>
                 <span>دخل</span>
             </button>
 
             <button id="btnExp" class="tab" onclick="setMode('expense')">
-                <i class="fa-solid fa-arrow-turn-up"></i>
+                <i class="fa-solid fa-arrow-turn-up icon-transparent icon-danger"></i>
                 <span>مصروف</span>
             </button>
         </div>
 
         <form onsubmit="saveTx(event)" id="form">
             <div class="input-group">
-                <i class="fa-solid fa-money-bill-wave"></i>
+                <i class="fa-solid fa-money-bill-wave icon-transparent icon-primary"></i>
                 <input type="number" id="amount" placeholder="المبلغ" step="0.01" required>
             </div>
 
             <div class="input-group">
-                <i class="fa-solid fa-pen"></i>
+                <i class="fa-solid fa-pen icon-transparent icon-primary"></i>
                 <input type="text" id="desc" placeholder="الوصف" required>
             </div>
 
             <button type="submit" class="save-btn" id="submitBtn">
-                <i class="fa-solid fa-floppy-disk"></i> تسجيل العملية
+                <i class="fa-solid fa-floppy-disk icon-transparent icon-success"></i> 
+                تسجيل العملية
             </button>
         </form>
     </div>
@@ -279,7 +596,7 @@
 <!-- Mic Button -->
 <div class="mic-container">
     <button class="mic-btn" id="mic" onclick="toggleMic()" title="اضغط للتحدث">
-        <i class="fa-solid fa-microphone"></i>
+        <i class="fa-solid fa-microphone icon-transparent icon-success"></i>
     </button>
 </div>
 
@@ -309,60 +626,45 @@ let records = [];
 let searchTerm = null;
 let isListening = false;
 let filter = "all";
-
-
-/* ================================
-   3) AI — تحميل موديلات الذكاء
-================================ */
 let AIClassifier = null;
 let AINER = null;
 
-async function loadAI() {
-    console.log("⏳ تحميل الذكاء...");
 
-    AIClassifier = await window.transformers.pipeline(
-        "text-classification",
-        "Xenova/bert-base-multilingual-uncased"
-    );
-
-    AINER = await window.transformers.pipeline(
-        "token-classification",
-        "Xenova/bert-base-multilingual-uncased-finetuned-ner"
-    );
-
-    console.log("🤖 الذكاء أصبح جاهز!");
+/* ================================
+   3) دالة تنسيق الأرقام بدون .00
+================================ */
+function formatNumber(n) {
+    const num = Number(n);
+    if (num % 1 === 0) {
+        return Math.floor(num).toLocaleString('ar-EG');
+    }
+    return num.toLocaleString('ar-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
-loadAI();
 
 
 /* ================================
-   4) دوال الذكاء
+   4) AI — تحميل موديلات الذكاء
 ================================ */
+async function loadAI() {
+    console.log("⏳ تحميل الذكاء...");
+    
+    try {
+        AIClassifier = await window.transformers.pipeline(
+            "text-classification",
+            "Xenova/bert-base-multilingual-uncased"
+        );
 
-function AI_SpellFix(text) {
-    return text
-        .replace(/فى/g, "في")
-        .replace(/الى/g, "إلى")
-        .replace(/اخد/g, "أخد")
-        .replace(/اخدت/g, "أخدت")
-        .replace(/\s+/g, " ")
-        .trim();
+        AINER = await window.transformers.pipeline(
+            "token-classification",
+            "Xenova/bert-base-multilingual-uncased-finetuned-ner"
+        );
+
+        console.log("🤖 الذكاء أصبح جاهز!");
+    } catch (error) {
+        console.warn("⚠️ فشل تحميل الذكاء الاصطناعي:", error);
+    }
 }
-
-async function AI_GetIntent(text) {
-    if (!AIClassifier) return null;
-    const out = await AIClassifier(text);
-    return out?.[0] || null;
-}
-
-async function AI_GetNames(text) {
-    if (!AINER) return [];
-    const raw = await AINER(text);
-
-    return [...new Set(
-        raw.filter(x => x.entity_group === "PER").map(x => x.word)
-    )];
-}
+loadAI();
 
 
 /* ================================
@@ -463,7 +765,6 @@ const EG_DICT = {
 };
 
 
-
 /* ================================
    6) دوال أساسية
 ================================ */
@@ -483,7 +784,7 @@ window.setMode = (m) => {
     document.getElementById("btnInc").className = `tab ${m==='income'?'active inc':''}`;
     document.getElementById("btnExp").className = `tab ${m==='expense'?'active exp':''}`;
     document.getElementById("submitBtn").style.background =
-        m === "income" ? "var(--success)" : "var(--danger)";
+        m === "income" ? "linear-gradient(135deg, var(--success), #059669)" : "linear-gradient(135deg, var(--danger), #dc2626)";
 };
 
 
@@ -585,8 +886,12 @@ window.saveTx = async (e) => {
     document.getElementById("desc").value = "";
 
     Swal.fire({
-        toast:true, icon:"success", title:"تم الحفظ",
-        position:"top", timer:1500, showConfirmButton:false
+        toast:true, 
+        icon:"success", 
+        title:"تم الحفظ",
+        position:"top", 
+        timer:1500, 
+        showConfirmButton:false
     });
 
     document.getElementById("inputBox").classList.add("hidden");
@@ -612,14 +917,13 @@ onValue(ref(db), (snap) => {
     render();
 });
 
-
 function render() {
     let data = records;
 
     if (searchTerm) {
         data = data.filter(r =>
             r.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            r.amount.toString().includes(searchTerm)
+            formatNumber(r.amount).includes(searchTerm)
         );
     }
 
@@ -645,7 +949,7 @@ function render() {
 
     if (data.length === 0) {
         list.innerHTML = `<div style="text-align:center; padding:30px; color:#94a3b8;">
-            <i class="fa-solid fa-inbox" style="font-size:2rem; margin-bottom:10px;"></i>
+            <i class="fa-solid fa-inbox icon-transparent icon-primary" style="font-size:2rem; margin-bottom:10px;"></i>
             <p>لا توجد سجلات</p>
         </div>`;
         return;
@@ -668,8 +972,8 @@ function render() {
                     <span>${date.toLocaleDateString('ar-EG')}</span>
                 </div>
             </div>
-            <div class="rec-amt" style="color:${r.type==='income'?'var(--success)':'var(--danger)'}">
-                ${r.type==='income'?'+':'-'}${Number(r.amount).toLocaleString('en-US', {minimumFractionDigits: 2})}
+            <div class="rec-amt" style="color:${r.type==='income'?'var(--success)':'var(--danger)'}; background: rgba(255,255,255,0.1); border-radius: 20px; padding: 6px 12px;">
+                ${r.type==='income'?'+':'-'}${formatNumber(r.amount)}
             </div>
         `;
 
@@ -686,7 +990,7 @@ function animateNumber(elementId, targetValue) {
     else if (elementId === "totalExp") el.classList.add("expense");
     else el.classList.add("net");
 
-    el.textContent = Number(targetValue).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    el.textContent = formatNumber(targetValue);
 }
 
 
@@ -696,7 +1000,7 @@ function animateNumber(elementId, targetValue) {
 window.manageRecord = async (r) => {
     const { isDenied, isConfirmed } = await Swal.fire({
         title: r.description,
-        html: `<strong style="font-size:1.3rem;">${Number(r.amount).toLocaleString('en-US', {minimumFractionDigits: 2})}</strong> جنيه`,
+        html: `<strong style="font-size:1.3rem; color: ${r.type==='income'?'var(--success)':'var(--danger)'}">${formatNumber(r.amount)}</strong> جنيه`,
         showDenyButton: true,
         showCancelButton: true,
         confirmButtonText: "تعديل",
@@ -718,7 +1022,7 @@ window.manageRecord = async (r) => {
         });
 
         if (confirmDelete) {
-            await remove(ref(db, `${r.type}/${r.id}`));
+            await remove(ref(db, `${r.type}s/${r.id}`));
             Swal.fire({toast:true, icon:"success", title:"تم الحذف", timer:1000, showConfirmButton:false});
         }
     }
@@ -733,8 +1037,8 @@ window.manageRecord = async (r) => {
             cancelButtonText: "إلغاء"
         });
 
-        if (newDesc) {
-            await update(ref(db, `${r.type}/${r.id}`), { description: newDesc });
+        if (newDesc && newDesc.trim()) {
+            await update(ref(db, `${r.type}s/${r.id}`), { description: newDesc.trim() });
             Swal.fire({toast:true, icon:"success", title:"تم التحديث", timer:1000, showConfirmButton:false});
         }
     }
@@ -795,8 +1099,8 @@ function cleanDescription(text, type) {
         ? [...EG_DICT.income_phrases, ...EG_DICT.income_words]
         : [...EG_DICT.expense_phrases, ...EG_DICT.expense_words];
 
-    removeWords.forEach(w => desc = desc.replace(w, ""));
-    EG_DICT.stopwords.forEach(w => desc = desc.replace(w, ""));
+    removeWords.forEach(w => desc = desc.replace(new RegExp(w, 'gi'), ""));
+    EG_DICT.stopwords.forEach(w => desc = desc.replace(new RegExp(w, 'gi'), ""));
 
     desc = desc.replace(/\d+/g, "");
     return desc.trim();
@@ -849,11 +1153,51 @@ if (SR) {
         if (isListening) rec.stop();
         else rec.start();
     };
+} else {
+    console.warn("الميكروفون غير مدعوم");
 }
 
 
 /* ================================
-   15) معالجة الأوامر (الذكاء الكامل)
+   15) AI — دوال الذكاء
+================================ */
+function AI_SpellFix(text) {
+    return text
+        .replace(/فى/g, "في")
+        .replace(/الى/g, "إلى")
+        .replace(/اخد/g, "أخد")
+        .replace(/اخدت/g, "أخدت")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+async function AI_GetIntent(text) {
+    if (!AIClassifier) return null;
+    try {
+        const out = await AIClassifier(text);
+        return out?.[0] || null;
+    } catch (error) {
+        console.warn("خطأ في تحليل النية:", error);
+        return null;
+    }
+}
+
+async function AI_GetNames(text) {
+    if (!AINER) return [];
+    try {
+        const raw = await AINER(text);
+        return [...new Set(
+            raw.filter(x => x.entity_group === "PER").map(x => x.word)
+        )];
+    } catch (error) {
+        console.warn("خطأ في استخراج الأسماء:", error);
+        return [];
+    }
+}
+
+
+/* ================================
+   16) معالجة الأوامر (الذكاء الكامل)
 ================================ */
 async function processCommand(text) {
     text = normalizeText(text);
@@ -864,7 +1208,7 @@ async function processCommand(text) {
 
     // أوامر حذف الكل
     for (let phrase of EG_DICT.delete_all_words) {
-        if (text.includes(phrase)) {
+        if (text.toLowerCase().includes(phrase.toLowerCase())) {
             await deleteAllRecordsPrompt();
             return;
         }
@@ -873,7 +1217,7 @@ async function processCommand(text) {
     // أوامر البحث
     const searchKeywords = ["بحث", "ابحث", "دور", "شوف", "شوفلي", "حساب"];
     if (searchKeywords.some(k => text.includes(k))) {
-        const key = names[0] || text.replace(/بحث|ابحث|دور|شوف|شوفلي|حساب|عن|لي/g, "").trim();
+        const key = names[0] || text.replace(/بحث|ابحث|دور|شوف|شوفلي|حساب|عن|لي/gi, "").trim();
 
         if (key) {
             searchTerm = key;
@@ -899,7 +1243,7 @@ async function processCommand(text) {
             const last = records[0];
             const { isConfirmed } = await Swal.fire({
                 title: "حذف آخر عملية",
-                html: `<strong>${last.description}</strong><br>${Number(last.amount).toLocaleString('en-US', {minimumFractionDigits: 2})} جنيه`,
+                html: `<strong>${last.description}</strong><br>${formatNumber(last.amount)} جنيه`,
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonText: "حذف",
@@ -908,7 +1252,7 @@ async function processCommand(text) {
             });
 
             if (isConfirmed) {
-                await remove(ref(db, `${last.type}/${last.id}`));
+                await remove(ref(db, `${last.type}s/${last.id}`));
                 Swal.fire({toast:true, icon:"success", title:"تم حذف آخر عملية", timer:1000, showConfirmButton:false});
             }
         }
@@ -939,8 +1283,9 @@ async function processCommand(text) {
         Swal.fire({
             icon: type==="income"?"success":"warning",
             title: type==="income"?"✓ وارد":"✕ مصروف",
-            html:`<strong style="font-size:1.2rem;">${Number(amount).toLocaleString('en-US', {minimumFractionDigits: 2})}</strong> جنيه<br><small>${desc}</small>`,
-            timer:2000, showConfirmButton:false
+            html:`<strong style="font-size:1.2rem; color: ${type==='income'?'var(--success)':'var(--danger)'}">${formatNumber(amount)}</strong> جنيه<br><small>${desc}</small>`,
+            timer:2000, 
+            showConfirmButton:false
         });
 
         setTimeout(() => saveTx(null), 500);
@@ -949,7 +1294,7 @@ async function processCommand(text) {
 
 
 /* ================================
-   16) دالة Excel Export محسّنة
+   17) دالة Excel Export محسّنة مع حدود وألوان وأرقام بدون .00
 ================================ */
 window.exportExcel = async () => {
     const inc = records.filter(r => r.type==="income");
@@ -966,12 +1311,12 @@ window.exportExcel = async () => {
     ];
     inc.forEach((r, i) => {
         const date = new Date(r.timestamp).toLocaleDateString('ar-EG');
-        incomeData.push([r.description, r.amount, date]);
+        incomeData.push([r.description, formatNumber(r.amount), date]);
     });
-    incomeData.push(["الإجمالي", incTotal, ""]);
+    incomeData.push(["الإجمالي", formatNumber(incTotal), ""]);
 
     const incomeWS = XLSX.utils.aoa_to_sheet(incomeData);
-    setExcelStyles(incomeWS, "income", incomeData.length);
+    setExcelStyles(incomeWS, "income", incomeData.length, "#10B981", "#ECFDF5");
     XLSX.utils.book_append_sheet(wb, incomeWS, "الدخل");
 
     // ==================== جدول المصروفات ====================
@@ -980,20 +1325,20 @@ window.exportExcel = async () => {
     ];
     exp.forEach((r, i) => {
         const date = new Date(r.timestamp).toLocaleDateString('ar-EG');
-        expenseData.push([r.description, r.amount, date]);
+        expenseData.push([r.description, formatNumber(r.amount), date]);
     });
-    expenseData.push(["الإجمالي", expTotal, ""]);
+    expenseData.push(["الإجمالي", formatNumber(expTotal), ""]);
 
     const expenseWS = XLSX.utils.aoa_to_sheet(expenseData);
-    setExcelStyles(expenseWS, "expense", expenseData.length);
+    setExcelStyles(expenseWS, "expense", expenseData.length, "#EF4444", "#FEF2F2");
     XLSX.utils.book_append_sheet(wb, expenseWS, "المصروفات");
 
     // ==================== جدول الملخص ====================
     const summaryData = [
         ["الملخص", ""],
-        ["الدخل الإجمالي", incTotal],
-        ["المصروفات الإجمالية", expTotal],
-        ["الرصيد النهائي", netTotal]
+        ["الدخل الإجمالي", formatNumber(incTotal)],
+        ["المصروفات الإجمالية", formatNumber(expTotal)],
+        ["الرصيد النهائي", formatNumber(netTotal)]
     ];
 
     const summaryWS = XLSX.utils.aoa_to_sheet(summaryData);
@@ -1008,76 +1353,214 @@ window.exportExcel = async () => {
     Swal.fire({
         toast: true,
         icon: "success",
-        title: "تم تصدير الملف",
+        title: "تم تصدير الملف بنجاح",
         position: "top",
-        timer: 1500,
+        timer: 2000,
         showConfirmButton: false
     });
 };
 
-// دالة تنسيق جداول الدخل والمصروفات
-function setExcelStyles(ws, type, rowCount) {
-    const color = type === "income" ? "10B981" : "EF4444";
-    const headerColor = type === "income" ? "ECFDF5" : "FEF2F2";
-    const borderStyle = { style: "thick", color: { rgb: color } };
+// دالة تنسيق جداول الدخل والمصروفات مع حدود وألوان مميزة
+function setExcelStyles(ws, type, rowCount, mainColor, bgColor) {
+    const headerColor = mainColor;
+    const dataBgColor = bgColor;
+    const borderColor = mainColor;
+    
+    // إعدادات الحدود
+    const thinBorder = { style: 'thin', color: { rgb: '#D1D5DB' } };
+    const thickBorder = { style: 'thick', color: { rgb: borderColor } };
 
-    for (let i = 1; i <= rowCount; i++) {
+    // تنسيق العناوين (الصف الأول)
+    if (ws['A1']) {
+        ws['A1'].fill = { fgColor: { rgb: headerColor }, patternType: 'solid' };
+        ws['A1'].font = { bold: true, color: { rgb: 'FFFFFF' }, size: 14 };
+        ws['A1'].alignment = { horizontal: 'center', vertical: 'center', wrapText: true };
+        ws['A1'].border = { 
+            top: thickBorder, bottom: thickBorder, 
+            left: thickBorder, right: thickBorder 
+        };
+    }
+    if (ws['B1']) {
+        ws['B1'].fill = { fgColor: { rgb: headerColor }, patternType: 'solid' };
+        ws['B1'].font = { bold: true, color: { rgb: 'FFFFFF' }, size: 14 };
+        ws['B1'].alignment = { horizontal: 'center', vertical: 'center', wrapText: true };
+        ws['B1'].border = { 
+            top: thickBorder, bottom: thickBorder, 
+            left: thickBorder, right: thickBorder 
+        };
+    }
+    if (ws['C1']) {
+        ws['C1'].fill = { fgColor: { rgb: headerColor }, patternType: 'solid' };
+        ws['C1'].font = { bold: true, color: { rgb: 'FFFFFF' }, size: 14 };
+        ws['C1'].alignment = { horizontal: 'center', vertical: 'center', wrapText: true };
+        ws['C1'].border = { 
+            top: thickBorder, bottom: thickBorder, 
+            left: thickBorder, right: thickBorder 
+        };
+    }
+
+    // تنسيق صفوف البيانات
+    for (let i = 2; i < rowCount; i++) {
         const cellA = ws[`A${i}`];
         const cellB = ws[`B${i}`];
         const cellC = ws[`C${i}`];
 
-        if (i === 1) {
-            // Header
-            cellA.fill = { fgColor: { rgb: color }, patternType: "solid" };
-            cellA.font = { bold: true, color: { rgb: "FFFFFF" }, size: 14 };
-            cellA.alignment = { horizontal: "center", vertical: "center" };
-        } else if (i === rowCount) {
-            // Footer (Total)
-            cellA.fill = { fgColor: { rgb: headerColor }, patternType: "solid" };
-            cellB.fill = { fgColor: { rgb: headerColor }, patternType: "solid" };
-            cellA.font = { bold: true, size: 12 };
-            cellB.font = { bold: true, size: 12, color: { rgb: color } };
-        } else {
-            // Data rows
-            cellA.fill = { fgColor: { rgb: headerColor }, patternType: "solid" };
-            cellB.alignment = { horizontal: "right" };
+        if (cellA) {
+            cellA.fill = { fgColor: { rgb: dataBgColor }, patternType: 'solid' };
+            cellA.font = { size: 11 };
+            cellA.alignment = { horizontal: 'right', vertical: 'center', wrapText: true };
+            cellA.border = { 
+                top: thinBorder, bottom: thinBorder, 
+                left: thinBorder, right: thinBorder 
+            };
         }
-
-        // Borders
-        if (cellA) cellA.border = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
-        if (cellB) cellB.border = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
-        if (cellC) cellC.border = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
+        
+        if (cellB) {
+            cellB.fill = { fgColor: { rgb: dataBgColor }, patternType: 'solid' };
+            cellB.font = { bold: true, size: 11, color: { rgb: mainColor } };
+            cellB.alignment = { horizontal: 'right', vertical: 'center' };
+            cellB.border = { 
+                top: thinBorder, bottom: thinBorder, 
+                left: thinBorder, right: thinBorder 
+            };
+            // تنسيق الأرقام
+            if (cellB.v && typeof cellB.v === 'number') {
+                cellB.t = 'n';
+                cellB.z = '#,##0.00';
+            }
+        }
+        
+        if (cellC) {
+            cellC.fill = { fgColor: { rgb: dataBgColor }, patternType: 'solid' };
+            cellC.font = { size: 10, color: { rgb: '#6B7280' } };
+            cellC.alignment = { horizontal: 'center', vertical: 'center' };
+            cellC.border = { 
+                top: thinBorder, bottom: thinBorder, 
+                left: thinBorder, right: thinBorder 
+            };
+        }
     }
 
-    ws["!cols"] = [{ wch: 20 }, { wch: 15 }, { wch: 15 }];
+    // تنسيق الإجمالي (الصف الأخير)
+    const lastRow = rowCount;
+    if (ws[`A${lastRow}`]) {
+        ws[`A${lastRow}`].fill = { fgColor: { rgb: '#F3F4F6' }, patternType: 'solid' };
+        ws[`A${lastRow}`].font = { bold: true, size: 12, color: { rgb: '#111827' } };
+        ws[`A${lastRow}`].alignment = { horizontal: 'right', vertical: 'center', wrapText: true };
+        ws[`A${lastRow}`].border = { 
+            top: thickBorder, bottom: thickBorder, 
+            left: thickBorder, right: thickBorder 
+        };
+    }
+    if (ws[`B${lastRow}`]) {
+        ws[`B${lastRow}`].fill = { fgColor: { rgb: '#F3F4F6' }, patternType: 'solid' };
+        ws[`B${lastRow}`].font = { bold: true, size: 12, color: { rgb: mainColor } };
+        ws[`B${lastRow}`].alignment = { horizontal: 'right', vertical: 'center' };
+        ws[`B${lastRow}`].border = { 
+            top: thickBorder, bottom: thickBorder, 
+            left: thickBorder, right: thickBorder 
+        };
+        // تنسيق الإجمالي كرقم
+        if (ws[`B${lastRow}`].v && typeof ws[`B${lastRow}`].v === 'number') {
+            ws[`B${lastRow}`].t = 'n';
+            ws[`B${lastRow}`].z = '#,##0.00';
+        }
+    }
+    if (ws[`C${lastRow}`]) {
+        ws[`C${lastRow}`].border = { 
+            top: thickBorder, bottom: thickBorder, 
+            left: thickBorder, right: thickBorder 
+        };
+    }
+
+    // ضبط عرض الأعمدة
+    ws['!cols'] = [
+        { wch: 35 },  // وصف - عرض أكبر
+        { wch: 18 },  // مبلغ
+        { wch: 15 }   // تاريخ
+    ];
+
+    // ضبط ارتفاع الصفوف
+    ws['!rows'] = Array(rowCount).fill({ hpx: 25 });
+    ws['!rows'][0] = { hpx: 35 }; // العنوان أعلى
+    ws['!rows'][rowCount-1] = { hpx: 30 }; // الإجمالي أعلى قليلاً
 }
 
-// دالة تنسيق جدول الملخص
+// دالة تنسيق جدول الملخص مع حدود وألوان مميزة
 function setSummaryStyles(ws) {
     const summaryColor = "6366F1";
-    const borderStyle = { style: "thick", color: { rgb: summaryColor } };
+    const summaryBg = "F0F4FF";
+    const borderColor = summaryColor;
+    
+    // إعدادات الحدود
+    const thinBorder = { style: 'thin', color: { rgb: '#D1D5DB' } };
+    const thickBorder = { style: 'thick', color: { rgb: borderColor } };
 
-    // Header
-    ws["A1"].fill = { fgColor: { rgb: summaryColor }, patternType: "solid" };
-    ws["A1"].font = { bold: true, color: { rgb: "FFFFFF" }, size: 14 };
-    ws["B1"].fill = { fgColor: { rgb: summaryColor }, patternType: "solid" };
+    // تنسيق العنوان
+    if (ws['A1']) {
+        ws['A1'].fill = { fgColor: { rgb: summaryColor }, patternType: 'solid' };
+        ws['A1'].font = { bold: true, color: { rgb: 'FFFFFF' }, size: 16 };
+        ws['A1'].alignment = { horizontal: 'center', vertical: 'center', wrapText: true };
+        ws['A1'].border = { 
+            top: thickBorder, bottom: thickBorder, 
+            left: thickBorder, right: thickBorder 
+        };
+    }
+    if (ws['B1']) {
+        ws['B1'].fill = { fgColor: { rgb: summaryColor }, patternType: 'solid' };
+        ws['B1'].border = { 
+            top: thickBorder, bottom: thickBorder, 
+            left: thickBorder, right: thickBorder 
+        };
+    }
 
-    // Data rows
-    for (let i = 2; i <= 5; i++) {
+    // تنسيق صفوف البيانات
+    for (let i = 2; i <= 4; i++) {
         const cellA = ws[`A${i}`];
         const cellB = ws[`B${i}`];
 
-        cellA.fill = { fgColor: { rgb: "F0F4FF" }, patternType: "solid" };
-        cellB.fill = { fgColor: { rgb: "F0F4FF" }, patternType: "solid" };
-        cellA.font = { bold: true, size: 12 };
-        cellB.font = { bold: true, size: 12, color: { rgb: i === 5 ? summaryColor : "000000" } };
-
-        cellA.border = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
-        cellB.border = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
+        if (cellA) {
+            cellA.fill = { fgColor: { rgb: summaryBg }, patternType: 'solid' };
+            cellA.font = { bold: true, size: 12, color: { rgb: '#374151' } };
+            cellA.alignment = { horizontal: 'right', vertical: 'center', wrapText: true };
+            cellA.border = { 
+                top: thinBorder, bottom: thinBorder, 
+                left: thinBorder, right: thinBorder 
+            };
+        }
+        
+        if (cellB) {
+            cellB.fill = { fgColor: { rgb: summaryBg }, patternType: 'solid' };
+            cellB.font = { bold: true, size: 12, color: { rgb: summaryColor } };
+            cellB.alignment = { horizontal: 'right', vertical: 'center' };
+            cellB.border = { 
+                top: thinBorder, bottom: thinBorder, 
+                left: thinBorder, right: thinBorder 
+            };
+            // تنسيق الأرقام في الملخص
+            if (cellB.v && typeof cellB.v === 'number') {
+                cellB.t = 'n';
+                cellB.z = '#,##0.00';
+            }
+        }
     }
 
-    ws["!cols"] = [{ wch: 20 }, { wch: 15 }];
+    // ضبط عرض الأعمدة للملخص
+    ws['!cols'] = [
+        { wch: 25 },  // وصف
+        { wch: 20 }   // قيمة
+    ];
+
+    // ضبط ارتفاع الصفوف
+    ws['!rows'] = [
+        { hpx: 40 },  // العنوان
+        { hpx: 25 },  // الدخل
+        { hpx: 25 },  // المصروفات
+        { hpx: 25 }   // الرصيد
+    ];
 }
 
 </script>
+
+</body>
 </html>
