@@ -381,7 +381,7 @@
         <div class="search-controls">
             <input type="number" id="searchAmount" class="search-input" placeholder="ابحث برقم المبلغ...">
             <input type="text" id="searchPerson" class="search-input" placeholder="ابحث باسم الشخص...">
-            <input type="text" id="searchDetails" class="search-input" placeholder="ابحث في تفاصيل المصروف...">
+            <input type="text" id="searchDetails" class="search-input" placeholder="ابحث في تفاصيل المصروف أو الوصف...">
             <input type="date" id="searchDate" class="search-input">
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
@@ -459,7 +459,6 @@
         </div>
     </div>
 </div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
@@ -494,6 +493,9 @@ let allRecords = [];
 let searchResults = [];
 let isSearching = false;
 
+/*************************************
+ * دعم الأرقام العربية / الكلمات
+ *************************************/
 const numberWords = {
  "صفر":0,"واحد":1,"اتنين":2,"تلاتة":3,"اربعة":4,"خمسة":5,"ستة":6,"سبعة":7,"تمانية":8,"تسعة":9,
  "عشرة":10,"حداشر":11,"اتناشر":12,"تلاتاشر":13,"اربعتاشر":14,"خمستاشر":15,"ستاشر":16,"سبعتاشر":17,
@@ -530,15 +532,6 @@ const numberWords = {
  "تسعمية الف":900000,"تسعميت الف":900000,
  "مليون":1000000
 };
-
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null;
-if (SpeechRecognition) {
-  recognition = new SpeechRecognition();
-  recognition.lang = "ar-EG";
-  recognition.continuous = false;
-  recognition.interimResults = false;
-}
 
 function convertArabicToEnglishNumbers(str) {
   const ar = ["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
@@ -577,14 +570,26 @@ function extractNumber(text) {
   return null;
 }
 
+/*************************************
+ * SpeechRecognition
+ *************************************/
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+  recognition.lang = "ar-EG";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+}
+
 function startVoiceInput(inputId, statusId, isNumber = false) {
   if (!recognition) {
     alert("متصفحك لا يدعم التعرف على الصوت. يرجى استخدام Chrome أو Edge");
     return;
   }
-  const inputElement = document.getElementById(inputId);
+  const inputElement  = document.getElementById(inputId);
   const statusElement = document.getElementById(statusId);
-  const micBtn = document.getElementById("mic" + inputId.charAt(0).toUpperCase() + inputId.slice(1));
+  const micBtn        = document.getElementById("mic" + inputId.charAt(0).toUpperCase() + inputId.slice(1));
 
   recognition.lang = "ar-EG";
   recognition.continuous = false;
@@ -635,8 +640,12 @@ document.getElementById("micIncomePerson").addEventListener("click", () => start
 document.getElementById("micExpenseAmount").addEventListener("click", () => startVoiceInput("expenseAmount", "statusExpenseAmount", true));
 document.getElementById("micExpenseDetails").addEventListener("click", () => startVoiceInput("expenseDetails", "statusExpenseDetails", false));
 
-const voiceSearchBtn = document.getElementById("voiceSearchBtn");
+/*************************************
+ * البحث الصوتي (اسم أو وصف أو مبلغ)
+ *************************************/
+const voiceSearchBtn    = document.getElementById("voiceSearchBtn");
 const voiceSearchStatus = document.getElementById("voiceSearchStatus");
+
 if (voiceSearchBtn && recognition) {
   voiceSearchBtn.addEventListener("click", () => {
     recognition.lang = "ar-EG";
@@ -647,24 +656,35 @@ if (voiceSearchBtn && recognition) {
     voiceSearchStatus.classList.add("listening");
 
     recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript.toLowerCase().trim();
+      let transcript = event.results[0][0].transcript.toLowerCase().trim();
       voiceSearchStatus.textContent = "✅ تم التعرف: " + transcript;
+
+      const amountInput  = document.getElementById("searchAmount");
+      const personInput  = document.getElementById("searchPerson");
+      const detailsInput = document.getElementById("searchDetails");
+
+      amountInput.value  = "";
+      personInput.value  = "";
+      detailsInput.value = "";
+
       const num = extractNumber(convertArabicToEnglishNumbers(transcript));
-      document.getElementById("searchAmount").value = "";
-      document.getElementById("searchPerson").value = "";
-      document.getElementById("searchDetails").value = "";
       if (num) {
-        document.getElementById("searchAmount").value = num;
+        // بحث بالمبلغ
+        amountInput.value = num;
       } else if (transcript.includes("حساب") || transcript.includes("عند")) {
-        const name = transcript.replace("حساب", "").replace("عند", "").trim();
-        document.getElementById("searchPerson").value = name;
+        // بحث باسم شخص
+        transcript = transcript.replace("حساب", "").replace("عند", "").trim();
+        personInput.value = transcript;
       } else {
-        document.getElementById("searchDetails").value = transcript;
+        // بحث في الاسم أو الوصف معًا
+        detailsInput.value = transcript;
       }
+
       setTimeout(() => {
         voiceSearchStatus.textContent = "";
         voiceSearchStatus.classList.remove("listening");
       }, 2500);
+
       window.performSearch();
     };
     recognition.onerror = () => {
@@ -677,26 +697,36 @@ if (voiceSearchBtn && recognition) {
   });
 }
 
+/*************************************
+ * التاريخ والوقت
+ *************************************/
 function formatDateTime() {
   const now = new Date();
-  const options = { year:"numeric", month:"long", day:"numeric", hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:true };
+  const options = {
+    year:"numeric", month:"long", day:"numeric",
+    hour:"2-digit", minute:"2-digit", second:"2-digit",
+    hour12:true
+  };
   return now.toLocaleDateString("ar-EG", options);
 }
 function updateDateTimeFields() {
   const dt = formatDateTime();
-  document.getElementById("incomeDateTime").value = dt;
+  document.getElementById("incomeDateTime").value  = dt;
   document.getElementById("expenseDateTime").value = dt;
 }
 setInterval(updateDateTimeFields, 1000);
 updateDateTimeFields();
 
+/*************************************
+ * إضافة وارد / مصروف (Firestore)
+ *************************************/
 document.getElementById("incomeForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
     const amountField = document.getElementById("incomeAmount");
     const personField = document.getElementById("incomePerson");
-    const amount = parseFloat(amountField.value);
-    const person = personField.value.trim();
+    const amount  = parseFloat(amountField.value);
+    const person  = personField.value.trim();
     const dateTime = document.getElementById("incomeDateTime").value;
     if (!amount || !person) {
       alert("رجاء إدخال مبلغ واسم شخص صحيحين");
@@ -723,9 +753,9 @@ document.getElementById("incomeForm").addEventListener("submit", async (e) => {
 document.getElementById("expenseForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
-    const amountField = document.getElementById("expenseAmount");
+    const amountField  = document.getElementById("expenseAmount");
     const detailsField = document.getElementById("expenseDetails");
-    const amount = parseFloat(amountField.value);
+    const amount  = parseFloat(amountField.value);
     const details = detailsField.value.trim();
     const dateTime = document.getElementById("expenseDateTime").value;
     if (!amount || !details) {
@@ -750,12 +780,15 @@ document.getElementById("expenseForm").addEventListener("submit", async (e) => {
   }
 });
 
+/*************************************
+ * تحميل البيانات من Firestore
+ *************************************/
 async function loadRecords() {
   try {
-    const incomeSnap = await getDocs(query(incomeCollection, orderBy("timestamp", "desc")));
+    const incomeSnap  = await getDocs(query(incomeCollection,  orderBy("timestamp", "desc")));
     const expenseSnap = await getDocs(query(expenseCollection, orderBy("timestamp", "desc")));
     allRecords = [];
-    incomeSnap.forEach((d) => allRecords.push({ id: d.id, ...d.data(), collectionType: "income" }));
+    incomeSnap.forEach((d)  => allRecords.push({ id: d.id, ...d.data(), collectionType: "income"  }));
     expenseSnap.forEach((d) => allRecords.push({ id: d.id, ...d.data(), collectionType: "expense" }));
     allRecords.sort((a, b) => b.timestamp - a.timestamp);
     displayRecords();
@@ -765,28 +798,42 @@ async function loadRecords() {
   }
 }
 
+/*************************************
+ * البحث (اسم / وصف / مبلغ / تاريخ)
+ *************************************/
 window.performSearch = function () {
-  const searchAmount = document.getElementById("searchAmount").value;
-  const searchPerson = document.getElementById("searchPerson").value.toLowerCase().trim();
+  const searchAmount  = document.getElementById("searchAmount").value;
+  const searchPerson  = document.getElementById("searchPerson").value.toLowerCase().trim();
   const searchDetails = document.getElementById("searchDetails").value.toLowerCase().trim();
-  const searchDate = document.getElementById("searchDate").value;
+  const searchDate    = document.getElementById("searchDate").value;
+
   searchResults = allRecords.filter((r) => {
     let m = true;
-    if (searchAmount) m = m && Number(r.amount) === parseFloat(searchAmount);
+
+    if (searchAmount) {
+      m = m && Number(r.amount) === parseFloat(searchAmount);
+    }
+
     if (searchPerson) {
-      const p = r.person || "";
-      m = m && p.toLowerCase().includes(searchPerson);
+      const p = (r.person  || "").toLowerCase();
+      const d = (r.details || "").toLowerCase();
+      m = m && (p.includes(searchPerson) || d.includes(searchPerson));
     }
+
     if (searchDetails) {
-      const d = r.details || "";
-      m = m && d.toLowerCase().includes(searchDetails);
+      const p = (r.person  || "").toLowerCase();
+      const d = (r.details || "").toLowerCase();
+      m = m && (p.includes(searchDetails) || d.includes(searchDetails));
     }
+
     if (searchDate) {
       const rd = r.dateTime.split(" ")[0];
       m = m && rd.includes(searchDate);
     }
+
     return m;
   });
+
   isSearching = true;
   displayRecords();
   const info = document.getElementById("searchResultsInfo");
@@ -795,19 +842,24 @@ window.performSearch = function () {
 };
 
 window.clearSearch = function () {
-  document.getElementById("searchAmount").value = "";
-  document.getElementById("searchPerson").value = "";
+  document.getElementById("searchAmount").value  = "";
+  document.getElementById("searchPerson").value  = "";
   document.getElementById("searchDetails").value = "";
-  document.getElementById("searchDate").value = "";
+  document.getElementById("searchDate").value    = "";
   document.getElementById("searchResultsInfo").style.display = "none";
   isSearching = false;
   displayRecords();
 };
 
+/*************************************
+ * عرض السجل + الإحصائيات
+ *************************************/
 function displayRecords() {
   const list = document.getElementById("recordsList");
   let records = isSearching ? searchResults : allRecords;
-  if (!isSearching && currentTab !== "all") records = allRecords.filter((r) => r.type === currentTab);
+  if (!isSearching && currentTab !== "all") {
+    records = allRecords.filter((r) => r.type === currentTab);
+  }
   if (records.length === 0) {
     list.innerHTML = `<div class="empty-state">
       <h3 style="margin-bottom:6px;">${isSearching ? "لا توجد نتائج بحث" : "لا توجد عمليات بعد"}</h3>
@@ -846,18 +898,24 @@ function displayRecords() {
 }
 
 function updateStatistics() {
-  const incomeRecs = allRecords.filter((r) => r.type === "income");
+  const incomeRecs  = allRecords.filter((r) => r.type === "income");
   const expenseRecs = allRecords.filter((r) => r.type === "expense");
-  const totalIncome = incomeRecs.reduce((s, r) => s + Number(r.amount), 0);
+  const totalIncome  = incomeRecs.reduce((s, r) => s + Number(r.amount), 0);
   const totalExpense = expenseRecs.reduce((s, r) => s + Number(r.amount), 0);
   const balance = totalIncome - totalExpense;
-  document.getElementById("totalIncome").innerHTML = `${totalIncome.toLocaleString("ar-EG", { maximumFractionDigits: 0 })} <span class="currency">جنيه</span>`;
-  document.getElementById("totalExpense").innerHTML = `${totalExpense.toLocaleString("ar-EG", { maximumFractionDigits: 0 })} <span class="currency">جنيه</span>`;
-  document.getElementById("balance").innerHTML = `${balance.toLocaleString("ar-EG", { maximumFractionDigits: 0 })} <span class="currency">جنيه</span>`;
-  document.getElementById("incomeCount").textContent = `${incomeRecs.length} عملية`;
+  document.getElementById("totalIncome").innerHTML =
+    `${totalIncome.toLocaleString("ar-EG", { maximumFractionDigits: 0 })} <span class="currency">جنيه</span>`;
+  document.getElementById("totalExpense").innerHTML =
+    `${totalExpense.toLocaleString("ar-EG", { maximumFractionDigits: 0 })} <span class="currency">جنيه</span>`;
+  document.getElementById("balance").innerHTML =
+    `${balance.toLocaleString("ar-EG", { maximumFractionDigits: 0 })} <span class="currency">جنيه</span>`;
+  document.getElementById("incomeCount").textContent  = `${incomeRecs.length} عملية`;
   document.getElementById("expenseCount").textContent = `${expenseRecs.length} عملية`;
 }
 
+/*************************************
+ * تبويب (الكل / وارد / مصروف)
+ *************************************/
 document.querySelectorAll(".tab").forEach((tab) => {
   tab.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
@@ -867,228 +925,255 @@ document.querySelectorAll(".tab").forEach((tab) => {
   });
 });
 
-window.deleteRecord = async (id, type) => {
-  if (!confirm("هل أنت متأكد من حذف هذه العملية؟")) return;
-  try {
-    const col = type === "income" ? incomeCollection : expenseCollection;
-    await deleteDoc(doc(col, id));
-    await loadRecords();
-  } catch (err) {
-    console.error(err);
-    alert("حدث خطأ أثناء حذف العملية");
-  }
-};
+/*************************************
+ * فتح / إغلاق المودال + حفظ التعديل
+ *************************************/
+const modalBackdrop  = document.getElementById("recordModalBackdrop");
+const modalCloseBtn  = document.getElementById("modalCloseBtn");
+const modalCancelBtn = document.getElementById("modalCancelBtn");
+const modalSaveBtn   = document.getElementById("modalSaveBtn");
 
-window.deleteAllRecords = async () => {
-  const pass = prompt("لأمان بياناتك، أدخل كلمة السر لمسح كل السجل:");
-  if (pass !== "521988") {
-    alert("كلمة السر غير صحيحة، لم يتم المسح");
-    return;
-  }
-  if (!confirm("تحذير: سيتم حذف جميع العمليات (وارد + مصروف) نهائياً، هل أنت متأكد؟")) return;
-  try {
-    const incomeSnap = await getDocs(incomeCollection);
-    const expenseSnap = await getDocs(expenseCollection);
-    const ops = [];
-    incomeSnap.forEach((d) => ops.push(deleteDoc(doc(incomeCollection, d.id))));
-    expenseSnap.forEach((d) => ops.push(deleteDoc(doc(expenseCollection, d.id))));
-    await Promise.all(ops);
-    await loadRecords();
-    alert("تم حذف كل السجل بنجاح");
-  } catch (err) {
-    console.error(err);
-    alert("حدث خطأ أثناء مسح السجل");
-  }
-};
+window.openRecordModal = function (id, collectionType) {
+  const rec = allRecords.find((r) => r.id === id && r.collectionType === collectionType);
+  if (!rec) return;
+  document.getElementById("modalRecordId").value          = rec.id;
+  document.getElementById("modalRecordCollection").value  = collectionType;
+  document.getElementById("modalType").value              = rec.type;
+  document.getElementById("modalAmount").value            = rec.amount;
+  document.getElementById("modalDateTime").value          = rec.dateTime;
 
-window.openRecordModal = (id, collectionType) => {
-  const r = allRecords.find((x) => x.id === id && x.collectionType === collectionType);
-  if (!r) return;
-  document.getElementById("modalRecordId").value = r.id;
-  document.getElementById("modalRecordCollection").value = collectionType;
-  document.getElementById("modalAmount").value = r.amount;
-  document.getElementById("modalDateTime").value = r.dateTime;
-  const modalType = document.getElementById("modalType");
-  const personGroup = document.getElementById("modalPersonGroup");
-  const detailsGroup = document.getElementById("modalDetailsGroup");
-  const modalPerson = document.getElementById("modalPerson");
-  const modalDetails = document.getElementById("modalDetails");
-  modalType.value = r.type;
-  if (r.type === "income") {
-    personGroup.style.display = "block";
-    detailsGroup.style.display = "none";
-    modalPerson.value = r.person || "";
-    modalDetails.value = "";
+  if (rec.type === "income") {
+    document.getElementById("modalPersonGroup").style.display  = "block";
+    document.getElementById("modalDetailsGroup").style.display = "none";
+    document.getElementById("modalPerson").value  = rec.person || "";
+    document.getElementById("modalDetails").value = "";
   } else {
-    personGroup.style.display = "none";
-    detailsGroup.style.display = "block";
-    modalPerson.value = "";
-    modalDetails.value = r.details || "";
+    document.getElementById("modalPersonGroup").style.display  = "none";
+    document.getElementById("modalDetailsGroup").style.display = "block";
+    document.getElementById("modalPerson").value  = "";
+    document.getElementById("modalDetails").value = rec.details || "";
   }
-  document.getElementById("recordModalBackdrop").classList.add("active");
-  document.getElementById("modalTitle").textContent = "تفاصيل/تعديل المعاملة";
+
+  modalBackdrop.classList.add("active");
 };
 
-document.getElementById("modalType").addEventListener("change", (e) => {
-  const t = e.target.value;
-  const personGroup = document.getElementById("modalPersonGroup");
-  const detailsGroup = document.getElementById("modalDetailsGroup");
-  if (t === "income") {
-    personGroup.style.display = "block";
-    detailsGroup.style.display = "none";
-  } else {
-    personGroup.style.display = "none";
-    detailsGroup.style.display = "block";
-  }
-});
-function closeRecordModal() {
-  document.getElementById("recordModalBackdrop").classList.remove("active");
+function closeModal() {
+  modalBackdrop.classList.remove("active");
 }
-document.getElementById("modalCloseBtn").addEventListener("click", closeRecordModal);
-document.getElementById("modalCancelBtn").addEventListener("click", closeRecordModal);
-document.getElementById("recordModalBackdrop").addEventListener("click", (e) => {
-  if (e.target.id === "recordModalBackdrop") closeRecordModal();
-});
+modalCloseBtn.addEventListener("click", closeModal);
+modalCancelBtn.addEventListener("click", closeModal);
 
-document.getElementById("modalSaveBtn").addEventListener("click", async () => {
-  const id = document.getElementById("modalRecordId").value;
+modalSaveBtn.addEventListener("click", async () => {
+  const id             = document.getElementById("modalRecordId").value;
   const collectionType = document.getElementById("modalRecordCollection").value;
-  const newType = document.getElementById("modalType").value;
-  const amount = parseFloat(document.getElementById("modalAmount").value) || 0;
-  const person = document.getElementById("modalPerson").value.trim();
-  const details = document.getElementById("modalDetails").value.trim();
+  const type           = document.getElementById("modalType").value;
+  const amount         = parseFloat(document.getElementById("modalAmount").value);
+  const person         = document.getElementById("modalPerson").value.trim();
+  const details        = document.getElementById("modalDetails").value.trim();
+
   if (!amount) {
-    alert("يرجى إدخال مبلغ صحيح");
+    alert("رجاء إدخال مبلغ صحيح");
     return;
   }
+  if (type === "income" && !person) {
+    alert("برجاء إدخال اسم الشخص");
+    return;
+  }
+  if (type === "expense" && !details) {
+    alert("برجاء إدخال تفاصيل المصروف");
+    return;
+  }
+
   try {
-    const oldCol = collectionType === "income" ? incomeCollection : expenseCollection;
-    const recRef = doc(oldCol, id);
-    if (collectionType !== newType) {
-      const oldRecord = allRecords.find((r) => r.id === id && r.collectionType === collectionType);
-      if (!oldRecord) return;
-      await deleteDoc(recRef);
-      if (newType === "income") {
-        await addDoc(incomeCollection, {
-          amount,
-          person: person || oldRecord.person || "",
-          dateTime: oldRecord.dateTime,
-          timestamp: oldRecord.timestamp || Date.now(),
-          type: "income"
-        });
-      } else {
-        await addDoc(expenseCollection, {
-          amount,
-          details: details || oldRecord.details || "",
-          dateTime: oldRecord.dateTime,
-          timestamp: oldRecord.timestamp || Date.now(),
-          type: "expense"
-        });
-      }
+    const col = collectionType === "income" ? incomeCollection : expenseCollection;
+    const ref = doc(col, id);
+    const payload = {
+      amount,
+      type,
+      timestamp: Date.now()
+    };
+    if (type === "income") {
+      payload.person = person;
+      payload.details = "";
     } else {
-      const updates = { amount, type: newType };
-      if (newType === "income") updates.person = person;
-      else updates.details = details;
-      await updateDoc(recRef, updates);
+      payload.details = details;
+      payload.person  = "";
     }
-    closeRecordModal();
+    await updateDoc(ref, payload);
     await loadRecords();
+    closeModal();
   } catch (err) {
-    console.error(err);
+    console.error("update error => ", err);
     alert("حدث خطأ أثناء حفظ التعديلات");
   }
 });
 
-function styleWorksheet(ws, wsData, headerRowsCount) {
-  if (!ws["!ref"]) return;
-  const range = XLSX.utils.decode_range(ws["!ref"]);
+/*************************************
+ * حذف عملية واحدة / مسح الكل
+ *************************************/
+window.deleteRecord = async function (id, collectionType) {
+  if (!confirm("هل أنت متأكد من حذف هذه العملية؟")) return;
+  try {
+    const col = collectionType === "income" ? incomeCollection : expenseCollection;
+    await deleteDoc(doc(col, id));
+    await loadRecords();
+  } catch (err) {
+    console.error("delete error => ", err);
+    alert("حدث خطأ أثناء حذف العملية");
+  }
+};
+
+window.deleteAllRecords = async function () {
+  if (!confirm("هل تريد مسح كل السجل بالكامل؟")) return;
+  try {
+    const incomeSnap  = await getDocs(incomeCollection);
+    const expenseSnap = await getDocs(expenseCollection);
+    const batchDelete = [];
+    incomeSnap.forEach((d)  => batchDelete.push(deleteDoc(doc(incomeCollection,  d.id))));
+    expenseSnap.forEach((d) => batchDelete.push(deleteDoc(doc(expenseCollection, d.id))));
+    await Promise.all(batchDelete);
+    await loadRecords();
+    document.getElementById("searchResultsInfo").style.display = "none";
+    isSearching = false;
+  } catch (err) {
+    console.error("delete all error => ", err);
+    alert("حدث خطأ أثناء مسح السجل");
+  }
+};
+/*************************************
+ * التصدير إلى Excel (Workbook واحد)
+ *************************************/
+let globalWorkbook = null;
+
+function ensureWorkbook() {
+  if (!globalWorkbook) {
+    globalWorkbook = XLSX.utils.book_new();
+    globalWorkbook.Props = {
+      Title: "سجل الحسابات",
+      Author: "نظام إدارة الحسابات المتقدم",
+      CreatedDate: new Date()
+    };
+  }
+}
+
+function buildSheetData(type, fromSearch = false) {
+  let records = fromSearch ? searchResults : allRecords;
+  if (type === "income")  records = records.filter((r) => r.type === "income");
+  if (type === "expense") records = records.filter((r) => r.type === "expense");
+
+  const rows = [];
+  rows.push(["النوع", "المبلغ", "الاسم / الوصف", "التاريخ والوقت"]);
+
+  records.forEach((r) => {
+    const desc = r.type === "income" ? (r.person || "") : (r.details || "");
+    rows.push([
+      r.type === "income" ? "وارد" : "مصروف",
+      Number(r.amount),
+      desc,
+      r.dateTime
+    ]);
+  });
+
+  return rows;
+}
+
+function styleWorksheet(ws, range, type) {
+  if (!ws["!cols"]) {
+    ws["!cols"] = [{ wch: 10 }, { wch: 12 }, { wch: 40 }, { wch: 26 }];
+  }
+
+  const headerFill  = { patternType: "solid", fgColor: { rgb: "1f2937" } };
+  const incomeFill  = { patternType: "solid", fgColor: { rgb: "064e3b" } };
+  const expenseFill = { patternType: "solid", fgColor: { rgb: "7f1d1d" } };
+
+  const border = {
+    top:    { style: "thick", color: { rgb: "000000" } },
+    bottom: { style: "thick", color: { rgb: "000000" } },
+    left:   { style: "thick", color: { rgb: "000000" } },
+    right:  { style: "thick", color: { rgb: "000000" } }
+  };
+
   for (let R = range.s.r; R <= range.e.r; ++R) {
-    const isHeader = R < headerRowsCount;
     for (let C = range.s.c; C <= range.e.c; ++C) {
-      const cellRef = XLSX.utils.encode_cell({ c: C, r: R });
-      if (!ws[cellRef]) continue;
-      const row = wsData[R] || [];
-      const typeCell = row[3];
-      let fill = "020617";
-      if (isHeader) fill = "1d4ed8";
-      else if (typeCell === "مبلغ وارد") fill = "d1fae5";
-      else if (typeCell === "مصروف") fill = "fee2e2";
-      else if (R % 2 === 0) fill = "f3f4f6";
-      ws[cellRef].s = {
-        font: { bold: isHeader, color: { rgb: isHeader ? "ffffff" : "000000" } },
-        fill: { fgColor: { rgb: fill } },
-        alignment: { horizontal: "center", vertical: "center" },
-        border: {
-          top: { style: "medium", color: { rgb: "000000" } },
-          bottom: { style: "medium", color: { rgb: "000000" } },
-          left: { style: "medium", color: { rgb: "000000" } },
-          right: { style: "medium", color: { rgb: "000000" } }
-        },
-        numFmt: C === 2 && !isHeader ? "0" : undefined
-      };
+      const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+      const cell = ws[cellRef];
+      if (!cell) continue;
+
+      const isHeader = R === 0;
+
+      cell.s = cell.s || {};
+      cell.s.border    = border;
+      cell.s.alignment = { vertical: "center", horizontal: "center", wrapText: true };
+
+      if (isHeader) {
+        cell.s.fill = headerFill;
+        cell.s.font = { bold: true, color: { rgb: "ffffff" } };
+      } else {
+        if (type === "income") {
+          cell.s.fill = incomeFill;
+        } else if (type === "expense") {
+          cell.s.fill = expenseFill;
+        } else {
+          // عند النوع "all" أو "نتائج البحث": تناوب بين لون الوارد والمصروف
+          const fillColor = (cell.v === "وارد" || cell.v === "مصروف")
+            ? headerFill
+            : (R % 2 === 0 ? incomeFill : expenseFill);
+          cell.s.fill = fillColor;
+        }
+        cell.s.font = { color: { rgb: "ffffff" } };
+      }
+
+      // عمود المبلغ رقم بدون كسور
+      if (C === 1 && !isHeader) {
+        cell.t = "n";
+        cell.z = "0";
+      }
     }
   }
 }
 
 window.exportToExcel = function (type) {
-  let recs = allRecords;
-  if (type === "income") recs = allRecords.filter((r) => r.type === "income");
-  else if (type === "expense") recs = allRecords.filter((r) => r.type === "expense");
-  if (recs.length === 0) {
+  ensureWorkbook();
+
+  const data = buildSheetData(type, false);
+  if (data.length <= 1) {
     alert("لا توجد بيانات للتصدير");
     return;
   }
-  const wb = XLSX.utils.book_new();
-  const wsData = [];
-  wsData.push([
-    "نظام إدارة الحسابات - تقرير " +
-      (type === "income" ? "المبالغ الواردة" : type === "expense" ? "المصروفات" : "كل العمليات")
-  ]);
-  wsData.push([]);
-  wsData.push(["تاريخ البيان الكامل", "اسم الشخص / التفاصيل", "المبلغ", "النوع"]);
-  recs
-    .filter((r) => r.type === "income")
-    .forEach((r) => wsData.push([r.dateTime, r.person || "", Number(r.amount), "مبلغ وارد"]));
-  recs
-    .filter((r) => r.type === "expense")
-    .forEach((r) => wsData.push([r.dateTime, r.details || "", Number(r.amount), "مصروف"]));
-  const ws = XLSX.utils.aoa_to_sheet(wsData);
-  styleWorksheet(ws, wsData, 3);
-  XLSX.utils.book_append_sheet(wb, ws, "تقرير العمليات");
-  const name =
-    type === "income"
-      ? "تقرير_المبالغ_الواردة.xlsx"
-      : type === "expense"
-      ? "تقرير_المصروفات.xlsx"
-      : "تقرير_كل_العمليات.xlsx";
-  XLSX.writeFile(wb, name);
+
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+  styleWorksheet(ws, range, type);
+
+  const sheetName =
+    type === "all"     ? "كل العمليات" :
+    type === "income"  ? "الوارد"      :
+    type === "expense" ? "المصروف"     : "بيانات";
+
+  XLSX.utils.book_append_sheet(globalWorkbook, ws, sheetName);
+  XLSX.writeFile(globalWorkbook, "سجل_الحسابات.xlsx");
 };
 
 window.exportSearchResults = function () {
-  if (!isSearching || searchResults.length === 0) {
-    alert("لا توجد نتائج بحث لتصديرها");
+  ensureWorkbook();
+
+  const data = buildSheetData("all", true);
+  if (data.length <= 1) {
+    alert("لا توجد نتائج بحث للتصدير");
     return;
   }
-  const wb = XLSX.utils.book_new();
-  const wsData = [];
-  wsData.push(["نظام إدارة الحسابات - تقرير نتائج البحث"]);
-  wsData.push([]);
-  wsData.push(["تاريخ البيان الكامل", "اسم الشخص / التفاصيل", "المبلغ", "النوع"]);
-  searchResults.forEach((r) => {
-    const isIncome = r.type === "income";
-    wsData.push([
-      r.dateTime,
-      isIncome ? r.person || "" : r.details || "",
-      Number(r.amount),
-      isIncome ? "مبلغ وارد" : "مصروف"
-    ]);
-  });
-  const ws = XLSX.utils.aoa_to_sheet(wsData);
-  styleWorksheet(ws, wsData, 3);
-  XLSX.utils.book_append_sheet(wb, ws, "نتائج البحث");
-  XLSX.writeFile(wb, "تقرير_نتائج_البحث.xlsx");
+
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+  styleWorksheet(ws, range, "all");
+
+  XLSX.utils.book_append_sheet(globalWorkbook, ws, "نتائج البحث");
+  XLSX.writeFile(globalWorkbook, "سجل_الحسابات.xlsx");
 };
 
+/*************************************
+ * تشغيل مبدئي
+ *************************************/
 loadRecords();
 </script>
 </body>
