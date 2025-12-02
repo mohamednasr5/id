@@ -461,33 +461,40 @@
 </div>
 
 <script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-    getFirestore,collection,addDoc,getDocs,deleteDoc,doc,query,orderBy,updateDoc
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  query,
+  orderBy,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig={
-    apiKey:"AIzaSyDJHcly8lYT4FTxrJCBRIR7JSbJGYtG3_I",
-    authDomain:"nasrapp-7a0fc.firebaseapp.com",
-    projectId:"nasrapp-7a0fc",
-    storageBucket:"nasrapp-7a0fc.firebasestorage.app",
-    messagingSenderId:"826970736109",
-    appId:"1:826970736109:web:c1cc3c3a1008e719b193e4",
-    measurementId:"G-BHP6J4K9VN"
+const firebaseConfig = {
+  apiKey: "AIzaSyDJHcly8lYT4FTxrJCBRIR7JSbJGYtG3_I",
+  authDomain: "nasrapp-7a0fc.firebaseapp.com",
+  projectId: "nasrapp-7a0fc",
+  storageBucket: "nasrapp-7a0fc.firebasestorage.app",
+  messagingSenderId: "826970736109",
+  appId: "1:826970736109:web:c1cc3c3a1008e719b193e4",
+  measurementId: "G-BHP6J4K9VN"
 };
 
-const app=initializeApp(firebaseConfig);
-const db=getFirestore(app);
-const incomeCollection=collection(db,'income');
-const expenseCollection=collection(db,'expenses');
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const incomeCollection = collection(db, "income");
+const expenseCollection = collection(db, "expenses");
 
-let currentTab='all';
-let allRecords=[];
-let searchResults=[];
-let isSearching=false;
+let currentTab = "all";
+let allRecords = [];
+let searchResults = [];
+let isSearching = false;
 
-// أرقام بالكلمات
-const numberWords={
+const numberWords = {
  "صفر":0,"واحد":1,"اتنين":2,"تلاتة":3,"اربعة":4,"خمسة":5,"ستة":6,"سبعة":7,"تمانية":8,"تسعة":9,
  "عشرة":10,"حداشر":11,"اتناشر":12,"تلاتاشر":13,"اربعتاشر":14,"خمستاشر":15,"ستاشر":16,"سبعتاشر":17,
  "تمنتاشر":18,"تسعتاشر":19,
@@ -524,503 +531,562 @@ const numberWords={
  "مليون":1000000
 };
 
-const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-let recognition=null;
-if(SpeechRecognition){
-    recognition=new SpeechRecognition();
-    recognition.lang='ar-EG';
-    recognition.continuous=false;
-    recognition.interimResults=false;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+  recognition.lang = "ar-EG";
+  recognition.continuous = false;
+  recognition.interimResults = false;
 }
 
-function convertArabicToEnglishNumbers(str){
-    const ar=['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
-    const en=['0','1','2','3','4','5','6','7','8','9'];
-    let res=str;
-    for(let i=0;i<10;i++){
-        res=res.replace(new RegExp(ar[i],'g'),en[i]);
-    }
-    return res;
+function convertArabicToEnglishNumbers(str) {
+  const ar = ["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
+  const en = ["0","1","2","3","4","5","6","7","8","9"];
+  let res = str;
+  for (let i = 0; i < 10; i++) {
+    res = res.replace(new RegExp(ar[i], "g"), en[i]);
+  }
+  return res;
 }
 
-function extractNumber(text){
-    const digitMatch=text.match(/[\d.]+/);
-    if(digitMatch) return digitMatch[0];
+function extractNumber(text) {
+  const digitMatch = text.match(/[\d.]+/);
+  if (digitMatch) return digitMatch[0];
 
-    let normalized=text.replace(/\s+/g,' ').trim();
-    if(numberWords.hasOwnProperty(normalized)){
-        return numberWords[normalized].toString();
+  let normalized = text.replace(/\s+/g, " ").trim();
+  if (numberWords.hasOwnProperty(normalized)) {
+    return numberWords[normalized].toString();
+  }
+  const words = normalized.split(" ");
+  let total = 0, current = 0;
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i];
+    if (numberWords.hasOwnProperty(w)) {
+      current += numberWords[w];
+    } else if (w === "الف" || w === "ألف") {
+      if (current === 0) current = 1;
+      current *= 1000; total += current; current = 0;
+    } else if (w === "مليون") {
+      if (current === 0) current = 1;
+      current *= 1000000; total += current; current = 0;
     }
-    const words=normalized.split(' ');
-    let total=0,current=0;
-    for(let i=0;i<words.length;i++){
-        const w=words[i];
-        if(numberWords.hasOwnProperty(w)){
-            current+=numberWords[w];
-        }else if(w==='الف'||w==='ألف'){
-            if(current===0) current=1;
-            current*=1000;total+=current;current=0;
-        }else if(w==='مليون'){
-            if(current===0) current=1;
-            current*=1000000;total+=current;current=0;
-        }
-    }
-    total+=current;
-    if(total>0) return total.toString();
-    return null;
+  }
+  total += current;
+  if (total > 0) return total.toString();
+  return null;
 }
 
-function startVoiceInput(inputId,statusId,isNumber=false){
-    if(!recognition){
-        alert('متصفحك لا يدعم التعرف على الصوت. يرجى استخدام Chrome أو Edge');
-        return;
+function startVoiceInput(inputId, statusId, isNumber = false) {
+  if (!recognition) {
+    alert("متصفحك لا يدعم التعرف على الصوت. يرجى استخدام Chrome أو Edge");
+    return;
+  }
+  const inputElement = document.getElementById(inputId);
+  const statusElement = document.getElementById(statusId);
+  const micBtn = document.getElementById("mic" + inputId.charAt(0).toUpperCase() + inputId.slice(1));
+
+  recognition.lang = "ar-EG";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.start();
+  micBtn.classList.add("recording");
+  statusElement.textContent = "🎤 جاري الاستماع... تحدث الآن";
+  statusElement.classList.add("listening");
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    if (isNumber) {
+      const converted = convertArabicToEnglishNumbers(transcript);
+      const num = extractNumber(converted.toLowerCase());
+      if (num) {
+        inputElement.value = num;
+        statusElement.textContent = "✅ تم التعرف: " + num;
+      } else {
+        inputElement.value = transcript;
+        statusElement.textContent = "✅ تم التعرف: " + transcript;
+      }
+    } else {
+      inputElement.value = transcript;
+      statusElement.textContent = "✅ تم التعرف على الصوت بنجاح";
     }
-    const inputElement=document.getElementById(inputId);
-    const statusElement=document.getElementById(statusId);
-    const micBtn=document.getElementById('mic'+inputId.charAt(0).toUpperCase()+inputId.slice(1));
+    setTimeout(() => {
+      statusElement.textContent = "";
+      statusElement.classList.remove("listening");
+    }, 3000);
+  };
+  recognition.onerror = (event) => {
+    micBtn.classList.remove("recording");
+    statusElement.classList.remove("listening");
+    if (event.error === "no-speech") statusElement.textContent = "❌ لم يتم اكتشاف صوت. حاول مرة أخرى";
+    else if (event.error === "not-allowed") statusElement.textContent = "❌ يرجى السماح بالوصول للميكروفون";
+    else statusElement.textContent = "❌ حدث خطأ في التعرف على الصوت";
+    setTimeout(() => { statusElement.textContent = ""; }, 3000);
+  };
+  recognition.onend = () => {
+    micBtn.classList.remove("recording");
+    statusElement.classList.remove("listening");
+  };
+}
 
-    recognition.lang='ar-EG';
-    recognition.continuous=false;
-    recognition.interimResults=false;
+document.getElementById("micIncomeAmount").addEventListener("click", () => startVoiceInput("incomeAmount", "statusIncomeAmount", true));
+document.getElementById("micIncomePerson").addEventListener("click", () => startVoiceInput("incomePerson", "statusIncomePerson", false));
+document.getElementById("micExpenseAmount").addEventListener("click", () => startVoiceInput("expenseAmount", "statusExpenseAmount", true));
+document.getElementById("micExpenseDetails").addEventListener("click", () => startVoiceInput("expenseDetails", "statusExpenseDetails", false));
 
+const voiceSearchBtn = document.getElementById("voiceSearchBtn");
+const voiceSearchStatus = document.getElementById("voiceSearchStatus");
+if (voiceSearchBtn && recognition) {
+  voiceSearchBtn.addEventListener("click", () => {
+    recognition.lang = "ar-EG";
+    recognition.continuous = false;
+    recognition.interimResults = false;
     recognition.start();
-    micBtn.classList.add('recording');
-    statusElement.textContent='🎤 جاري الاستماع... تحدث الآن';
-    statusElement.classList.add('listening');
+    voiceSearchStatus.textContent = "🎤 جاري الاستماع لأمر البحث...";
+    voiceSearchStatus.classList.add("listening");
 
-    recognition.onresult=(event)=>{
-        const transcript=event.results[0][0].transcript;
-        if(isNumber){
-            const converted=convertArabicToEnglishNumbers(transcript);
-            const num=extractNumber(converted.toLowerCase());
-            if(num){
-                inputElement.value=num;
-                statusElement.textContent='✅ تم التعرف: '+num;
-            }else{
-                inputElement.value=transcript;
-                statusElement.textContent='✅ تم التعرف: '+transcript;
-            }
-        }else{
-            inputElement.value=transcript;
-            statusElement.textContent='✅ تم التعرف على الصوت بنجاح';
-        }
-        setTimeout(()=>{
-            statusElement.textContent='';
-            statusElement.classList.remove('listening');
-        },3000);
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript.toLowerCase().trim();
+      voiceSearchStatus.textContent = "✅ تم التعرف: " + transcript;
+      const num = extractNumber(convertArabicToEnglishNumbers(transcript));
+      document.getElementById("searchAmount").value = "";
+      document.getElementById("searchPerson").value = "";
+      document.getElementById("searchDetails").value = "";
+      if (num) {
+        document.getElementById("searchAmount").value = num;
+      } else if (transcript.includes("حساب") || transcript.includes("عند")) {
+        const name = transcript.replace("حساب", "").replace("عند", "").trim();
+        document.getElementById("searchPerson").value = name;
+      } else {
+        document.getElementById("searchDetails").value = transcript;
+      }
+      setTimeout(() => {
+        voiceSearchStatus.textContent = "";
+        voiceSearchStatus.classList.remove("listening");
+      }, 2500);
+      window.performSearch();
     };
-    recognition.onerror=(event)=>{
-        micBtn.classList.remove('recording');
-        statusElement.classList.remove('listening');
-        if(event.error==='no-speech') statusElement.textContent='❌ لم يتم اكتشاف صوت. حاول مرة أخرى';
-        else if(event.error==='not-allowed') statusElement.textContent='❌ يرجى السماح بالوصول للميكروفون';
-        else statusElement.textContent='❌ حدث خطأ في التعرف على الصوت';
-        setTimeout(()=>{statusElement.textContent='';},3000);
+    recognition.onerror = () => {
+      voiceSearchStatus.textContent = "❌ حدث خطأ في البحث الصوتي";
+      voiceSearchStatus.classList.remove("listening");
     };
-    recognition.onend=()=>{
-        micBtn.classList.remove('recording');
-        statusElement.classList.remove('listening');
+    recognition.onend = () => {
+      voiceSearchStatus.classList.remove("listening");
     };
+  });
 }
 
-document.getElementById('micIncomeAmount').addEventListener('click',()=>startVoiceInput('incomeAmount','statusIncomeAmount',true));
-document.getElementById('micIncomePerson').addEventListener('click',()=>startVoiceInput('incomePerson','statusIncomePerson',false));
-document.getElementById('micExpenseAmount').addEventListener('click',()=>startVoiceInput('expenseAmount','statusExpenseAmount',true));
-document.getElementById('micExpenseDetails').addEventListener('click',()=>startVoiceInput('expenseDetails','statusExpenseDetails',false));
-
-const voiceSearchBtn=document.getElementById('voiceSearchBtn');
-const voiceSearchStatus=document.getElementById('voiceSearchStatus');
-if(voiceSearchBtn&&recognition){
-    voiceSearchBtn.addEventListener('click',()=>{
-        recognition.lang='ar-EG';
-        recognition.continuous=false;
-        recognition.interimResults=false;
-        recognition.start();
-        voiceSearchStatus.textContent='🎤 جاري الاستماع لأمر البحث...';
-        voiceSearchStatus.classList.add('listening');
-
-        recognition.onresult=(event)=>{
-            const transcript=event.results[0][0].transcript.toLowerCase().trim();
-            voiceSearchStatus.textContent='✅ تم التعرف: '+transcript;
-            const num=extractNumber(convertArabicToEnglishNumbers(transcript));
-            document.getElementById('searchAmount').value='';
-            document.getElementById('searchPerson').value='';
-            document.getElementById('searchDetails').value='';
-            if(num){
-                document.getElementById('searchAmount').value=num;
-            }else if(transcript.includes('حساب')||transcript.includes('عند')){
-                const name=transcript.replace('حساب','').replace('عند','').trim();
-                document.getElementById('searchPerson').value=name;
-            }else{
-                document.getElementById('searchDetails').value=transcript;
-            }
-            setTimeout(()=>{
-                voiceSearchStatus.textContent='';
-                voiceSearchStatus.classList.remove('listening');
-            },2500);
-            window.performSearch();
-        };
-        recognition.onerror=()=>{
-            voiceSearchStatus.textContent='❌ حدث خطأ في البحث الصوتي';
-            voiceSearchStatus.classList.remove('listening');
-        };
-        recognition.onend=()=>{
-            voiceSearchStatus.classList.remove('listening');
-        };
-    });
+function formatDateTime() {
+  const now = new Date();
+  const options = { year:"numeric", month:"long", day:"numeric", hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:true };
+  return now.toLocaleDateString("ar-EG", options);
 }
-
-function formatDateTime(){
-    const now=new Date();
-    const options={year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true};
-    return now.toLocaleDateString('ar-EG',options);
+function updateDateTimeFields() {
+  const dt = formatDateTime();
+  document.getElementById("incomeDateTime").value = dt;
+  document.getElementById("expenseDateTime").value = dt;
 }
-function updateDateTimeFields(){
-    const dt=formatDateTime();
-    document.getElementById('incomeDateTime').value=dt;
-    document.getElementById('expenseDateTime').value=dt;
-}
-setInterval(updateDateTimeFields,1000);
+setInterval(updateDateTimeFields, 1000);
 updateDateTimeFields();
 
-document.getElementById('incomeForm').addEventListener('submit',async(e)=>{
-    e.preventDefault();
-    const amount=parseFloat(document.getElementById('incomeAmount').value);
-    const person=document.getElementById('incomePerson').value.trim();
-    const dateTime=document.getElementById('incomeDateTime').value;
-    try{
-        await addDoc(incomeCollection,{amount,person,dateTime,timestamp:new Date().getTime(),type:'income'});
-        e.target.reset();
-        updateDateTimeFields();
-        const btn=e.target.querySelector('button[type="submit"]');
-        const originalText=btn.textContent;
-        btn.textContent='✅ تم الإضافة بنجاح!';
-        btn.style.background='#22c55e';
-        setTimeout(()=>{btn.textContent=originalText;btn.style.background='';},2000);
-        await loadRecords();
-    }catch(err){
-        console.error(err);
-        alert('حدث خطأ أثناء إضافة المبلغ');
+document.getElementById("incomeForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    const amountField = document.getElementById("incomeAmount");
+    const personField = document.getElementById("incomePerson");
+    const amount = parseFloat(amountField.value);
+    const person = personField.value.trim();
+    const dateTime = document.getElementById("incomeDateTime").value;
+    if (!amount || !person) {
+      alert("رجاء إدخال مبلغ واسم شخص صحيحين");
+      return;
     }
+    await addDoc(incomeCollection, { amount, person, dateTime, timestamp: Date.now(), type: "income" });
+    e.target.reset();
+    updateDateTimeFields();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.textContent;
+    btn.textContent = "✅ تم الإضافة بنجاح!";
+    btn.style.background = "#22c55e";
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.background = "";
+    }, 2000);
+    await loadRecords();
+  } catch (err) {
+    console.error("income error => ", err);
+    alert("حدث خطأ أثناء إضافة المبلغ");
+  }
 });
 
-document.getElementById('expenseForm').addEventListener('submit',async(e)=>{
-    e.preventDefault();
-    const amount=parseFloat(document.getElementById('expenseAmount').value);
-    const details=document.getElementById('expenseDetails').value.trim();
-    const dateTime=document.getElementById('expenseDateTime').value;
-    try{
-        await addDoc(expenseCollection,{amount,details,dateTime,timestamp:new Date().getTime(),type:'expense'});
-        e.target.reset();
-        updateDateTimeFields();
-        const btn=e.target.querySelector('button[type="submit"]');
-        const originalText=btn.textContent;
-        btn.textContent='✅ تم الإضافة بنجاح!';
-        btn.style.background='#22c55e';
-        setTimeout(()=>{btn.textContent=originalText;btn.style.background='';},2000);
-        await loadRecords();
-    }catch(err){
-        console.error(err);
-        alert('حدث خطأ أثناء إضافة المصروف');
+document.getElementById("expenseForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    const amountField = document.getElementById("expenseAmount");
+    const detailsField = document.getElementById("expenseDetails");
+    const amount = parseFloat(amountField.value);
+    const details = detailsField.value.trim();
+    const dateTime = document.getElementById("expenseDateTime").value;
+    if (!amount || !details) {
+      alert("رجاء إدخال مبلغ وتفاصيل صحيحة");
+      return;
     }
+    await addDoc(expenseCollection, { amount, details, dateTime, timestamp: Date.now(), type: "expense" });
+    e.target.reset();
+    updateDateTimeFields();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.textContent;
+    btn.textContent = "✅ تم الإضافة بنجاح!";
+    btn.style.background = "#22c55e";
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.background = "";
+    }, 2000);
+    await loadRecords();
+  } catch (err) {
+    console.error("expense error => ", err);
+    alert("حدث خطأ أثناء إضافة المصروف");
+  }
 });
 
-async function loadRecords(){
-    try{
-        const incomeSnap=await getDocs(query(incomeCollection,orderBy('timestamp','desc')));
-        const expenseSnap=await getDocs(query(expenseCollection,orderBy('timestamp','desc')));
-        allRecords=[];
-        incomeSnap.forEach(d=>allRecords.push({id:d.id,...d.data(),collectionType:'income'}));
-        expenseSnap.forEach(d=>allRecords.push({id:d.id,...d.data(),collectionType:'expense'}));
-        allRecords.sort((a,b)=>b.timestamp-a.timestamp);
-        displayRecords();
-        updateStatistics();
-    }catch(err){
-        console.error(err);
-    }
+async function loadRecords() {
+  try {
+    const incomeSnap = await getDocs(query(incomeCollection, orderBy("timestamp", "desc")));
+    const expenseSnap = await getDocs(query(expenseCollection, orderBy("timestamp", "desc")));
+    allRecords = [];
+    incomeSnap.forEach((d) => allRecords.push({ id: d.id, ...d.data(), collectionType: "income" }));
+    expenseSnap.forEach((d) => allRecords.push({ id: d.id, ...d.data(), collectionType: "expense" }));
+    allRecords.sort((a, b) => b.timestamp - a.timestamp);
+    displayRecords();
+    updateStatistics();
+  } catch (err) {
+    console.error(err);
+  }
 }
 
-window.performSearch=function(){
-    const searchAmount=document.getElementById('searchAmount').value;
-    const searchPerson=document.getElementById('searchPerson').value.toLowerCase().trim();
-    const searchDetails=document.getElementById('searchDetails').value.toLowerCase().trim();
-    const searchDate=document.getElementById('searchDate').value;
-    searchResults=allRecords.filter(r=>{
-        let m=true;
-        if(searchAmount) m=m&&Number(r.amount)===parseFloat(searchAmount);
-        if(searchPerson){
-            const p=r.person||'';m=m&&p.toLowerCase().includes(searchPerson);
-        }
-        if(searchDetails){
-            const d=r.details||'';m=m&&d.toLowerCase().includes(searchDetails);
-        }
-        if(searchDate){
-            const rd=r.dateTime.split(' ')[0];m=m&&rd.includes(searchDate);
-        }
-        return m;
-    });
-    isSearching=true;
-    displayRecords();
-    const info=document.getElementById('searchResultsInfo');
-    info.style.display='block';
-    info.innerHTML=`<div class="search-results-info"><strong>✅ تم العثور على ${searchResults.length} نتيجة</strong></div>`;
+window.performSearch = function () {
+  const searchAmount = document.getElementById("searchAmount").value;
+  const searchPerson = document.getElementById("searchPerson").value.toLowerCase().trim();
+  const searchDetails = document.getElementById("searchDetails").value.toLowerCase().trim();
+  const searchDate = document.getElementById("searchDate").value;
+  searchResults = allRecords.filter((r) => {
+    let m = true;
+    if (searchAmount) m = m && Number(r.amount) === parseFloat(searchAmount);
+    if (searchPerson) {
+      const p = r.person || "";
+      m = m && p.toLowerCase().includes(searchPerson);
+    }
+    if (searchDetails) {
+      const d = r.details || "";
+      m = m && d.toLowerCase().includes(searchDetails);
+    }
+    if (searchDate) {
+      const rd = r.dateTime.split(" ")[0];
+      m = m && rd.includes(searchDate);
+    }
+    return m;
+  });
+  isSearching = true;
+  displayRecords();
+  const info = document.getElementById("searchResultsInfo");
+  info.style.display = "block";
+  info.innerHTML = `<div class="search-results-info"><strong>✅ تم العثور على ${searchResults.length} نتيجة</strong></div>`;
 };
 
-window.clearSearch=function(){
-    document.getElementById('searchAmount').value='';
-    document.getElementById('searchPerson').value='';
-    document.getElementById('searchDetails').value='';
-    document.getElementById('searchDate').value='';
-    document.getElementById('searchResultsInfo').style.display='none';
-    isSearching=false;
-    displayRecords();
+window.clearSearch = function () {
+  document.getElementById("searchAmount").value = "";
+  document.getElementById("searchPerson").value = "";
+  document.getElementById("searchDetails").value = "";
+  document.getElementById("searchDate").value = "";
+  document.getElementById("searchResultsInfo").style.display = "none";
+  isSearching = false;
+  displayRecords();
 };
 
-function displayRecords(){
-    const list=document.getElementById('recordsList');
-    let records=isSearching?searchResults:allRecords;
-    if(!isSearching&&currentTab!=='all') records=allRecords.filter(r=>r.type===currentTab);
-    if(records.length===0){
-        list.innerHTML=`<div class="empty-state">
-            <h3 style="margin-bottom:6px;">${isSearching?'لا توجد نتائج بحث':'لا توجد عمليات بعد'}</h3>
-            <p>${isSearching?'حاول البحث بمعايير أخرى':'ابدأ بإضافة مبلغ وارد أو مصروف من الأعلى'}</p>
+function displayRecords() {
+  const list = document.getElementById("recordsList");
+  let records = isSearching ? searchResults : allRecords;
+  if (!isSearching && currentTab !== "all") records = allRecords.filter((r) => r.type === currentTab);
+  if (records.length === 0) {
+    list.innerHTML = `<div class="empty-state">
+      <h3 style="margin-bottom:6px;">${isSearching ? "لا توجد نتائج بحث" : "لا توجد عمليات بعد"}</h3>
+      <p>${isSearching ? "حاول البحث بمعايير أخرى" : "ابدأ بإضافة مبلغ وارد أو مصروف من الأعلى"}</p>
+    </div>`;
+    return;
+  }
+  list.innerHTML = records
+    .map((r) => {
+      const dataAttr = `data-id="${r.id}" data-collection="${r.collectionType}"`;
+      if (r.type === "income") {
+        return `<div class="record-item income" ${dataAttr} onclick="openRecordModal('${r.id}','${r.collectionType}')">
+          <div class="record-header">
+            <div class="record-amount income">+${Number(r.amount).toLocaleString("ar-EG")} جنيه</div>
+            <div style="text-align:left;min-width:160px;">
+              <div class="record-date">📅 ${r.dateTime}</div>
+              <button class="delete-btn" onclick="event.stopPropagation();deleteRecord('${r.id}','income')">🗑️ حذف</button>
+            </div>
+          </div>
+          <div class="record-person">👤 ${r.person}</div>
         </div>`;
-        return;
-    }
-    list.innerHTML=records.map(r=>{
-        const dataAttr=`data-id="${r.id}" data-collection="${r.collectionType}"`;
-        if(r.type==='income'){
-            return `<div class="record-item income" ${dataAttr} onclick="openRecordModal('${r.id}','${r.collectionType}')">
-                <div class="record-header">
-                    <div class="record-amount income">+${Number(r.amount).toLocaleString('ar-EG')} جنيه</div>
-                    <div style="text-align:left;min-width:160px;">
-                        <div class="record-date">📅 ${r.dateTime}</div>
-                        <button class="delete-btn" onclick="event.stopPropagation();deleteRecord('${r.id}','income')">🗑️ حذف</button>
-                    </div>
-                </div>
-                <div class="record-person">👤 ${r.person}</div>
-            </div>`;
-        }else{
-            return `<div class="record-item expense" ${dataAttr} onclick="openRecordModal('${r.id}','${r.collectionType}')">
-                <div class="record-header">
-                    <div class="record-amount expense">-${Number(r.amount).toLocaleString('ar-EG')} جنيه</div>
-                    <div style="text-align:left;min-width:160px;">
-                        <div class="record-date">📅 ${r.dateTime}</div>
-                        <button class="delete-btn" onclick="event.stopPropagation();deleteRecord('${r.id}','expense')">🗑️ حذف</button>
-                    </div>
-                </div>
-                <div class="record-details">📝 ${r.details||''}</div>
-            </div>`;
-        }
-    }).join('');
+      } else {
+        return `<div class="record-item expense" ${dataAttr} onclick="openRecordModal('${r.id}','${r.collectionType}')">
+          <div class="record-header">
+            <div class="record-amount expense">-${Number(r.amount).toLocaleString("ar-EG")} جنيه</div>
+            <div style="text-align:left;min-width:160px;">
+              <div class="record-date">📅 ${r.dateTime}</div>
+              <button class="delete-btn" onclick="event.stopPropagation();deleteRecord('${r.id}','expense')">🗑️ حذف</button>
+            </div>
+          </div>
+          <div class="record-details">📝 ${r.details || ""}</div>
+        </div>`;
+      }
+    })
+    .join("");
 }
 
-function updateStatistics(){
-    const incomeRecs=allRecords.filter(r=>r.type==='income');
-    const expenseRecs=allRecords.filter(r=>r.type==='expense');
-    const totalIncome=incomeRecs.reduce((s,r)=>s+Number(r.amount),0);
-    const totalExpense=expenseRecs.reduce((s,r)=>s+Number(r.amount),0);
-    const balance=totalIncome-totalExpense;
-    document.getElementById('totalIncome').innerHTML=`${totalIncome.toLocaleString('ar-EG',{maximumFractionDigits:0})} <span class="currency">جنيه</span>`;
-    document.getElementById('totalExpense').innerHTML=`${totalExpense.toLocaleString('ar-EG',{maximumFractionDigits:0})} <span class="currency">جنيه</span>`;
-    document.getElementById('balance').innerHTML=`${balance.toLocaleString('ar-EG',{maximumFractionDigits:0})} <span class="currency">جنيه</span>`;
-    document.getElementById('incomeCount').textContent=`${incomeRecs.length} عملية`;
-    document.getElementById('expenseCount').textContent=`${expenseRecs.length} عملية`;
+function updateStatistics() {
+  const incomeRecs = allRecords.filter((r) => r.type === "income");
+  const expenseRecs = allRecords.filter((r) => r.type === "expense");
+  const totalIncome = incomeRecs.reduce((s, r) => s + Number(r.amount), 0);
+  const totalExpense = expenseRecs.reduce((s, r) => s + Number(r.amount), 0);
+  const balance = totalIncome - totalExpense;
+  document.getElementById("totalIncome").innerHTML = `${totalIncome.toLocaleString("ar-EG", { maximumFractionDigits: 0 })} <span class="currency">جنيه</span>`;
+  document.getElementById("totalExpense").innerHTML = `${totalExpense.toLocaleString("ar-EG", { maximumFractionDigits: 0 })} <span class="currency">جنيه</span>`;
+  document.getElementById("balance").innerHTML = `${balance.toLocaleString("ar-EG", { maximumFractionDigits: 0 })} <span class="currency">جنيه</span>`;
+  document.getElementById("incomeCount").textContent = `${incomeRecs.length} عملية`;
+  document.getElementById("expenseCount").textContent = `${expenseRecs.length} عملية`;
 }
 
-document.querySelectorAll('.tab').forEach(tab=>{
-    tab.addEventListener('click',()=>{
-        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-        tab.classList.add('active');
-        currentTab=tab.getAttribute('data-tab');
-        displayRecords();
-    });
+document.querySelectorAll(".tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+    tab.classList.add("active");
+    currentTab = tab.getAttribute("data-tab");
+    displayRecords();
+  });
 });
 
-window.deleteRecord=async(id,type)=>{
-    if(!confirm('هل أنت متأكد من حذف هذه العملية؟')) return;
-    try{
-        const col=type==='income'?incomeCollection:expenseCollection;
-        await deleteDoc(doc(col,id));
-        await loadRecords();
-    }catch(err){
-        console.error(err);
-        alert('حدث خطأ أثناء حذف العملية');
-    }
+window.deleteRecord = async (id, type) => {
+  if (!confirm("هل أنت متأكد من حذف هذه العملية؟")) return;
+  try {
+    const col = type === "income" ? incomeCollection : expenseCollection;
+    await deleteDoc(doc(col, id));
+    await loadRecords();
+  } catch (err) {
+    console.error(err);
+    alert("حدث خطأ أثناء حذف العملية");
+  }
 };
 
-window.deleteAllRecords=async()=>{
-    const pass=prompt('لأمان بياناتك، أدخل كلمة السر لمسح كل السجل:');
-    if(pass!=='521988'){alert('كلمة السر غير صحيحة، لم يتم المسح');return;}
-    if(!confirm('تحذير: سيتم حذف جميع العمليات (وارد + مصروف) نهائياً، هل أنت متأكد؟')) return;
-    try{
-        const incomeSnap=await getDocs(incomeCollection);
-        const expenseSnap=await getDocs(expenseCollection);
-        const ops=[];
-        incomeSnap.forEach(d=>ops.push(deleteDoc(doc(incomeCollection,d.id))));
-        expenseSnap.forEach(d=>ops.push(deleteDoc(doc(expenseCollection,d.id))));
-        await Promise.all(ops);
-        await loadRecords();
-        alert('تم حذف كل السجل بنجاح');
-    }catch(err){
-        console.error(err);
-        alert('حدث خطأ أثناء مسح السجل');
-    }
+window.deleteAllRecords = async () => {
+  const pass = prompt("لأمان بياناتك، أدخل كلمة السر لمسح كل السجل:");
+  if (pass !== "521988") {
+    alert("كلمة السر غير صحيحة، لم يتم المسح");
+    return;
+  }
+  if (!confirm("تحذير: سيتم حذف جميع العمليات (وارد + مصروف) نهائياً، هل أنت متأكد؟")) return;
+  try {
+    const incomeSnap = await getDocs(incomeCollection);
+    const expenseSnap = await getDocs(expenseCollection);
+    const ops = [];
+    incomeSnap.forEach((d) => ops.push(deleteDoc(doc(incomeCollection, d.id))));
+    expenseSnap.forEach((d) => ops.push(deleteDoc(doc(expenseCollection, d.id))));
+    await Promise.all(ops);
+    await loadRecords();
+    alert("تم حذف كل السجل بنجاح");
+  } catch (err) {
+    console.error(err);
+    alert("حدث خطأ أثناء مسح السجل");
+  }
 };
 
-window.openRecordModal=(id,collectionType)=>{
-    const r=allRecords.find(x=>x.id===id&&x.collectionType===collectionType);
-    if(!r) return;
-    document.getElementById('modalRecordId').value=r.id;
-    document.getElementById('modalRecordCollection').value=collectionType;
-    document.getElementById('modalAmount').value=r.amount;
-    document.getElementById('modalDateTime').value=r.dateTime;
-    const modalType=document.getElementById('modalType');
-    const personGroup=document.getElementById('modalPersonGroup');
-    const detailsGroup=document.getElementById('modalDetailsGroup');
-    const modalPerson=document.getElementById('modalPerson');
-    const modalDetails=document.getElementById('modalDetails');
-    modalType.value=r.type;
-    if(r.type==='income'){
-        personGroup.style.display='block';detailsGroup.style.display='none';
-        modalPerson.value=r.person||'';modalDetails.value='';
-    }else{
-        personGroup.style.display='none';detailsGroup.style.display='block';
-        modalPerson.value='';modalDetails.value=r.details||'';
-    }
-    document.getElementById('recordModalBackdrop').classList.add('active');
-    document.getElementById('modalTitle').textContent='تفاصيل/تعديل المعاملة';
+window.openRecordModal = (id, collectionType) => {
+  const r = allRecords.find((x) => x.id === id && x.collectionType === collectionType);
+  if (!r) return;
+  document.getElementById("modalRecordId").value = r.id;
+  document.getElementById("modalRecordCollection").value = collectionType;
+  document.getElementById("modalAmount").value = r.amount;
+  document.getElementById("modalDateTime").value = r.dateTime;
+  const modalType = document.getElementById("modalType");
+  const personGroup = document.getElementById("modalPersonGroup");
+  const detailsGroup = document.getElementById("modalDetailsGroup");
+  const modalPerson = document.getElementById("modalPerson");
+  const modalDetails = document.getElementById("modalDetails");
+  modalType.value = r.type;
+  if (r.type === "income") {
+    personGroup.style.display = "block";
+    detailsGroup.style.display = "none";
+    modalPerson.value = r.person || "";
+    modalDetails.value = "";
+  } else {
+    personGroup.style.display = "none";
+    detailsGroup.style.display = "block";
+    modalPerson.value = "";
+    modalDetails.value = r.details || "";
+  }
+  document.getElementById("recordModalBackdrop").classList.add("active");
+  document.getElementById("modalTitle").textContent = "تفاصيل/تعديل المعاملة";
 };
 
-document.getElementById('modalType').addEventListener('change',e=>{
-    const t=e.target.value;
-    const personGroup=document.getElementById('modalPersonGroup');
-    const detailsGroup=document.getElementById('modalDetailsGroup');
-    if(t==='income'){personGroup.style.display='block';detailsGroup.style.display='none';}
-    else{personGroup.style.display='none';detailsGroup.style.display='block';}
+document.getElementById("modalType").addEventListener("change", (e) => {
+  const t = e.target.value;
+  const personGroup = document.getElementById("modalPersonGroup");
+  const detailsGroup = document.getElementById("modalDetailsGroup");
+  if (t === "income") {
+    personGroup.style.display = "block";
+    detailsGroup.style.display = "none";
+  } else {
+    personGroup.style.display = "none";
+    detailsGroup.style.display = "block";
+  }
 });
-function closeRecordModal(){
-    document.getElementById('recordModalBackdrop').classList.remove('active');
+function closeRecordModal() {
+  document.getElementById("recordModalBackdrop").classList.remove("active");
 }
-document.getElementById('modalCloseBtn').addEventListener('click',closeRecordModal);
-document.getElementById('modalCancelBtn').addEventListener('click',closeRecordModal);
-document.getElementById('recordModalBackdrop').addEventListener('click',e=>{
-    if(e.target.id==='recordModalBackdrop') closeRecordModal();
+document.getElementById("modalCloseBtn").addEventListener("click", closeRecordModal);
+document.getElementById("modalCancelBtn").addEventListener("click", closeRecordModal);
+document.getElementById("recordModalBackdrop").addEventListener("click", (e) => {
+  if (e.target.id === "recordModalBackdrop") closeRecordModal();
 });
 
-document.getElementById('modalSaveBtn').addEventListener('click',async()=>{
-    const id=document.getElementById('modalRecordId').value;
-    const collectionType=document.getElementById('modalRecordCollection').value;
-    const newType=document.getElementById('modalType').value;
-    const amount=parseFloat(document.getElementById('modalAmount').value)||0;
-    const person=document.getElementById('modalPerson').value.trim();
-    const details=document.getElementById('modalDetails').value.trim();
-    if(!amount){alert('يرجى إدخال مبلغ صحيح');return;}
-    try{
-        const oldCol=collectionType==='income'?incomeCollection:expenseCollection;
-        const recRef=doc(oldCol,id);
-        if(collectionType!==newType){
-            const oldRecord=allRecords.find(r=>r.id===id&&r.collectionType===collectionType);
-            if(!oldRecord) return;
-            await deleteDoc(recRef);
-            if(newType==='income'){
-                await addDoc(incomeCollection,{
-                    amount,
-                    person:person||oldRecord.person||'',
-                    dateTime:oldRecord.dateTime,
-                    timestamp:oldRecord.timestamp||new Date().getTime(),
-                    type:'income'
-                });
-            }else{
-                await addDoc(expenseCollection,{
-                    amount,
-                    details:details||oldRecord.details||'',
-                    dateTime:oldRecord.dateTime,
-                    timestamp:oldRecord.timestamp||new Date().getTime(),
-                    type:'expense'
-                });
-            }
-        }else{
-            const updates={amount,type:newType};
-            if(newType==='income') updates.person=person;
-            else updates.details=details;
-            await updateDoc(recRef,updates);
-        }
-        closeRecordModal();
-        await loadRecords();
-    }catch(err){
-        console.error(err);
-        alert('حدث خطأ أثناء حفظ التعديلات');
+document.getElementById("modalSaveBtn").addEventListener("click", async () => {
+  const id = document.getElementById("modalRecordId").value;
+  const collectionType = document.getElementById("modalRecordCollection").value;
+  const newType = document.getElementById("modalType").value;
+  const amount = parseFloat(document.getElementById("modalAmount").value) || 0;
+  const person = document.getElementById("modalPerson").value.trim();
+  const details = document.getElementById("modalDetails").value.trim();
+  if (!amount) {
+    alert("يرجى إدخال مبلغ صحيح");
+    return;
+  }
+  try {
+    const oldCol = collectionType === "income" ? incomeCollection : expenseCollection;
+    const recRef = doc(oldCol, id);
+    if (collectionType !== newType) {
+      const oldRecord = allRecords.find((r) => r.id === id && r.collectionType === collectionType);
+      if (!oldRecord) return;
+      await deleteDoc(recRef);
+      if (newType === "income") {
+        await addDoc(incomeCollection, {
+          amount,
+          person: person || oldRecord.person || "",
+          dateTime: oldRecord.dateTime,
+          timestamp: oldRecord.timestamp || Date.now(),
+          type: "income"
+        });
+      } else {
+        await addDoc(expenseCollection, {
+          amount,
+          details: details || oldRecord.details || "",
+          dateTime: oldRecord.dateTime,
+          timestamp: oldRecord.timestamp || Date.now(),
+          type: "expense"
+        });
+      }
+    } else {
+      const updates = { amount, type: newType };
+      if (newType === "income") updates.person = person;
+      else updates.details = details;
+      await updateDoc(recRef, updates);
     }
+    closeRecordModal();
+    await loadRecords();
+  } catch (err) {
+    console.error(err);
+    alert("حدث خطأ أثناء حفظ التعديلات");
+  }
 });
 
-function styleWorksheet(ws,wsData,headerRowsCount){
-    if(!ws['!ref']) return;
-    const range=XLSX.utils.decode_range(ws['!ref']);
-    for(let R=range.s.r;R<=range.e.r;++R){
-        const isHeader=R<headerRowsCount;
-        for(let C=range.s.c;C<=range.e.c;++C){
-            const cellRef=XLSX.utils.encode_cell({c:C,r:R});
-            if(!ws[cellRef]) continue;
-            const row=wsData[R]||[];
-            const typeCell=row[3];
-            let fill='020617';
-            if(isHeader) fill='1d4ed8';
-            else if(typeCell==='مبلغ وارد') fill='d1fae5';
-            else if(typeCell==='مصروف') fill='fee2e2';
-            else if(R%2===0) fill='f3f4f6';
-            ws[cellRef].s={
-                font:{bold:isHeader,color:{rgb:isHeader?'ffffff':'000000'}},
-                fill:{fgColor:{rgb:fill}},
-                alignment:{horizontal:'center',vertical:'center'},
-                border:{
-                    top:{style:'medium',color:{rgb:'000000'}},
-                    bottom:{style:'medium',color:{rgb:'000000'}},
-                    left:{style:'medium',color:{rgb:'000000'}},
-                    right:{style:'medium',color:{rgb:'000000'}}
-                },
-                numFmt:(C===2&&!isHeader?"0":undefined)
-            };
-        }
+function styleWorksheet(ws, wsData, headerRowsCount) {
+  if (!ws["!ref"]) return;
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+  for (let R = range.s.r; R <= range.e.r; ++R) {
+    const isHeader = R < headerRowsCount;
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+      const cellRef = XLSX.utils.encode_cell({ c: C, r: R });
+      if (!ws[cellRef]) continue;
+      const row = wsData[R] || [];
+      const typeCell = row[3];
+      let fill = "020617";
+      if (isHeader) fill = "1d4ed8";
+      else if (typeCell === "مبلغ وارد") fill = "d1fae5";
+      else if (typeCell === "مصروف") fill = "fee2e2";
+      else if (R % 2 === 0) fill = "f3f4f6";
+      ws[cellRef].s = {
+        font: { bold: isHeader, color: { rgb: isHeader ? "ffffff" : "000000" } },
+        fill: { fgColor: { rgb: fill } },
+        alignment: { horizontal: "center", vertical: "center" },
+        border: {
+          top: { style: "medium", color: { rgb: "000000" } },
+          bottom: { style: "medium", color: { rgb: "000000" } },
+          left: { style: "medium", color: { rgb: "000000" } },
+          right: { style: "medium", color: { rgb: "000000" } }
+        },
+        numFmt: C === 2 && !isHeader ? "0" : undefined
+      };
     }
+  }
 }
 
-window.exportToExcel=function(type){
-    let recs=allRecords;
-    if(type==='income') recs=allRecords.filter(r=>r.type==='income');
-    else if(type==='expense') recs=allRecords.filter(r=>r.type==='expense');
-    if(recs.length===0){alert('لا توجد بيانات للتصدير');return;}
-    const wb=XLSX.utils.book_new();
-    const wsData=[];
-    wsData.push(['نظام إدارة الحسابات - تقرير '+(type==='income'?'المبالغ الواردة':type==='expense'?'المصروفات':'كل العمليات')]);
-    wsData.push([]);
-    wsData.push(['تاريخ البيان الكامل','اسم الشخص / التفاصيل','المبلغ','النوع']);
-    recs.filter(r=>r.type==='income').forEach(r=>wsData.push([r.dateTime,r.person||'',Number(r.amount),'مبلغ وارد']));
-    recs.filter(r=>r.type==='expense').forEach(r=>wsData.push([r.dateTime,r.details||'',Number(r.amount),'مصروف']));
-    const ws=XLSX.utils.aoa_to_sheet(wsData);
-    styleWorksheet(ws,wsData,3);
-    XLSX.utils.book_append_sheet(wb,ws,'تقرير العمليات');
-    const name=type==='income'?'تقرير_المبالغ_الواردة.xlsx':type==='expense'?'تقرير_المصروفات.xlsx':'تقرير_كل_العمليات.xlsx';
-    XLSX.writeFile(wb,name);
+window.exportToExcel = function (type) {
+  let recs = allRecords;
+  if (type === "income") recs = allRecords.filter((r) => r.type === "income");
+  else if (type === "expense") recs = allRecords.filter((r) => r.type === "expense");
+  if (recs.length === 0) {
+    alert("لا توجد بيانات للتصدير");
+    return;
+  }
+  const wb = XLSX.utils.book_new();
+  const wsData = [];
+  wsData.push([
+    "نظام إدارة الحسابات - تقرير " +
+      (type === "income" ? "المبالغ الواردة" : type === "expense" ? "المصروفات" : "كل العمليات")
+  ]);
+  wsData.push([]);
+  wsData.push(["تاريخ البيان الكامل", "اسم الشخص / التفاصيل", "المبلغ", "النوع"]);
+  recs
+    .filter((r) => r.type === "income")
+    .forEach((r) => wsData.push([r.dateTime, r.person || "", Number(r.amount), "مبلغ وارد"]));
+  recs
+    .filter((r) => r.type === "expense")
+    .forEach((r) => wsData.push([r.dateTime, r.details || "", Number(r.amount), "مصروف"]));
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  styleWorksheet(ws, wsData, 3);
+  XLSX.utils.book_append_sheet(wb, ws, "تقرير العمليات");
+  const name =
+    type === "income"
+      ? "تقرير_المبالغ_الواردة.xlsx"
+      : type === "expense"
+      ? "تقرير_المصروفات.xlsx"
+      : "تقرير_كل_العمليات.xlsx";
+  XLSX.writeFile(wb, name);
 };
 
-window.exportSearchResults=function(){
-    if(!isSearching||searchResults.length===0){
-        alert('لا توجد نتائج بحث لتصديرها');return;
-    }
-    const wb=XLSX.utils.book_new();
-    const wsData=[];
-    wsData.push(['نظام إدارة الحسابات - تقرير نتائج البحث']);
-    wsData.push([]);
-    wsData.push(['تاريخ البيان الكامل','اسم الشخص / التفاصيل','المبلغ','النوع']);
-    searchResults.forEach(r=>{
-        const isIncome=r.type==='income';
-        wsData.push([r.dateTime,isIncome?(r.person||''):(r.details||''),Number(r.amount),isIncome?'مبلغ وارد':'مصروف']);
-    });
-    const ws=XLSX.utils.aoa_to_sheet(wsData);
-    styleWorksheet(ws,wsData,3);
-    XLSX.utils.book_append_sheet(wb,ws,'نتائج البحث');
-    XLSX.writeFile(wb,'تقرير_نتائج_البحث.xlsx');
+window.exportSearchResults = function () {
+  if (!isSearching || searchResults.length === 0) {
+    alert("لا توجد نتائج بحث لتصديرها");
+    return;
+  }
+  const wb = XLSX.utils.book_new();
+  const wsData = [];
+  wsData.push(["نظام إدارة الحسابات - تقرير نتائج البحث"]);
+  wsData.push([]);
+  wsData.push(["تاريخ البيان الكامل", "اسم الشخص / التفاصيل", "المبلغ", "النوع"]);
+  searchResults.forEach((r) => {
+    const isIncome = r.type === "income";
+    wsData.push([
+      r.dateTime,
+      isIncome ? r.person || "" : r.details || "",
+      Number(r.amount),
+      isIncome ? "مبلغ وارد" : "مصروف"
+    ]);
+  });
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  styleWorksheet(ws, wsData, 3);
+  XLSX.utils.book_append_sheet(wb, ws, "نتائج البحث");
+  XLSX.writeFile(wb, "تقرير_نتائج_البحث.xlsx");
 };
 
 loadRecords();
