@@ -23,7 +23,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
         body { background: var(--bg); color: var(--text); padding: 12px; padding-bottom: 100px; min-height: 100vh; transition: 0.3s; }
         .container { max-width: 100%; margin: 0 auto; width: 100%; }
-        
+
         /* تحسينات للشاشات الصغيرة */
         @media (max-width: 480px) {
             body { padding: 10px; padding-bottom: 90px; }
@@ -32,13 +32,12 @@
             .stat-card { padding: 12px 5px; }
             .stat-icon { width: 30px; height: 30px; line-height: 30px; font-size: 1.1rem; }
             .stat-val { font-size: 1.2rem; }
-            .toggle-input-btn { padding: 12px; font-size: 1rem; }
             .input-box { padding: 20px; }
             .btn-icon { width: 40px; height: 40px; font-size: 1.1rem; }
             .input-with-mic { padding-left: 50px !important; }
             .field-mic-btn { width: 40px; height: 40px; }
         }
-        
+
         @media (min-width: 768px) {
             .container { max-width: 720px; }
         }
@@ -127,27 +126,7 @@
         .stat-val.expense { color: var(--danger); } 
         .stat-val.net { color: var(--primary); }
 
-        /* النموذج - متجاوب */
-        .toggle-input-btn { 
-            width: 100%; 
-            background: linear-gradient(135deg, var(--primary), #4f46e5); 
-            color: white; 
-            padding: 15px; 
-            border-radius: var(--radius-md); 
-            border: none; 
-            cursor: pointer; 
-            font-weight: 700; 
-            font-size: 1.1rem; 
-            margin-bottom: 20px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 10px; 
-            box-shadow: 0 5px 15px rgba(99,102,241,0.3);
-            transition: transform 0.2s;
-        }
-        .toggle-input-btn:hover { transform: translateY(-2px); }
-        
+        /* النموذج - متجاوب (بدون زر إظهار/إخفاء) */
         .input-box { 
             background: var(--surface); 
             padding: 25px; 
@@ -155,7 +134,6 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
             margin-bottom: 20px; 
         }
-        .input-box.hidden { display: none; }
         .tabs { 
             display: flex; 
             gap: 10px; 
@@ -424,30 +402,6 @@
         @keyframes spin { 
             to { transform: rotate(360deg); } 
         }
-
-        /* شريط تعليمات الميكروفون */
-        .mic-instructions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background: var(--surface);
-            padding: 15px;
-            border-radius: var(--radius-md);
-            margin-bottom: 20px;
-            border-right: 4px solid var(--primary);
-        }
-        .mic-instruction-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.85rem;
-            color: var(--text);
-        }
-        .mic-instruction-item i {
-            color: var(--primary);
-            width: 20px;
-        }
-
     </style>
 </head>
 <body>
@@ -476,18 +430,6 @@
         </div>
     </div>
 
-    <!-- تعليمات الميكروفون -->
-    <div class="mic-instructions">
-        <div class="mic-instruction-item">
-            <i class="fa-solid fa-microphone"></i>
-            <span>انقر على الميكروفون بجوار كل حقل ثم تحدث لملء البيانات</span>
-        </div>
-        <div class="mic-instruction-item">
-            <i class="fa-solid fa-lightbulb"></i>
-            <span>يمكنك قول: "مليون" أو "ميت الف" أو "خمسين الف" أو "تلت تلاف"</span>
-        </div>
-    </div>
-
     <!-- الإحصائيات -->
     <div class="stats-grid">
         <div class="stat-card income">
@@ -507,13 +449,8 @@
         </div>
     </div>
 
-    <!-- زر الإضافة -->
-    <button class="toggle-input-btn" onclick="toggleInputForm()">
-        <i class="fa-solid fa-plus-circle"></i> تسجيل عملية يدوية
-    </button>
-
-    <!-- نموذج الإضافة -->
-    <div class="input-box hidden" id="inputBox">
+    <!-- نموذج الإضافة (دائمًا ظاهر) -->
+    <div class="input-box" id="inputBox">
         <div class="tabs">
             <button id="btnInc" class="tab active inc" onclick="setMode('income')">دخل</button>
             <button id="btnExp" class="tab" onclick="setMode('expense')">مصروف</button>
@@ -521,12 +458,13 @@
         <form onsubmit="saveTx(event)">
             <!-- حقل المبلغ مع ميكروفون -->
             <div class="input-group">
-                <button type="button" class="field-mic-btn income" onclick="startFieldMic('amount')" 
+                <button type="button" class="field-mic-btn income"
+                        onclick="startFieldMic('amount')"
                         title="انقر ثم تحدث لتعيين المبلغ" id="amountMic">
                     <i class="fa-solid fa-microphone"></i>
                 </button>
                 <i class="fa-solid fa-coins field-icon"></i>
-                <input type="text" id="amount" placeholder="المبلغ (مثال: ١٠٠٠ أو 'الف جنيه')" class="input-with-mic" required>
+                <input type="text" id="amount" placeholder="المبلغ (مثال: ١٠٠٠ أو الف جنيه)" class="input-with-mic" required>
             </div>
             
             <!-- حقل الوصف مع ميكروفون -->
@@ -537,7 +475,7 @@
                     <i class="fa-solid fa-microphone"></i>
                 </button>
                 <i class="fa-solid fa-pen-nib field-icon"></i>
-                <input type="text" id="desc" placeholder="وصف العملية (مثال: 'مرتب شهر يناير')" class="input-with-mic" required>
+                <input type="text" id="desc" placeholder="وصف العملية (مثال: مرتب شهر يناير)" class="input-with-mic" required>
             </div>
             
             <button type="submit" class="save-btn" id="submitBtn">
@@ -622,7 +560,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const app = initializeApp({
     apiKey: "AIzaSyDJHcly8lYT4FTxrJCBRIR7JSbJGYtG3_I",
@@ -656,7 +594,6 @@ window.setMode = (m) => {
     document.getElementById("btnExp").className = `tab ${m==='expense'?'active exp':''}`;
     document.getElementById("submitBtn").style.background = m === "income" ? "var(--success)" : "var(--danger)";
     
-    // تحديث لون ميكروفون المبلغ حسب النوع
     const amountMic = document.getElementById('amountMic');
     amountMic.className = `field-mic-btn ${m === 'income' ? 'income' : 'expense'}`;
 };
@@ -666,11 +603,6 @@ window.setFilter = (f) => {
     filter = f;
     document.querySelectorAll(".filter-btn").forEach(b => b.classList.toggle("active", b.dataset.filter === f));
     render();
-};
-
-// تبديل نموذج الإدخال
-window.toggleInputForm = () => {
-    document.getElementById("inputBox").classList.toggle("hidden");
 };
 
 // =============================================
@@ -685,7 +617,6 @@ window.saveTx = async (e, directData = null) => {
         txt = directData.description;
         type = directData.type;
     } else {
-        // تحويل النص إلى رقم باستخدام المحلل
         const amountText = document.getElementById("amount").value.trim();
         const amountResult = parseArabicNumber(amountText);
         
@@ -708,7 +639,6 @@ window.saveTx = async (e, directData = null) => {
     if (!directData) {
         document.getElementById("amount").value = "";
         document.getElementById("desc").value = "";
-        document.getElementById("inputBox").classList.add("hidden");
     }
 
     Swal.fire({
@@ -789,7 +719,6 @@ window.openEditModal = (record) => {
     document.getElementById('editDesc').value = record.description;
     document.getElementById('editModal').classList.remove('hidden');
     
-    // تحديث ألوان أزرار الميكروفون في النافذة
     const editAmountMic = document.getElementById('editAmountMic');
     editAmountMic.className = `field-mic-btn ${record.type === 'income' ? 'income' : 'expense'}`;
 };
@@ -806,7 +735,6 @@ window.updateRecord = async (e) => {
     const amountText = document.getElementById('editAmount').value.trim();
     const newDesc = document.getElementById('editDesc').value.trim();
     
-    // تحويل النص إلى رقم
     const newAmount = parseArabicNumber(amountText) || parseFloat(amountText.replace(/,/g, ''));
     
     if (!newAmount || isNaN(newAmount) || !newDesc) {
@@ -815,10 +743,8 @@ window.updateRecord = async (e) => {
     }
     
     try {
-        // حذف السجل القديم
         await remove(ref(db, `${currentEditingRecord.type}/${currentEditingRecord.id}`));
         
-        // إضافة السجل الجديد
         await push(ref(db, newType === "income" ? "income" : "expenses"), {
             amount: newAmount, 
             description: newDesc, 
@@ -903,30 +829,25 @@ async function deleteAllRecords() {
 function parseArabicNumber(text) {
     if (!text) return 0;
     
-    // تحويل الأرقام العربية إلى إنجليزية
     let normalized = text
         .replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d))
         .toLowerCase()
         .replace(/[^\u0600-\u06FF0-9\s.,]/g, '')
         .trim();
     
-    // التحقق من وجود أرقام مباشرة
     const numMatch = normalized.match(/(\d+(\.\d+)?)/);
     if (numMatch) {
         return parseFloat(numMatch[0].replace(/,/g, ''));
     }
     
-    // قاموس الأرقام الكامل
     const numberWords = {
-        // الأساسية
         "صفر": 0, "واحد": 1, "اتنين": 2, "تلاتة": 3, "اربعة": 4, "خمسة": 5,
         "ستة": 6, "سبعة": 7, "تمانية": 8, "تسعة": 9, "عشرة": 10,
         "حداشر": 11, "اتناشر": 12, "تلاتاشر": 13, "اربعتاشر": 14, "خمستاشر": 15,
         "ستاشر": 16, "سبعتاشر": 17, "تمنتاشر": 18, "تسعتاشر": 19,
         "عشرين": 20, "تلاتين": 30, "اربعين": 40, "خمسين": 50, "ستين": 60,
         "سبعين": 70, "تمانين": 80, "تسعين": 90,
-        
-        // المئات
+
         "مية": 100, "ميه": 100, "ميتين": 200,
         "تلاتمية": 300, "تلاتميه": 300, "تلتوميه": 300, "تلتومية": 300,
         "ربعمية": 400, "ربعميه": 400, "ربعميت": 400,
@@ -935,8 +856,7 @@ function parseArabicNumber(text) {
         "سبعمية": 700, "سبعميه": 700, "سبعميت": 700,
         "تمنمية": 800, "تمنميه": 800, "تمنميت": 800,
         "تسعمية": 900, "تسعميه": 900, "تسعميت": 900,
-        
-        // الآلاف
+
         "الف": 1000, "ألف": 1000, "تلاف": 1000,
         "الفين": 2000, "تلافين": 2000,
         "تلت تلاف": 3000, "تلات الاف": 3000, "تلاتلاف": 3000,
@@ -946,10 +866,9 @@ function parseArabicNumber(text) {
         "سبعة الاف": 7000, "سبع تلاف": 7000, "سبعتلاف": 7000,
         "تمانية الاف": 8000, "تمن تلاف": 8000, "تمنتلاف": 8000,
         "تسعة الاف": 9000, "تسع تلاف": 9000, "تسعتلاف": 9000,
-        
-        // عشرات الآلاف
+
         "عشرة الاف": 10000, "عشر تلاف": 10000,
-        "عشرين الف": 20000, "عشرين الف": 20000,
+        "عشرين الف": 20000,
         "تلاتين الف": 30000,
         "اربعين الف": 40000,
         "خمسين الف": 50000,
@@ -957,8 +876,7 @@ function parseArabicNumber(text) {
         "سبعين الف": 70000,
         "تمانين الف": 80000,
         "تسعين الف": 90000,
-        
-        // مئات الآلاف
+
         "مية الف": 100000, "ميت الف": 100000,
         "ميتين الف": 200000, "متين الف": 200000,
         "تلاتمية الف": 300000, "تلتميت الف": 300000,
@@ -968,8 +886,7 @@ function parseArabicNumber(text) {
         "سبعمية الف": 700000, "سبعميت الف": 700000,
         "تمنمية الف": 800000, "تمنميت الف": 800000,
         "تسعمية الف": 900000, "تسعميت الف": 900000,
-        
-        // الملايين
+
         "مليون": 1000000
     };
     
@@ -978,14 +895,12 @@ function parseArabicNumber(text) {
         "ربع": 0.25, "تلت": 0.333, "ثلث": 0.333
     };
     
-    // البحث عن الكلمات مباشرة
     for (const [word, value] of Object.entries(numberWords)) {
         if (normalized.includes(word)) {
             return value;
         }
     }
     
-    // البحث عن كسور
     for (const [word, value] of Object.entries(fractions)) {
         if (normalized.includes(word)) {
             return value;
@@ -1002,11 +917,9 @@ let isListening = false;
 let currentRecognition = null;
 const voiceMsg = document.getElementById("voiceMsg");
 
-// التحقق من دعم المتصفح
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const isSpeechSupported = SpeechRecognition !== undefined;
 
-// تهيئة نظام التعرف على الصوت
 function initializeSpeechRecognition() {
     if (!isSpeechSupported) {
         console.warn('Speech recognition not supported');
@@ -1022,7 +935,6 @@ function initializeSpeechRecognition() {
     return recognition;
 }
 
-// بدء الميكروفون للحقل
 window.startFieldMic = async (fieldId) => {
     if (!isSpeechSupported) {
         Swal.fire({
@@ -1038,7 +950,6 @@ window.startFieldMic = async (fieldId) => {
     
     if (!inputField) return;
     
-    // طلب إذن الميكروفون
     try {
         await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (error) {
@@ -1050,22 +961,18 @@ window.startFieldMic = async (fieldId) => {
         return;
     }
     
-    // إيقاف أي تسجيل جاري
     if (isListening && currentRecognition) {
         currentRecognition.stop();
     }
     
-    // إنشاء نظام تعرف جديد
     currentRecognition = initializeSpeechRecognition();
     if (!currentRecognition) return;
     
-    // تحديث واجهة المستخدم
     micBtn.classList.add('listening');
     voiceMsg.innerText = "جاري الاستماع...";
     voiceMsg.classList.add("active");
     isListening = true;
     
-    // إعداد الأحداث
     currentRecognition.onstart = () => {
         micBtn.classList.add('listening');
         voiceMsg.innerText = "استمع إليك...";
@@ -1075,7 +982,6 @@ window.startFieldMic = async (fieldId) => {
         const transcript = event.results[0][0].transcript;
         voiceMsg.innerText = `"${transcript}"`;
         
-        // إذا كان حقل المبلغ، نحاول تحويل النص إلى رقم
         if (fieldId === 'amount' || fieldId === 'editAmount') {
             const amount = parseArabicNumber(transcript);
             if (amount > 0) {
@@ -1088,7 +994,6 @@ window.startFieldMic = async (fieldId) => {
             inputField.value = transcript;
         }
         
-        // إظهار تأكيد
         Swal.fire({
             toast: true,
             position: 'top',
@@ -1130,11 +1035,9 @@ window.startFieldMic = async (fieldId) => {
         currentRecognition = null;
     };
     
-    // بدء التعرف على الصوت
     currentRecognition.start();
 };
 
-// للميكروفونات في نافذة التعديل
 window.startEditFieldMic = (fieldId) => {
     startFieldMic(fieldId.replace('edit', ''));
 };
@@ -1152,7 +1055,6 @@ window.toggleMainMic = async () => {
         return;
     }
     
-    // طلب إذن الميكروفون
     try {
         await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (error) {
@@ -1164,25 +1066,21 @@ window.toggleMainMic = async () => {
         return;
     }
     
-    // إيقاف أي تسجيل جاري
     if (isListening && currentRecognition) {
         currentRecognition.stop();
         return;
     }
     
-    // إنشاء نظام تعرف جديد
     currentRecognition = initializeSpeechRecognition();
     if (!currentRecognition) return;
     
     const mainMic = document.getElementById('mainMic');
     
-    // تحديث واجهة المستخدم
     mainMic.classList.add('listening');
     voiceMsg.innerText = "جاري الاستماع للمعاملة...";
     voiceMsg.classList.add("active");
     isListening = true;
     
-    // إعداد الأحداث
     currentRecognition.onstart = () => {
         mainMic.classList.add('listening');
         voiceMsg.innerText = "استمع إليك...";
@@ -1192,12 +1090,10 @@ window.toggleMainMic = async () => {
         const transcript = event.results[0][0].transcript;
         voiceMsg.innerText = `"${transcript}"`;
         
-        // تحليل النص
         const result = analyzeSpeech(transcript);
         
         if (result) {
             if (result.action === 'deleteAll') {
-                // طلب حذف الكل
                 const { value: password } = await Swal.fire({
                     title: 'حذف جميع المعاملات',
                     text: 'لحذف جميع المعاملات، أدخل كلمة السر:',
@@ -1214,7 +1110,6 @@ window.toggleMainMic = async () => {
                     Swal.fire({icon: 'error', title: 'خطأ', text: 'كلمة السر غير صحيحة'});
                 }
             } else {
-                // معاملة عادية
                 await saveTx(null, result);
                 voiceMsg.innerText = `تم حفظ: ${result.description}`;
             }
@@ -1254,7 +1149,6 @@ window.toggleMainMic = async () => {
         currentRecognition = null;
     };
     
-    // بدء التعرف على الصوت
     currentRecognition.start();
 };
 
@@ -1264,7 +1158,6 @@ window.toggleMainMic = async () => {
 function analyzeSpeech(text) {
     const normalized = text.toLowerCase();
     
-    // كلمات حذف الكل
     const deleteAllPhrases = [
         "حذف الكل", "احذف الكل", "مسح الكل", "امسح الكل", "شيل الكل",
         "حذف كل", "احذف كل", "مسح كل", "امسح كل", "شيل كل",
@@ -1273,18 +1166,15 @@ function analyzeSpeech(text) {
         "تفريغ", "تفريغ الكل", "تفريغ كل", "صفر الكل", "صفر كل"
     ];
     
-    // التحقق من أمر حذف الكل
     for (const phrase of deleteAllPhrases) {
         if (normalized.includes(phrase)) {
             return { action: 'deleteAll', text: text };
         }
     }
     
-    // استخراج المبلغ
     const amount = parseArabicNumber(text);
     if (amount === 0) return null;
     
-    // تحديد النوع (دخل/مصروف)
     const incomeWords = ["قبضت", "قبض", "خدت", "جالي", "وصلني", "استلمت", "مرتب", "راتب", "دخل", "وارد"];
     const expenseWords = ["صرفت", "صرف", "دفعت", "دفع", "اشتريت", "شراء", "فاتورة", "ايجار", "مصروف"];
     
@@ -1293,7 +1183,6 @@ function analyzeSpeech(text) {
     
     let type = expenseScore > incomeScore ? "expense" : "income";
     
-    // استخراج الوصف
     let description = normalized
         .replace(/(\d+(\.\d+)?)/g, '')
         .replace(/(جنيه|جنية|ريال|دولار|يورو|ج|قرش)/g, '');
@@ -1326,7 +1215,6 @@ window.exportExcel = () => {
 
     const wb = XLSX.utils.book_new();
     
-    // ورقة الدخل
     const incData = records.filter(r => r.type === "income");
     const incRows = [["الوصف", "المبلغ", "التاريخ", "الوقت"]];
     incData.forEach(r => {
@@ -1339,17 +1227,13 @@ window.exportExcel = () => {
         ]);
     });
     
-    // إضافة المجموع
     const incTotal = incData.reduce((s, r) => s + r.amount, 0);
     incRows.push(["المجموع", incTotal, "", ""]);
     
     const incWs = XLSX.utils.aoa_to_sheet(incRows);
-    
-    // تنسيق
     incWs['!cols'] = [{wch: 40}, {wch: 15}, {wch: 15}, {wch: 10}];
     XLSX.utils.book_append_sheet(wb, incWs, "الوارد");
     
-    // ورقة المصروفات
     const expData = records.filter(r => r.type === "expense");
     const expRows = [["الوصف", "المبلغ", "التاريخ", "الوقت"]];
     expData.forEach(r => {
@@ -1369,7 +1253,6 @@ window.exportExcel = () => {
     expWs['!cols'] = [{wch: 40}, {wch: 15}, {wch: 15}, {wch: 10}];
     XLSX.utils.book_append_sheet(wb, expWs, "المصروف");
     
-    // ورقة الملخص
     const summaryRows = [
         ["الإجمالي", "المبلغ"],
         ["إجمالي الدخل", incTotal],
@@ -1381,7 +1264,6 @@ window.exportExcel = () => {
     summaryWs['!cols'] = [{wch: 25}, {wch: 15}];
     XLSX.utils.book_append_sheet(wb, summaryWs, "الملخص");
     
-    // حفظ الملف
     const dateStr = new Date().toISOString().split('T')[0];
     XLSX.writeFile(wb, `المالية_الذكية_${dateStr}.xlsx`);
 };
@@ -1391,13 +1273,11 @@ window.exportExcel = () => {
 // =============================================
 document.addEventListener('DOMContentLoaded', () => {
     if (!isSpeechSupported) {
-        // إخفاء جميع أزرار الميكروفون إذا غير مدعوم
         document.querySelectorAll('.field-mic-btn').forEach(btn => {
             btn.style.display = 'none';
         });
         document.getElementById('mainMic').style.display = 'none';
         
-        // إظهار تحذير
         Swal.fire({
             icon: 'warning',
             title: 'الميزة غير مدعومة',
