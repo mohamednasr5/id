@@ -1,349 +1,368 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>Smart Finance V3 – Hybrid Voice AI</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>النظام المالي | إهداء للحاج أحمد شطا </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #f1f5f9;
+            --surface: #ffffff;
+            --text: #1e293b;
+        }
+        [data-theme="dark"] {
+            --bg: #0f172a; --surface: #1e293b; --text: #f8fafc;
+        }
 
-<style>
-    body{
-        margin:0;
-        padding:15px;
-        background:#f4f5f7;
-        font-family:'Cairo',sans-serif;
-    }
-    .box{
-        background:white;
-        padding:20px;
-        border-radius:15px;
-        box-shadow:0 6px 20px rgba(0,0,0,0.06);
-        margin-bottom:20px;
-    }
-    .input{
-        width:100%;
-        padding:14px;
-        border:2px solid #e7e9ed;
-        border-radius:10px;
-        margin-bottom:10px;
-        font-size:1.1rem;
-    }
-    button{
-        width:100%;
-        padding:15px;
-        border:none;
-        border-radius:12px;
-        background:#4f46e5;
-        color:white;
-        font-size:1.1rem;
-        font-weight:800;
-        cursor:pointer;
-    }
-    .mic-btn{
-        position:fixed;
-        bottom:25px;
-        left:50%;
-        transform:translateX(-50%);
-        width:80px;
-        height:80px;
-        border-radius:50%;
-        background:#e11d48;
-        color:white;
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        font-size:2rem;
-        cursor:pointer;
-        box-shadow:0 10px 25px rgba(225,29,72,0.4);
-    }
-    .mic-btn.active{
-        background:#10b981;
-        animation:pulse 1.5s infinite;
-    }
-    @keyframes pulse{
-        0%{box-shadow:0 0 0 0 rgba(16,185,129,0.7)}
-        70%{box-shadow:0 0 0 25px rgba(16,185,129,0)}
-        100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}
-    }
-    .item{
-        background:white;
-        padding:15px;
-        border-radius:12px;
-        margin-bottom:10px;
-        border-right:5px solid #4f46e5;
-    }
-    .date{
-        float:left;
-        color:#777;
-        font-size:0.9rem;
-    }
-    .amt{
-        font-weight:900;
-        font-size:1.2rem;
-    }
-</style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; outline: none; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); padding: 15px; padding-bottom: 90px; min-height: 100vh; }
+        .container { max-width: 600px; margin: 0 auto; }
+
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 15px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .btn-icon { background: #f1f5f9; border: none; width: 40px; height: 40px; border-radius: 10px; font-size: 1.2rem; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        /* Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+        .stat-card { background: var(--surface); padding: 15px 5px; border-radius: 15px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        /* Background Icons inside Stats */
+        .stat-bg-icon { position: absolute; bottom: -5px; left: -5px; font-size: 3rem; opacity: 0.1; transform: rotate(15deg); pointer-events: none; }
+        
+        .stat-val { font-size: 1.1rem; font-weight: 800; direction: ltr; z-index: 2; position: relative; }
+        .stat-label { font-size: 0.8rem; color: #64748b; font-weight: 700; z-index: 2; position: relative; }
+
+        /* Input Section */
+        .input-box { background: var(--surface); padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab { flex: 1; padding: 12px; border: 2px solid transparent; border-radius: 12px; font-weight: 800; cursor: pointer; background: #f8fafc; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: 0.2s; }
+        .tab i { font-size: 1.5rem; }
+        
+        .tab.active.inc { background: #dcfce7; color: #166534; border-color: #166534; }
+        .tab.active.exp { background: #fee2e2; color: #991b1b; border-color: #991b1b; }
+
+        /* Input Fields with Icons */
+        .input-group { position: relative; margin-bottom: 12px; }
+        .input-group i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.1rem; }
+        .input-group input { width: 100%; padding: 14px 45px 14px 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: var(--bg); color: var(--text); }
+        .input-group input:focus { border-color: var(--primary); background: var(--surface); }
+
+        .save-btn { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
+
+        /* Search Bar */
+        .search-box { display: none; background: #fff7ed; border: 2px solid #fdba74; padding: 12px; border-radius: 12px; margin-bottom: 15px; justify-content: space-between; align-items: center; }
+        .search-box.active { display: flex; }
+
+        /* List */
+        .record { background: var(--surface); padding: 12px; border-radius: 14px; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); cursor: pointer; }
+        
+        .rec-icon { width: 45px; height: 45px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; flex-shrink: 0; }
+        .rec-icon.inc { background: #dcfce7; color: #166534; }
+        .rec-icon.exp { background: #fee2e2; color: #991b1b; }
+
+        .rec-info { flex: 1; }
+        .rec-info h4 { font-size: 1rem; margin-bottom: 2px; }
+        .rec-date { font-size: 0.75rem; color: #64748b; display: flex; align-items: center; gap: 4px; }
+        
+        .rec-amt { font-weight: 800; font-size: 1.1rem; direction: ltr; }
+
+        /* Mic Button */
+        .mic-btn { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; border: 4px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-size: 1.8rem; cursor: pointer; z-index: 100; display: flex; justify-content: center; align-items: center; transition: 0.3s; }
+        .mic-btn.listening { background: #10b981; transform: translateX(-50%) scale(1.1); }
+    </style>
 </head>
-
 <body>
 
-<div class="box">
-    <h2 style="margin-top:0;font-weight:900">المالية الذكية V3 – أوامر صوتية</h2>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <i class="fa-solid fa-sack-dollar" style="color:var(--primary); font-size:1.5rem;"></i>
+            <h2 style="font-weight:800;">المالية</h2>
+        </div>
+        <div style="display:flex; gap:5px;">
+            <button class="btn-icon" onclick="exportExcel()"><i class="fa-solid fa-file-excel" style="color:#10b981"></i></button>
+            <button class="btn-icon" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+        </div>
+    </div>
 
-    <input id="amount" type="text" class="input" placeholder="المبلغ">
-    <input id="desc" type="text" class="input" placeholder="الوصف">
+    <!-- Search Display -->
+    <div id="searchBox" class="search-box">
+        <div style="font-weight:bold; color:#c2410c;">
+            <i class="fa-solid fa-magnifying-glass"></i> <span id="searchKey">...</span>
+        </div>
+        <button onclick="clearSearch()" style="background:none; border:none; font-size:1.2rem; color:#c2410c;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
 
-    <select id="type" class="input">
-        <option value="income">دخل</option>
-        <option value="expense">مصروف</option>
-    </select>
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <i class="fa-solid fa-hand-holding-dollar stat-bg-icon" style="color:var(--success)"></i>
+            <div class="stat-label">وارد</div>
+            <div class="stat-val" style="color:var(--success)" id="totalInc">0</div>
+        </div>
+        <div class="stat-card">
+            <i class="fa-solid fa-money-bill-transfer stat-bg-icon" style="color:var(--danger)"></i>
+            <div class="stat-label">مصروف</div>
+            <div class="stat-val" style="color:var(--danger)" id="totalExp">0</div>
+        </div>
+        <div class="stat-card">
+            <i class="fa-solid fa-scale-balanced stat-bg-icon" style="color:var(--primary)"></i>
+            <div class="stat-label">الصافي</div>
+            <div class="stat-val" style="color:var(--primary)" id="netBal">0</div>
+        </div>
+    </div>
 
-    <button onclick="save()">حفظ العملية</button>
+    <!-- Input Form -->
+    <div class="input-box">
+        <div class="tabs">
+            <button id="btnInc" class="tab active inc" onclick="setMode('income')">
+                <i class="fa-solid fa-circle-arrow-down"></i>
+                <span>دخلت</span>
+            </button>
+            <button id="btnExp" class="tab" onclick="setMode('expense')">
+                <i class="fa-solid fa-circle-arrow-up"></i>
+                <span>خرجت</span>
+            </button>
+        </div>
+
+        <form onsubmit="saveTx(event)" id="form">
+            <div class="input-group">
+                <i class="fa-solid fa-coins"></i>
+                <input type="number" id="amount" placeholder="المبلغ (كام؟)" step="0.01" required>
+            </div>
+            <div class="input-group">
+                <i class="fa-solid fa-pen-to-square"></i>
+                <input type="text" id="desc" placeholder="الوصف (ايه؟ / مين؟)" required>
+            </div>
+            <button class="save-btn" id="submitBtn">
+                <i class="fa-solid fa-check"></i> حفظ
+            </button>
+        </form>
+    </div>
+
+    <!-- List -->
+    <div id="list"></div>
 </div>
 
-<h3 style="font-weight:900;margin-top:20px">قائمة العمليات</h3>
-<div id="list"></div>
+<button class="mic-btn" id="mic" onclick="toggleMic()">
+    <i class="fa-solid fa-microphone"></i>
+</button>
 
-<div class="mic-btn" id="mic" onclick="toggleMic()">
-    🎙️
-</div>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-<script>
-/* ------------------------------------------------------
-      Firebase
------------------------------------------------------- */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-const app = initializeApp({
-    apiKey: "AIzaSyDJHcly8lYT4FTxrJCBRIR7JSbJGYtG3_I",
-    authDomain: "nasrapp-7a0fc.firebaseapp.com",
-    databaseURL: "https://nasrapp-7a0fc-default-rtdb.firebaseio.com",
-    projectId: "nasrapp-7a0fc",
-    appId: "1:826970736109:web:c1cc3c3a1008e719b193e4"
-});
-const db = getDatabase(app);
-
-let dataList = [];
-
-/* ------------------------------------------------------
-    حفظ عملية
------------------------------------------------------- */
-function save(){
-    let amountTxt = amount.value.trim();
-    let descTxt = desc.value.trim();
-    let typeTxt = type.value;
-
-    let val = parseArabicNumber(amountTxt);
-
-    if(isNaN(val) || val <= 0){
-        Swal.fire("خطأ","أدخل مبلغ صحيح","error");return;
-    }
-    if(descTxt.length === 0){
-        Swal.fire("خطأ","أدخل وصف","error");return;
-    }
-
-    push(ref(db,typeTxt),{
-        amount:val,
-        description:descTxt,
-        timestamp:Date.now()
+    const app = initializeApp({
+        apiKey: "AIzaSyDJHcly8lYT4FTxrJCBRIR7JSbJGYtG3_I",
+        authDomain: "nasrapp-7a0fc.firebaseapp.com",
+        databaseURL: "https://nasrapp-7a0fc-default-rtdb.firebaseio.com",
+        projectId: "nasrapp-7a0fc",
+        appId: "1:826970736109:web:c1cc3c3a1008e719b193e4"
     });
+    const db = getDatabase(app);
 
-    amount.value="";
-    desc.value="";
+    let mode = 'income';
+    let records = [];
+    let searchTerm = null;
 
-    Swal.fire({
-        toast:true,
-        position:"top",
-        icon:"success",
-        title:"تم الحفظ",
-        timer:1200,
-        showConfirmButton:false
-    });
-}
+    window.toggleTheme = () => document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
 
-/* ------------------------------------------------------
-    جلب البيانات
------------------------------------------------------- */
-onValue(ref(db),(snap)=>{
-    dataList=[];
-    let d=snap.val();
+    window.setMode = (m) => {
+        mode = m;
+        const bInc = document.getElementById('btnInc');
+        const bExp = document.getElementById('btnExp');
+        const sBtn = document.getElementById('submitBtn');
 
-    if(d){
-        if(d.income) Object.values(d.income).forEach(v=>dataList.push({...v,type:"income"}));
-        if(d.expense) Object.values(d.expense).forEach(v=>dataList.push({...v,type:"expense"}));
-    }
-    render();
-});
-
-/* ------------------------------------------------------
-    عرض البيانات
------------------------------------------------------- */
-function render(){
-    list.innerHTML="";
-    dataList.sort((a,b)=>b.timestamp - a.timestamp);
-
-    dataList.forEach(r=>{
-        let dt=new Date(r.timestamp);
-        list.innerHTML+=`
-        <div class="item">
-            <b>${r.description}</b><br>
-            <span class="amt" style="color:${r.type=='income'?'#10b981':'#ef4444'}">
-                ${r.type=='income'?'+':'-'} ${r.amount.toLocaleString()}
-            </span>
-            <span class="date">${dt.toLocaleDateString('ar-EG')}</span>
-        </div>`;
-    });
-}
-
-/* ------------------------------------------------------
-    تحليل الأرقام
------------------------------------------------------- */
-function parseArabicNumber(t){
-    if(!t) return 0;
-
-    t=t.replace(/[٠-٩]/g,(d)=>"٠١٢٣٤٥٦٧٨٩".indexOf(d));
-
-    const special={
-        "نص مليون":500000,
-        "ربع مليون":250000,
-        "تلت مليون":333333,
-        "مليون":1000000,
-        "الف":1000,
-        "ألف":1000,
-        "ألفين":2000
+        if(m === 'income') {
+            bInc.className = "tab active inc";
+            bExp.className = "tab";
+            sBtn.style.background = "var(--primary)";
+        } else {
+            bInc.className = "tab";
+            bExp.className = "tab active exp";
+            sBtn.style.background = "var(--danger)";
+        }
     };
 
-    for(let w in special){
-        if(t.includes(w)) return special[w];
-    }
+    window.clearSearch = () => {
+        searchTerm = null;
+        document.getElementById('searchBox').classList.remove('active');
+        render();
+    };
 
-    if(/\d+/.test(t)) return parseFloat(t);
+    // --- Save ---
+    window.saveTx = async (e) => {
+        if(e) e.preventDefault();
+        const amount = parseFloat(document.getElementById('amount').value);
+        const desc = document.getElementById('desc').value;
+        if(!amount || !desc) return;
 
-    return 0;
-}
+        await push(ref(db, mode === 'income' ? 'income' : 'expenses'), { amount, description: desc, timestamp: Date.now() });
+        document.getElementById('form').reset();
+        Swal.fire({toast:true, icon:'success', title:'👍 تم الحفظ', position:'top', showConfirmButton:false, timer:1500});
+    };
 
-/* ------------------------------------------------------
-    Web Speech + Deepgram Hybrid
------------------------------------------------------- */
-
-const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-let rec=null;
-let micOn=false;
-
-const DEEPGRAM_KEY = "dg_test_1d4dfe0b676a2c909b4ac31e"; // مفتاح عام للتجربة
-
-async function deepgramAI(text){
-    let res = await fetch("https://api.deepgram.com/v1/listen?model=nova-2-general",{
-        method:"POST",
-        headers:{
-            "Authorization":"Token "+DEEPGRAM_KEY,
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({text})
+    // --- Listen ---
+    onValue(ref(db), (snap) => {
+        records = [];
+        const d = snap.val();
+        if(d) {
+            if(d.income) Object.entries(d.income).forEach(([id, v]) => records.push({...v, id, type: 'income'}));
+            if(d.expenses) Object.entries(d.expenses).forEach(([id, v]) => records.push({...v, id, type: 'expense'}));
+        }
+        records.sort((a, b) => b.timestamp - a.timestamp);
+        render();
     });
 
-    let data = await res.json();
-    return data.results?.channels?.[0]?.alternatives?.[0]?.transcript || text;
-}
-
-/* ------------------------------------------------------
-    AI Command Engine
------------------------------------------------------- */
-function understandCommand(text){
-    text=text.toLowerCase();
-
-    // حذف آخر عملية
-    if(text.includes("احذف") || text.includes("شيل اخر")){
-        if(dataList.length>0){
-            let last = dataList[0];
-            remove(ref(db, last.type + "/" + last.id));
-            Swal.fire("تم الحذف","تم حذف آخر عملية","success");
-            return;
+    function render() {
+        let displayData = records;
+        if(searchTerm) {
+            displayData = records.filter(r => 
+                r.description.includes(searchTerm) || 
+                r.amount.toString().includes(searchTerm) ||
+                new Date(r.timestamp).toLocaleDateString('ar-EG').includes(searchTerm)
+            );
         }
+
+        const inc = records.filter(r => r.type === "income").reduce((s, r) => s + Number(r.amount), 0);
+        const exp = records.filter(r => r.type === "expense").reduce((s, r) => s + Number(r.amount), 0);
+        document.getElementById('totalInc').innerText = inc.toLocaleString();
+        document.getElementById('totalExp').innerText = exp.toLocaleString();
+        document.getElementById('netBal').innerText = (inc - exp).toLocaleString();
+
+        const list = document.getElementById('list');
+        list.innerHTML = "";
+        
+        displayData.slice(0, 50).forEach(r => {
+            const div = document.createElement("div");
+            div.className = "record";
+            div.onclick = () => manageRecord(r);
+            
+            const date = new Date(r.timestamp);
+            const isInc = r.type === 'income';
+            
+            div.innerHTML = `
+                <div class="rec-icon ${isInc ? 'inc' : 'exp'}">
+                    <i class="fa-solid ${isInc ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+                </div>
+                <div class="rec-info">
+                    <h4>${r.description}</h4>
+                    <div class="rec-date">
+                        <i class="fa-regular fa-clock"></i> 
+                        ${date.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}
+                        - ${date.toLocaleDateString('ar-EG')}
+                    </div>
+                </div>
+                <div class="rec-amt" style="color:${isInc ? 'var(--success)' : 'var(--danger)'}">
+                    ${isInc ? '+' : '-'}${Number(r.amount).toLocaleString()}
+                </div>
+            `;
+            list.appendChild(div);
+        });
     }
 
-    // إجمالي المصروفات
-    if(text.includes("اجمالي المصروف") || text.includes("إجمالي المصاريف")){
-        let total = dataList.filter(x=>x.type=="expense")
-                            .reduce((a,b)=>a+b.amount,0);
-        speak("إجمالي المصروفات هو " + total + " جنيه");
-        return;
-    }
-
-    // إجمالي الدخل
-    if(text.includes("اجمالي الدخل")){
-        let total = dataList.filter(x=>x.type=="income")
-                            .reduce((a,b)=>a+b.amount,0);
-        speak("إجمالي الدخل هو " + total + " جنيه");
-        return;
-    }
-
-    // إضافة عملية
-    let amount = parseArabicNumber(text);
-    if(amount>0){
-        let type = text.includes("مصروف") || text.includes("دفعت") ? "expense" : "income";
-        let desc = text.replace(/\d+/g,"").replace("جنيه","").trim();
-
-        push(ref(db,type),{
-            amount,
-            description:desc || "عملية",
-            timestamp:Date.now()
+    window.manageRecord = async (r) => {
+        const { isDenied } = await Swal.fire({
+            title: r.description, 
+            text: `${r.amount}`, 
+            icon: r.type === 'income' ? 'success' : 'error',
+            showDenyButton: true, 
+            showCancelButton: true, 
+            confirmButtonText: '✏️ تعديل', 
+            denyButtonText: '🗑️ حذف',
+            cancelButtonText: 'إغلاق'
         });
 
-        Swal.fire("تم","تم إضافة العملية","success");
-        return;
-    }
-
-    Swal.fire("لم أفهم الأمر","أعد المحاولة","warning");
-}
-
-/* ------------------------------------------------------
-   نطق النظام
------------------------------------------------------- */
-function speak(t){
-    let u=new SpeechSynthesisUtterance(t);
-    u.lang="ar-EG";
-    speechSynthesis.speak(u);
-}
-
-/* ------------------------------------------------------
-   تشغيل الميكروفون
------------------------------------------------------- */
-async function toggleMic(){
-    if(!Speech){
-        Swal.fire("خطأ","المتصفح لا يدعم التعرف على الصوت","error");
-        return;
-    }
-
-    if(micOn){
-        rec.stop();
-        return;
-    }
-
-    rec = new Speech();
-    rec.lang="ar-EG";
-    rec.start();
-    micOn=true;
-    mic.classList.add("active");
-
-    rec.onresult = async (e)=>{
-        let raw = e.results[0][0].transcript;
-        let fixed = await deepgramAI(raw);
-        understandCommand(fixed);
+        if(isDenied) {
+            await remove(ref(db, `${r.type === 'income' ? 'income' : 'expenses'}/${r.id}`));
+            Swal.fire('تم الحذف', '', 'success');
+        }
     };
 
-    rec.onend = ()=>{
-        micOn=false;
-        mic.classList.remove("active");
+    window.exportExcel = () => {
+        const wb = XLSX.utils.book_new();
+        const data = [[ "التاريخ", "الوقت", "النوع", "الوصف", "المبلغ" ]];
+        records.forEach(r => {
+            const d = new Date(r.timestamp);
+            data.push([
+                d.toLocaleDateString('ar-EG'),
+                d.toLocaleTimeString('ar-EG'),
+                r.type==='income'?'وارد':'مصروف',
+                r.description,
+                Number(r.amount)
+            ]);
+        });
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        XLSX.utils.book_append_sheet(wb, ws, "Report");
+        XLSX.writeFile(wb, "Finance_Report.xlsx");
     };
-}
+
+    // --- Smart Voice ---
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(SR) {
+        const rec = new SR();
+        rec.lang = "ar-EG";
+        rec.onstart = () => document.getElementById('mic').classList.add('listening');
+        rec.onend = () => document.getElementById('mic').classList.remove('listening');
+        
+        rec.onresult = async (e) => {
+            let txt = e.results[0][0].transcript;
+            
+            // Search
+            const searchMatch = txt.match(/(?:ابحث عن|شوف|حساب) (.+)/);
+            if(searchMatch) {
+                searchTerm = searchMatch[1].trim();
+                document.getElementById('searchBox').classList.add('active');
+                document.getElementById('searchKey').innerText = searchTerm;
+                render();
+                return;
+            }
+
+            // Delete All
+            if(txt.includes("امسح الكل")) {
+                const {value} = await Swal.fire({title:'كلمة السر', input:'password'});
+                if(value==='521988') { await remove(ref(db,'income')); await remove(ref(db,'expenses')); }
+                return;
+            }
+
+            // Add Transaction
+            txt = txt.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
+            const amtMatch = txt.match(/(\d+(\.\d+)?)/);
+            
+            if(amtMatch) {
+                const amount = parseFloat(amtMatch[0]);
+                const incKw = ["وصل", "جالي", "جه", "موجود", "مع", "وارد", "دخل"];
+                let type = 'expense'; 
+                if(incKw.some(k => txt.includes(k))) type = 'income';
+
+                let desc = txt.replace(amount, '').replace(/جنيه|جنية/g, '').trim();
+                ["وصل","جالي","صرفت","اشتريت","من","لـ"].forEach(k => desc = desc.replace(k, ''));
+                desc = desc.trim() || "صوتي";
+
+                document.getElementById('amount').value = amount;
+                document.getElementById('desc').value = desc;
+                setMode(type);
+                saveTx(null);
+            } else {
+                Swal.fire('؟', 'قول رقم', 'question');
+            }
+        };
+        window.toggleMic = () => {
+            const btn = document.getElementById('mic');
+            if(btn.classList.contains('listening')) rec.stop(); else rec.start();
+        }
+    }
 </script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
-
 </body>
 </html>
