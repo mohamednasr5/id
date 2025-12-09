@@ -272,6 +272,27 @@
             color: white;
         }
 
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-small:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .btn-small:active {
+            transform: translateY(0);
+        }
+
         /* صورة البطاقة */
         .card-image {
             width: 100%;
@@ -577,7 +598,7 @@
         <div class="alert" id="loginAlert"></div>
         
         <div class="footer">
-            <p>نسخة النظام 3.0 | تطوير <a href="#" class="footer-link">المهندس محمد حماد</a></p>
+            <p>نظام المناديب  3.0 | برمجة <a href="#" class="footer-link">المهندس محمد حماد</a></p>
         </div>
     </div>
 
@@ -704,9 +725,66 @@
             <span>📊 صفحة الإحصائيات الكاملة</span>
         </button>
         
+        <!-- إدارة الرسائل -->
         <h3 style="margin: 20px 0 10px 0; color: var(--dark);">📨 إدارة الرسائل</h3>
-        <div id="adminMessagesList" style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-            <p style="text-align: center; color: #666;">لا توجد رسائل جديدة</p>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+            <button class="btn-small" style="background: var(--info); color: white;" onclick="loadAdminMessages()">
+                🔄 تحديث الرسائل
+            </button>
+            <button class="btn-small" style="background: var(--danger); color: white;" onclick="deleteAllMessages()">
+                🗑️ مسح جميع الرسائل
+            </button>
+        </div>
+        <div id="adminMessagesList" style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px; max-height: 300px; overflow-y: auto;">
+            <p style="text-align: center; color: #666;">لا توجد رسائل</p>
+        </div>
+        
+        <!-- عداد الإدخالات -->
+        <h3 style="margin: 20px 0 10px 0; color: var(--dark);">📊 عداد الإدخالات</h3>
+        <div class="input-group" style="margin-bottom: 15px;">
+            <label class="input-label">اختر اسم المندوب</label>
+            <select id="adminRepSelect" class="input-field" onchange="loadSelectedRepCounter()">
+                <option value="">-- اختر المندوب --</option>
+            </select>
+        </div>
+        
+        <div class="counter-box">
+            <span class="counter-value" id="adminCounter">0</span>
+            <span class="counter-label">عدد إدخالات المندوب المحدد</span>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+            <button class="btn-small" style="background: var(--success); color: white;" onclick="adminIncCounter()">
+                ➕ زيادة
+            </button>
+            <button class="btn-small" style="background: var(--warning); color: white;" onclick="adminDecCounter()">
+                ➖ نقصان
+            </button>
+            <button class="btn-small" style="background: var(--danger); color: white;" onclick="adminResetCounter()">
+                🗑️ تصفير
+            </button>
+        </div>
+        
+        <!-- قائمة المناديب -->
+        <h3 style="margin: 20px 0 10px 0; color: var(--dark);">👥 أسماء المناديب المسجلة</h3>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+            <button class="btn-small" style="background: var(--info); color: white;" onclick="loadRepsList()">
+                🔄 تحديث القائمة
+            </button>
+        </div>
+        <div id="adminRepsList" style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px; max-height: 300px; overflow-y: auto;">
+            <p style="text-align: center; color: #666;">لا توجد أسماء مسجلة</p>
+        </div>
+        
+        <!-- أزرار التصفير الشامل -->
+        <h3 style="margin: 20px 0 10px 0; color: var(--dark);">🗑️ إدارة البيانات</h3>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+            <button class="btn-small" style="background: var(--warning); color: white; flex: 1;" onclick="resetUsersOnly()">
+                🔄 تصفير الإدخالات فقط
+            </button>
+            <button class="btn-small" style="background: var(--danger); color: white; flex: 1;" onclick="resetAllData()">
+                ⚠️ تصفير كامل للنظام
+            </button>
         </div>
         
         <button class="btn btn-danger" onclick="showPage('mainPage')">
@@ -739,12 +817,12 @@
         <source src="https://actions.google.com/sounds/v1/notifications/notification_simple.ogg" type="audio/ogg">
     </audio>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK & JavaScript -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getDatabase, ref, onValue, set, push, remove, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+        import { getDatabase, ref, onValue, set, push, remove, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-        // إعدادات Firebase (نفس الموجودة في صفحة الإحصائيات)
+        // إعدادات Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
             authDomain: "idmanazla.firebaseapp.com",
@@ -762,8 +840,8 @@
         const SYSTEM_CONFIG = {
             adminPassword: "521988",
             maxSessionsPerCode: 3,
-            sessionTimeout: 30 * 60 * 1000, // 30 دقيقة
-            entryPrice: 200 // سعر الإدخال
+            sessionTimeout: 30 * 60 * 1000,
+            entryPrice: 200
         };
 
         // قائمة الأماكن الكاملة (69 مكان)
@@ -839,7 +917,7 @@
             "69- المطرية نقطة رقم 9"
         ];
 
-        // أكواد الدخول (900901 إلى 900969)
+        // أكواد الدخول
         const LOGIN_CODES = {};
         for (let i = 1; i <= 69; i++) {
             const code = `9009${i.toString().padStart(2, '0')}`;
@@ -849,7 +927,6 @@
             };
         }
 
-        // كود التحقق الخاص
         LOGIN_CODES["111111"] = {
             place: "وضع التحقق من البطاقة",
             placeIdx: 0
@@ -864,7 +941,8 @@
             deviceId: null,
             messagesListener: null,
             unreadMessages: 0,
-            currentRepName: ""
+            currentRepName: "",
+            selectedAdminRep: ""
         };
 
         // تهيئة النظام
@@ -875,16 +953,12 @@
             setInterval(updateTime, 1000);
         });
 
-        // تهيئة النظام الأساسية
         function initSystem() {
-            // إنشاء معرف فريد للجهاز
             systemState.deviceId = getDeviceId();
             document.getElementById('deviceId').textContent = systemState.deviceId.substring(0, 8);
             
-            // تهيئة البحث الصوتي
             initVoiceRecognition();
             
-            // إضافة اختصار Ctrl+Enter للدخول
             document.addEventListener('keydown', function(e) {
                 if (e.ctrlKey && e.key === 'Enter') {
                     const activePage = getActivePage();
@@ -896,7 +970,6 @@
             });
         }
 
-        // توليد معرف فريد للجهاز
         function getDeviceId() {
             let deviceId = localStorage.getItem('deviceId');
             if (!deviceId) {
@@ -906,7 +979,6 @@
             return deviceId;
         }
 
-        // تحميل البيانات المحفوظة
         function loadRememberedData() {
             const savedCode = localStorage.getItem('rememberedCode');
             const rememberMe = localStorage.getItem('rememberMe') === 'true';
@@ -917,7 +989,6 @@
             }
         }
 
-        // تحديث الوقت
         function updateTime() {
             const now = new Date();
             document.getElementById('currentTime').textContent = 
@@ -925,7 +996,7 @@
                 now.toLocaleDateString('ar-EG');
         }
 
-        // البحث الصوتي
+        // البحث الصوتي - مع إصلاح مشكلة الميكروفون
         let voiceRecognition = null;
         let isListening = false;
 
@@ -940,19 +1011,28 @@
                 
                 voiceRecognition.onstart = function() {
                     isListening = true;
-                    document.getElementById('voiceBtn').classList.add('listening');
+                    const voiceBtn = document.getElementById('voiceBtn');
+                    if (voiceBtn) {
+                        voiceBtn.classList.add('listening');
+                    }
                     showVoiceStatus('🎤 جاري الاستماع...');
                 };
                 
                 voiceRecognition.onresult = function(event) {
                     const transcript = event.results[0][0].transcript.replace(/\D/g, '');
                     
+                    // التأكد من أننا في صفحة تسجيل الدخول فقط
+                    const activePage = getActivePage();
+                    if (activePage !== 'loginPage') {
+                        hideVoiceStatus();
+                        return;
+                    }
+                    
                     if (transcript.length >= 6) {
                         const code = transcript.slice(0, 6);
                         document.getElementById('loginCode').value = code;
                         showVoiceStatus(`✅ تم إدخال: ${code}`);
                         
-                        // الدخول التلقائي بعد تأخير بسيط
                         setTimeout(() => {
                             hideVoiceStatus();
                             login();
@@ -970,14 +1050,26 @@
                 
                 voiceRecognition.onend = function() {
                     isListening = false;
-                    document.getElementById('voiceBtn').classList.remove('listening');
+                    const voiceBtn = document.getElementById('voiceBtn');
+                    if (voiceBtn) {
+                        voiceBtn.classList.remove('listening');
+                    }
                 };
             } else {
-                document.getElementById('voiceBtn').style.display = 'none';
+                const voiceBtn = document.getElementById('voiceBtn');
+                if (voiceBtn) {
+                    voiceBtn.style.display = 'none';
+                }
             }
         }
 
         window.toggleVoiceRecognition = function() {
+            // التأكد من أننا في صفحة تسجيل الدخول فقط
+            const activePage = getActivePage();
+            if (activePage !== 'loginPage') {
+                return;
+            }
+            
             if (!voiceRecognition) {
                 showAlert(document.getElementById('loginAlert'), 'المتصفح لا يدعم التعرف الصوتي', 'error');
                 return;
@@ -992,25 +1084,27 @@
 
         function showVoiceStatus(message) {
             const statusEl = document.getElementById('voiceStatus');
-            statusEl.textContent = message;
-            statusEl.style.display = 'block';
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.style.display = 'block';
+            }
         }
 
         function hideVoiceStatus() {
-            document.getElementById('voiceStatus').style.display = 'none';
+            const statusEl = document.getElementById('voiceStatus');
+            if (statusEl) {
+                statusEl.style.display = 'none';
+            }
         }
 
         // وظائف التنقل بين الصفحات
         window.showPage = function(pageId) {
-            // إخفاء جميع الصفحات
             document.querySelectorAll('.card').forEach(card => {
                 card.classList.remove('active');
             });
             
-            // إظهار الصفحة المطلوبة
             document.getElementById(pageId).classList.add('active');
             
-            // إخفاء جميع التنبيهات
             document.querySelectorAll('.alert').forEach(alert => {
                 alert.style.display = 'none';
             });
@@ -1021,13 +1115,12 @@
             return activeCard ? activeCard.id : null;
         }
 
-        // وظيفة تسجيل الدخول الرئيسية
+        // تسجيل الدخول
         window.login = async function() {
             const code = document.getElementById('loginCode').value.trim();
             const rememberMe = document.getElementById('rememberMe').checked;
             const alertEl = document.getElementById('loginAlert');
             
-            // التحقق من المدخلات
             if (!code) {
                 showAlert(alertEl, 'يرجى إدخال كود الدخول', 'error');
                 return;
@@ -1038,7 +1131,6 @@
                 return;
             }
             
-            // حفظ تذكرني
             if (rememberMe) {
                 localStorage.setItem('rememberedCode', code);
                 localStorage.setItem('rememberMe', 'true');
@@ -1047,7 +1139,6 @@
                 localStorage.setItem('rememberMe', 'false');
             }
             
-            // التحقق من كود التحقق الخاص
             if (code === "111111") {
                 systemState.isVerificationMode = true;
                 systemState.currentPlace = "وضع التحقق من البطاقة";
@@ -1055,7 +1146,6 @@
                 return;
             }
             
-            // التحقق من صحة الكود
             const codeData = LOGIN_CODES[code];
             if (!codeData) {
                 showAlert(alertEl, 'كود الدخول غير صحيح', 'error');
@@ -1063,25 +1153,20 @@
             }
             
             try {
-                // حفظ بيانات المستخدم
                 systemState.currentUser = code;
                 systemState.currentPlace = codeData.place;
                 systemState.currentPlaceIdx = codeData.placeIdx;
                 systemState.isVerificationMode = false;
                 
-                // تحديث واجهة المستخدم
                 document.getElementById('welcomeTitle').textContent = `مرحبًا في ${codeData.place}`;
                 document.getElementById('placeSubtitle').textContent = `المكان: ${codeData.place}`;
                 document.getElementById('placeBadge').textContent = `المكان ${codeData.placeIdx}`;
                 
-                // الانتقال للصفحة الرئيسية
                 showPage('mainPage');
                 
-                // تهيئة النظام
                 await loadEntryCounter();
                 startMessagesListener();
                 
-                // تشغيل صوت النجاح
                 playSound('success');
                 
             } catch (error) {
@@ -1094,7 +1179,6 @@
             const natId = document.getElementById('verifyNatID').value.trim();
             const alertEl = document.getElementById('verifyAlert');
             
-            // التحقق من المدخلات
             if (!natId) {
                 showAlert(alertEl, 'يرجى إدخال الرقم القومي', 'error');
                 return;
@@ -1106,7 +1190,6 @@
             }
             
             try {
-                // البحث في Firebase
                 const usersRef = ref(db, 'users');
                 const snapshot = await get(usersRef);
                 
@@ -1115,7 +1198,6 @@
                     const foundUser = Object.values(users).find(user => user.natID === natId);
                     
                     if (foundUser) {
-                        // البطاقة موجودة (نصابة)
                         playSound('duplicate');
                         
                         showAlert(alertEl, `
@@ -1125,7 +1207,6 @@
                             ⏰ الوقت: ${new Date(foundUser.time).toLocaleString('ar-EG')}
                         `, 'warning');
                     } else {
-                        // البطاقة غير موجودة (نظيفة)
                         showAlert(alertEl, `
                             ✅ <strong>بطاقة نظيفة</strong><br>
                             هذه البطاقة غير مسجلة في النظام
@@ -1137,7 +1218,6 @@
                     playSound('success');
                 }
                 
-                // تفريغ الحقل
                 document.getElementById('verifyNatID').value = '';
                 document.getElementById('verifyNatID').focus();
                 
@@ -1152,7 +1232,6 @@
             const natId = document.getElementById('natID').value.trim();
             const alertEl = document.getElementById('addAlert');
             
-            // التحقق من المدخلات
             if (!repName) {
                 showAlert(alertEl, 'يرجى إدخال اسم المندوب', 'error');
                 document.getElementById('repName').focus();
@@ -1176,7 +1255,6 @@
             }
             
             try {
-                // البحث في Firebase عن نصابة
                 const usersRef = ref(db, 'users');
                 const snapshot = await get(usersRef);
                 
@@ -1185,7 +1263,6 @@
                     const foundUser = Object.values(users).find(user => user.natID === natId);
                     
                     if (foundUser) {
-                        // بطاقة نصابة - حفظ في قائمة النصابة
                         playSound('duplicate');
                         
                         showAlert(alertEl, `
@@ -1195,7 +1272,6 @@
                             ⏰ الوقت: ${new Date(foundUser.time).toLocaleString('ar-EG')}
                         `, 'warning');
                         
-                        // حفظ في قائمة النصابة
                         const duplicatesRef = ref(db, 'duplicates');
                         await push(duplicatesRef, {
                             duplicatedID: natId,
@@ -1211,7 +1287,6 @@
                     }
                 }
                 
-                // إضافة المستخدم الجديد
                 const newUserRef = push(usersRef);
                 await set(newUserRef, {
                     natID: natId,
@@ -1223,13 +1298,11 @@
                     deviceId: systemState.deviceId
                 });
                 
-                // تحديث العداد
                 await incrementEntryCounter();
                 
                 showAlert(alertEl, '✅ تم إضافة البطاقة بنجاح', 'success');
                 playSound('success');
                 
-                // تفريغ الحقول
                 document.getElementById('natID').value = '';
                 document.getElementById('natID').focus();
                 
@@ -1298,7 +1371,6 @@
                     ...data
                 }));
                 
-                // فلترة الرسائل حسب المستخدم الحالي
                 const relevantMessages = messageArray.filter(msg => {
                     if (msg.read) return false;
                     
@@ -1309,11 +1381,9 @@
                     return false;
                 });
                 
-                // تحديث عدد الرسائل غير المقروءة
                 systemState.unreadMessages = relevantMessages.length;
                 updateMessageBadge();
                 
-                // إظهار إشعار للرسائل الجديدة
                 if (relevantMessages.length > 0) {
                     const latestMessage = relevantMessages[relevantMessages.length - 1];
                     showNotification(latestMessage);
@@ -1322,7 +1392,6 @@
             });
         }
 
-        // تحديث شارة الرسائل
         function updateMessageBadge() {
             const badge = document.getElementById('messageBadge');
             if (systemState.unreadMessages > 0) {
@@ -1333,7 +1402,6 @@
             }
         }
 
-        // إظهار إشعار
         function showNotification(message) {
             const notificationArea = document.getElementById('notificationArea');
             const notification = document.createElement('div');
@@ -1382,7 +1450,6 @@
                     ...data
                 }));
                 
-                // فلترة الرسائل
                 const relevantMessages = messageArray.filter(msg => {
                     if (msg.target === 'all') return true;
                     if (msg.target === `place:${systemState.currentPlace}`) return true;
@@ -1417,7 +1484,6 @@
             
             document.getElementById('messagesModal').classList.add('active');
             
-            // تحديث حالة الرسائل لتصبح مقروءة
             systemState.unreadMessages = 0;
             updateMessageBadge();
         };
@@ -1445,12 +1511,15 @@
             if (password === SYSTEM_CONFIG.adminPassword) {
                 showPage('adminPage');
                 loadAdminMessages();
+                loadRepsList();
+                loadRepsDropdown();
             } else {
                 showAlert(alertEl, 'كلمة المرور غير صحيحة', 'error');
             }
         };
 
-        async function loadAdminMessages() {
+        // إدارة الرسائل في لوحة التحكم
+        window.loadAdminMessages = async function() {
             const messagesRef = ref(db, 'messages');
             const snapshot = await get(messagesRef);
             
@@ -1468,18 +1537,301 @@
             }));
             
             let html = '';
-            messageArray.reverse().slice(0, 5).forEach(msg => {
+            messageArray.reverse().slice(0, 10).forEach(msg => {
                 html += `
-                    <div style="background: white; padding: 10px; margin-bottom: 8px; border-radius: 8px; border-right: 3px solid #3498db;">
-                        <div style="font-weight: 600;">${getTargetText(msg.target)}</div>
-                        <div style="font-size: 13px; color: #666; margin-top: 4px;">${msg.text.substring(0, 50)}...</div>
-                        <small style="color: #999;">${new Date(msg.timestamp).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}</small>
+                    <div style="background: white; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-right: 3px solid #3498db;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #2c3e50; margin-bottom: 4px;">${getTargetText(msg.target)}</div>
+                                <div style="font-size: 13px; color: #666;">${msg.text.substring(0, 80)}${msg.text.length > 80 ? '...' : ''}</div>
+                                <small style="color: #999;">${new Date(msg.timestamp).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}</small>
+                            </div>
+                            <button class="btn-small" style="background: var(--danger); color: white; margin-right: 10px;" onclick="deleteMessage('${msg.id}')">
+                                🗑️
+                            </button>
+                        </div>
                     </div>
                 `;
             });
             
             container.innerHTML = html;
+        };
+
+        window.deleteMessage = async function(messageId) {
+            if (!confirm('هل أنت متأكد من حذف هذه الرسالة؟')) return;
+            
+            try {
+                const messageRef = ref(db, `messages/${messageId}`);
+                await remove(messageRef);
+                loadAdminMessages();
+                alert('✅ تم حذف الرسالة بنجاح');
+            } catch (error) {
+                alert('❌ خطأ في حذف الرسالة: ' + error.message);
+            }
+        };
+
+        window.deleteAllMessages = async function() {
+            const password = prompt('⚠️ تحذير!\n\nأنت على وشك حذف جميع الرسائل في النظام.\nأدخل كلمة المرور للتأكيد:');
+            
+            if (password !== SYSTEM_CONFIG.adminPassword) {
+                if (password !== null) {
+                    alert('❌ كلمة المرور غير صحيحة');
+                }
+                return;
+            }
+            
+            if (!confirm('⚠️ هل أنت متأكد تمامًا من حذف جميع الرسائل؟\n\nهذا الإجراء لا يمكن التراجع عنه!')) return;
+            
+            try {
+                const messagesRef = ref(db, 'messages');
+                await remove(messagesRef);
+                loadAdminMessages();
+                alert('✅ تم حذف جميع الرسائل بنجاح');
+            } catch (error) {
+                alert('❌ خطأ في حذف الرسائل: ' + error.message);
+            }
+        };
+
+        // إدارة قائمة المناديب
+        window.loadRepsList = async function() {
+            const usersRef = ref(db, 'users');
+            const snapshot = await get(usersRef);
+            
+            const container = document.getElementById('adminRepsList');
+            
+            if (!snapshot.exists()) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">لا توجد أسماء مسجلة</p>';
+                return;
+            }
+            
+            const users = snapshot.val();
+            const repsSet = new Set();
+            
+            Object.values(users).forEach(user => {
+                if (user.repName && user.repName.trim() !== '') {
+                    repsSet.add(user.repName);
+                }
+            });
+            
+            const repsArray = Array.from(repsSet).sort();
+            
+            let html = '';
+            repsArray.forEach(repName => {
+                // حساب عدد إدخالات كل مندوب
+                const repEntries = Object.values(users).filter(u => u.repName === repName).length;
+                
+                html += `
+                    <div style="background: white; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-right: 3px solid #2ecc71; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: 600; color: #2c3e50;">${repName}</div>
+                            <small style="color: #666;">عدد الإدخالات: ${repEntries}</small>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        };
+
+        // تحميل قائمة المناديب في Dropdown
+        async function loadRepsDropdown() {
+            const usersRef = ref(db, 'users');
+            const snapshot = await get(usersRef);
+            
+            const select = document.getElementById('adminRepSelect');
+            select.innerHTML = '<option value="">-- اختر المندوب --</option>';
+            
+            if (!snapshot.exists()) return;
+            
+            const users = snapshot.val();
+            const repsSet = new Set();
+            
+            Object.values(users).forEach(user => {
+                if (user.repName && user.repName.trim() !== '') {
+                    repsSet.add(user.repName);
+                }
+            });
+            
+            const repsArray = Array.from(repsSet).sort();
+            
+            repsArray.forEach(repName => {
+                const option = document.createElement('option');
+                option.value = repName;
+                option.textContent = repName;
+                select.appendChild(option);
+            });
         }
+
+        // تحميل عداد المندوب المحدد
+        window.loadSelectedRepCounter = async function() {
+            const repName = document.getElementById('adminRepSelect').value;
+            systemState.selectedAdminRep = repName;
+            
+            if (!repName) {
+                document.getElementById('adminCounter').textContent = '0';
+                return;
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            const counterRef = ref(db, `counters/${repName}`);
+            
+            const snapshot = await get(counterRef);
+            let count = 0;
+            
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                if (data.date === today) {
+                    count = data.count || 0;
+                }
+            }
+            
+            document.getElementById('adminCounter').textContent = count;
+        };
+
+        // زيادة العداد (الإدارة)
+        window.adminIncCounter = async function() {
+            const repName = systemState.selectedAdminRep;
+            
+            if (!repName) {
+                alert('⚠️ يرجى اختيار اسم المندوب أولاً');
+                return;
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            const counterRef = ref(db, `counters/${repName}`);
+            
+            const snapshot = await get(counterRef);
+            let count = 1;
+            
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                if (data.date === today) {
+                    count = (data.count || 0) + 1;
+                }
+            }
+            
+            await set(counterRef, {
+                date: today,
+                count: count
+            });
+            
+            document.getElementById('adminCounter').textContent = count;
+            alert('✅ تم زيادة العداد بنجاح');
+        };
+
+        // نقصان العداد (الإدارة)
+        window.adminDecCounter = async function() {
+            const repName = systemState.selectedAdminRep;
+            
+            if (!repName) {
+                alert('⚠️ يرجى اختيار اسم المندوب أولاً');
+                return;
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            const counterRef = ref(db, `counters/${repName}`);
+            
+            const snapshot = await get(counterRef);
+            
+            if (!snapshot.exists()) {
+                alert('⚠️ لا يوجد عداد لهذا المندوب');
+                return;
+            }
+            
+            const data = snapshot.val();
+            if (data.date !== today) {
+                alert('⚠️ لا يوجد عداد لهذا اليوم');
+                return;
+            }
+            
+            let count = (data.count || 0) - 1;
+            if (count < 0) count = 0;
+            
+            await set(counterRef, {
+                date: today,
+                count: count
+            });
+            
+            document.getElementById('adminCounter').textContent = count;
+            alert('✅ تم إنقاص العداد بنجاح');
+        };
+
+        // تصفير العداد (الإدارة)
+        window.adminResetCounter = async function() {
+            const repName = systemState.selectedAdminRep;
+            
+            if (!repName) {
+                alert('⚠️ يرجى اختيار اسم المندوب أولاً');
+                return;
+            }
+            
+            if (!confirm(`⚠️ هل أنت متأكد من تصفير عداد المندوب: ${repName}؟`)) return;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const counterRef = ref(db, `counters/${repName}`);
+            
+            await set(counterRef, {
+                date: today,
+                count: 0
+            });
+            
+            document.getElementById('adminCounter').textContent = '0';
+            alert('✅ تم تصفير العداد بنجاح');
+        };
+
+        // تصفير الإدخالات فقط
+        window.resetUsersOnly = async function() {
+            const password = prompt('⚠️ تحذير!\n\nأنت على وشك حذف جميع الإدخالات (المستخدمين والنصابة).\nسيتم الاحتفاظ بالرسائل والعدادات.\n\nأدخل كلمة المرور للتأكيد:');
+            
+            if (password !== SYSTEM_CONFIG.adminPassword) {
+                if (password !== null) {
+                    alert('❌ كلمة المرور غير صحيحة');
+                }
+                return;
+            }
+            
+            if (!confirm('⚠️ هل أنت متأكد تمامًا من حذف جميع الإدخالات؟\n\nهذا الإجراء لا يمكن التراجع عنه!')) return;
+            
+            try {
+                await remove(ref(db, 'users'));
+                await remove(ref(db, 'duplicates'));
+                
+                alert('✅ تم تصفير الإدخالات بنجاح');
+                location.reload();
+            } catch (error) {
+                alert('❌ خطأ في التصفير: ' + error.message);
+            }
+        };
+
+        // تصفير كامل للنظام
+        window.resetAllData = async function() {
+            const password = prompt('⚠️⚠️⚠️ تحذير شديد! ⚠️⚠️⚠️\n\nأنت على وشك حذف جميع البيانات في النظام بالكامل:\n- الإدخالات\n- النصابة\n- الرسائل\n- العدادات\n\nأدخل كلمة المرور للتأكيد:');
+            
+            if (password !== SYSTEM_CONFIG.adminPassword) {
+                if (password !== null) {
+                    alert('❌ كلمة المرور غير صحيحة');
+                }
+                return;
+            }
+            
+            const confirm1 = confirm('⚠️ هل أنت متأكد 100% من التصفير الكامل؟');
+            if (!confirm1) return;
+            
+            const confirm2 = confirm('⚠️⚠️ تأكيد نهائي: سيتم حذف كل شيء!\n\nهل تريد المتابعة؟');
+            if (!confirm2) return;
+            
+            try {
+                await remove(ref(db, 'users'));
+                await remove(ref(db, 'duplicates'));
+                await remove(ref(db, 'messages'));
+                await remove(ref(db, 'counters'));
+                
+                alert('✅ تم تصفير النظام بالكامل بنجاح');
+                location.reload();
+            } catch (error) {
+                alert('❌ خطأ في التصفير: ' + error.message);
+            }
+        };
 
         // تسجيل الخروج
         window.logout = function() {
@@ -1491,12 +1843,12 @@
                 deviceId: systemState.deviceId,
                 messagesListener: null,
                 unreadMessages: 0,
-                currentRepName: ""
+                currentRepName: "",
+                selectedAdminRep: ""
             };
             
             showPage('loginPage');
             
-            // تفريغ الحقول
             document.getElementById('loginCode').value = '';
             document.getElementById('repName').value = '';
             document.getElementById('natID').value = '';
@@ -1508,7 +1860,6 @@
             element.className = `alert alert-${type}`;
             element.style.display = 'block';
             
-            // إخفاء بعد 5 ثوان
             setTimeout(() => {
                 element.style.display = 'none';
             }, 5000);
