@@ -345,44 +345,6 @@
             color: #666;
         }
 
-        /* قوائم الإدارة */
-        .list-container {
-            max-height: 200px;
-            overflow-y: auto;
-            background: white;
-            border-radius: 12px;
-            padding: 10px;
-            margin: 15px 0;
-            border: 1px solid #e0e0e0;
-        }
-
-        .list-item {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .list-item:last-child {
-            border-bottom: none;
-        }
-
-        .list-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 12px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-family: 'Cairo', sans-serif;
-            font-weight: 600;
-        }
-
         /* النافذة المنبثقة للرسائل */
         .modal {
             position: fixed;
@@ -582,7 +544,7 @@
     </style>
 </head>
 <body>
-    <!-- الصفحات الرئيسية -->
+    <!-- صفحة تسجيل الدخول -->
     <div class="card active" id="loginPage">
         <div class="card-header">
             <span class="card-icon">🔐</span>
@@ -594,7 +556,7 @@
             <label class="input-label">كود الدخول (6 أرقام)</label>
             <div style="position: relative;">
                 <input type="tel" id="loginCode" class="input-field" placeholder="900901" maxlength="6" inputmode="numeric">
-                <button class="voice-btn" id="voiceBtn" title="إدخال صوتي">
+                <button class="voice-btn" id="voiceBtn" title="إدخال صوتي" onclick="toggleVoiceRecognition()">
                     🎤
                 </button>
                 <div class="voice-status" id="voiceStatus"></div>
@@ -615,7 +577,7 @@
         <div class="alert" id="loginAlert"></div>
         
         <div class="footer">
-            <p>نسخة النظام 2.0 | تطوير <a href="#" class="footer-link">المهندس محمد حماد</a></p>
+            <p>نسخة النظام 3.0 | تطوير <a href="#" class="footer-link">المهندس محمد حماد</a></p>
         </div>
     </div>
 
@@ -743,38 +705,9 @@
         </button>
         
         <h3 style="margin: 20px 0 10px 0; color: var(--dark);">📨 إدارة الرسائل</h3>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <button class="btn-small" style="background: var(--info); color: white;" onclick="loadMessages()">
-                عرض الرسائل
-            </button>
-            <button class="btn-small" style="background: var(--danger); color: white;" onclick="deleteAllMessages()">
-                مسح الكل
-            </button>
+        <div id="adminMessagesList" style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+            <p style="text-align: center; color: #666;">لا توجد رسائل جديدة</p>
         </div>
-        <div class="list-container" id="messagesList"></div>
-        
-        <h3 style="margin: 20px 0 10px 0; color: var(--dark);">عداد الإدخالات</h3>
-        <div class="counter-box">
-            <span class="counter-value" id="adminCounter">0</span>
-            <span class="counter-label">عدد إدخالات المندوب الحالي</span>
-        </div>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <button class="btn-small" style="background: var(--success); color: white;" onclick="adminIncCounter()">
-                ➕ زيادة
-            </button>
-            <button class="btn-small" style="background: var(--warning); color: white;" onclick="adminDecCounter()">
-                ➖ نقصان
-            </button>
-            <button class="btn-small" style="background: var(--danger); color: white;" onclick="adminResetCounter()">
-                🗑️ تصفير
-            </button>
-        </div>
-        
-        <h3 style="margin: 20px 0 10px 0; color: var(--dark);">الجلسات النشطة</h3>
-        <div class="list-container" id="sessionsList"></div>
-        
-        <h3 style="margin: 20px 0 10px 0; color: var(--dark);">أسماء المناديب</h3>
-        <div class="list-container" id="repsList"></div>
         
         <button class="btn btn-danger" onclick="showPage('mainPage')">
             <span>↩ خروج من اللوحة</span>
@@ -806,7 +739,25 @@
         <source src="https://actions.google.com/sounds/v1/notifications/notification_simple.ogg" type="audio/ogg">
     </audio>
 
-    <script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set, push, remove, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+        // إعدادات Firebase (نفس الموجودة في صفحة الإحصائيات)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
+            authDomain: "idmanazla.firebaseapp.com",
+            databaseURL: "https://idmanazla-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "idmanazla",
+            storageBucket: "idmanazla.firebasestorage.app",
+            messagingSenderId: "408446131276",
+            appId: "1:408446131276:web:976ae54181b5398de5a8e9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
         // البيانات الأساسية للنظام
         const SYSTEM_CONFIG = {
             adminPassword: "521988",
@@ -933,9 +884,6 @@
             // تهيئة البحث الصوتي
             initVoiceRecognition();
             
-            // تحميل أسماء المناديب المحفوظة
-            loadRepNames();
-            
             // إضافة اختصار Ctrl+Enter للدخول
             document.addEventListener('keydown', function(e) {
                 if (e.ctrlKey && e.key === 'Enter') {
@@ -1029,9 +977,9 @@
             }
         }
 
-        function toggleVoiceRecognition() {
+        window.toggleVoiceRecognition = function() {
             if (!voiceRecognition) {
-                showAlert('voiceBtn', 'المتصفح لا يدعم التعرف الصوتي', 'error');
+                showAlert(document.getElementById('loginAlert'), 'المتصفح لا يدعم التعرف الصوتي', 'error');
                 return;
             }
             
@@ -1040,7 +988,7 @@
             } else {
                 voiceRecognition.start();
             }
-        }
+        };
 
         function showVoiceStatus(message) {
             const statusEl = document.getElementById('voiceStatus');
@@ -1053,7 +1001,7 @@
         }
 
         // وظائف التنقل بين الصفحات
-        function showPage(pageId) {
+        window.showPage = function(pageId) {
             // إخفاء جميع الصفحات
             document.querySelectorAll('.card').forEach(card => {
                 card.classList.remove('active');
@@ -1066,7 +1014,7 @@
             document.querySelectorAll('.alert').forEach(alert => {
                 alert.style.display = 'none';
             });
-        }
+        };
 
         function getActivePage() {
             const activeCard = document.querySelector('.card.active');
@@ -1074,7 +1022,7 @@
         }
 
         // وظيفة تسجيل الدخول الرئيسية
-        async function login() {
+        window.login = async function() {
             const code = document.getElementById('loginCode').value.trim();
             const rememberMe = document.getElementById('rememberMe').checked;
             const alertEl = document.getElementById('loginAlert');
@@ -1115,9 +1063,6 @@
             }
             
             try {
-                // التحقق من حد الجلسات
-                await checkSessionLimit(code);
-                
                 // حفظ بيانات المستخدم
                 systemState.currentUser = code;
                 systemState.currentPlace = codeData.place;
@@ -1129,14 +1074,11 @@
                 document.getElementById('placeSubtitle').textContent = `المكان: ${codeData.place}`;
                 document.getElementById('placeBadge').textContent = `المكان ${codeData.placeIdx}`;
                 
-                // تسجيل الجلسة
-                await registerSession(code);
-                
                 // الانتقال للصفحة الرئيسية
                 showPage('mainPage');
                 
                 // تهيئة النظام
-                loadEntryCounter();
+                await loadEntryCounter();
                 startMessagesListener();
                 
                 // تشغيل صوت النجاح
@@ -1145,35 +1087,10 @@
             } catch (error) {
                 showAlert(alertEl, `خطأ: ${error.message}`, 'error');
             }
-        }
-
-        // التحقق من حد الجلسات
-        async function checkSessionLimit(code) {
-            // في نظام حقيقي، هنا يتم التحقق من قاعدة البيانات
-            // للتبسيط، سنقوم بمحاكاة العملية
-            return new Promise((resolve) => {
-                setTimeout(resolve, 100);
-            });
-        }
-
-        // تسجيل الجلسة
-        async function registerSession(code) {
-            // في نظام حقيقي، هنا يتم حفظ الجلسة في قاعدة البيانات
-            // للتبسيط، سنقوم بحفظها في localStorage
-            const sessionData = {
-                code: code,
-                deviceId: systemState.deviceId,
-                loginTime: new Date().toISOString(),
-                expiresAt: Date.now() + SYSTEM_CONFIG.sessionTimeout
-            };
-            
-            const sessions = JSON.parse(localStorage.getItem('activeSessions') || '{}');
-            sessions[`${code}_${systemState.deviceId}`] = sessionData;
-            localStorage.setItem('activeSessions', JSON.stringify(sessions));
-        }
+        };
 
         // التحقق من البطاقة
-        async function checkCard() {
+        window.checkCard = async function() {
             const natId = document.getElementById('verifyNatID').value.trim();
             const alertEl = document.getElementById('verifyAlert');
             
@@ -1189,28 +1106,34 @@
             }
             
             try {
-                // محاكاة التحقق من قاعدة البيانات
-                const users = JSON.parse(localStorage.getItem('users') || '{}');
+                // البحث في Firebase
+                const usersRef = ref(db, 'users');
+                const snapshot = await get(usersRef);
                 
-                if (users[natId]) {
-                    // البطاقة موجودة (نصابة)
-                    const userData = users[natId];
-                    playSound('duplicate');
+                if (snapshot.exists()) {
+                    const users = snapshot.val();
+                    const foundUser = Object.values(users).find(user => user.natID === natId);
                     
-                    showAlert(alertEl, `
-                        ⚠️ <strong>بطاقة مسجلة مسبقًا</strong><br>
-                        📍 المكان: ${userData.place}<br>
-                        👤 المندوب: ${userData.repName}<br>
-                        ⏰ الوقت: ${new Date(userData.time).toLocaleString('ar-EG')}
-                    `, 'warning');
-                    
+                    if (foundUser) {
+                        // البطاقة موجودة (نصابة)
+                        playSound('duplicate');
+                        
+                        showAlert(alertEl, `
+                            ⚠️ <strong>بطاقة مسجلة مسبقًا</strong><br>
+                            📍 المكان: ${foundUser.place}<br>
+                            👤 المندوب: ${foundUser.repName}<br>
+                            ⏰ الوقت: ${new Date(foundUser.time).toLocaleString('ar-EG')}
+                        `, 'warning');
+                    } else {
+                        // البطاقة غير موجودة (نظيفة)
+                        showAlert(alertEl, `
+                            ✅ <strong>بطاقة نظيفة</strong><br>
+                            هذه البطاقة غير مسجلة في النظام
+                        `, 'success');
+                        playSound('success');
+                    }
                 } else {
-                    // البطاقة غير موجودة (صحيحة)
-                    showAlert(alertEl, `
-                        ✅ <strong>البطاقة صحيحة</strong><br>
-                        يمكن تسجيل هذه البطاقة في النظام
-                    `, 'success');
-                    
+                    showAlert(alertEl, 'البطاقة غير مسجلة في النظام', 'success');
                     playSound('success');
                 }
                 
@@ -1219,12 +1142,12 @@
                 document.getElementById('verifyNatID').focus();
                 
             } catch (error) {
-                showAlert(alertEl, `خطأ في التحقق: ${error.message}`, 'error');
+                showAlert(alertEl, `خطأ: ${error.message}`, 'error');
             }
-        }
+        };
 
         // إضافة مستخدم جديد
-        async function addUser() {
+        window.addUser = async function() {
             const repName = document.getElementById('repName').value.trim();
             const natId = document.getElementById('natID').value.trim();
             const alertEl = document.getElementById('addAlert');
@@ -1248,173 +1171,158 @@
             }
             
             if (!systemState.currentPlace) {
-                showAlert(alertEl, 'خطأ في تحديد المكان', 'error');
+                showAlert(alertEl, 'خطأ: لم يتم تحديد المكان', 'error');
                 return;
             }
             
             try {
-                // التحقق من تكرار الرقم القومي
-                const users = JSON.parse(localStorage.getItem('users') || '{}');
+                // البحث في Firebase عن نصابة
+                const usersRef = ref(db, 'users');
+                const snapshot = await get(usersRef);
                 
-                if (users[natId]) {
-                    // اكتشاف نصابة
-                    const userData = users[natId];
-                    playSound('duplicate');
+                if (snapshot.exists()) {
+                    const users = snapshot.val();
+                    const foundUser = Object.values(users).find(user => user.natID === natId);
                     
-                    showAlert(alertEl, `
-                        ⚠️ <strong>اكتشاف عملية نصب!</strong><br>
-                        📍 مسجل في: ${userData.place}<br>
-                        👤 بواسطة: ${userData.repName}<br>
-                        ⏰ منذ: ${new Date(userData.time).toLocaleString('ar-EG')}
-                    `, 'warning');
-                    
-                    // تسجيل محاولة النصابة
-                    const duplicates = JSON.parse(localStorage.getItem('duplicates') || '[]');
-                    duplicates.push({
-                        natId: natId,
-                        attemptBy: repName,
-                        attemptPlace: systemState.currentPlace,
-                        originalRep: userData.repName,
-                        originalPlace: userData.place,
-                        timestamp: new Date().toISOString(),
-                        deviceId: systemState.deviceId
-                    });
-                    localStorage.setItem('duplicates', JSON.stringify(duplicates));
-                    
-                    return;
+                    if (foundUser) {
+                        // بطاقة نصابة - حفظ في قائمة النصابة
+                        playSound('duplicate');
+                        
+                        showAlert(alertEl, `
+                            ⚠️ <strong>بطاقة نصابة!</strong><br>
+                            📍 المكان الأصلي: ${foundUser.place}<br>
+                            👤 المندوب الأصلي: ${foundUser.repName}<br>
+                            ⏰ الوقت: ${new Date(foundUser.time).toLocaleString('ar-EG')}
+                        `, 'warning');
+                        
+                        // حفظ في قائمة النصابة
+                        const duplicatesRef = ref(db, 'duplicates');
+                        await push(duplicatesRef, {
+                            duplicatedID: natId,
+                            attemptByRep: repName,
+                            attemptPlace: systemState.currentPlace,
+                            originalPlace: foundUser.place,
+                            originalRep: foundUser.repName,
+                            timestamp: new Date().toISOString(),
+                            deviceId: systemState.deviceId
+                        });
+                        
+                        return;
+                    }
                 }
                 
-                // حفظ المستخدم الجديد
-                users[natId] = {
-                    natId: natId,
+                // إضافة المستخدم الجديد
+                const newUserRef = push(usersRef);
+                await set(newUserRef, {
+                    natID: natId,
                     repName: repName,
                     place: systemState.currentPlace,
                     placeIdx: systemState.currentPlaceIdx,
                     time: new Date().toISOString(),
                     userCode: systemState.currentUser,
                     deviceId: systemState.deviceId
-                };
-                localStorage.setItem('users', JSON.stringify(users));
-                
-                // حفظ اسم المندوب
-                saveRepName(repName);
+                });
                 
                 // تحديث العداد
-                incrementEntryCounter();
+                await incrementEntryCounter();
                 
-                // إظهار رسالة النجاح
-                showAlert(alertEl, '✅ تمت إضافة البطاقة بنجاح', 'success');
+                showAlert(alertEl, '✅ تم إضافة البطاقة بنجاح', 'success');
                 playSound('success');
                 
-                // تفريغ الحقل
+                // تفريغ الحقول
                 document.getElementById('natID').value = '';
                 document.getElementById('natID').focus();
                 
-                // تحديث قائمة المناديب في لوحة التحكم
-                if (getActivePage() === 'adminPage') {
-                    loadRepsList();
-                }
-                
             } catch (error) {
-                showAlert(alertEl, `خطأ في الإضافة: ${error.message}`, 'error');
+                showAlert(alertEl, `خطأ: ${error.message}`, 'error');
             }
-        }
+        };
 
-        // حفظ اسم المندوب
-        function saveRepName(name) {
-            const savedNames = JSON.parse(localStorage.getItem('savedRepNames') || '[]');
-            if (!savedNames.includes(name)) {
-                savedNames.push(name);
-                localStorage.setItem('savedRepNames', JSON.stringify(savedNames));
-                loadRepNames();
+        // تحميل عداد الإدخالات
+        async function loadEntryCounter() {
+            const repName = document.getElementById('repName').value.trim();
+            if (!repName) return;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const counterRef = ref(db, `counters/${repName}`);
+            
+            const snapshot = await get(counterRef);
+            let count = 0;
+            
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                if (data.date === today) {
+                    count = data.count || 0;
+                }
             }
             
-            // تحديث اسم المندوب الحالي
-            systemState.currentRepName = name;
+            document.getElementById('entryCounter').textContent = count;
         }
 
-        // تحميل أسماء المناديب
-        function loadRepNames() {
-            const savedNames = JSON.parse(localStorage.getItem('savedRepNames') || '[]');
-            const datalist = document.getElementById('repNamesList');
-            datalist.innerHTML = '';
+        // زيادة العداد
+        async function incrementEntryCounter() {
+            const repName = document.getElementById('repName').value.trim();
+            if (!repName) return;
             
-            savedNames.forEach(name => {
-                const option = document.createElement('option');
-                option.value = name;
-                datalist.appendChild(option);
+            const today = new Date().toISOString().split('T')[0];
+            const counterRef = ref(db, `counters/${repName}`);
+            
+            const snapshot = await get(counterRef);
+            let count = 1;
+            
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                if (data.date === today) {
+                    count = (data.count || 0) + 1;
+                }
+            }
+            
+            await set(counterRef, {
+                date: today,
+                count: count
+            });
+            
+            document.getElementById('entryCounter').textContent = count;
+        }
+
+        // مراقبة الرسائل
+        function startMessagesListener() {
+            const messagesRef = ref(db, 'messages');
+            
+            onValue(messagesRef, (snapshot) => {
+                if (!snapshot.exists()) return;
+                
+                const messages = snapshot.val();
+                const messageArray = Object.entries(messages).map(([id, data]) => ({
+                    id,
+                    ...data
+                }));
+                
+                // فلترة الرسائل حسب المستخدم الحالي
+                const relevantMessages = messageArray.filter(msg => {
+                    if (msg.read) return false;
+                    
+                    if (msg.target === 'all') return true;
+                    if (msg.target === `place:${systemState.currentPlace}`) return true;
+                    if (msg.target === `rep:${systemState.currentRepName}`) return true;
+                    
+                    return false;
+                });
+                
+                // تحديث عدد الرسائل غير المقروءة
+                systemState.unreadMessages = relevantMessages.length;
+                updateMessageBadge();
+                
+                // إظهار إشعار للرسائل الجديدة
+                if (relevantMessages.length > 0) {
+                    const latestMessage = relevantMessages[relevantMessages.length - 1];
+                    showNotification(latestMessage);
+                    playSound('message');
+                }
             });
         }
 
-        // إدارة العداد
-        function loadEntryCounter() {
-            const repName = document.getElementById('repName').value.trim();
-            if (!repName) return;
-            
-            const today = new Date().toISOString().split('T')[0];
-            const counters = JSON.parse(localStorage.getItem('entryCounters') || '{}');
-            
-            if (!counters[repName] || counters[repName].date !== today) {
-                counters[repName] = { date: today, count: 0 };
-                localStorage.setItem('entryCounters', JSON.stringify(counters));
-            }
-            
-            document.getElementById('entryCounter').textContent = counters[repName].count;
-            document.getElementById('adminCounter').textContent = counters[repName].count;
-        }
-
-        function incrementEntryCounter() {
-            const repName = document.getElementById('repName').value.trim();
-            if (!repName) return;
-            
-            const today = new Date().toISOString().split('T')[0];
-            const counters = JSON.parse(localStorage.getItem('entryCounters') || '{}');
-            
-            if (!counters[repName] || counters[repName].date !== today) {
-                counters[repName] = { date: today, count: 1 };
-            } else {
-                counters[repName].count++;
-            }
-            
-            localStorage.setItem('entryCounters', JSON.stringify(counters));
-            loadEntryCounter();
-        }
-
-        // استماع لتغيير اسم المندوب
-        document.getElementById('repName').addEventListener('input', function() {
-            loadEntryCounter();
-            systemState.currentRepName = this.value.trim();
-        });
-
-        // الرسائل
-        function startMessagesListener() {
-            // في نظام حقيقي، هنا يتم الاتصال بـ Firebase للاستماع للرسائل
-            // للتبسيط، سنقوم بمحاكاة العملية
-            simulateMessages();
-        }
-
-        function simulateMessages() {
-            // محاكاة وصول رسائل جديدة
-            setInterval(() => {
-                const messages = JSON.parse(localStorage.getItem('messages') || '[]');
-                const newMessages = messages.filter(msg => 
-                    !msg.read && 
-                    (msg.target === 'all' || 
-                     msg.target === systemState.currentPlace || 
-                     msg.target === systemState.currentRepName)
-                );
-                
-                if (newMessages.length > 0) {
-                    systemState.unreadMessages = newMessages.length;
-                    updateMessageBadge();
-                    
-                    // إظهار إشعار
-                    showNotification(newMessages[0]);
-                    playSound('message');
-                }
-            }, 30000); // التحقق كل 30 ثانية
-        }
-
+        // تحديث شارة الرسائل
         function updateMessageBadge() {
             const badge = document.getElementById('messageBadge');
             if (systemState.unreadMessages > 0) {
@@ -1425,6 +1333,7 @@
             }
         }
 
+        // إظهار إشعار
         function showNotification(message) {
             const notificationArea = document.getElementById('notificationArea');
             const notification = document.createElement('div');
@@ -1452,276 +1361,128 @@
         }
 
         // عرض نافذة الرسائل
-        function showMessagesModal() {
-            const messages = JSON.parse(localStorage.getItem('messages') || '[]');
+        window.showMessagesModal = async function() {
+            const messagesRef = ref(db, 'messages');
+            const snapshot = await get(messagesRef);
+            
             const content = document.getElementById('messagesContent');
             
-            if (messages.length === 0) {
+            if (!snapshot.exists()) {
                 content.innerHTML = `
                     <div style="text-align: center; padding: 40px 20px; color: #666;">
                         <div style="font-size: 48px; margin-bottom: 20px;">📭</div>
                         <div style="font-size: 18px; font-weight: 600;">لا توجد رسائل</div>
-                        <div style="margin-top: 10px;">لم يتم إرسال أي رسائل حتى الآن</div>
+                        <div style="margin-top: 10px;">لم تصلك أي رسائل بعد</div>
                     </div>
                 `;
             } else {
-                let html = '';
-                messages.forEach((msg, index) => {
-                    const isUnread = !msg.read;
-                    html += `
-                        <div style="background: ${isUnread ? '#fff5f5' : '#f8f9fa'}; 
-                                   border-right: 4px solid ${isUnread ? '#e74c3c' : '#3498db'};
-                                   border-radius: 12px; padding: 15px; margin-bottom: 10px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <strong style="color: #2c3e50;">${msg.target}</strong>
-                                <small style="color: #666;">${new Date(msg.time).toLocaleString('ar-EG')}</small>
-                            </div>
-                            <div style="color: #2c3e50; line-height: 1.6;">${msg.text}</div>
-                            ${isUnread ? `
-                                <div style="margin-top: 10px;">
-                                    <button onclick="markMessageAsRead(${index})" 
-                                            style="background: #2ecc71; color: white; border: none; 
-                                                   padding: 5px 10px; border-radius: 6px; 
-                                                   font-size: 12px; cursor: pointer;">
-                                        ✓ تمت القراءة
-                                    </button>
-                                </div>
-                            ` : ''}
+                const messages = snapshot.val();
+                const messageArray = Object.entries(messages).map(([id, data]) => ({
+                    id,
+                    ...data
+                }));
+                
+                // فلترة الرسائل
+                const relevantMessages = messageArray.filter(msg => {
+                    if (msg.target === 'all') return true;
+                    if (msg.target === `place:${systemState.currentPlace}`) return true;
+                    if (msg.target === `rep:${systemState.currentRepName}`) return true;
+                    return false;
+                });
+                
+                if (relevantMessages.length === 0) {
+                    content.innerHTML = `
+                        <div style="text-align: center; padding: 40px 20px; color: #666;">
+                            <div style="font-size: 48px; margin-bottom: 20px;">📭</div>
+                            <div style="font-size: 18px; font-weight: 600;">لا توجد رسائل</div>
                         </div>
                     `;
-                });
-                content.innerHTML = html;
+                } else {
+                    let html = '';
+                    relevantMessages.reverse().forEach(msg => {
+                        const isUnread = !msg.read;
+                        html += `
+                            <div style="background: ${isUnread ? '#fff5f5' : '#f8f9fa'}; border-right: 4px solid ${isUnread ? '#e74c3c' : '#3498db'}; border-radius: 12px; padding: 15px; margin-bottom: 10px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <strong style="color: #2c3e50;">${getTargetText(msg.target)}</strong>
+                                    <small style="color: #666;">${new Date(msg.timestamp).toLocaleString('ar-EG')}</small>
+                                </div>
+                                <div style="color: #2c3e50; line-height: 1.6;">${msg.text}</div>
+                            </div>
+                        `;
+                    });
+                    content.innerHTML = html;
+                }
             }
             
             document.getElementById('messagesModal').classList.add('active');
-        }
-
-        function closeMessagesModal() {
-            document.getElementById('messagesModal').classList.remove('active');
+            
+            // تحديث حالة الرسائل لتصبح مقروءة
             systemState.unreadMessages = 0;
             updateMessageBadge();
+        };
+
+        function getTargetText(target) {
+            if (target === 'all') return '🌐 رسالة عامة';
+            if (target.startsWith('place:')) return `📍 ${target.replace('place:', '')}`;
+            if (target.startsWith('rep:')) return `👤 ${target.replace('rep:', '')}`;
+            return target;
         }
 
-        function markMessageAsRead(index) {
-            const messages = JSON.parse(localStorage.getItem('messages') || '[]');
-            if (messages[index]) {
-                messages[index].read = true;
-                localStorage.setItem('messages', JSON.stringify(messages));
-                showMessagesModal();
-            }
-        }
+        window.closeMessagesModal = function() {
+            document.getElementById('messagesModal').classList.remove('active');
+        };
 
-        // لوحة التحكم
-        function showAdminLogin() {
+        // صفحة الإدارة
+        window.showAdminLogin = function() {
             showPage('adminLoginPage');
-        }
+        };
 
-        function verifyAdmin() {
+        window.verifyAdmin = function() {
             const password = document.getElementById('adminPassword').value;
             const alertEl = document.getElementById('adminAlert');
             
             if (password === SYSTEM_CONFIG.adminPassword) {
                 showPage('adminPage');
-                loadAdminData();
+                loadAdminMessages();
             } else {
                 showAlert(alertEl, 'كلمة المرور غير صحيحة', 'error');
             }
-        }
+        };
 
-        function loadAdminData() {
-            loadMessagesList();
-            loadSessionsList();
-            loadRepsList();
-            loadEntryCounter();
-        }
-
-        function loadMessagesList() {
-            const messages = JSON.parse(localStorage.getItem('messages') || '[]');
-            const container = document.getElementById('messagesList');
+        async function loadAdminMessages() {
+            const messagesRef = ref(db, 'messages');
+            const snapshot = await get(messagesRef);
             
-            if (messages.length === 0) {
-                container.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">لا توجد رسائل</div>';
+            const container = document.getElementById('adminMessagesList');
+            
+            if (!snapshot.exists()) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">لا توجد رسائل</p>';
                 return;
             }
             
+            const messages = snapshot.val();
+            const messageArray = Object.entries(messages).map(([id, data]) => ({
+                id,
+                ...data
+            }));
+            
             let html = '';
-            messages.slice(0, 5).forEach((msg, index) => {
+            messageArray.reverse().slice(0, 5).forEach(msg => {
                 html += `
-                    <div class="list-item">
-                        <div>
-                            <div style="font-weight: 600;">${msg.target}</div>
-                            <div style="font-size: 12px; color: #666;">${msg.text.substring(0, 30)}...</div>
-                        </div>
-                        <div class="list-actions">
-                            <button class="btn-small" style="background: #e74c3c; color: white;" 
-                                    onclick="deleteMessage(${index})">
-                                حذف
-                            </button>
-                        </div>
+                    <div style="background: white; padding: 10px; margin-bottom: 8px; border-radius: 8px; border-right: 3px solid #3498db;">
+                        <div style="font-weight: 600;">${getTargetText(msg.target)}</div>
+                        <div style="font-size: 13px; color: #666; margin-top: 4px;">${msg.text.substring(0, 50)}...</div>
+                        <small style="color: #999;">${new Date(msg.timestamp).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}</small>
                     </div>
                 `;
             });
+            
             container.innerHTML = html;
-        }
-
-        function loadSessionsList() {
-            const sessions = JSON.parse(localStorage.getItem('activeSessions') || '{}');
-            const container = document.getElementById('sessionsList');
-            
-            const sessionArray = Object.values(sessions);
-            if (sessionArray.length === 0) {
-                container.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">لا توجد جلسات نشطة</div>';
-                return;
-            }
-            
-            let html = '';
-            sessionArray.slice(0, 5).forEach((session, index) => {
-                html += `
-                    <div class="list-item">
-                        <div>
-                            <div style="font-weight: 600;">كود: ${session.code}</div>
-                            <div style="font-size: 12px; color: #666;">جهاز: ${session.deviceId.substring(0, 8)}</div>
-                        </div>
-                        <div class="list-actions">
-                            <button class="btn-small" style="background: #e74c3c; color: white;" 
-                                    onclick="kickSession('${session.code}', '${session.deviceId}')">
-                                طرد
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-
-        function loadRepsList() {
-            const savedNames = JSON.parse(localStorage.getItem('savedRepNames') || '[]');
-            const container = document.getElementById('repsList');
-            
-            if (savedNames.length === 0) {
-                container.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">لا توجد أسماء محفوظة</div>';
-                return;
-            }
-            
-            let html = '';
-            savedNames.forEach((name, index) => {
-                html += `
-                    <div class="list-item">
-                        <div style="font-weight: 600;">${name}</div>
-                        <div class="list-actions">
-                            <button class="btn-small" style="background: #e74c3c; color: white;" 
-                                    onclick="deleteRepName(${index})">
-                                حذف
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-
-        // وظائف التحكم في العداد
-        function adminIncCounter() {
-            const repName = document.getElementById('repName').value.trim();
-            if (!repName) {
-                alert('أدخل اسم المندوب أولاً');
-                return;
-            }
-            
-            const counters = JSON.parse(localStorage.getItem('entryCounters') || '{}');
-            const today = new Date().toISOString().split('T')[0];
-            
-            if (!counters[repName] || counters[repName].date !== today) {
-                counters[repName] = { date: today, count: 1 };
-            } else {
-                counters[repName].count++;
-            }
-            
-            localStorage.setItem('entryCounters', JSON.stringify(counters));
-            loadEntryCounter();
-        }
-
-        function adminDecCounter() {
-            const repName = document.getElementById('repName').value.trim();
-            if (!repName) {
-                alert('أدخل اسم المندوب أولاً');
-                return;
-            }
-            
-            const counters = JSON.parse(localStorage.getItem('entryCounters') || '{}');
-            const today = new Date().toISOString().split('T')[0];
-            
-            if (counters[repName] && counters[repName].date === today && counters[repName].count > 0) {
-                counters[repName].count--;
-                localStorage.setItem('entryCounters', JSON.stringify(counters));
-                loadEntryCounter();
-            }
-        }
-
-        function adminResetCounter() {
-            const repName = document.getElementById('repName').value.trim();
-            if (!repName) {
-                alert('أدخل اسم المندوب أولاً');
-                return;
-            }
-            
-            if (confirm(`هل تريد تصفير عداد ${repName}؟`)) {
-                const counters = JSON.parse(localStorage.getItem('entryCounters') || '{}');
-                const today = new Date().toISOString().split('T')[0];
-                counters[repName] = { date: today, count: 0 };
-                localStorage.setItem('entryCounters', JSON.stringify(counters));
-                loadEntryCounter();
-            }
-        }
-
-        // وظائف الإدارة
-        function deleteMessage(index) {
-            if (confirm('هل تريد حذف هذه الرسالة؟')) {
-                const messages = JSON.parse(localStorage.getItem('messages') || '[]');
-                messages.splice(index, 1);
-                localStorage.setItem('messages', JSON.stringify(messages));
-                loadMessagesList();
-            }
-        }
-
-        function deleteAllMessages() {
-            if (confirm('هل تريد حذف جميع الرسائل؟')) {
-                localStorage.removeItem('messages');
-                loadMessagesList();
-            }
-        }
-
-        function kickSession(code, deviceId) {
-            if (confirm('هل تريد طرد هذه الجلسة؟')) {
-                const sessions = JSON.parse(localStorage.getItem('activeSessions') || '{}');
-                delete sessions[`${code}_${deviceId}`];
-                localStorage.setItem('activeSessions', JSON.stringify(sessions));
-                loadSessionsList();
-            }
-        }
-
-        function deleteRepName(index) {
-            const savedNames = JSON.parse(localStorage.getItem('savedRepNames') || '[]');
-            const name = savedNames[index];
-            
-            if (confirm(`هل تريد حذف اسم "${name}"؟`)) {
-                savedNames.splice(index, 1);
-                localStorage.setItem('savedRepNames', JSON.stringify(savedNames));
-                loadRepsList();
-                loadRepNames();
-            }
         }
 
         // تسجيل الخروج
-        function logout() {
-            if (systemState.currentUser) {
-                // إزالة الجلسة
-                const sessions = JSON.parse(localStorage.getItem('activeSessions') || '{}');
-                delete sessions[`${systemState.currentUser}_${systemState.deviceId}`];
-                localStorage.setItem('activeSessions', JSON.stringify(sessions));
-            }
-            
-            // إعادة تعيين حالة النظام
+        window.logout = function() {
             systemState = {
                 currentUser: null,
                 currentPlace: null,
@@ -1733,14 +1494,13 @@
                 currentRepName: ""
             };
             
-            // العودة لصفحة الدخول
             showPage('loginPage');
             
             // تفريغ الحقول
             document.getElementById('loginCode').value = '';
             document.getElementById('repName').value = '';
             document.getElementById('natID').value = '';
-        }
+        };
 
         // وظائف مساعدة
         function showAlert(element, message, type = 'info') {
@@ -1748,7 +1508,7 @@
             element.className = `alert alert-${type}`;
             element.style.display = 'block';
             
-            // إخفاء التنبيه بعد 5 ثواني
+            // إخفاء بعد 5 ثوان
             setTimeout(() => {
                 element.style.display = 'none';
             }, 5000);
@@ -1758,35 +1518,15 @@
             const sound = document.getElementById(`sound${type.charAt(0).toUpperCase() + type.slice(1)}`);
             if (sound) {
                 sound.currentTime = 0;
-                sound.play().catch(e => console.log('تعذر تشغيل الصوت:', e));
+                sound.play().catch(e => console.log('خطأ في تشغيل الصوت:', e));
             }
         }
 
-        // تهيئة بيانات تجريبية
-        function initSampleData() {
-            // بيانات تجريبية للاختبار
-            if (!localStorage.getItem('sampleDataInitialized')) {
-                const sampleMessages = [
-                    {
-                        target: 'all',
-                        text: 'مرحباً بالجميع، نرجو الالتزام بتسجيل البطاقات بدقة',
-                        time: new Date().toISOString(),
-                        read: false
-                    },
-                    {
-                        target: systemState.currentPlace || 'المنزلة الجديدة',
-                        text: 'تذكير: تسليم النقاط الساعة 6 مساءً',
-                        time: new Date(Date.now() - 3600000).toISOString(),
-                        read: false
-                    }
-                ];
-                localStorage.setItem('messages', JSON.stringify(sampleMessages));
-                localStorage.setItem('sampleDataInitialized', 'true');
-            }
-        }
-
-        // تهيئة البيانات عند التحميل
-        initSampleData();
+        // مراقبة تغيير اسم المندوب لتحديث العداد
+        document.getElementById('repName').addEventListener('input', function() {
+            systemState.currentRepName = this.value.trim();
+            loadEntryCounter();
+        });
     </script>
 </body>
 </html>
