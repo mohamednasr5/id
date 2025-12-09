@@ -281,6 +281,48 @@
       display: none;
     }
     
+    .suggestions-box {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 10px;
+      margin-top: 5px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      z-index: 1000;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+    }
+    
+    .suggestion-item {
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .suggestion-item:hover {
+      background: #f0f8ff;
+      color: var(--primary);
+    }
+    
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+    
+    .suggestion-item .match {
+      color: var(--success);
+      font-weight: bold;
+    }
+    
+    .suggestion-item .hint {
+      font-size: 0.8em;
+      color: #999;
+      margin-top: 2px;
+    }
+    
     .header-controls {
       display: flex;
       gap: 10px;
@@ -943,6 +985,10 @@
       .voice-status {
         left: 125px;
       }
+      
+      .suggestions-box {
+        max-height: 150px;
+      }
     }
     
     @media (max-width: 480px) {
@@ -961,6 +1007,10 @@
       
       .search-box {
         padding: 15px 75px 15px 15px;
+      }
+      
+      .suggestions-box {
+        max-height: 120px;
       }
     }
   </style>
@@ -1005,7 +1055,8 @@
           class="search-box" 
           id="searchInput" 
           placeholder="ابحث بالحي أو اسم المندوب أو رقم المكان..."
-          oninput="filterPlaces()"
+          oninput="handleSearchInput()"
+          onfocus="showSuggestions()"
         >
         <span class="search-icon">🔍</span>
         <button class="clear-search" id="clearSearch" onclick="clearSearch()">×</button>
@@ -1017,6 +1068,9 @@
         
         <!-- مؤشر حالة البحث الصوتي -->
         <div class="voice-status" id="voiceStatus"></div>
+        
+        <!-- مربع الاقتراحات -->
+        <div class="suggestions-box" id="suggestionsBox"></div>
       </div>
       
       <div class="header-controls">
@@ -1127,6 +1181,282 @@
 
   <!-- JavaScript للبحث الصوتي وإدارة الدخول -->
   <script>
+    // قائمة الأماكن المحددة (يجب أن تكون متاحة في النطاق العام)
+    const placesList = [
+      "المنزلة الجديدة 1 - كريم المرور", "المنزلة الجديدة 2 - شريف التأمين الصحي",
+      "بحر البلد شارع الكابتن - شريف العزازي", "مدرسة عبد العال شلبياية - اشرف الأباصيري",
+      "مصنع البصل - فؤاد حال", "الكفر 1 - علي شطا", "الكفر 2 تحت السكة - عادل جلال",
+      "سوق الجملة - السعيد شطا- على البياع", "الفداء 1 - عمر الكيال", "الفداء 2 - حماده الكيال",
+      "الحمزاوي - حماده السري", "الجرن 1 - بوجي البرعي", "الجرن 2 - إبراهيم فهيد",
+      "البر الثاني حي السلام - يحيى حبق", "حي الأعجام - حماده ابو رشاد",
+      "العزبة منشية ناصر -حسان عطية", "الطويل - أحمد عبد العظيم",
+      "البر الثاني 2 الهاويس - إبراهيم عبد المجيد", "الفقاعي - محمد حبيب",
+      "بحر البلد 2 - السيد حراز", "حي الجبانة - سعد الشلودي",
+      "الكفر 3 بجوار ملعب برشلونة - محمد البداية", "أبو رشاد مقهى أبو سليمان - محمد رشاد",
+      "حي الزهراء - رشاد عبد الوهاب", "بحر البلد 3 - منصور البدري",
+      "حي السلموني - حسن المناخلى", "حى مزلفان العلمي -أبوعلاء",
+      "حي البصله حمود-عبد الحميد", "حى الجرن 3 -قهوة النجدي محمد النجدي",
+      "المزرعة", "أمن الدولة", "الفروسات", "أبو الأخضر", "جديدة المنزلة",
+      "العامرة", "مصر الجديدة", "عرب زيدان", "الستايتة", "كفر حجاج",
+      "ميت خضير", "المواجد", "البصراط", "ميت شريف", "الطوابرة",
+      "العمارنة", "اولاد بانا", "اولاد حانا", "بحر حادوث", "القزاقزة",
+      "الحوتة", "اولاد نور", "الخلايفة", "القطشة", "الجماملة",
+      "قرية العزيزة", "الأحمدية", "العربان", "اولاد علم", "اولاد ناصر",
+      "بني هلال", "الشبول", "الرودة", "النسايمة", "المطرية",
+      "قرية العصافرة", "قرية الضهير"
+    ];
+    
+    // قائمة الكلمات البديلة والمرادفات
+    const wordAlternatives = {
+      'الحمزواي': 'الحمزاوي',
+      'حمزاوي': 'الحمزاوي',
+      'حمزواي': 'الحمزاوي',
+      'الحمزوى': 'الحمزاوي',
+      'حمزوى': 'الحمزاوي',
+      'كفر': 'الكفر',
+      'الجرن': 'الجرن',
+      'الفداء': 'الفداء',
+      'بحر': 'بحر',
+      'حي': 'حي',
+      'العزبة': 'العزبة',
+      'الطويل': 'الطويل',
+      'الفقاعي': 'الفقاعي',
+      'الجبانة': 'الجبانة',
+      'الزهراء': 'الزهراء',
+      'السلموني': 'السلموني',
+      'مزلفان': 'مزلفان',
+      'البصله': 'البصله',
+      'المزرعة': 'المزرعة',
+      'الدولة': 'الدولة',
+      'الفروسات': 'الفروسات',
+      'الأخضر': 'الأخضر',
+      'المنزلة': 'المنزلة',
+      'العامرة': 'العامرة',
+      'مصر': 'مصر',
+      'زيدان': 'زيدان',
+      'الستايتة': 'الستايتة',
+      'حجاج': 'حجاج',
+      'خضير': 'خضير',
+      'المواجد': 'المواجد',
+      'البصراط': 'البصراط',
+      'شريف': 'شريف',
+      'الطوابرة': 'الطوابرة',
+      'العمارنة': 'العمارنة',
+      'بانا': 'بانا',
+      'حانا': 'حانا',
+      'حادوث': 'حادوث',
+      'القزاقزة': 'القزاقزة',
+      'الحوتة': 'الحوتة',
+      'نور': 'نور',
+      'الخلايفة': 'الخلايفة',
+      'القطشة': 'القطشة',
+      'الجماملة': 'الجماملة',
+      'العزيزة': 'العزيزة',
+      'الأحمدية': 'الأحمدية',
+      'العربان': 'العربان',
+      'علم': 'علم',
+      'ناصر': 'ناصر',
+      'هلال': 'هلال',
+      'الشبول': 'الشبول',
+      'الرودة': 'الرودة',
+      'النسايمة': 'النسايمة',
+      'المطرية': 'المطرية',
+      'العصافرة': 'العصافرة',
+      'الضهير': 'الضهير'
+    };
+    
+    // دالة لحساب المسافة بين الكلمات (Levenshtein Distance)
+    function levenshteinDistance(a, b) {
+      const matrix = [];
+      
+      for (let i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+      }
+      
+      for (let j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+      }
+      
+      for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+          if (b.charAt(i - 1) === a.charAt(j - 1)) {
+            matrix[i][j] = matrix[i - 1][j - 1];
+          } else {
+            matrix[i][j] = Math.min(
+              matrix[i - 1][j - 1] + 1,
+              matrix[i][j - 1] + 1,
+              matrix[i - 1][j] + 1
+            );
+          }
+        }
+      }
+      
+      return matrix[b.length][a.length];
+    }
+    
+    // دالة للبحث التقريبي عن المكان الأنسب
+    function findClosestPlace(searchTerm) {
+      if (!searchTerm || searchTerm.trim() === '') return null;
+      
+      const normalizedSearch = normalizeArabicText(searchTerm.toLowerCase());
+      let closestPlace = null;
+      let minDistance = Infinity;
+      let bestMatchScore = 0;
+      
+      // أولاً: البحث عن تطابق تام أو جزئي
+      for (const place of placesList) {
+        const normalizedPlace = normalizeArabicText(place.toLowerCase());
+        
+        // إذا كان البحث مطابق تماماً
+        if (normalizedPlace.includes(normalizedSearch) || normalizedSearch.includes(normalizedPlace)) {
+          return place;
+        }
+        
+        // حساب المسافة بين الكلمات
+        const distance = levenshteinDistance(normalizedSearch, normalizedPlace);
+        const maxLength = Math.max(normalizedSearch.length, normalizedPlace.length);
+        const similarity = 1 - (distance / maxLength);
+        
+        // إذا كانت التشابه عالي (أكثر من 70%) وكان أفضل من النتائج السابقة
+        if (similarity > 0.7 && similarity > bestMatchScore) {
+          bestMatchScore = similarity;
+          closestPlace = place;
+        }
+        
+        // أيضًا البحث في أجزاء المكان (مثل "الحمزاوي" في "الحمزاوي - حماده السري")
+        const placeParts = normalizedPlace.split(' ');
+        for (const part of placeParts) {
+          if (part.length > 3) { // تجاهل الكلمات القصيرة
+            const partDistance = levenshteinDistance(normalizedSearch, part);
+            const partSimilarity = 1 - (partDistance / Math.max(normalizedSearch.length, part.length));
+            
+            if (partSimilarity > 0.8 && partSimilarity > bestMatchScore) {
+              bestMatchScore = partSimilarity;
+              closestPlace = place;
+            }
+          }
+        }
+      }
+      
+      // ثانياً: التحقق من الكلمات البديلة
+      for (const [wrongWord, correctWord] of Object.entries(wordAlternatives)) {
+        const normalizedWrong = normalizeArabicText(wrongWord.toLowerCase());
+        if (normalizedSearch.includes(normalizedWrong) || levenshteinDistance(normalizedSearch, normalizedWrong) <= 2) {
+          // البحث عن المكان الذي يحتوي على الكلمة الصحيحة
+          for (const place of placesList) {
+            const normalizedPlace = normalizeArabicText(place.toLowerCase());
+            if (normalizedPlace.includes(normalizeArabicText(correctWord.toLowerCase()))) {
+              return place;
+            }
+          }
+        }
+      }
+      
+      // ثالثاً: إذا لم نجد تطابقاً جيداً، نبحث بالأرقام (مثل "المكان 1")
+      const numberMatch = searchTerm.match(/\d+/);
+      if (numberMatch) {
+        const number = parseInt(numberMatch[0]);
+        if (number >= 1 && number <= placesList.length) {
+          return placesList[number - 1];
+        }
+      }
+      
+      return closestPlace;
+    }
+    
+    // دالة لتطبيع النص العربي (إزالة التشكيل والتكرارات)
+    function normalizeArabicText(text) {
+      return text
+        .replace(/[ًٌٌٍٍََُُِِّّ]/g, '') // إزالة التشكيل
+        .replace(/إ|أ/g, 'ا') // تحويل الهمزات إلى ألف
+        .replace(/ة/g, 'ه') // تحويل التاء المربوطة إلى هاء
+        .replace(/ى/g, 'ي') // تحويل الألف المقصورة إلى ياء
+        .replace(/ؤ/g, 'و') // تحويل الهمزة على الواو إلى واو
+        .replace(/ئ/g, 'ي') // تحويل الهمزة على الياء إلى ياء
+        .replace(/\s+/g, ' ') // إزالة المسافات الزائدة
+        .trim();
+    }
+    
+    // دالة لعرض الاقتراحات
+    function showSuggestions() {
+      const searchTerm = document.getElementById('searchInput').value.trim();
+      const suggestionsBox = document.getElementById('suggestionsBox');
+      
+      if (!searchTerm) {
+        suggestionsBox.style.display = 'none';
+        return;
+      }
+      
+      const normalizedSearch = normalizeArabicText(searchTerm.toLowerCase());
+      const suggestions = [];
+      
+      // البحث عن الأماكن المناسبة
+      for (const place of placesList) {
+        const normalizedPlace = normalizeArabicText(place.toLowerCase());
+        
+        // التحقق من التطابق
+        if (normalizedPlace.includes(normalizedSearch) || normalizedSearch.includes(normalizedPlace)) {
+          suggestions.push({ place, score: 100, type: 'تطابق كامل' });
+        } else {
+          // حساب المسافة والتشابه
+          const distance = levenshteinDistance(normalizedSearch, normalizedPlace);
+          const maxLength = Math.max(normalizedSearch.length, normalizedPlace.length);
+          const similarity = Math.round((1 - (distance / maxLength)) * 100);
+          
+          if (similarity > 60) {
+            suggestions.push({ place, score: similarity, type: 'مشابه' });
+          }
+        }
+      }
+      
+      // ترتيب الاقتراحات حسب النتيجة
+      suggestions.sort((a, b) => b.score - a.score);
+      
+      // عرض الاقتراحات (حد أقصى 5)
+      if (suggestions.length > 0) {
+        let html = '';
+        const topSuggestions = suggestions.slice(0, 5);
+        
+        topSuggestions.forEach((suggestion, index) => {
+          const highlightClass = suggestion.score > 85 ? 'match' : '';
+          html += `
+            <div class="suggestion-item" onclick="selectSuggestion('${suggestion.place.replace(/'/g, "\\'")}')">
+              <div class="${highlightClass}">${suggestion.place}</div>
+              <div class="hint">${suggestion.type} (${suggestion.score}%)</div>
+            </div>
+          `;
+        });
+        
+        suggestionsBox.innerHTML = html;
+        suggestionsBox.style.display = 'block';
+      } else {
+        suggestionsBox.style.display = 'none';
+      }
+    }
+    
+    // دالة لاختيار اقتراح
+    window.selectSuggestion = function(place) {
+      document.getElementById('searchInput').value = place;
+      document.getElementById('suggestionsBox').style.display = 'none';
+      filterPlaces();
+    };
+    
+    // دالة لمعالجة إدخال البحث
+    window.handleSearchInput = function() {
+      const searchTerm = document.getElementById('searchInput').value.trim();
+      const clearBtn = document.getElementById('clearSearch');
+      
+      if (searchTerm) {
+        clearBtn.style.display = 'flex';
+        showSuggestions();
+      } else {
+        clearBtn.style.display = 'none';
+        document.getElementById('suggestionsBox').style.display = 'none';
+      }
+      
+      filterPlaces();
+    };
+    
     // إدارة حفظ تسجيل الدخول
     function loadRememberMe() {
       const savedPassword = localStorage.getItem('dashboardPassword');
@@ -1188,11 +1518,20 @@
         
         recognition.onresult = function(event) {
           const transcript = event.results[0][0].transcript;
-          document.getElementById('searchInput').value = transcript;
-          filterPlaces();
           
-          // إظهار رسالة نجاح
-          document.getElementById('voiceStatus').textContent = "تم التعرف على: " + transcript;
+          // البحث عن المكان الأقرب
+          const closestPlace = findClosestPlace(transcript);
+          
+          if (closestPlace) {
+            document.getElementById('searchInput').value = closestPlace;
+            document.getElementById('voiceStatus').textContent = `تم العثور على: ${closestPlace}`;
+            filterPlaces();
+          } else {
+            document.getElementById('searchInput').value = transcript;
+            document.getElementById('voiceStatus').textContent = "لم يتم العثور على تطابق دقيق. جاري البحث...";
+            filterPlaces();
+          }
+          
           setTimeout(() => {
             document.getElementById('voiceStatus').style.display = 'none';
           }, 3000);
@@ -1214,7 +1553,7 @@
         // إظهار رسالة أن البحث الصوتي متاح
         setTimeout(() => {
           const voiceStatus = document.getElementById('voiceStatus');
-          voiceStatus.textContent = "🔊 البحث الصوتي متاح";
+          voiceStatus.textContent = "🔊 البحث الصوتي مع التقريب متاح";
           voiceStatus.style.display = 'block';
           setTimeout(() => {
             voiceStatus.style.display = 'none';
@@ -1254,6 +1593,16 @@
           initializeVoiceSearch();
         }, 500);
       }
+      
+      // إغلاق مربع الاقتراحات عند النقر خارجها
+      document.addEventListener('click', function(event) {
+        const suggestionsBox = document.getElementById('suggestionsBox');
+        const searchInput = document.getElementById('searchInput');
+        
+        if (!searchInput.contains(event.target) && !suggestionsBox.contains(event.target)) {
+          suggestionsBox.style.display = 'none';
+        }
+      });
     });
     
     // إضافة اختصار لوحة المفاتيح للبحث الصوتي (Ctrl+Shift+V)
@@ -1282,62 +1631,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const places = [
-      "المنزلة الجديدة 1 - كريم المرور", "المنزلة الجديدة 2 - شريف التأمين الصحي",
-      "بحر البلد شارع الكابتن - شريف العزازي", "مدرسة عبد العال شلبياية - اشرف الأباصيري",
-      "مصنع البصل - فؤاد حال", "الكفر 1 - علي شطا", "الكفر 2 تحت السكة - عادل جلال",
-      "سوق الجملة - السعيد شطا- على البياع", "الفداء 1 - عمر الكيال", "الفداء 2 - حماده الكيال",
-      "الحمزاوي - حماده السري", "الجرن 1 - بوجي البرعي", "الجرن 2 - إبراهيم فهيد",
-      "البر الثاني حي السلام - يحيى حبق", "حي الأعجام - حماده ابو رشاد",
-      "العزبة منشية ناصر -حسان عطية", "الطويل - أحمد عبد العظيم",
-      "البر الثاني 2 الهاويس - إبراهيم عبد المجيد", "الفقاعي - محمد حبيب",
-      "بحر البلد 2 - السيد حراز", "حي الجبانة - سعد الشلودي",
-      "الكفر 3 بجوار ملعب برشلونة - محمد البداية", "أبو رشاد مقهى أبو سليمان - محمد رشاد",
-      "حي الزهراء - رشاد عبد الوهاب", "بحر البلد 3 - منصور البدري",
-      "حي السلموني - حسن المناخلى", "حى مزلفان العلمي -أبوعلاء",
-      "حي البصله حمود-عبد الحميد", "حى الجرن 3 -قهوة النجدي محمد النجدي",
-
-      // الأماكن الجديدة - المزرعة وأمن الدولة (30 و 31)
-      "المزرعة",
-      "أمن الدولة",
-
-      // باقي الأماكن من 32 فما فوق
-      "الفروسات",
-      "أبو الأخضر",
-      "جديدة المنزلة",
-      "العامرة",
-      "مصر الجديدة",
-      "عرب زيدان",
-      "الستايتة",
-      "كفر حجاج",
-      "ميت خضير",
-      "المواجد",
-      "البصراط",
-      "ميت شريف",
-      "الطوابرة",
-      "العمارنة",
-      "اولاد بانا",
-      "اولاد حانا",
-      "بحر حادوث",
-      "القزاقزة",
-      "الحوتة",
-      "اولاد نور",
-      "الخلايفة",
-      "القطشة",
-      "الجماملة",
-      "قرية العزيزة",
-      "الأحمدية",
-      "العربان",
-      "اولاد علم",
-      "اولاد ناصر",
-      "بني هلال",
-      "الشبول",
-      "الرودة",
-      "النسايمة",
-      "المطرية",
-      "قرية العصافرة",
-      "قرية الضهير"
-    ];
+    const places = placesList; // استخدام القائمة العامة
 
     let allData = {};
     let allCards = [];
@@ -1600,6 +1894,106 @@
       });
     };
 
+    // وظائف البحث
+    window.filterPlaces = function() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+      const clearBtn = document.getElementById('clearSearch');
+      
+      if (searchTerm) {
+        clearBtn.style.display = 'flex';
+      } else {
+        clearBtn.style.display = 'none';
+        document.getElementById('suggestionsBox').style.display = 'none';
+      }
+
+      let visibleCount = 0;
+
+      // تطبيع كلمة البحث
+      const normalizedSearch = normalizeArabicText(searchTerm);
+      
+      allCards.forEach(card => {
+        const placeName = normalizeArabicText(card.dataset.place);
+        const placeIndex = card.dataset.index;
+        const repNames = card.dataset.reps;
+        
+        // البحث باستخدام خوارزمية تقريبية
+        const matches = 
+          placeName.includes(normalizedSearch) || 
+          repNames.includes(normalizedSearch) ||
+          placeIndex.includes(searchTerm) ||
+          checkFuzzyMatch(placeName, normalizedSearch);
+
+        if (matches) {
+          card.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+
+      const grid = document.getElementById('placeGrid');
+      let noResults = document.querySelector('.no-results');
+      
+      if (visibleCount === 0 && searchTerm) {
+        if (!noResults) {
+          noResults = document.createElement('div');
+          noResults.className = 'no-results';
+          noResults.innerHTML = `
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <h3 style="color: #666; margin-bottom: 10px;">لا توجد نتائج</h3>
+            <p style="color: #999;">لم يتم العثور على نتائج تطابق "${searchTerm}"</p>
+            <button onclick="showAllPlaces()" class="btn btn-primary" style="margin-top: 15px; padding: 8px 16px;">
+              عرض جميع الأماكن
+            </button>
+          `;
+          grid.appendChild(noResults);
+        }
+      } else if (noResults) {
+        noResults.remove();
+      }
+      
+      // إخفاء الاقتراحات بعد البحث
+      document.getElementById('suggestionsBox').style.display = 'none';
+    };
+    
+    // دالة للتحقق من التطابق التقريبي
+    function checkFuzzyMatch(text, search) {
+      if (search.length < 2) return false;
+      
+      // حساب المسافة بين الكلمات
+      const distance = levenshteinDistance(text, search);
+      const maxLength = Math.max(text.length, search.length);
+      const similarity = 1 - (distance / maxLength);
+      
+      // إذا كانت النسبة أكبر من 70% نعتبرها تطابق
+      return similarity > 0.7;
+    }
+    
+    // دالة لعرض جميع الأماكن
+    window.showAllPlaces = function() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('clearSearch').style.display = 'none';
+      document.getElementById('suggestionsBox').style.display = 'none';
+      
+      allCards.forEach(card => {
+        card.classList.remove('hidden');
+      });
+      
+      const noResults = document.querySelector('.no-results');
+      if (noResults) {
+        noResults.remove();
+      }
+    };
+
+    window.clearSearch = function() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('clearSearch').style.display = 'none';
+      document.getElementById('suggestionsBox').style.display = 'none';
+      filterPlaces();
+    };
+
     // وظائف الرسائل
     window.openMessageModal = function() {
       document.getElementById('messageModal').classList.add('active');
@@ -1768,62 +2162,6 @@
         closeMessageModal();
       }
     });
-
-    window.filterPlaces = function() {
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-      const clearBtn = document.getElementById('clearSearch');
-      
-      if (searchTerm) {
-        clearBtn.style.display = 'flex';
-      } else {
-        clearBtn.style.display = 'none';
-      }
-
-      let visibleCount = 0;
-
-      allCards.forEach(card => {
-        const placeName = card.dataset.place;
-        const placeIndex = card.dataset.index;
-        const repNames = card.dataset.reps;
-        
-        const matches = placeName.includes(searchTerm) || 
-                       repNames.includes(searchTerm) ||
-                       placeIndex.includes(searchTerm);
-
-        if (matches) {
-          card.classList.remove('hidden');
-          visibleCount++;
-        } else {
-          card.classList.add('hidden');
-        }
-      });
-
-      const grid = document.getElementById('placeGrid');
-      let noResults = document.querySelector('.no-results');
-      
-      if (visibleCount === 0 && searchTerm) {
-        if (!noResults) {
-          noResults = document.createElement('div');
-          noResults.className = 'no-results';
-          noResults.innerHTML = `
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-            <h3 style="color: #666; margin-bottom: 10px;">لا توجد نتائج</h3>
-            <p style="color: #999;">لم يتم العثور على نتائج تطابق "${searchTerm}"</p>
-          `;
-          grid.appendChild(noResults);
-        }
-      } else if (noResults) {
-        noResults.remove();
-      }
-    };
-
-    window.clearSearch = function() {
-      document.getElementById('searchInput').value = '';
-      document.getElementById('clearSearch').style.display = 'none';
-      filterPlaces();
-    };
 
     window.exportToExcel = function() {
       let html = `
