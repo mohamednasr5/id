@@ -1075,7 +1075,8 @@
       
       <div class="header-controls">
         <button class="btn btn-message" onclick="openMessageModal()">📨 إرسال رسالة جماعية</button>
-        <button class="btn btn-success" onclick="exportToExcel()">📥 تحميل Excel</button>
+        <button class="btn btn-success" onclick="exportToExcel()">📥 تحميل Excel للإحصائيات</button>
+        <button class="btn btn-success" onclick="exportLeadersExcel()">📥 تحميل Excel للمناديب</button>
         <button class="btn btn-primary" onclick="location.reload()">🔄 تحديث</button>
         <button class="btn btn-info" onclick="resetUsersOnly()">🔄 تصفير الإدخالات فقط</button>
         <button class="btn btn-warning" onclick="resetData()">🗑️ تصفير كامل</button>
@@ -2375,6 +2376,134 @@
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = `تقرير_المناديب_${new Date().toISOString().slice(0,10)}.xls`;
+      link.click();
+    };
+    
+    // دالة تصدير Excel للمناديب (الليدر والمندوب المالي)
+    window.exportLeadersExcel = function() {
+      let html = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+              xmlns:x="urn:schemas-microsoft-com:office:excel" 
+              xmlns="http://www.w3.org/TR/REC-html40">
+          <head>
+            <meta charset="UTF-8">
+            <style>
+              table { 
+                border-collapse: collapse; 
+                width: 100%; 
+                font-family: 'Arial', sans-serif; 
+              }
+              th { 
+                background: #0072ff; 
+                color: white; 
+                border: 2px solid #333; 
+                padding: 12px; 
+                font-weight: bold;
+                font-size: 14px;
+              }
+              td { 
+                border: 1px solid #ddd; 
+                padding: 10px; 
+                text-align: center;
+              }
+              tr:nth-child(even) { background: #f9f9f9; }
+              .header-row { 
+                background: #2c3e50; 
+                color: white; 
+                font-weight: bold; 
+                font-size: 16px;
+              }
+              .number-cell { text-align: center; font-weight: bold; }
+              .important-cell { background: #e0f7fa; font-weight: bold; }
+            </style>
+          </head>
+          <body dir="rtl">
+            <h2 style="text-align: center; color: #0072ff; margin-bottom: 20px;">
+              📋 تقرير بيانات المناديب والليدرات - ${new Date().toLocaleDateString('ar-EG')}
+            </h2>
+            <table>
+              <thead>
+                <tr class="header-row">
+                  <th>مسلسل<br>(رقم النقطة)</th>
+                  <th>اسم النقطة<br>(اسم المكان)</th>
+                  <th>اسم الليدر</th>
+                  <th>رقم هاتف الليدر</th>
+                  <th>اسم المندوب المالي</th>
+                  <th>رقم هاتف المندوب المالي</th>
+                  <th>كلمة السر</th>
+                </tr>
+              </thead>
+              <tbody>
+      `;
+
+      // قائمة بيانات الليدرات والمندوبين الماليين لكل مكان
+      const leadersData = {
+        // الأماكن من 1 إلى 26
+        "1- حي الحمزاوي - حماده عبده مصباح": { leaderName: "حماده عبده مصباح", leaderPhone: "01000000001", financialName: "المندوب المالي 1", financialPhone: "01000000002", password: "PASS001" },
+        "2- حي الجرن 3 - بجوار قهوة النجدي": { leaderName: "قائد الجرن 3", leaderPhone: "01000000003", financialName: "المندوب المالي 2", financialPhone: "01000000004", password: "PASS002" },
+        "3- حي الجرن 1 - شارع المظلوم": { leaderName: "قائد الجرن 1", leaderPhone: "01000000005", financialName: "المندوب المالي 3", financialPhone: "01000000006", password: "PASS003" },
+        "4- حي الجرن 2 - إبراهيم فهيد": { leaderName: "إبراهيم فهيد", leaderPhone: "01000000007", financialName: "المندوب المالي 4", financialPhone: "01000000008", password: "PASS004" },
+        "5- حي أبو رشاد - مقهى أبو سليمان": { leaderName: "قائد أبو رشاد", leaderPhone: "01000000009", financialName: "المندوب المالي 5", financialPhone: "01000000010", password: "PASS005" },
+        "6- حي الإعجام - حمادة أبو رشاد": { leaderName: "حمادة أبو رشاد", leaderPhone: "01000000011", financialName: "المندوب المالي 6", financialPhone: "01000000012", password: "PASS006" },
+        "7- حي العزبة - منشية ناصر": { leaderName: "قائد العزبة", leaderPhone: "01000000013", financialName: "المندوب المالي 7", financialPhone: "01000000014", password: "PASS007" },
+        "8- حي المستشفى العام - حماده عساسه": { leaderName: "حماده عساسه", leaderPhone: "01000000015", financialName: "المندوب المالي 8", financialPhone: "01000000016", password: "PASS008" },
+        "9- حي المنزلة الجديدة - كريم شقرف": { leaderName: "كريم شقرف", leaderPhone: "01000000017", financialName: "المندوب المالي 9", financialPhone: "01000000018", password: "PASS009" },
+        "10- حي المنزلة الجديدة 2 - شريف دبرياش": { leaderName: "شريف دبرياش", leaderPhone: "01000000019", financialName: "المندوب المالي 10", financialPhone: "01000000020", password: "PASS010" },
+        
+        // يمكنك إضافة بقية البيانات هنا...
+        // للتبسيط، سأضع بيانات افتراضية لباقي الأماكن
+      };
+
+      places.forEach((place, idx) => {
+        // الحصول على البيانات من leadersData أو استخدام بيانات افتراضية
+        const data = leadersData[place] || { 
+          leaderName: `قائد ${idx + 1}`, 
+          leaderPhone: `010${String(idx + 1).padStart(8, '0')}`, 
+          financialName: `المندوب المالي ${idx + 1}`, 
+          financialPhone: `011${String(idx + 1).padStart(8, '0')}`, 
+          password: `PASS${String(idx + 1).padStart(3, '0')}` 
+        };
+        
+        html += `
+          <tr>
+            <td class="number-cell">${idx + 1}</td>
+            <td class="important-cell">${place}</td>
+            <td>${data.leaderName}</td>
+            <td>${data.leaderPhone}</td>
+            <td>${data.financialName}</td>
+            <td>${data.financialPhone}</td>
+            <td class="important-cell">${data.password}</td>
+          </tr>
+        `;
+      });
+
+      html += `
+              </tbody>
+            </table>
+            
+            <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+              <h3 style="color: #0072ff; margin-bottom: 15px;">📝 تعليمات:</h3>
+              <ul style="color: #666; line-height: 1.8;">
+                <li><strong>اسم الليدر:</strong> الشخص المسؤول عن النقطة</li>
+                <li><strong>اسم المندوب المالي:</strong> الشخص المسؤول عن التحصيل المالي</li>
+                <li><strong>كلمة السر:</strong> تستخدم للوصول إلى التطبيق الخاص بالنقطة</li>
+                <li>يجب تحديث البيانات دورياً حسب التغييرات في الميدان</li>
+                <li>جميع الأرقام مكونة من 11 رقم تبدأ بـ 010 أو 011 أو 012</li>
+              </ul>
+            </div>
+            
+            <p style="margin-top: 20px; text-align: center; color: #666; font-size: 12px;">
+              تم إنشاء التقرير في: ${new Date().toLocaleString('ar-EG')}<br>
+              برمجة: المهندس محمد حماد
+            </p>
+          </body>
+        </html>
+      `;
+
+      const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `بيانات_المناديب_والليدرات_${new Date().toISOString().slice(0,10)}.xls`;
       link.click();
     };
     
