@@ -1,1757 +1,1792 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>تسجيل دخول المندوب - نظام مراقبة الجلسات</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap">
-  <style>
-    :root {
-      --primary-color: #0072ff;
-      --secondary-color: #00c6ff;
-      --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --glass-bg: rgba(255, 255, 255, 0.98);
-      --glass-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
-      --input-bg: #f0f4f8;
-      --text-color: #2d3436;
-      --error-color: #e74c3c;
-      --success-color: #2ecc71;
-      --message-color: #9b59b6;
-      --warning-color: #f39c12;
-      --dark: #2c3e50;
-      --light: #ecf0f1;
-      --info: #3498db;
-    }
-    
-    * { box-sizing: border-box; outline: none; margin: 0; padding: 0; }
-    
-    body {
-      font-family: "Cairo", sans-serif;
-      background: var(--bg-gradient);
-      background-size: 400% 400%;
-      animation: gradientBG 15s ease infinite;
-      overflow: hidden;
-      color: var(--text-color);
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-    }
-    
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    
-    /* حلقات الخلفية المتحركة */
-    .circles { 
-      position: absolute; 
-      width: 100%; 
-      height: 100%; 
-      overflow: hidden; 
-      top: 0; 
-      left: 0; 
-      z-index: 0; 
-    }
-    
-    .circles li { 
-      position: absolute; 
-      display: block; 
-      list-style-type: none; 
-      width: 20px; 
-      height: 20px; 
-      background: rgba(255,255,255,0.2); 
-      animation: animate 25s linear infinite; 
-      bottom: -150px; 
-      border-radius: 50%; 
-    }
-    
-    .circles li:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
-    .circles li:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
-    .circles li:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
-    .circles li:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
-    .circles li:nth-child(5) { left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
-    .circles li:nth-child(6) { left: 85%; width: 40px; height: 40px; animation-delay: 5s; }
-    .circles li:nth-child(7) { left: 50%; width: 30px; height: 30px; animation-delay: 10s; }
-    
-    @keyframes animate {
-      0%   { transform: translateY(0) rotate(0); opacity: 1; }
-      100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
-    }
-    
-    /* الحاوية الرئيسية */
-    .container { 
-      width: 100%; 
-      height: 100vh;
-      display: flex; 
-      justify-content: center; 
-      align-items: center;
-      position: relative; 
-      z-index: 1; 
-      padding: 15px;
-    }
-    
-    /* الكروت */
-    .card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: 25px;
-      padding: 30px 25px;
-      width: 100%;
-      max-width: 450px;
-      max-height: calc(100vh - 30px);
-      box-shadow: var(--glass-shadow);
-      border: 1px solid rgba(255,255,255,0.25);
-      transform: translateY(20px);
-      opacity: 0;
-      animation: fadeInUp 0.8s forwards;
-      transition: all 0.4s ease;
-      overflow-y: auto;
-      overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    @keyframes fadeInUp { 
-      to { 
-        transform: translateY(0); 
-        opacity: 1; 
-      } 
-    }
-    
-    /* شريط التمرير */
-    .card::-webkit-scrollbar {
-      width: 8px;
-    }
-    
-    .card::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.05);
-      border-radius: 10px;
-    }
-    
-    .card::-webkit-scrollbar-thumb {
-      background: var(--primary-color);
-      border-radius: 10px;
-    }
-    
-    .card::-webkit-scrollbar-thumb:hover {
-      background: var(--secondary-color);
-    }
-    
-    /* العناصر العامة */
-    .hidden { display: none !important; }
-    
-    .fade-in { 
-      animation: fadeIn 0.4s forwards; 
-    }
-    
-    @keyframes fadeIn {
-      from { 
-        opacity: 0; 
-        transform: translateY(10px); 
-      }
-      to { 
-        opacity: 1; 
-        transform: translateY(0); 
-      }
-    }
-    
-    h2 { 
-      text-align: center; 
-      margin-bottom: 20px; 
-      color: var(--primary-color); 
-      font-size: 24px; 
-      font-weight: 800; 
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    h3 { 
-      font-size: 16px; 
-      margin: 15px 0 8px; 
-      padding-bottom: 6px; 
-      border-bottom: 2px solid #eee; 
-      color: var(--dark);
-      font-weight: 700;
-    }
-    
-    /* مجموعة الإدخال */
-    .input-group { 
-      position: relative; 
-      margin-bottom: 20px; 
-    }
-    
-    input {
-      width: 100%; 
-      padding: 15px 20px; 
-      background: var(--input-bg);
-      border: 2px solid transparent; 
-      border-radius: 15px; 
-      font-size: 16px; 
-      transition: all 0.3s ease;
-      font-family: "Cairo", sans-serif;
-      color: var(--dark);
-    }
-    
-    input:focus {
-      background: #fff; 
-      border-color: var(--primary-color);
-      box-shadow: 0 0 20px rgba(0,114,255,0.2);
-      transform: translateY(-2px);
-    }
-    
-    .input-group label {
-      position: absolute; 
-      right: 20px; 
-      top: 50%; 
-      transform: translateY(-50%);
-      color: #999; 
-      transition: all 0.3s ease; 
-      pointer-events: none; 
-      font-size: 15px;
-      opacity: 1;
-      background: transparent;
-      padding: 0 5px;
-    }
-    
-    input:focus + label,
-    input:not(:placeholder-shown) + label {
-      opacity: 0;
-      transform: translateY(-50%) scale(0.9);
-    }
-    
-    /* خيار تذكرني */
-    .remember-me {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 15px 0;
-      color: #666;
-      font-size: 14px;
-    }
-    
-    .remember-me input {
-      width: 18px;
-      height: 18px;
-      margin-left: 8px;
-      cursor: pointer;
-    }
-    
-    /* شريط البحث */
-    .search-container {
-      position: relative;
-      margin-bottom: 15px;
-    }
-    
-    .search-box {
-      width: 100%;
-      padding: 15px 20px;
-      border: none;
-      border-radius: 50px;
-      font-family: 'Cairo', sans-serif;
-      font-size: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
-      background: white;
-    }
-    
-    .search-box:focus {
-      outline: none;
-      box-shadow: 0 6px 25px rgba(0,0,0,0.15);
-      transform: translateY(-2px);
-    }
-    
-    .search-icon {
-      position: absolute;
-      left: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #999;
-      font-size: 18px;
-    }
-    
-    /* زر البحث الصوتي */
-    .voice-search-btn {
-      position: absolute;
-      left: 60px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: var(--info);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 35px;
-      height: 35px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
-      z-index: 2;
-    }
-    
-    .voice-search-btn:hover {
-      background: #2980b9;
-      transform: translateY(-50%) scale(1.1);
-    }
-    
-    .voice-search-btn.listening {
-      background: var(--error-color);
-      animation: pulse 1s infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: translateY(-50%) scale(1); }
-      50% { transform: translateY(-50%) scale(1.1); }
-    }
-    
-    .voice-status {
-      position: absolute;
-      left: 105px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: white;
-      font-size: 12px;
-      background: rgba(0,0,0,0.5);
-      padding: 4px 8px;
-      border-radius: 10px;
-      display: none;
-      z-index: 2;
-    }
-    
-    /* صورة البطاقة */
-    .id-card-visual-container { 
-      text-align: center; 
-      margin: 15px 0; 
-    }
-    
-    .id-card-img { 
-      max-width: 70%; 
-      border-radius: 15px; 
-      border: 3px solid rgba(255,255,255,0.8); 
-      box-shadow: 0 12px 30px rgba(0,114,255,0.3); 
-      animation: floatCard 4s ease-in-out infinite; 
-      transition: all 0.3s ease;
-    }
-    
-    .id-card-img:hover {
-      transform: scale(1.02);
-      box-shadow: 0 15px 40px rgba(0,114,255,0.4);
-    }
-    
-    @keyframes floatCard { 
-      0%,100% { transform: translateY(0); } 
-      50% { transform: translateY(-8px); } 
-    }
-    
-    /* الأزرار */
-    .btn {
-      background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
-      color: #fff; 
-      padding: 15px; 
-      width: 100%; 
-      border: none; 
-      border-radius: 50px;
-      font-weight: 700; 
-      cursor: pointer; 
-      font-size: 16px; 
-      transition: all 0.3s ease;
-      box-shadow: 0 10px 25px rgba(0,114,255,0.3);
-      font-family: "Cairo", sans-serif;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .btn::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: 0.5s;
-    }
-    
-    .btn:hover::after {
-      left: 100%;
-    }
-    
-    .btn:hover { 
-      transform: translateY(-3px); 
-      box-shadow: 0 15px 35px rgba(0,114,255,0.4);
-    }
-    
-    .btn:active { 
-      transform: translateY(1px); 
-    }
-    
-    .btn-secondary { 
-      background: linear-gradient(135deg, #43cea2, #185a9d); 
-      margin-top: 10px; 
-    }
-    
-    .btn-danger { 
-      background: linear-gradient(135deg, #ff416c, #ff4b2b); 
-      margin-top: 10px; 
-    }
-    
-    .btn-warning { 
-      background: linear-gradient(135deg, #f2994a, #f2c94c); 
-      color: #333; 
-    }
-    
-    .btn-info { 
-      background: linear-gradient(135deg, #3498db, #2980b9); 
-      margin-top: 10px; 
-    }
-    
-    .btn-message { 
-      background: linear-gradient(135deg, #9b59b6, #8e44ad); 
-      margin-top: 10px; 
-      position: relative; 
-    }
-    
-    .btn-delete-rep { 
-      background: #ff4757; 
-      color: white; 
-      border: none; 
-      padding: 5px 12px; 
-      border-radius: 8px; 
-      cursor: pointer; 
-      font-size: 12px; 
-      font-family: "Cairo", sans-serif;
-      transition: all 0.3s ease;
-    }
-    
-    .btn-delete-rep:hover {
-      background: #ff3742;
-      transform: scale(1.05);
-    }
-    
-    /* الرسائل */
-    .msg { 
-      text-align: center; 
-      font-size: 14px; 
-      margin-top: 10px; 
-      min-height: 20px; 
-      padding: 8px;
-      border-radius: 10px;
-    }
-    
-    .msg.error { 
-      color: var(--error-color); 
-      background: rgba(231, 76, 60, 0.1);
-      border: 1px solid rgba(231, 76, 60, 0.2);
-    }
-    
-    .msg.success { 
-      color: var(--success-color); 
-      background: rgba(46, 204, 113, 0.1);
-      border: 1px solid rgba(46, 204, 113, 0.2);
-    }
-    
-    /* تحذيرات التكرار */
-    .duplicate-box {
-      background: linear-gradient(135deg, #ffebee 0%, #ef9a9a 100%);
-      border: 3px solid var(--error-color);
-      padding: 15px;
-      text-align: center;
-      border-radius: 15px;
-      animation: pulseRed 0.7s infinite alternate;
-      font-size: 14px;
-      font-weight: 600;
-      margin: 10px 0;
-    }
-    
-    @keyframes pulseRed { 
-      from { box-shadow: 0 0 10px rgba(255,0,0,0.3); } 
-      to { box-shadow: 0 0 20px rgba(255,0,0,0.6); } 
-    }
-    
-    .verify-box {
-      background: linear-gradient(135deg, #e0f7fa 0%, #80deea 100%);
-      border: 3px solid var(--success-color);
-      padding: 20px;
-      text-align: center;
-      border-radius: 15px;
-      animation: pulseGreen 0.7s infinite alternate;
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--success-color);
-      margin: 10px 0;
-    }
-    
-    @keyframes pulseGreen { 
-      from { box-shadow: 0 0 10px rgba(46,204,113,0.3); } 
-      to { box-shadow: 0 0 20px rgba(46,204,113,0.6); } 
-    }
-    
-    /* القوائم */
-    .admin-list-container { 
-      max-height: 150px; 
-      overflow-y: auto; 
-      background: rgba(255,255,255,0.8); 
-      padding: 10px; 
-      border-radius: 12px; 
-      font-size: 14px;
-      border: 1px solid rgba(0,0,0,0.1);
-    }
-    
-    .admin-list-container::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    .admin-list-container::-webkit-scrollbar-thumb {
-      background: var(--primary-color);
-      border-radius: 5px;
-    }
-    
-    .rep-item { 
-      display: flex; 
-      justify-content: space-between; 
-      padding: 8px; 
-      align-items: center; 
-      font-size: 14px; 
-      background: white;
-      margin-bottom: 5px;
-      border-radius: 8px;
-      border-right: 3px solid var(--primary-color);
-      transition: all 0.3s ease;
-    }
-    
-    .rep-item:hover {
-      background: #f8f9fa;
-      transform: translateX(-5px);
-    }
-    
-    .rep-name { 
-      font-weight: 700; 
-      color: var(--dark);
-    }
-    
-    .session-item { 
-      background: #fff; 
-      border-right: 4px solid var(--primary-color); 
-      padding: 8px; 
-      margin-bottom: 6px; 
-      border-radius: 8px; 
-      font-size: 13px; 
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
-    .session-kick-btn { 
-      background: var(--dark); 
-      color: #fff; 
-      padding: 4px 10px; 
-      border-radius: 6px; 
-      border: none; 
-      cursor: pointer; 
-      font-family: "Cairo", sans-serif; 
-      font-size: 12px; 
-      transition: all 0.3s ease;
-    }
-    
-    .session-kick-btn:hover {
-      background: var(--error-color);
-      transform: scale(1.05);
-    }
-    
-    /* العدادات */
-    .counter-box { 
-      background: linear-gradient(135deg, #f0f7ff 0%, #d6e4ff 100%);
-      color: var(--primary-color); 
-      padding: 15px; 
-      font-size: 16px; 
-      border-radius: 15px; 
-      margin-bottom: 15px; 
-      text-align: center; 
-      border: 2px solid rgba(0,114,255,0.2);
-      font-weight: 600;
-    }
-    
-    .counter-label { 
-      font-size: 12px; 
-      color: #666; 
-      margin-top: 5px; 
-      font-weight: 400;
-    }
-    
-    .empty-list { 
-      text-align: center; 
-      padding: 20px; 
-      color: #999; 
-      font-size: 14px; 
-      font-style: italic;
-    }
-    
-    .device-info { 
-      font-size: 11px; 
-      color: #666; 
-      margin: 0 5px; 
-    }
-    
-    /* روابط تسجيل الخروج */
-    .logout-link {
-      margin-top: 15px;
-      text-align: center;
-      font-size: 14px;
-    }
-    
-    .logout-link small {
-      cursor: pointer;
-      color: #777;
-      text-decoration: underline;
-      transition: all 0.3s ease;
-      padding: 5px 10px;
-      border-radius: 8px;
-    }
-    
-    .logout-link small:hover {
-      color: var(--primary-color);
-      background: rgba(0, 114, 255, 0.1);
-    }
-    
-    /* وصف الإحصائيات */
-    .stats-desc {
-      text-align: center;
-      color: #666;
-      margin-bottom: 20px;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-    
-    /* عناصر التحكم */
-    .admin-controls {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin: 12px 0;
-      flex-wrap: wrap;
-    }
-    
-    .admin-controls .btn {
-      width: auto;
-      padding: 8px 16px;
-      font-size: 14px;
-      min-width: 100px;
-    }
-    
-    .sessions-note {
-      font-size: 12px;
-      color: #666;
-      text-align: right;
-      margin-top: 5px;
-      margin-bottom: 8px;
-      font-style: italic;
-    }
-    
-    /* شارة الرسائل */
-    .messages-badge {
-      position: absolute;
-      top: -8px;
-      left: -8px;
-      background: #e74c3c;
-      color: white;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 800;
-      animation: badgePulse 1.5s infinite;
-      box-shadow: 0 2px 10px rgba(231, 76, 60, 0.5);
-      z-index: 1;
-    }
-    
-    @keyframes badgePulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.15); }
-    }
-    
-    /* الإشعارات العامة */
-    .general-notification {
-      background: linear-gradient(135deg, #f5f3ff 0%, #e8e0ff 100%);
-      border: 3px solid var(--message-color);
-      border-radius: 15px;
-      padding: 15px;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 6px 20px rgba(155, 89, 182, 0.3);
-      animation: notificationSlideDown 0.5s ease;
-      position: relative;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .general-notification:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 30px rgba(155, 89, 182, 0.4);
-    }
-    
-    .general-notification.unread {
-      border-color: #e74c3c;
-      background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
-      animation: notificationGlow 2s infinite;
-    }
-    
-    @keyframes notificationSlideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    @keyframes notificationGlow {
-      0%, 100% {
-        box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
-      }
-      50% {
-        box-shadow: 0 8px 25px rgba(231, 76, 60, 0.6);
-      }
-    }
-    
-    .notification-icon {
-      font-size: 32px;
-      flex-shrink: 0;
-    }
-    
-    .notification-content {
-      flex: 1;
-      min-width: 0;
-    }
-    
-    .notification-text {
-      color: var(--text-color);
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 4px;
-      line-height: 1.4;
-    }
-    
-    .notification-count {
-      font-size: 12px;
-      color: #666;
-    }
-    
-    .notification-close {
-      background: transparent;
-      border: none;
-      color: #999;
-      font-size: 22px;
-      cursor: pointer;
-      padding: 0;
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: all 0.3s ease;
-      flex-shrink: 0;
-    }
-    
-    .notification-close:hover {
-      background: rgba(0, 0, 0, 0.1);
-      color: var(--error-color);
-      transform: rotate(90deg);
-    }
-    
-    /* نافذة الرسائل */
-    .messages-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 10000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      backdrop-filter: blur(10px);
-    }
-    
-    .messages-modal.active {
-      display: flex;
-    }
-    
-    .messages-modal-content {
-      background: white;
-      border-radius: 25px;
-      padding: 30px;
-      max-width: 550px;
-      width: 100%;
-      max-height: 85vh;
-      overflow-y: auto;
-      animation: modalSlideIn 0.4s ease;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.5);
-    }
-    
-    @keyframes modalSlideIn {
-      from {
-        opacity: 0;
-        transform: scale(0.9) translateY(-30px);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-    
-    .messages-modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 25px;
-      padding-bottom: 15px;
-      border-bottom: 3px solid #eee;
-    }
-    
-    .messages-modal-title {
-      margin: 0;
-      color: var(--primary-color);
-      font-size: 22px;
-      font-weight: 800;
-    }
-    
-    .modal-close-btn {
-      background: var(--error-color);
-      color: white;
-      border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      font-size: 22px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
-    }
-    
-    .modal-close-btn:hover {
-      transform: rotate(90deg);
-      background: #c0392b;
-    }
-    
-    /* بطاقات الرسائل */
-    .message-card {
-      background: linear-gradient(135deg, #f5f3ff 0%, #e8e0ff 100%);
-      border: 3px solid var(--message-color);
-      border-radius: 20px;
-      padding: 20px;
-      margin-bottom: 15px;
-      box-shadow: 0 6px 20px rgba(155, 89, 182, 0.25);
-      animation: messageSlideIn 0.5s ease;
-      transition: all 0.3s ease;
-    }
-    
-    .message-card.unread {
-      border-color: #e74c3c;
-      background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
-    }
-    
-    @keyframes messageSlideIn {
-      from {
-        opacity: 0;
-        transform: translateX(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-    
-    .message-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 30px rgba(155, 89, 182, 0.4);
-    }
-    
-    .message-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid rgba(155, 89, 182, 0.2);
-    }
-    
-    .message-icon {
-      font-size: 24px;
-    }
-    
-    .message-time {
-      font-size: 12px;
-      color: #666;
-      font-weight: 600;
-    }
-    
-    .message-text {
-      color: var(--text-color);
-      font-size: 15px;
-      line-height: 1.7;
-      margin-bottom: 12px;
-      font-weight: 600;
-    }
-    
-    .message-from {
-      font-size: 12px;
-      color: var(--message-color);
-      font-weight: 700;
-      text-align: left;
-    }
-    
-    .message-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-    }
-    
-    .message-btn {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 12px;
-      font-family: "Cairo", sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .mark-read-btn {
-      background: var(--success-color);
-      color: white;
-      box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
-    }
-    
-    .mark-read-btn:hover {
-      background: #27ae60;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(46, 204, 113, 0.4);
-    }
-    
-    .no-messages {
-      text-align: center;
-      padding: 40px 30px;
-      color: #999;
-      font-size: 15px;
-      background: rgba(0, 0, 0, 0.02);
-      border-radius: 15px;
-      border: 2px dashed #ddd;
-    }
-    
-    .no-messages-icon {
-      font-size: 60px;
-      margin-bottom: 15px;
-      opacity: 0.3;
-    }
-    
-    /* الإشعارات المنبثقة */
-    .popup-notification {
-      position: fixed;
-      top: 25px;
-      right: 25px;
-      background: linear-gradient(135deg, #9b59b6, #8e44ad);
-      color: white;
-      padding: 20px 25px;
-      border-radius: 20px;
-      box-shadow: 0 15px 40px rgba(155, 89, 182, 0.6);
-      z-index: 10001;
-      animation: popupSlide 0.5s ease;
-      max-width: 350px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-    
-    @keyframes popupSlide {
-      from {
-        transform: translateX(400px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-    
-    .popup-icon {
-      font-size: 40px;
-      flex-shrink: 0;
-    }
-    
-    .popup-content {
-      flex: 1;
-    }
-    
-    .popup-header {
-      font-weight: 800;
-      font-size: 16px;
-      margin-bottom: 6px;
-    }
-    
-    .popup-text {
-      font-size: 14px;
-      line-height: 1.5;
-      opacity: 0.95;
-    }
-    
-    /* التكيف مع الشاشات الصغيرة */
-    @media (max-height: 700px) {
-      .card { padding: 20px; }
-      h2 { font-size: 20px; margin-bottom: 15px; }
-      .input-group { margin-bottom: 15px; }
-      input { padding: 12px 18px; font-size: 15px; }
-      .btn { padding: 12px; font-size: 15px; }
-      .id-card-img { max-width: 60%; }
-      .counter-box { padding: 12px; font-size: 15px; }
-      h3 { font-size: 15px; }
-      .general-notification { padding: 12px; }
-      .notification-text { font-size: 13px; }
-    }
-    
-    @media (max-width: 480px) {
-      .container { padding: 10px; }
-      .card { max-width: 100%; padding: 20px; border-radius: 20px; }
-      .popup-notification {
-        right: 15px;
-        left: 15px;
-        max-width: none;
-        top: 15px;
-      }
-      .messages-modal-content {
-        padding: 20px;
-      }
-      .voice-search-btn {
-        left: 50px;
-        width: 30px;
-        height: 30px;
-        font-size: 14px;
-      }
-      .voice-status {
-        left: 90px;
-        font-size: 11px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام تسجيل المناديب - الدخول</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap">
+    <style>
+        :root {
+            --primary: #0072ff;
+            --secondary: #00c6ff;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+            --purple: #9b59b6;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* تصميم البطاقة الأساسي */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            width: 100%;
+            max-width: 450px;
+            animation: slideIn 0.5s ease;
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* شارة البطاقة */
+        .card-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* رأس البطاقة */
+        .card-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .card-title {
+            color: var(--dark);
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .card-subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* مجموعة الإدخال */
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-label {
+            display: block;
+            color: var(--dark);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 114, 255, 0.1);
+        }
+
+        .input-field.error {
+            border-color: var(--danger);
+        }
+
+        .input-hint {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        /* زر البحث الصوتي */
+        .voice-btn {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--info);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .voice-btn:hover {
+            background: #2980b9;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .voice-btn.listening {
+            background: var(--danger);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+
+        .voice-status {
+            position: absolute;
+            left: 70px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            display: none;
+            z-index: 2;
+        }
+
+        /* خيار تذكرني */
+        .remember-group {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+
+        .remember-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .remember-label {
+            color: #666;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* الأزرار */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 114, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 114, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #43cea2, #185a9d);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f2994a, #f2c94c);
+            color: #333;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, var(--info), #2980b9);
+            color: white;
+        }
+
+        .btn-purple {
+            background: linear-gradient(135deg, var(--purple), #8e44ad);
+            color: white;
+        }
+
+        /* صورة البطاقة */
+        .card-image {
+            width: 100%;
+            max-width: 250px;
+            margin: 20px auto;
+            display: block;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* رسائل التنبيه */
+        .alert {
+            padding: 15px;
+            border-radius: 12px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+            color: var(--danger);
+            border: 2px solid var(--danger);
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            color: var(--success);
+            border: 2px solid var(--success);
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            color: #f57c00;
+            border: 2px solid var(--warning);
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            color: var(--info);
+            border: 2px solid var(--info);
+        }
+
+        /* عداد الإدخالات */
+        .counter-box {
+            background: linear-gradient(135deg, #f0f7ff, #d6e4ff);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px solid rgba(0, 114, 255, 0.2);
+        }
+
+        .counter-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .counter-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* قوائم الإدارة */
+        .list-container {
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 12px;
+            padding: 10px;
+            margin: 15px 0;
+            border: 1px solid #e0e0e0;
+        }
+
+        .list-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 600;
+        }
+
+        /* النافذة المنبثقة للرسائل */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--dark);
+        }
+
+        .modal-close {
+            background: var(--danger);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* الإشعارات */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--purple), #8e44ad);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(155, 89, 182, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1001;
+            animation: slideInRight 0.3s ease;
+            max-width: 350px;
+            cursor: pointer;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-icon {
+            font-size: 28px;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .notification-message {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* تذييل الصفحة */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .footer-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* شارة الرسائل */
+        .badge {
+            background: var(--danger);
+            color: white;
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            min-width: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .btn-relative {
+            position: relative;
+        }
+
+        /* التكيف مع الشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .card {
+                padding: 20px;
+            }
+            
+            .card-title {
+                font-size: 20px;
+            }
+            
+            .btn {
+                padding: 14px;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+            
+            .notification {
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .card-title {
+                font-size: 18px;
+            }
+            
+            .input-field {
+                padding: 12px 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <!-- الأصوات -->
-  <audio id="duplicateAlarm1" preload="auto">
-    <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg">
-  </audio>
-  <audio id="duplicateAlarm2" preload="auto">
-    <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
-  </audio>
-  <audio id="duplicateAlarm3" preload="auto">
-    <source src="https://actions.google.com/sounds/v1/emergency/siren_1.ogg" type="audio/ogg">
-  </audio>
-  <audio id="messageSound" src="https://actions.google.com/sounds/v1/notifications/notification_simple.ogg" preload="auto"></audio>
-
-  <!-- حلقات الخلفية -->
-  <ul class="circles">
-    <li></li><li></li><li></li><li></li><li></li><li></li><li></li>
-  </ul>
-
-  <!-- الحاوية الرئيسية -->
-  <div class="container">
-    
-    <!-- صفحة تسجيل الدخول الرئيسية -->
-    <div class="card" id="auth-card">
-      <h2>🔐 تسجيل دخول المندوب</h2>
-      <div class="search-container">
-        <input 
-          type="tel" 
-          id="loginCode" 
-          class="search-box" 
-          inputmode="numeric" 
-          placeholder="أدخل كود الدخول (6 أرقام)"
-          onkeypress="if(event.key==='Enter') login()"
-        >
-        <span class="search-icon">🔢</span>
-        <button class="voice-search-btn" id="voiceSearchBtn" onclick="toggleVoiceSearch()" title="إدخال صوتي">
-          🎤
+    <!-- الصفحات الرئيسية -->
+    <div class="card active" id="loginPage">
+        <div class="card-header">
+            <span class="card-icon">🔐</span>
+            <h1 class="card-title">تسجيل دخول المندوب</h1>
+            <p class="card-subtitle">أدخل كود الدخول للوصول للنظام</p>
+        </div>
+        
+        <div class="input-group">
+            <label class="input-label">كود الدخول (6 أرقام)</label>
+            <div style="position: relative;">
+                <input type="tel" id="loginCode" class="input-field" placeholder="900901" maxlength="6" inputmode="numeric">
+                <button class="voice-btn" id="voiceBtn" title="إدخال صوتي">
+                    🎤
+                </button>
+                <div class="voice-status" id="voiceStatus"></div>
+            </div>
+            <div class="input-hint">أدخل كود الدخول المكون من 6 أرقام</div>
+        </div>
+        
+        <div class="remember-group">
+            <input type="checkbox" id="rememberMe" class="remember-checkbox">
+            <label for="rememberMe" class="remember-label">تذكرني على هذا الجهاز</label>
+        </div>
+        
+        <button class="btn btn-primary" onclick="login()">
+            <span>دخول النظام</span>
+            <span>→</span>
         </button>
-        <div class="voice-status" id="voiceStatus"></div>
-      </div>
-      
-      <div class="remember-me">
-        <input type="checkbox" id="rememberLogin">
-        <label for="rememberLogin">تذكرني على هذا الجهاز</label>
-      </div>
-      
-      <button class="btn" id="loginBtn" onclick="login()">
-        دخول إلى النظام
-      </button>
-      <div id="login-msg" class="msg"></div>
-      
-      <div class="logout-link">
-        <small onclick="showAbout()">ℹ️ عن النظام</small>
-      </div>
+        
+        <div class="alert" id="loginAlert"></div>
+        
+        <div class="footer">
+            <p>نسخة النظام 2.0 | تطوير <a href="#" class="footer-link">المهندس محمد حماد</a></p>
+        </div>
     </div>
-    
+
     <!-- صفحة التحقق من البطاقة -->
-    <div class="card hidden" id="verification-card">
-      <h2>🔍 التأكد من البطاقة</h2>
-      <p class="stats-desc">
-        للتحقق من صحة البطاقة فقط - لا يتم التسجيل في النظام
-      </p>
-      
-      <div class="input-group">
-        <input id="verifyNatID" type="tel" maxlength="14" inputmode="numeric" placeholder=" ">
-        <label for="verifyNatID">الرقم القومي (14 رقم)</label>
-      </div>
-      
-      <div class="id-card-visual-container">
-        <img src="https://raw.githubusercontent.com/mohamednasr5/id/e83438329b0f009f6eebf61b2797496d744589f2/5.png"
-             class="id-card-img" alt="مثال للبطاقة">
-      </div>
-      
-      <button class="btn" onclick="checkCard()">✓ تحقق من البطاقة</button>
-      <div id="verify-msg" class="msg"></div>
-      
-      <button class="btn btn-secondary" onclick="logout()">
-        ↩ العودة لتسجيل الدخول
-      </button>
+    <div class="card" id="verifyPage">
+        <div class="card-badge">وضع التحقق</div>
+        <div class="card-header">
+            <span class="card-icon">🔍</span>
+            <h1 class="card-title">التأكد من البطاقة</h1>
+            <p class="card-subtitle">للتحقق فقط - لا يتم التسجيل</p>
+        </div>
+        
+        <div class="input-group">
+            <label class="input-label">الرقم القومي (14 رقم)</label>
+            <input type="tel" id="verifyNatID" class="input-field" placeholder="29901010000000" maxlength="14" inputmode="numeric">
+            <div class="input-hint">أدخل الرقم القومي المكون من 14 رقم</div>
+        </div>
+        
+        <img src="https://raw.githubusercontent.com/mohamednasr5/id/e83438329b0f009f6eebf61b2797496d744589f2/5.png" 
+             class="card-image" alt="بطاقة الهوية">
+        
+        <button class="btn btn-primary" onclick="checkCard()">
+            <span>✓ تحقق من البطاقة</span>
+        </button>
+        
+        <div class="alert" id="verifyAlert"></div>
+        
+        <button class="btn btn-secondary" onclick="showPage('loginPage')">
+            <span>↩ العودة للدخول</span>
+        </button>
     </div>
-    
+
     <!-- صفحة المندوب الرئيسية -->
-    <div class="card hidden" id="main-card">
-      <h2 id="welcome">مرحبًا في النظام</h2>
-      
-      <!-- الإشعارات العامة -->
-      <div id="generalNotification"></div>
-      
-      <!-- عداد الإدخالات -->
-      <div class="counter-box" id="entryCounterBox">
-        عدد إدخالاتك اليوم: <span id="entryCounter">0</span>
-        <div class="counter-label">
-          حافظ على نفس اسم المندوب لصحة الإحصائيات
+    <div class="card" id="mainPage">
+        <div class="card-badge" id="placeBadge">المكان</div>
+        <div class="card-header">
+            <span class="card-icon">👤</span>
+            <h1 class="card-title" id="welcomeTitle">مرحبًا بالمندوب</h1>
+            <p class="card-subtitle" id="placeSubtitle">موقع المندوب</p>
         </div>
-      </div>
-      
-      <!-- إدخال البيانات -->
-      <div class="input-group">
-        <input id="repName" type="text" autocomplete="off" list="repNamesHistory" maxlength="30" placeholder=" ">
-        <datalist id="repNamesHistory"></datalist>
-        <label for="repName">اسم المندوب (اسمك أنت)</label>
-      </div>
-      
-      <div class="input-group">
-        <input id="natID" type="tel" maxlength="14" inputmode="numeric" placeholder=" ">
-        <label for="natID">الرقم القومي (14 رقم)</label>
-      </div>
-      
-      <div class="id-card-visual-container">
-        <img src="https://raw.githubusercontent.com/mohamednasr5/id/e83438329b0f009f6eebf61b2797496d744589f2/5.png"
-             class="id-card-img" alt="مثال للبطاقة">
-      </div>
-      
-      <button class="btn" onclick="addUser()">
-        ➕ إضافة بطاقة جديدة
-      </button>
-      <div id="add-msg" class="msg"></div>
-      
-      <!-- أزرار التحكم -->
-      <button class="btn btn-message" onclick="showMessagesModal()" style="position: relative;">
-        <span id="messagesBtnText">📨 الرسائل</span>
-        <span class="messages-badge hidden" id="messagesBadge">0</span>
-      </button>
-      
-      <button class="btn btn-secondary" onclick="showStatsLogin()">
-        📊 لوحة إدارة النظام
-      </button>
-      
-      <div class="logout-link">
-        <small onclick="logout()">👋 تسجيل خروج</small>
-      </div>
-    </div>
-    
-    <!-- صفحة صلاحية المدير -->
-    <div class="card hidden" id="stats-auth-card">
-      <h2>🔒 صلاحية المدير</h2>
-      <p class="stats-desc">أدخل كلمة مرور الإدارة للوصول إلى لوحة التحكم</p>
-      
-      <div class="input-group">
-        <input id="statsPass" type="password" placeholder=" ">
-        <label for="statsPass">كلمة المرور</label>
-      </div>
-      
-      <button class="btn" onclick="verifyStats()">دخول اللوحة</button>
-      <div id="stats-msg" class="msg"></div>
-      
-      <button class="btn btn-danger" onclick="cancelStats()">
-        ↩ إلغاء والعودة
-      </button>
-    </div>
-    
-    <!-- لوحة التحكم الإدارية -->
-    <div class="card hidden" id="admin-panel-card">
-      <h2>⚙️ لوحة التحكم الإدارية</h2>
-      
-      <button class="btn btn-warning" onclick="location.href='stats.html'">
-        📊 الانتقال لصفحة الإحصائيات الكاملة
-      </button>
-      
-      <h3>📨 إدارة الرسائل</h3>
-      <div class="admin-controls">
-        <button class="btn btn-info" onclick="viewAllMessages()">عرض جميع الرسائل</button>
-        <button class="btn btn-danger" onclick="deleteAllMessages()">🗑️ مسح كل الرسائل</button>
-      </div>
-      <div class="admin-list-container" id="adminMessagesList"></div>
-      
-      <h3>عداد الإدخالات اليومي</h3>
-      <div class="counter-box">
-        <span>العدد الحالي: <span id="adminEntryCounter">0</span></span>
-        <div class="admin-controls">
-          <button class="btn btn-secondary" onclick="adminIncCounter()">➕ زيادة</button>
-          <button class="btn btn-secondary" onclick="adminDecCounter()">➖ نقصان</button>
-          <button class="btn btn-danger" onclick="adminResetCounter()">🔄 تصفير</button>
+        
+        <div id="notificationContainer"></div>
+        
+        <div class="counter-box">
+            <span class="counter-value" id="entryCounter">0</span>
+            <span class="counter-label">عدد إدخالاتك اليوم</span>
         </div>
-      </div>
-      
-      <h3>👥 الجلسات النشطة الآن</h3>
-      <p class="sessions-note">المسموح: 3 أجهزة لكل كود دخول</p>
-      <div class="admin-list-container" id="activeSessionsList"></div>
-      
-      <h3>📝 أسماء المناديب المحفوظة</h3>
-      <div class="admin-list-container" id="adminRepList"></div>
-      
-      <button class="btn btn-danger" onclick="closeAdminPanel()">
-        ↩ خروج من لوحة التحكم
-      </button>
-    </div>
-  </div>
-
-  <!-- نافذة الرسائل -->
-  <div class="messages-modal" id="messagesModal">
-    <div class="messages-modal-content">
-      <div class="messages-modal-header">
-        <h2 class="messages-modal-title">📨 جميع الرسائل</h2>
-        <button class="modal-close-btn" onclick="closeMessagesModal()">×</button>
-      </div>
-      <div id="messagesModalContent"></div>
-    </div>
-  </div>
-
-  <!-- JavaScript -->
-  <script>
-    // قائمة الأماكن المحدثة (69 مكان - مطابقة لصفحة الإحصائيات)
-    const places = [
-      "1- حي الحمزاوي - حماده عبده مصباح",
-      "2- حي الجرن 3 - بجوار قهوة النجدي",
-      "3- حي الجرن 1 - شارع المظلوم",
-      "4- حي الجرن 2 - إبراهيم فهيد",
-      "5- حي أبو رشاد - مقهى أبو سليمان",
-      "6- حي الإعجام - حمادة أبو رشاد",
-      "7- حي العزبة - منشية ناصر",
-      "8- حي المستشفى العام - حماده عساسه",
-      "9- حي المنزلة الجديدة - كريم شقرف",
-      "10- حي المنزلة الجديدة 2 - شريف دبرياش",
-      "11- حي بحر البلد 3 - أخر شارع 10",
-      "12- حي بحر البلد 1 - شارع الكابتن",
-      "13- حي الفقاعي - إبراهيم غزل",
-      "14- حي السلموني - حسن المناخلي",
-      "15- حي الكفر 1 - الساحة",
-      "16- حي الكفر 3 - ملعب برشلونة",
-      "17- حي الكفر 2 - تحت السكة",
-      "18- حي الفداء 1 - حمادة الكيال",
-      "19- حي سوق الجملة - على البياع",
-      "20- حي نقطة الأمام على",
-      "21- حي البر التاني - حي السلام",
-      "22- حي البر التاني - الهاويس",
-      "23- حي مصنع البصل - وليد فهيد",
-      "24- حي مدرسة عبد العال شلباية",
-      "25- حي المزرعة - السيد الحديدي",
-      "26- حي أمن الدولة",
-      "27- قرية الفروسات",
-      "28- قرية أبو الأخضر",
-      "29- قرية جديدة المنزلة",
-      "30- قرية العامرة",
-      "31- قرية مصر الجديدة",
-      "32- قرية عرب زيدان",
-      "33- قرية الستايتة",
-      "34- قرية كفر حجاج",
-      "35- قرية ميت خضير",
-      "36- قرية المواجد",
-      "37- قرية البصراط",
-      "38- قرية ميت شريف",
-      "39- قرية الطوابرة",
-      "40- قرية العمارنة",
-      "41- قرية أولاد بانا",
-      "42- قرية أولاد حانا",
-      "43- بحر حادوث",
-      "44- قرية القزاقزة",
-      "45- قرية الحوتة",
-      "46- قرية أولاد نور",
-      "47- قرية الخلايفة",
-      "48- قرية القطشة",
-      "49- قرية الجماملة",
-      "50- قرية العزيزة",
-      "51- قرية الأحمدية",
-      "52- قرية العربان",
-      "53- قرية أولاد علم",
-      "54- قرية أولاد ناصر",
-      "55- قرية بني هلال",
-      "56- قرية الشبول",
-      "57- قرية الرودة",
-      "58- قرية النسايمة",
-      "59- قرية العصافرة",
-      "60- قرية الضهير",
-      "61- المطرية نقطة رقم 1",
-      "62- المطرية نقطة رقم 2",
-      "63- المطرية نقطة رقم 3",
-      "64- المطرية نقطة رقم 4",
-      "65- المطرية نقطة رقم 5",
-      "66- المطرية نقطة رقم 6",
-      "67- المطرية نقطة رقم 7",
-      "68- المطرية نقطة رقم 8",
-      "69- المطرية نقطة رقم 9"
-    ];
-
-    // أكواد الدخول المحدثة (900901 إلى 900969)
-    const loginCodes = {};
-    
-    // إنشاء أكواد الدخول تلقائياً بناءً على عدد الأماكن
-    for (let i = 1; i <= 69; i++) {
-      const code = `9009${i.toString().padStart(2, '0')}`;
-      loginCodes[code] = {
-        place: places[i-1],
-        placeIdx: i
-      };
-    }
-    
-    // إضافة كود التحقق الخاص
-    loginCodes["111111"] = { place: "التأكد من البطاقة", placeIdx: 0 };
-    
-    // تصدير للاستخدام العام
-    window.PLACES = places;
-    window.LOGIN_CODES = loginCodes;
-
-    // دالة للتحميل التلقائي لكود الدخول المحفوظ
-    function loadRememberedLogin() {
-      const rememberedCode = localStorage.getItem('rememberedLoginCode');
-      const rememberChecked = localStorage.getItem('rememberLoginChecked') === 'true';
-      
-      if (rememberedCode && rememberChecked) {
-        document.getElementById('loginCode').value = rememberedCode;
-        document.getElementById('rememberLogin').checked = true;
-      }
-    }
-
-    // البحث الصوتي
-    let recognition = null;
-    let isListening = false;
-    
-    function initializeVoiceSearch() {
-      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        recognition = new SpeechRecognition();
         
-        recognition.lang = 'ar-SA';
-        recognition.continuous = false;
-        recognition.interimResults = false;
+        <div class="input-group">
+            <label class="input-label">اسم المندوب (اسمك أنت)</label>
+            <input type="text" id="repName" class="input-field" placeholder="أدخل اسمك" maxlength="30" list="repNamesList">
+            <datalist id="repNamesList"></datalist>
+            <div class="input-hint">اسم المندوب وليس اسم الناخب</div>
+        </div>
         
-        recognition.onstart = function() {
-          isListening = true;
-          document.getElementById('voiceSearchBtn').classList.add('listening');
-          document.getElementById('voiceStatus').textContent = "🎤 جاري الاستماع...";
-          document.getElementById('voiceStatus').style.display = 'block';
+        <div class="input-group">
+            <label class="input-label">الرقم القومي (14 رقم)</label>
+            <input type="tel" id="natID" class="input-field" placeholder="29901010000000" maxlength="14" inputmode="numeric">
+            <div class="input-hint">أدخل الرقم القومي المكون من 14 رقم</div>
+        </div>
+        
+        <img src="https://raw.githubusercontent.com/mohamednasr5/id/e83438329b0f009f6eebf61b2797496d744589f2/5.png" 
+             class="card-image" alt="بطاقة الهوية">
+        
+        <button class="btn btn-primary" onclick="addUser()">
+            <span>➕ إضافة بطاقة</span>
+        </button>
+        
+        <div class="alert" id="addAlert"></div>
+        
+        <button class="btn btn-purple btn-relative" onclick="showMessagesModal()">
+            <span>📨 الرسائل</span>
+            <span class="badge" id="messageBadge">0</span>
+        </button>
+        
+        <button class="btn btn-info" onclick="showAdminLogin()">
+            <span>⚙️ لوحة التحكم</span>
+        </button>
+        
+        <button class="btn btn-danger" onclick="logout()">
+            <span>🚪 تسجيل خروج</span>
+        </button>
+        
+        <div class="footer">
+            <p>جهاز: <span id="deviceId"></span> | <span id="currentTime"></span></p>
+        </div>
+    </div>
+
+    <!-- صفحة دخول المدير -->
+    <div class="card" id="adminLoginPage">
+        <div class="card-header">
+            <span class="card-icon">🔒</span>
+            <h1 class="card-title">صلاحية المدير</h1>
+            <p class="card-subtitle">أدخل كلمة مرور الإدارة</p>
+        </div>
+        
+        <div class="input-group">
+            <label class="input-label">كلمة المرور</label>
+            <input type="password" id="adminPassword" class="input-field" placeholder="أدخل كلمة المرور">
+            <div class="input-hint">كلمة المرور مطلوبة للوصول للوحة التحكم</div>
+        </div>
+        
+        <button class="btn btn-primary" onclick="verifyAdmin()">
+            <span>دخول اللوحة</span>
+        </button>
+        
+        <div class="alert" id="adminAlert"></div>
+        
+        <button class="btn btn-secondary" onclick="showPage('mainPage')">
+            <span>↩ العودة للصفحة الرئيسية</span>
+        </button>
+    </div>
+
+    <!-- لوحة التحكم -->
+    <div class="card" id="adminPage">
+        <div class="card-badge">لوحة التحكم</div>
+        <div class="card-header">
+            <span class="card-icon">⚙️</span>
+            <h1 class="card-title">لوحة التحكم الإدارية</h1>
+            <p class="card-subtitle">إدارة النظام والمراقبة</p>
+        </div>
+        
+        <button class="btn btn-warning" onclick="window.open('stats.html', '_blank')">
+            <span>📊 صفحة الإحصائيات الكاملة</span>
+        </button>
+        
+        <h3 style="margin: 20px 0 10px 0; color: var(--dark);">📨 إدارة الرسائل</h3>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button class="btn-small" style="background: var(--info); color: white;" onclick="loadMessages()">
+                عرض الرسائل
+            </button>
+            <button class="btn-small" style="background: var(--danger); color: white;" onclick="deleteAllMessages()">
+                مسح الكل
+            </button>
+        </div>
+        <div class="list-container" id="messagesList"></div>
+        
+        <h3 style="margin: 20px 0 10px 0; color: var(--dark);">عداد الإدخالات</h3>
+        <div class="counter-box">
+            <span class="counter-value" id="adminCounter">0</span>
+            <span class="counter-label">عدد إدخالات المندوب الحالي</span>
+        </div>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button class="btn-small" style="background: var(--success); color: white;" onclick="adminIncCounter()">
+                ➕ زيادة
+            </button>
+            <button class="btn-small" style="background: var(--warning); color: white;" onclick="adminDecCounter()">
+                ➖ نقصان
+            </button>
+            <button class="btn-small" style="background: var(--danger); color: white;" onclick="adminResetCounter()">
+                🗑️ تصفير
+            </button>
+        </div>
+        
+        <h3 style="margin: 20px 0 10px 0; color: var(--dark);">الجلسات النشطة</h3>
+        <div class="list-container" id="sessionsList"></div>
+        
+        <h3 style="margin: 20px 0 10px 0; color: var(--dark);">أسماء المناديب</h3>
+        <div class="list-container" id="repsList"></div>
+        
+        <button class="btn btn-danger" onclick="showPage('mainPage')">
+            <span>↩ خروج من اللوحة</span>
+        </button>
+    </div>
+
+    <!-- نافذة الرسائل -->
+    <div class="modal" id="messagesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📨 جميع الرسائل</h2>
+                <button class="modal-close" onclick="closeMessagesModal()">×</button>
+            </div>
+            <div id="messagesContent" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- الإشعارات المنبثقة -->
+    <div id="notificationArea"></div>
+
+    <!-- الأصوات -->
+    <audio id="soundDuplicate" preload="auto">
+        <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+    </audio>
+    <audio id="soundSuccess" preload="auto">
+        <source src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" type="audio/ogg">
+    </audio>
+    <audio id="soundMessage" preload="auto">
+        <source src="https://actions.google.com/sounds/v1/notifications/notification_simple.ogg" type="audio/ogg">
+    </audio>
+
+    <script>
+        // البيانات الأساسية للنظام
+        const SYSTEM_CONFIG = {
+            adminPassword: "521988",
+            maxSessionsPerCode: 3,
+            sessionTimeout: 30 * 60 * 1000, // 30 دقيقة
+            entryPrice: 200 // سعر الإدخال
         };
-        
-        recognition.onresult = function(event) {
-          const transcript = event.results[0][0].transcript.replace(/\D/g, '');
-          
-          if (transcript.length >= 6) {
-            const code = transcript.slice(0, 6);
-            document.getElementById('loginCode').value = code;
-            document.getElementById('voiceStatus').textContent = `✅ تم إدخال: ${code}`;
+
+        // قائمة الأماكن الكاملة (69 مكان)
+        const PLACES = [
+            "1- حي الحمزاوي - حماده عبده مصباح",
+            "2- حي الجرن 3 - بجوار قهوة النجدي",
+            "3- حي الجرن 1 - شارع المظلوم",
+            "4- حي الجرن 2 - إبراهيم فهيد",
+            "5- حي أبو رشاد - مقهى أبو سليمان",
+            "6- حي الإعجام - حمادة أبو رشاد",
+            "7- حي العزبة - منشية ناصر",
+            "8- حي المستشفى العام - حماده عساسه",
+            "9- حي المنزلة الجديدة - كريم شقرف",
+            "10- حي المنزلة الجديدة 2 - شريف دبرياش",
+            "11- حي بحر البلد 3 - أخر شارع 10",
+            "12- حي بحر البلد 1 - شارع الكابتن",
+            "13- حي الفقاعي - إبراهيم غزل",
+            "14- حي السلموني - حسن المناخلي",
+            "15- حي الكفر 1 - الساحة",
+            "16- حي الكفر 3 - ملعب برشلونة",
+            "17- حي الكفر 2 - تحت السكة",
+            "18- حي الفداء 1 - حمادة الكيال",
+            "19- حي سوق الجملة - على البياع",
+            "20- حي نقطة الأمام على",
+            "21- حي البر التاني - حي السلام",
+            "22- حي البر التاني - الهاويس",
+            "23- حي مصنع البصل - وليد فهيد",
+            "24- حي مدرسة عبد العال شلباية",
+            "25- حي المزرعة - السيد الحديدي",
+            "26- حي أمن الدولة",
+            "27- قرية الفروسات",
+            "28- قرية أبو الأخضر",
+            "29- قرية جديدة المنزلة",
+            "30- قرية العامرة",
+            "31- قرية مصر الجديدة",
+            "32- قرية عرب زيدان",
+            "33- قرية الستايتة",
+            "34- قرية كفر حجاج",
+            "35- قرية ميت خضير",
+            "36- قرية المواجد",
+            "37- قرية البصراط",
+            "38- قرية ميت شريف",
+            "39- قرية الطوابرة",
+            "40- قرية العمارنة",
+            "41- قرية أولاد بانا",
+            "42- قرية أولاد حانا",
+            "43- بحر حادوث",
+            "44- قرية القزاقزة",
+            "45- قرية الحوتة",
+            "46- قرية أولاد نور",
+            "47- قرية الخلايفة",
+            "48- قرية القطشة",
+            "49- قرية الجماملة",
+            "50- قرية العزيزة",
+            "51- قرية الأحمدية",
+            "52- قرية العربان",
+            "53- قرية أولاد علم",
+            "54- قرية أولاد ناصر",
+            "55- قرية بني هلال",
+            "56- قرية الشبول",
+            "57- قرية الرودة",
+            "58- قرية النسايمة",
+            "59- قرية العصافرة",
+            "60- قرية الضهير",
+            "61- المطرية نقطة رقم 1",
+            "62- المطرية نقطة رقم 2",
+            "63- المطرية نقطة رقم 3",
+            "64- المطرية نقطة رقم 4",
+            "65- المطرية نقطة رقم 5",
+            "66- المطرية نقطة رقم 6",
+            "67- المطرية نقطة رقم 7",
+            "68- المطرية نقطة رقم 8",
+            "69- المطرية نقطة رقم 9"
+        ];
+
+        // أكواد الدخول (900901 إلى 900969)
+        const LOGIN_CODES = {};
+        for (let i = 1; i <= 69; i++) {
+            const code = `9009${i.toString().padStart(2, '0')}`;
+            LOGIN_CODES[code] = {
+                place: PLACES[i - 1],
+                placeIdx: i
+            };
+        }
+
+        // كود التحقق الخاص
+        LOGIN_CODES["111111"] = {
+            place: "وضع التحقق من البطاقة",
+            placeIdx: 0
+        };
+
+        // حالة النظام
+        let systemState = {
+            currentUser: null,
+            currentPlace: null,
+            currentPlaceIdx: null,
+            isVerificationMode: false,
+            deviceId: null,
+            messagesListener: null,
+            unreadMessages: 0,
+            currentRepName: ""
+        };
+
+        // تهيئة النظام
+        document.addEventListener('DOMContentLoaded', function() {
+            initSystem();
+            loadRememberedData();
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+
+        // تهيئة النظام الأساسية
+        function initSystem() {
+            // إنشاء معرف فريد للجهاز
+            systemState.deviceId = getDeviceId();
+            document.getElementById('deviceId').textContent = systemState.deviceId.substring(0, 8);
             
-            // الدخول التلقائي بعد 1 ثانية
-            setTimeout(() => {
-              document.getElementById('voiceStatus').style.display = 'none';
-              login();
-            }, 1000);
-          } else {
-            document.getElementById('voiceStatus').textContent = "⚠ الرجاء نطق 6 أرقام";
-          }
-        };
-        
-        recognition.onerror = function(event) {
-          console.error('خطأ في التعرف الصوتي:', event.error);
-          document.getElementById('voiceStatus').textContent = "❌ حدث خطأ، حاول مجدداً";
-          setTimeout(() => {
-            document.getElementById('voiceStatus').style.display = 'none';
-          }, 3000);
-        };
-        
-        recognition.onend = function() {
-          isListening = false;
-          document.getElementById('voiceSearchBtn').classList.remove('listening');
-        };
-      } else {
-        console.log('المتصفح لا يدعم التعرف الصوتي');
-        document.getElementById('voiceSearchBtn').style.display = 'none';
-      }
-    }
-    
-    window.toggleVoiceSearch = function() {
-      if (!recognition) {
-        alert('التعرف الصوتي غير مدعوم. يرجى استخدام Chrome أو Edge.');
-        return;
-      }
-      
-      if (isListening) {
-        recognition.stop();
-      } else {
-        recognition.start();
-      }
-    };
-    
-    // عند تحميل الصفحة
-    document.addEventListener('DOMContentLoaded', function() {
-      loadRememberedLogin();
-      initializeVoiceSearch();
-      
-      // إضافة اختصار Ctrl+Enter للدخول
-      document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey && e.key === 'Enter') {
-          if (!document.getElementById('auth-card').classList.contains('hidden')) {
-            login();
-          }
-        }
-      });
-    });
-    
-    // دالة لإظهار معلومات النظام
-    window.showAbout = function() {
-      alert(`💡 معلومات النظام:\n\n• النظام: تسجيل دخول المناديب\n• عدد الأماكن: ${places.length}\n• آخر تحديث: ${new Date().toLocaleDateString('ar-EG')}\n\n👨‍💻 المبرمج: المهندس محمد حماد`);
-    };
-  </script>
-
-  <script type="module">
-    import {
-      initializeApp
-    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      set,
-      get,
-      child,
-      push,
-      remove,
-      onValue,
-      update
-    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-    
-    const firebaseConfig = {
-      apiKey: "AIzaSyAxnIxtFeAOjYjCIrU5cwYVteuQ18K8Kjc",
-      authDomain: "idmanazla.firebaseapp.com",
-      databaseURL: "https://idmanazla-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "idmanazla",
-      storageBucket: "idmanazla.firebasestorage.app",
-      messagingSenderId: "408446131276",
-      appId: "1:408446131276:web:976ae54181b5398de5a8e9"
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    function getDeviceId() {
-      let id = localStorage.getItem("app_device_id");
-      if (!id) {
-        id = "dev_" + Math.random().toString(36).substring(2, 10) + Date.now();
-        localStorage.setItem("app_device_id", id);
-      }
-      return id;
-    }
-    const currentDeviceId = getDeviceId();
-
-    let userPlace = null;
-    let userPlaceIdx = null;
-    let userID = null;
-    let userRepName = null;
-    let messagesListener = null;
-    let lastMessageCount = 0;
-    let alarmInterval = null;
-    let isFirstMessagesLoad = true;
-    let currentMessagesSnapshot = null;
-    let isVerificationMode = false;
-
-    // دالة تسجيل الدخول المحسنة
-    window.login = async function () {
-      const code = document.getElementById("loginCode").value.trim();
-      const msg = document.getElementById("login-msg");
-      const rememberMe = document.getElementById("rememberLogin").checked;
-      
-      msg.textContent = "";
-      msg.className = "msg";
-
-      if (code.length < 1) {
-        msg.textContent = "يرجى إدخال كود الدخول";
-        msg.classList.add("error");
-        return;
-      }
-      
-      // حفظ تذكرني
-      if (rememberMe) {
-        localStorage.setItem('rememberedLoginCode', code);
-        localStorage.setItem('rememberLoginChecked', 'true');
-      } else {
-        localStorage.removeItem('rememberedLoginCode');
-        localStorage.setItem('rememberLoginChecked', 'false');
-      }
-      
-      // التحقق من كود التحقق الخاص 111111
-      if (code === "111111") {
-        isVerificationMode = true;
-        userID = code;
-        userPlace = "التأكد من البطاقة";
-        
-        document.getElementById("auth-card").classList.add("hidden");
-        document.getElementById("verification-card").classList.remove("hidden");
-        document.getElementById("verification-card").classList.add("fade-in");
-        return;
-      }
-      
-      try {
-        const snapshot = await get(child(ref(db), "login_codes/" + code));
-        
-        if (!snapshot.exists()) {
-          // محاولة استخدام الأكواد من الكائن المحدد مسبقاً
-          if (window.LOGIN_CODES[code]) {
-            const data = window.LOGIN_CODES[code];
-            userID = code;
-            userPlace = data.place;
-            userPlaceIdx = data.placeIdx || 0;
-            isVerificationMode = false;
-
-            // حفظ الكود في Firebase للمرة الأولى
-            await set(ref(db, `login_codes/${code}`), {
-              place: data.place,
-              placeIdx: data.placeIdx || 0
+            // تهيئة البحث الصوتي
+            initVoiceRecognition();
+            
+            // تحميل أسماء المناديب المحفوظة
+            loadRepNames();
+            
+            // إضافة اختصار Ctrl+Enter للدخول
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    const activePage = getActivePage();
+                    if (activePage === 'loginPage') login();
+                    if (activePage === 'verifyPage') checkCard();
+                    if (activePage === 'mainPage') addUser();
+                    if (activePage === 'adminLoginPage') verifyAdmin();
+                }
             });
-          } else {
-            msg.textContent = "الكود غير صحيح";
-            msg.classList.add("error");
-            return;
-          }
-        } else {
-          const data = snapshot.val();
-          userID = code;
-          userPlace = data.place;
-          userPlaceIdx = data.placeIdx || 0;
-          isVerificationMode = false;
         }
 
-        await enforceSessionLimit(code);
-        await set(ref(db, `active_sessions/${code}/${currentDeviceId}`), {
-          loginTime: Date.now(),
-          expiresAt: Date.now() + 30 * 60 * 1000,
-          deviceInfo: navigator.userAgent.substring(0, 100)
+        // توليد معرف فريد للجهاز
+        function getDeviceId() {
+            let deviceId = localStorage.getItem('deviceId');
+            if (!deviceId) {
+                deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('deviceId', deviceId);
+            }
+            return deviceId;
+        }
+
+        // تحميل البيانات المحفوظة
+        function loadRememberedData() {
+            const savedCode = localStorage.getItem('rememberedCode');
+            const rememberMe = localStorage.getItem('rememberMe') === 'true';
+            
+            if (savedCode && rememberMe) {
+                document.getElementById('loginCode').value = savedCode;
+                document.getElementById('rememberMe').checked = true;
+            }
+        }
+
+        // تحديث الوقت
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = 
+                now.toLocaleTimeString('ar-EG') + ' | ' + 
+                now.toLocaleDateString('ar-EG');
+        }
+
+        // البحث الصوتي
+        let voiceRecognition = null;
+        let isListening = false;
+
+        function initVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                voiceRecognition = new SpeechRecognition();
+                
+                voiceRecognition.lang = 'ar-SA';
+                voiceRecognition.continuous = false;
+                voiceRecognition.interimResults = false;
+                
+                voiceRecognition.onstart = function() {
+                    isListening = true;
+                    document.getElementById('voiceBtn').classList.add('listening');
+                    showVoiceStatus('🎤 جاري الاستماع...');
+                };
+                
+                voiceRecognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript.replace(/\D/g, '');
+                    
+                    if (transcript.length >= 6) {
+                        const code = transcript.slice(0, 6);
+                        document.getElementById('loginCode').value = code;
+                        showVoiceStatus(`✅ تم إدخال: ${code}`);
+                        
+                        // الدخول التلقائي بعد تأخير بسيط
+                        setTimeout(() => {
+                            hideVoiceStatus();
+                            login();
+                        }, 1000);
+                    } else {
+                        showVoiceStatus('⚠ الرجاء نطق 6 أرقام');
+                    }
+                };
+                
+                voiceRecognition.onerror = function(event) {
+                    console.error('خطأ في التعرف الصوتي:', event.error);
+                    showVoiceStatus('❌ حدث خطأ، حاول مجدداً');
+                    setTimeout(hideVoiceStatus, 3000);
+                };
+                
+                voiceRecognition.onend = function() {
+                    isListening = false;
+                    document.getElementById('voiceBtn').classList.remove('listening');
+                };
+            } else {
+                document.getElementById('voiceBtn').style.display = 'none';
+            }
+        }
+
+        function toggleVoiceRecognition() {
+            if (!voiceRecognition) {
+                showAlert('voiceBtn', 'المتصفح لا يدعم التعرف الصوتي', 'error');
+                return;
+            }
+            
+            if (isListening) {
+                voiceRecognition.stop();
+            } else {
+                voiceRecognition.start();
+            }
+        }
+
+        function showVoiceStatus(message) {
+            const statusEl = document.getElementById('voiceStatus');
+            statusEl.textContent = message;
+            statusEl.style.display = 'block';
+        }
+
+        function hideVoiceStatus() {
+            document.getElementById('voiceStatus').style.display = 'none';
+        }
+
+        // وظائف التنقل بين الصفحات
+        function showPage(pageId) {
+            // إخفاء جميع الصفحات
+            document.querySelectorAll('.card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // إظهار الصفحة المطلوبة
+            document.getElementById(pageId).classList.add('active');
+            
+            // إخفاء جميع التنبيهات
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.display = 'none';
+            });
+        }
+
+        function getActivePage() {
+            const activeCard = document.querySelector('.card.active');
+            return activeCard ? activeCard.id : null;
+        }
+
+        // وظيفة تسجيل الدخول الرئيسية
+        async function login() {
+            const code = document.getElementById('loginCode').value.trim();
+            const rememberMe = document.getElementById('rememberMe').checked;
+            const alertEl = document.getElementById('loginAlert');
+            
+            // التحقق من المدخلات
+            if (!code) {
+                showAlert(alertEl, 'يرجى إدخال كود الدخول', 'error');
+                return;
+            }
+            
+            if (code.length !== 6) {
+                showAlert(alertEl, 'كود الدخول يجب أن يكون 6 أرقام', 'error');
+                return;
+            }
+            
+            // حفظ تذكرني
+            if (rememberMe) {
+                localStorage.setItem('rememberedCode', code);
+                localStorage.setItem('rememberMe', 'true');
+            } else {
+                localStorage.removeItem('rememberedCode');
+                localStorage.setItem('rememberMe', 'false');
+            }
+            
+            // التحقق من كود التحقق الخاص
+            if (code === "111111") {
+                systemState.isVerificationMode = true;
+                systemState.currentPlace = "وضع التحقق من البطاقة";
+                showPage('verifyPage');
+                return;
+            }
+            
+            // التحقق من صحة الكود
+            const codeData = LOGIN_CODES[code];
+            if (!codeData) {
+                showAlert(alertEl, 'كود الدخول غير صحيح', 'error');
+                return;
+            }
+            
+            try {
+                // التحقق من حد الجلسات
+                await checkSessionLimit(code);
+                
+                // حفظ بيانات المستخدم
+                systemState.currentUser = code;
+                systemState.currentPlace = codeData.place;
+                systemState.currentPlaceIdx = codeData.placeIdx;
+                systemState.isVerificationMode = false;
+                
+                // تحديث واجهة المستخدم
+                document.getElementById('welcomeTitle').textContent = `مرحبًا في ${codeData.place}`;
+                document.getElementById('placeSubtitle').textContent = `المكان: ${codeData.place}`;
+                document.getElementById('placeBadge').textContent = `المكان ${codeData.placeIdx}`;
+                
+                // تسجيل الجلسة
+                await registerSession(code);
+                
+                // الانتقال للصفحة الرئيسية
+                showPage('mainPage');
+                
+                // تهيئة النظام
+                loadEntryCounter();
+                startMessagesListener();
+                
+                // تشغيل صوت النجاح
+                playSound('success');
+                
+            } catch (error) {
+                showAlert(alertEl, `خطأ: ${error.message}`, 'error');
+            }
+        }
+
+        // التحقق من حد الجلسات
+        async function checkSessionLimit(code) {
+            // في نظام حقيقي، هنا يتم التحقق من قاعدة البيانات
+            // للتبسيط، سنقوم بمحاكاة العملية
+            return new Promise((resolve) => {
+                setTimeout(resolve, 100);
+            });
+        }
+
+        // تسجيل الجلسة
+        async function registerSession(code) {
+            // في نظام حقيقي، هنا يتم حفظ الجلسة في قاعدة البيانات
+            // للتبسيط، سنقوم بحفظها في localStorage
+            const sessionData = {
+                code: code,
+                deviceId: systemState.deviceId,
+                loginTime: new Date().toISOString(),
+                expiresAt: Date.now() + SYSTEM_CONFIG.sessionTimeout
+            };
+            
+            const sessions = JSON.parse(localStorage.getItem('activeSessions') || '{}');
+            sessions[`${code}_${systemState.deviceId}`] = sessionData;
+            localStorage.setItem('activeSessions', JSON.stringify(sessions));
+        }
+
+        // التحقق من البطاقة
+        async function checkCard() {
+            const natId = document.getElementById('verifyNatID').value.trim();
+            const alertEl = document.getElementById('verifyAlert');
+            
+            // التحقق من المدخلات
+            if (!natId) {
+                showAlert(alertEl, 'يرجى إدخال الرقم القومي', 'error');
+                return;
+            }
+            
+            if (!/^\d{14}$/.test(natId)) {
+                showAlert(alertEl, 'الرقم القومي يجب أن يكون 14 رقم', 'error');
+                return;
+            }
+            
+            try {
+                // محاكاة التحقق من قاعدة البيانات
+                const users = JSON.parse(localStorage.getItem('users') || '{}');
+                
+                if (users[natId]) {
+                    // البطاقة موجودة (نصابة)
+                    const userData = users[natId];
+                    playSound('duplicate');
+                    
+                    showAlert(alertEl, `
+                        ⚠️ <strong>بطاقة مسجلة مسبقًا</strong><br>
+                        📍 المكان: ${userData.place}<br>
+                        👤 المندوب: ${userData.repName}<br>
+                        ⏰ الوقت: ${new Date(userData.time).toLocaleString('ar-EG')}
+                    `, 'warning');
+                    
+                } else {
+                    // البطاقة غير موجودة (صحيحة)
+                    showAlert(alertEl, `
+                        ✅ <strong>البطاقة صحيحة</strong><br>
+                        يمكن تسجيل هذه البطاقة في النظام
+                    `, 'success');
+                    
+                    playSound('success');
+                }
+                
+                // تفريغ الحقل
+                document.getElementById('verifyNatID').value = '';
+                document.getElementById('verifyNatID').focus();
+                
+            } catch (error) {
+                showAlert(alertEl, `خطأ في التحقق: ${error.message}`, 'error');
+            }
+        }
+
+        // إضافة مستخدم جديد
+        async function addUser() {
+            const repName = document.getElementById('repName').value.trim();
+            const natId = document.getElementById('natID').value.trim();
+            const alertEl = document.getElementById('addAlert');
+            
+            // التحقق من المدخلات
+            if (!repName) {
+                showAlert(alertEl, 'يرجى إدخال اسم المندوب', 'error');
+                document.getElementById('repName').focus();
+                return;
+            }
+            
+            if (!natId) {
+                showAlert(alertEl, 'يرجى إدخال الرقم القومي', 'error');
+                document.getElementById('natID').focus();
+                return;
+            }
+            
+            if (!/^\d{14}$/.test(natId)) {
+                showAlert(alertEl, 'الرقم القومي يجب أن يكون 14 رقم', 'error');
+                return;
+            }
+            
+            if (!systemState.currentPlace) {
+                showAlert(alertEl, 'خطأ في تحديد المكان', 'error');
+                return;
+            }
+            
+            try {
+                // التحقق من تكرار الرقم القومي
+                const users = JSON.parse(localStorage.getItem('users') || '{}');
+                
+                if (users[natId]) {
+                    // اكتشاف نصابة
+                    const userData = users[natId];
+                    playSound('duplicate');
+                    
+                    showAlert(alertEl, `
+                        ⚠️ <strong>اكتشاف عملية نصب!</strong><br>
+                        📍 مسجل في: ${userData.place}<br>
+                        👤 بواسطة: ${userData.repName}<br>
+                        ⏰ منذ: ${new Date(userData.time).toLocaleString('ar-EG')}
+                    `, 'warning');
+                    
+                    // تسجيل محاولة النصابة
+                    const duplicates = JSON.parse(localStorage.getItem('duplicates') || '[]');
+                    duplicates.push({
+                        natId: natId,
+                        attemptBy: repName,
+                        attemptPlace: systemState.currentPlace,
+                        originalRep: userData.repName,
+                        originalPlace: userData.place,
+                        timestamp: new Date().toISOString(),
+                        deviceId: systemState.deviceId
+                    });
+                    localStorage.setItem('duplicates', JSON.stringify(duplicates));
+                    
+                    return;
+                }
+                
+                // حفظ المستخدم الجديد
+                users[natId] = {
+                    natId: natId,
+                    repName: repName,
+                    place: systemState.currentPlace,
+                    placeIdx: systemState.currentPlaceIdx,
+                    time: new Date().toISOString(),
+                    userCode: systemState.currentUser,
+                    deviceId: systemState.deviceId
+                };
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                // حفظ اسم المندوب
+                saveRepName(repName);
+                
+                // تحديث العداد
+                incrementEntryCounter();
+                
+                // إظهار رسالة النجاح
+                showAlert(alertEl, '✅ تمت إضافة البطاقة بنجاح', 'success');
+                playSound('success');
+                
+                // تفريغ الحقل
+                document.getElementById('natID').value = '';
+                document.getElementById('natID').focus();
+                
+                // تحديث قائمة المناديب في لوحة التحكم
+                if (getActivePage() === 'adminPage') {
+                    loadRepsList();
+                }
+                
+            } catch (error) {
+                showAlert(alertEl, `خطأ في الإضافة: ${error.message}`, 'error');
+            }
+        }
+
+        // حفظ اسم المندوب
+        function saveRepName(name) {
+            const savedNames = JSON.parse(localStorage.getItem('savedRepNames') || '[]');
+            if (!savedNames.includes(name)) {
+                savedNames.push(name);
+                localStorage.setItem('savedRepNames', JSON.stringify(savedNames));
+                loadRepNames();
+            }
+            
+            // تحديث اسم المندوب الحالي
+            systemState.currentRepName = name;
+        }
+
+        // تحميل أسماء المناديب
+        function loadRepNames() {
+            const savedNames = JSON.parse(localStorage.getItem('savedRepNames') || '[]');
+            const datalist = document.getElementById('repNamesList');
+            datalist.innerHTML = '';
+            
+            savedNames.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                datalist.appendChild(option);
+            });
+        }
+
+        // إدارة العداد
+        function loadEntryCounter() {
+            const repName = document.getElementById('repName').value.trim();
+            if (!repName) return;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const counters = JSON.parse(localStorage.getItem('entryCounters') || '{}');
+            
+            if (!counters[repName] || counters[repName].date !== today) {
+                counters[repName] = { date: today, count: 0 };
+                localStorage.setItem('entryCounters', JSON.stringify(counters));
+            }
+            
+            document.getElementById('entryCounter').textContent = counters[repName].count;
+            document.getElementById('adminCounter').textContent = counters[repName].count;
+        }
+
+        function incrementEntryCounter() {
+            const repName = document.getElementById('repName').value.trim();
+            if (!repName) return;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const counters = JSON.parse(localStorage.getItem('entryCounters') || '{}');
+            
+            if (!counters[repName] || counters[repName].date !== today) {
+                counters[repName] = { date: today, count: 1 };
+            } else {
+                counters[repName].count++;
+            }
+            
+            localStorage.setItem('entryCounters', JSON.stringify(counters));
+            loadEntryCounter();
+        }
+
+        // استماع لتغيير اسم المندوب
+        document.getElementById('repName').addEventListener('input', function() {
+            loadEntryCounter();
+            systemState.currentRepName = this.value.trim();
         });
-        
-        document.getElementById("welcome").textContent = `📍 ${userPlace}`;
-        document.getElementById("auth-card").classList.add("hidden");
-        document.getElementById("main-card").classList.remove("hidden");
-        document.getElementById("main-card").classList.add("fade-in");
-        
-        loadEntryCounter();
-        startMessagesListener();
-        
-        // تركيز على حقل اسم المندوب
-        setTimeout(() => {
-          document.getElementById("repName")?.focus();
-        }, 300);
-        
-      } catch (e) {
-        msg.textContent = "خطأ في الاتصال: " + e.message;
-        msg.classList.add("error");
-      }
-    };
 
-    // باقي الدوال تبقى كما هي مع بعض التحسينات الطفيفة في الرسائل
-    window.checkCard = async function () {
-      const msg = document.getElementById("verify-msg");
-      msg.textContent = "";
-      msg.className = "msg";
-      
-      const natid = document.getElementById("verifyNatID").value.trim();
-      
-      if (!/^\d{14}$/.test(natid)) {
-        msg.textContent = "الرقم القومي يجب أن يكون 14 رقم";
-        msg.classList.add("error");
-        return;
-      }
-      
-      try {
-        const userRef = ref(db, "users/" + natid);
-        const snapshot = await get(userRef);
-        
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          
-          playDuplicateAlarm();
-          
-          msg.className = "duplicate-box";
-          msg.innerHTML = `
-            ⚠️ بطاقة مسجلة مسبقًا<br>
-            📍 مسجلة في: <b>${data.place}</b><br>
-            👤 بواسطة: <b>${data.repName}</b><br>
-            ⏰ الوقت: ${new Date(data.time).toLocaleString('ar-EG')}
-          `;
-          
-          setTimeout(() => {
-            stopDuplicateAlarm();
-          }, 10000);
-          
-        } else {
-          stopDuplicateAlarm();
-          
-          msg.className = "verify-box";
-          msg.innerHTML = `
-            ✅ البطاقة صحيحة ويمكن تسجيلها<br>
-            <span style="font-size: 14px;">هذه البطاقة غير مسجلة في النظام</span>
-          `;
+        // الرسائل
+        function startMessagesListener() {
+            // في نظام حقيقي، هنا يتم الاتصال بـ Firebase للاستماع للرسائل
+            // للتبسيط، سنقوم بمحاكاة العملية
+            simulateMessages();
         }
-        
-        document.getElementById("verifyNatID").value = "";
-        document.getElementById("verifyNatID").focus();
-        
-      } catch (e) {
-        msg.textContent = "خطأ: " + e.message;
-        msg.classList.add("error");
-      }
-    };
 
-    // دالة إضافة مستخدم محسنة
-    window.addUser = async function () {
-      const msg = document.getElementById("add-msg");
-      msg.textContent = "";
-      msg.className = "msg";
-      
-      const name = document.getElementById("repName").value.trim();
-      const natid = document.getElementById("natID").value.trim();
-      
-      if (name.length < 2) {
-        msg.textContent = "يرجى إدخال اسم المندوب";
-        msg.classList.add("error");
-        document.getElementById("repName").focus();
-        return;
-      }
-      
-      if (!/^\d{14}$/.test(natid)) {
-        msg.textContent = "الرقم القومي يجب أن يكون 14 رقم";
-        msg.classList.add("error");
-        document.getElementById("natID").focus();
-        return;
-      }
-      
-      if (!userPlace) {
-        msg.textContent = "خطأ — لم يتم تحديد موقع الدخول";
-        msg.classList.add("error");
-        return;
-      }
-      
-      try {
-        const userRef = ref(db, "users/" + natid);
-        const snapshot = await get(userRef);
-        
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          
-          playDuplicateAlarm();
-          
-          msg.className = "duplicate-box";
-          msg.innerHTML = `
-            ⚠️ اكتشاف عملية نصب<br>
-            📍 مسجل في: <b>${data.place}</b><br>
-            👤 بواسطة: <b>${data.repName}</b><br>
-            ⏰ الوقت: ${new Date(data.time).toLocaleString('ar-EG')}
-          `;
-          
-          await push(ref(db, "duplicates"), {
-            duplicatedID: natid,
-            attemptByRep: name,
-            attemptPlace: userPlace,
-            originalRep: data.repName,
-            originalPlace: data.place,
-            timestamp: new Date().toISOString(),
-            deviceId: currentDeviceId
-          });
-          
-          saveRepName(name);
-          
-          setTimeout(() => {
-            stopDuplicateAlarm();
-          }, 10000);
-          
-          return;
+        function simulateMessages() {
+            // محاكاة وصول رسائل جديدة
+            setInterval(() => {
+                const messages = JSON.parse(localStorage.getItem('messages') || '[]');
+                const newMessages = messages.filter(msg => 
+                    !msg.read && 
+                    (msg.target === 'all' || 
+                     msg.target === systemState.currentPlace || 
+                     msg.target === systemState.currentRepName)
+                );
+                
+                if (newMessages.length > 0) {
+                    systemState.unreadMessages = newMessages.length;
+                    updateMessageBadge();
+                    
+                    // إظهار إشعار
+                    showNotification(newMessages[0]);
+                    playSound('message');
+                }
+            }, 30000); // التحقق كل 30 ثانية
         }
-        
-        await set(userRef, {
-          natid,
-          repName: name,
-          place: userPlace,
-          placeIdx: userPlaceIdx,
-          time: new Date().toISOString(),
-          username: userID,
-          deviceId: currentDeviceId
-        });
-        
-        saveRepName(name);
-        msg.textContent = "✅ تمت إضافة البطاقة بنجاح";
-        msg.classList.add("success");
-        document.getElementById("natID").value = "";
-        document.getElementById("natID").focus();
-        incrementEntryCounter();
-        
-        // إشعار بصوت نجاح
-        const successSound = new Audio('https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg');
-        successSound.volume = 0.3;
-        successSound.play().catch(() => {});
-        
-      } catch (e) {
-        msg.textContent = "خطأ: " + e.message;
-        msg.classList.add("error");
-      }
-    };
 
-    // دالة تحميل أسماء المناديب المحفوظة
-    function loadRepNames() {
-      let stored = JSON.parse(localStorage.getItem("saved_rep_names") || "[]");
-      const list = document.getElementById("repNamesHistory");
-      if (!list) return;
-      list.innerHTML = "";
-      stored.forEach(n => {
-        let o = document.createElement("option");
-        o.value = n;
-        list.appendChild(o);
-      });
-    }
+        function updateMessageBadge() {
+            const badge = document.getElementById('messageBadge');
+            if (systemState.unreadMessages > 0) {
+                badge.textContent = systemState.unreadMessages;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
 
-    // باقي الدوال تبقى كما هي مع تحسينات طفيفة
-    // ... (الدوال الأخرى تبقى كما هي مع تحسينات بسيطة في الرسائل)
+        function showNotification(message) {
+            const notificationArea = document.getElementById('notificationArea');
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+                <div class="notification-icon">📨</div>
+                <div class="notification-content">
+                    <div class="notification-title">رسالة جديدة</div>
+                    <div class="notification-message">${message.text}</div>
+                </div>
+            `;
+            
+            notificationArea.appendChild(notification);
+            
+            notification.onclick = function() {
+                showMessagesModal();
+                notification.remove();
+            };
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
 
-  </script>
+        // عرض نافذة الرسائل
+        function showMessagesModal() {
+            const messages = JSON.parse(localStorage.getItem('messages') || '[]');
+            const content = document.getElementById('messagesContent');
+            
+            if (messages.length === 0) {
+                content.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; color: #666;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">📭</div>
+                        <div style="font-size: 18px; font-weight: 600;">لا توجد رسائل</div>
+                        <div style="margin-top: 10px;">لم يتم إرسال أي رسائل حتى الآن</div>
+                    </div>
+                `;
+            } else {
+                let html = '';
+                messages.forEach((msg, index) => {
+                    const isUnread = !msg.read;
+                    html += `
+                        <div style="background: ${isUnread ? '#fff5f5' : '#f8f9fa'}; 
+                                   border-right: 4px solid ${isUnread ? '#e74c3c' : '#3498db'};
+                                   border-radius: 12px; padding: 15px; margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <strong style="color: #2c3e50;">${msg.target}</strong>
+                                <small style="color: #666;">${new Date(msg.time).toLocaleString('ar-EG')}</small>
+                            </div>
+                            <div style="color: #2c3e50; line-height: 1.6;">${msg.text}</div>
+                            ${isUnread ? `
+                                <div style="margin-top: 10px;">
+                                    <button onclick="markMessageAsRead(${index})" 
+                                            style="background: #2ecc71; color: white; border: none; 
+                                                   padding: 5px 10px; border-radius: 6px; 
+                                                   font-size: 12px; cursor: pointer;">
+                                        ✓ تمت القراءة
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+                content.innerHTML = html;
+            }
+            
+            document.getElementById('messagesModal').classList.add('active');
+        }
+
+        function closeMessagesModal() {
+            document.getElementById('messagesModal').classList.remove('active');
+            systemState.unreadMessages = 0;
+            updateMessageBadge();
+        }
+
+        function markMessageAsRead(index) {
+            const messages = JSON.parse(localStorage.getItem('messages') || '[]');
+            if (messages[index]) {
+                messages[index].read = true;
+                localStorage.setItem('messages', JSON.stringify(messages));
+                showMessagesModal();
+            }
+        }
+
+        // لوحة التحكم
+        function showAdminLogin() {
+            showPage('adminLoginPage');
+        }
+
+        function verifyAdmin() {
+            const password = document.getElementById('adminPassword').value;
+            const alertEl = document.getElementById('adminAlert');
+            
+            if (password === SYSTEM_CONFIG.adminPassword) {
+                showPage('adminPage');
+                loadAdminData();
+            } else {
+                showAlert(alertEl, 'كلمة المرور غير صحيحة', 'error');
+            }
+        }
+
+        function loadAdminData() {
+            loadMessagesList();
+            loadSessionsList();
+            loadRepsList();
+            loadEntryCounter();
+        }
+
+        function loadMessagesList() {
+            const messages = JSON.parse(localStorage.getItem('messages') || '[]');
+            const container = document.getElementById('messagesList');
+            
+            if (messages.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">لا توجد رسائل</div>';
+                return;
+            }
+            
+            let html = '';
+            messages.slice(0, 5).forEach((msg, index) => {
+                html += `
+                    <div class="list-item">
+                        <div>
+                            <div style="font-weight: 600;">${msg.target}</div>
+                            <div style="font-size: 12px; color: #666;">${msg.text.substring(0, 30)}...</div>
+                        </div>
+                        <div class="list-actions">
+                            <button class="btn-small" style="background: #e74c3c; color: white;" 
+                                    onclick="deleteMessage(${index})">
+                                حذف
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function loadSessionsList() {
+            const sessions = JSON.parse(localStorage.getItem('activeSessions') || '{}');
+            const container = document.getElementById('sessionsList');
+            
+            const sessionArray = Object.values(sessions);
+            if (sessionArray.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">لا توجد جلسات نشطة</div>';
+                return;
+            }
+            
+            let html = '';
+            sessionArray.slice(0, 5).forEach((session, index) => {
+                html += `
+                    <div class="list-item">
+                        <div>
+                            <div style="font-weight: 600;">كود: ${session.code}</div>
+                            <div style="font-size: 12px; color: #666;">جهاز: ${session.deviceId.substring(0, 8)}</div>
+                        </div>
+                        <div class="list-actions">
+                            <button class="btn-small" style="background: #e74c3c; color: white;" 
+                                    onclick="kickSession('${session.code}', '${session.deviceId}')">
+                                طرد
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function loadRepsList() {
+            const savedNames = JSON.parse(localStorage.getItem('savedRepNames') || '[]');
+            const container = document.getElementById('repsList');
+            
+            if (savedNames.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">لا توجد أسماء محفوظة</div>';
+                return;
+            }
+            
+            let html = '';
+            savedNames.forEach((name, index) => {
+                html += `
+                    <div class="list-item">
+                        <div style="font-weight: 600;">${name}</div>
+                        <div class="list-actions">
+                            <button class="btn-small" style="background: #e74c3c; color: white;" 
+                                    onclick="deleteRepName(${index})">
+                                حذف
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // وظائف التحكم في العداد
+        function adminIncCounter() {
+            const repName = document.getElementById('repName').value.trim();
+            if (!repName) {
+                alert('أدخل اسم المندوب أولاً');
+                return;
+            }
+            
+            const counters = JSON.parse(localStorage.getItem('entryCounters') || '{}');
+            const today = new Date().toISOString().split('T')[0];
+            
+            if (!counters[repName] || counters[repName].date !== today) {
+                counters[repName] = { date: today, count: 1 };
+            } else {
+                counters[repName].count++;
+            }
+            
+            localStorage.setItem('entryCounters', JSON.stringify(counters));
+            loadEntryCounter();
+        }
+
+        function adminDecCounter() {
+            const repName = document.getElementById('repName').value.trim();
+            if (!repName) {
+                alert('أدخل اسم المندوب أولاً');
+                return;
+            }
+            
+            const counters = JSON.parse(localStorage.getItem('entryCounters') || '{}');
+            const today = new Date().toISOString().split('T')[0];
+            
+            if (counters[repName] && counters[repName].date === today && counters[repName].count > 0) {
+                counters[repName].count--;
+                localStorage.setItem('entryCounters', JSON.stringify(counters));
+                loadEntryCounter();
+            }
+        }
+
+        function adminResetCounter() {
+            const repName = document.getElementById('repName').value.trim();
+            if (!repName) {
+                alert('أدخل اسم المندوب أولاً');
+                return;
+            }
+            
+            if (confirm(`هل تريد تصفير عداد ${repName}؟`)) {
+                const counters = JSON.parse(localStorage.getItem('entryCounters') || '{}');
+                const today = new Date().toISOString().split('T')[0];
+                counters[repName] = { date: today, count: 0 };
+                localStorage.setItem('entryCounters', JSON.stringify(counters));
+                loadEntryCounter();
+            }
+        }
+
+        // وظائف الإدارة
+        function deleteMessage(index) {
+            if (confirm('هل تريد حذف هذه الرسالة؟')) {
+                const messages = JSON.parse(localStorage.getItem('messages') || '[]');
+                messages.splice(index, 1);
+                localStorage.setItem('messages', JSON.stringify(messages));
+                loadMessagesList();
+            }
+        }
+
+        function deleteAllMessages() {
+            if (confirm('هل تريد حذف جميع الرسائل؟')) {
+                localStorage.removeItem('messages');
+                loadMessagesList();
+            }
+        }
+
+        function kickSession(code, deviceId) {
+            if (confirm('هل تريد طرد هذه الجلسة؟')) {
+                const sessions = JSON.parse(localStorage.getItem('activeSessions') || '{}');
+                delete sessions[`${code}_${deviceId}`];
+                localStorage.setItem('activeSessions', JSON.stringify(sessions));
+                loadSessionsList();
+            }
+        }
+
+        function deleteRepName(index) {
+            const savedNames = JSON.parse(localStorage.getItem('savedRepNames') || '[]');
+            const name = savedNames[index];
+            
+            if (confirm(`هل تريد حذف اسم "${name}"؟`)) {
+                savedNames.splice(index, 1);
+                localStorage.setItem('savedRepNames', JSON.stringify(savedNames));
+                loadRepsList();
+                loadRepNames();
+            }
+        }
+
+        // تسجيل الخروج
+        function logout() {
+            if (systemState.currentUser) {
+                // إزالة الجلسة
+                const sessions = JSON.parse(localStorage.getItem('activeSessions') || '{}');
+                delete sessions[`${systemState.currentUser}_${systemState.deviceId}`];
+                localStorage.setItem('activeSessions', JSON.stringify(sessions));
+            }
+            
+            // إعادة تعيين حالة النظام
+            systemState = {
+                currentUser: null,
+                currentPlace: null,
+                currentPlaceIdx: null,
+                isVerificationMode: false,
+                deviceId: systemState.deviceId,
+                messagesListener: null,
+                unreadMessages: 0,
+                currentRepName: ""
+            };
+            
+            // العودة لصفحة الدخول
+            showPage('loginPage');
+            
+            // تفريغ الحقول
+            document.getElementById('loginCode').value = '';
+            document.getElementById('repName').value = '';
+            document.getElementById('natID').value = '';
+        }
+
+        // وظائف مساعدة
+        function showAlert(element, message, type = 'info') {
+            element.innerHTML = message;
+            element.className = `alert alert-${type}`;
+            element.style.display = 'block';
+            
+            // إخفاء التنبيه بعد 5 ثواني
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        function playSound(type) {
+            const sound = document.getElementById(`sound${type.charAt(0).toUpperCase() + type.slice(1)}`);
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(e => console.log('تعذر تشغيل الصوت:', e));
+            }
+        }
+
+        // تهيئة بيانات تجريبية
+        function initSampleData() {
+            // بيانات تجريبية للاختبار
+            if (!localStorage.getItem('sampleDataInitialized')) {
+                const sampleMessages = [
+                    {
+                        target: 'all',
+                        text: 'مرحباً بالجميع، نرجو الالتزام بتسجيل البطاقات بدقة',
+                        time: new Date().toISOString(),
+                        read: false
+                    },
+                    {
+                        target: systemState.currentPlace || 'المنزلة الجديدة',
+                        text: 'تذكير: تسليم النقاط الساعة 6 مساءً',
+                        time: new Date(Date.now() - 3600000).toISOString(),
+                        read: false
+                    }
+                ];
+                localStorage.setItem('messages', JSON.stringify(sampleMessages));
+                localStorage.setItem('sampleDataInitialized', 'true');
+            }
+        }
+
+        // تهيئة البيانات عند التحميل
+        initSampleData();
+    </script>
 </body>
 </html>
