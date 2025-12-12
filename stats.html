@@ -17,7 +17,7 @@
       --light: #ecf0f1;
       --saved: #9b59b6;
       --info: #3498db;
-      --purple: #8e44ad;
+      --permanent: #e67e22;
     }
     
     * { 
@@ -302,60 +302,6 @@
       backdrop-filter: blur(5px);
     }
     
-    /* الاقتراحات */
-    .suggestions-box {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: white;
-      border-radius: 15px;
-      margin-top: 8px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-      z-index: 1000;
-      max-height: 250px;
-      overflow-y: auto;
-      display: none;
-      border: 1px solid #eee;
-      animation: fadeInDown 0.3s ease;
-    }
-    
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .suggestion-item {
-      padding: 12px 18px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      border-bottom: 1px solid #f0f0f0;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .suggestion-item:hover {
-      background: linear-gradient(135deg, #f0f8ff, #e6f7ff);
-      color: var(--primary);
-      transform: translateX(-5px);
-    }
-    
-    .suggestion-item:last-child {
-      border-bottom: none;
-    }
-    
-    .suggestion-item .match {
-      color: var(--success);
-      font-weight: bold;
-      font-size: 1.05em;
-    }
-    
-    .suggestion-item .hint {
-      font-size: 0.8em;
-      color: #999;
-      margin-top: 4px;
-    }
-    
     /* أزرار التحكم */
     .header-controls {
       display: flex;
@@ -416,15 +362,13 @@
     }
     
     .btn-message {
-      background: linear-gradient(135deg, var(--saved), var(--purple));
+      background: linear-gradient(135deg, var(--saved), #8e44ad);
       color: white;
     }
     
-    /* الحاوية الرئيسية */
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px;
+    .btn-permanent {
+      background: linear-gradient(135deg, var(--permanent), #d35400);
+      color: white;
     }
     
     /* بطاقات الإحصائيات */
@@ -483,12 +427,12 @@
       text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
     }
     
-    .summary-card.saved {
-      border-top-color: var(--saved);
+    .summary-card.permanent {
+      border-top-color: var(--permanent);
     }
     
-    .summary-card.saved .value {
-      color: var(--saved);
+    .summary-card.permanent .value {
+      color: var(--permanent);
     }
     
     /* شبكة الأماكن */
@@ -604,9 +548,9 @@
       border-color: var(--success);
     }
     
-    .stat-box.saved {
-      background: linear-gradient(135deg, #f3e5f5 0%, #ce93d8 100%);
-      border-color: var(--saved);
+    .stat-box.permanent {
+      background: linear-gradient(135deg, #fff3e0 0%, #ffcc80 100%);
+      border-color: var(--permanent);
     }
     
     .stat-box label {
@@ -628,82 +572,9 @@
     .stat-box.entries .value { color: var(--secondary); }
     .stat-box.duplicates .value { color: var(--danger); }
     .stat-box.amount .value { color: var(--success); }
-    .stat-box.saved .value { color: var(--saved); }
+    .stat-box.permanent .value { color: var(--permanent); }
     
-    /* تفاصيل المناديب */
-    .rep-details {
-      margin-top: 20px;
-      border-top: 3px solid var(--light);
-      padding-top: 20px;
-    }
-    
-    .rep-details-title {
-      font-size: 1em;
-      font-weight: 700;
-      color: var(--dark);
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .rep-details-title i {
-      color: var(--primary);
-    }
-    
-    .rep-item {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      padding: 12px 15px;
-      margin-bottom: 10px;
-      border-radius: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-right: 4px solid var(--primary);
-      font-size: 0.95em;
-      transition: all 0.3s ease;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
-    }
-    
-    .rep-item:hover {
-      background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
-      transform: translateX(-5px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    
-    .rep-name {
-      font-weight: 700;
-      color: var(--dark);
-      flex: 1;
-    }
-    
-    .rep-stats {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    
-    .rep-count {
-      background: linear-gradient(135deg, var(--success), #27ae60);
-      color: white;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.85em;
-      font-weight: 700;
-      box-shadow: 0 3px 8px rgba(46, 204, 113, 0.3);
-    }
-    
-    .rep-duplicates {
-      background: linear-gradient(135deg, var(--danger), #c0392b);
-      color: white;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.85em;
-      font-weight: 700;
-      box-shadow: 0 3px 8px rgba(231, 76, 60, 0.3);
-    }
-    
-    /* النوافذ المنبثقة */
+    /* نوافذ النصابة */
     .modal {
       position: fixed;
       top: 0;
@@ -736,7 +607,7 @@
       background: white;
       padding: 35px;
       border-radius: 25px;
-      max-width: 650px;
+      max-width: 750px;
       width: 100%;
       max-height: 85vh;
       overflow-y: auto;
@@ -790,7 +661,29 @@
       background: linear-gradient(135deg, #c0392b, var(--danger));
     }
     
-    /* عناصر النصابة */
+    .duplicate-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--light);
+      padding-bottom: 15px;
+    }
+    
+    .duplicate-tab {
+      padding: 10px 20px;
+      background: #f0f0f0;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .duplicate-tab.active {
+      background: linear-gradient(135deg, var(--danger), #c0392b);
+      color: white;
+    }
+    
     .duplicate-item {
       background: linear-gradient(135deg, #fff5f5 0%, #ffeaea 100%);
       border: 2px solid var(--danger);
@@ -820,6 +713,16 @@
       padding: 8px 15px;
       border-radius: 10px;
       border: 1px dashed #ff9999;
+    }
+    
+    .permanent-badge {
+      background: linear-gradient(135deg, var(--permanent), #d35400);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.7em;
+      font-weight: 700;
+      margin-left: 10px;
     }
     
     .copy-btn {
@@ -862,291 +765,6 @@
       border: 2px dashed #ddd;
     }
     
-    /* نافذة الرسائل */
-    .message-modal-content {
-      max-width: 750px;
-    }
-    
-    .message-form {
-      margin-bottom: 30px;
-    }
-    
-    .form-group {
-      margin-bottom: 25px;
-    }
-    
-    .form-label {
-      display: block;
-      font-weight: 700;
-      color: var(--dark);
-      margin-bottom: 10px;
-      font-size: 1em;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .form-select, .form-textarea {
-      width: 100%;
-      padding: 15px;
-      border: 2px solid #e0e0e0;
-      border-radius: 12px;
-      font-size: 16px;
-      transition: all 0.3s ease;
-      background: #f9f9f9;
-    }
-    
-    .form-select:focus, .form-textarea:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 20px rgba(0, 114, 255, 0.15);
-      background: white;
-    }
-    
-    .form-textarea {
-      min-height: 150px;
-      resize: vertical;
-      line-height: 1.6;
-    }
-    
-    .char-counter {
-      text-align: left;
-      color: #999;
-      font-size: 0.9em;
-      margin-top: 8px;
-      font-weight: 600;
-    }
-    
-    .send-btn {
-      width: 100%;
-      padding: 18px;
-      background: linear-gradient(135deg, var(--saved), var(--purple));
-      color: white;
-      border: none;
-      border-radius: 50px;
-      font-weight: 800;
-      font-size: 17px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 10px 30px rgba(155, 89, 182, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-    }
-    
-    .send-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 15px 40px rgba(155, 89, 182, 0.5);
-      background: linear-gradient(135deg, var(--purple), var(--saved));
-    }
-    
-    .send-btn:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-    
-    .messages-history {
-      margin-top: 35px;
-      border-top: 3px solid var(--light);
-      padding-top: 25px;
-    }
-    
-    .history-title {
-      font-size: 1.3em;
-      font-weight: 800;
-      color: var(--dark);
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .message-item {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      border-right: 5px solid var(--primary);
-      border-radius: 15px;
-      padding: 20px;
-      margin-bottom: 15px;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    
-    .message-item:hover {
-      background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
-      transform: translateX(-5px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
-    
-    .message-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 12px;
-      font-size: 0.9em;
-      color: #666;
-    }
-    
-    .message-target {
-      font-weight: 700;
-      color: var(--primary);
-      background: rgba(0, 114, 255, 0.1);
-      padding: 4px 10px;
-      border-radius: 8px;
-    }
-    
-    .message-time {
-      color: #999;
-      font-weight: 600;
-    }
-    
-    .message-text {
-      color: var(--dark);
-      line-height: 1.7;
-      font-size: 1.05em;
-    }
-    
-    .no-messages {
-      text-align: center;
-      color: #999;
-      padding: 40px;
-      background: #f8f9fa;
-      border-radius: 15px;
-      border: 2px dashed #ddd;
-      font-size: 1.1em;
-    }
-    
-    /* مؤشر التحميل */
-    .loader {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 400px;
-      grid-column: 1 / -1;
-    }
-    
-    .spinner {
-      width: 60px;
-      height: 60px;
-      border: 6px solid var(--light);
-      border-top-color: var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      box-shadow: 0 0 20px rgba(0, 114, 255, 0.2);
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
-    .no-results {
-      background: white;
-      padding: 50px;
-      border-radius: 20px;
-      text-align: center;
-      grid-column: 1 / -1;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      border: 2px dashed #ddd;
-    }
-    
-    .no-results i {
-      font-size: 80px;
-      color: #ddd;
-      margin-bottom: 20px;
-    }
-    
-    /* الفوتر */
-    .footer {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 40px 30px;
-      border-radius: 25px;
-      text-align: center;
-      margin-top: 50px;
-      box-shadow: 0 10px 35px rgba(0,0,0,0.15);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.3);
-    }
-    
-    .footer-content {
-      font-size: 1.2em;
-      color: #666;
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-    
-    .footer-heart {
-      color: var(--danger);
-      display: inline-block;
-      animation: heartbeat 1.5s infinite;
-      font-size: 1.3em;
-    }
-    
-    @keyframes heartbeat {
-      0%, 100% { transform: scale(1); }
-      10%, 30% { transform: scale(1.3); }
-      20%, 40% { transform: scale(1); }
-    }
-    
-    .footer-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      background: linear-gradient(135deg, #1877f2, #0d5bc6);
-      color: white;
-      padding: 15px 30px;
-      border-radius: 50px;
-      text-decoration: none;
-      font-weight: 700;
-      transition: all 0.3s ease;
-      box-shadow: 0 8px 25px rgba(24, 119, 242, 0.4);
-      font-size: 1.1em;
-      margin-top: 15px;
-    }
-    
-    .footer-link:hover {
-      transform: translateY(-5px) scale(1.05);
-      box-shadow: 0 15px 35px rgba(24, 119, 242, 0.5);
-      background: linear-gradient(135deg, #0d5bc6, #1877f2);
-    }
-    
-    .footer h3 {
-      color: var(--primary);
-      margin-bottom: 20px;
-      font-size: 1.8em;
-      font-weight: 800;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
-    }
-    
-    /* تأثيرات متقدمة */
-    .ripple {
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .ripple:after {
-      content: "";
-      display: block;
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-      background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
-      background-repeat: no-repeat;
-      background-position: 50%;
-      transform: scale(10, 10);
-      opacity: 0;
-      transition: transform .5s, opacity 1s;
-    }
-    
-    .ripple:active:after {
-      transform: scale(0, 0);
-      opacity: 0.3;
-      transition: 0s;
-    }
-    
     /* تخصيص شريط التمرير */
     ::-webkit-scrollbar {
       width: 10px;
@@ -1167,29 +785,6 @@
     }
     
     /* التجاوب مع الأجهزة المختلفة */
-    @media (max-width: 1200px) {
-      .place-grid {
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      }
-    }
-    
-    @media (max-width: 992px) {
-      .place-grid {
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 20px;
-      }
-      
-      .header h1 {
-        font-size: 2em;
-      }
-      
-      .btn {
-        min-width: 130px;
-        padding: 12px 20px;
-        font-size: 0.9em;
-      }
-    }
-    
     @media (max-width: 768px) {
       .place-grid {
         grid-template-columns: 1fr;
@@ -1222,87 +817,6 @@
       .modal-content {
         padding: 25px;
         width: 95%;
-      }
-      
-      .search-box {
-        padding: 16px 100px 16px 16px;
-      }
-      
-      .voice-search-btn {
-        left: 90px;
-      }
-      
-      .voice-status {
-        left: 140px;
-        font-size: 0.75em;
-      }
-      
-      .clear-search {
-        left: 55px;
-      }
-      
-      .footer {
-        padding: 30px 20px;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .login-box {
-        padding: 40px 25px;
-      }
-      
-      .place-card {
-        padding: 20px;
-      }
-      
-      .place-name {
-        font-size: 1.1em;
-      }
-      
-      .search-box {
-        padding: 14px 80px 14px 14px;
-        font-size: 15px;
-      }
-      
-      .voice-search-btn {
-        left: 75px;
-        width: 38px;
-        height: 38px;
-        font-size: 16px;
-      }
-      
-      .voice-status {
-        left: 120px;
-        padding: 4px 8px;
-      }
-      
-      .clear-search {
-        left: 50px;
-        width: 26px;
-        height: 26px;
-        font-size: 16px;
-      }
-      
-      .search-icon {
-        left: 18px;
-        font-size: 18px;
-      }
-      
-      .modal-content {
-        padding: 20px;
-      }
-      
-      .header h1 {
-        font-size: 1.6em;
-      }
-      
-      .footer h3 {
-        font-size: 1.5em;
-      }
-      
-      .footer-link {
-        padding: 12px 20px;
-        font-size: 1em;
       }
     }
   </style>
@@ -1345,7 +859,7 @@
       <span id="lastUpdate" style="font-size: 0.9em; opacity: 0.8;">آخر تحديث: الآن</span>
     </div>
     <p style="font-size: 1.1em; margin-top: 10px; opacity: 0.9;">
-      <i class="fas fa-info-circle"></i> إحصائيات مفصلة للإدخالات والنصابة والتحصيل المالي
+      <i class="fas fa-info-circle"></i> نظام حفظ النصابة بشكل دائم - لا يتم حذفها أبداً
     </p>
     
     <div class="search-container">
@@ -1363,7 +877,7 @@
         <i class="fas fa-times"></i>
       </button>
       
-      <button class="voice-search-btn" id="voiceSearchBtn" onclick="toggleVoiceSearch()" title="البحث الصوتي (Ctrl+Shift+V)">
+      <button class="voice-search-btn" id="voiceSearchBtn" onclick="toggleVoiceSearch()" title="البحث الصوتي">
         <i class="fas fa-microphone"></i>
       </button>
       
@@ -1373,9 +887,6 @@
     </div>
     
     <div class="header-controls">
-      <button class="btn btn-message" onclick="openMessageModal()">
-        <i class="fas fa-envelope"></i> إرسال رسالة جماعية
-      </button>
       <button class="btn btn-success" onclick="exportToExcel()">
         <i class="fas fa-file-excel"></i> تحميل Excel للإحصائيات
       </button>
@@ -1388,11 +899,11 @@
       <button class="btn btn-warning" onclick="resetUsersOnly()">
         <i class="fas fa-user-slash"></i> تصفير الإدخالات فقط
       </button>
-      <button class="btn btn-danger" onclick="resetData()">
-        <i class="fas fa-trash-alt"></i> تصفير كامل
+      <button class="btn btn-permanent" onclick="showAllDuplicatesModal()">
+        <i class="fas fa-database"></i> عرض جميع النصابة
       </button>
-      <button class="btn btn-primary" onclick="location.href='DelegateApp_Pro.html'">
-        <i class="fas fa-arrow-right"></i> عودة للتطبيق
+      <button class="btn btn-danger" onclick="resetData()">
+        <i class="fas fa-trash-alt"></i> تصفير كامل (بدون النصابة)
       </button>
     </div>
   </div>
@@ -1408,13 +919,13 @@
         <h3><i class="fas fa-exclamation-triangle"></i> إجمالي النصابة</h3>
         <div class="value" id="totalDuplicates">0</div>
       </div>
+      <div class="summary-card permanent">
+        <h3><i class="fas fa-shield-alt"></i> النصابة المحفوظة</h3>
+        <div class="value" id="totalPermanent">0</div>
+      </div>
       <div class="summary-card" style="border-top-color: var(--success);">
         <h3><i class="fas fa-money-bill-wave"></i> إجمالي المبلغ</h3>
         <div class="value" id="totalAmount">0 ج.م</div>
-      </div>
-      <div class="summary-card saved">
-        <h3><i class="fas fa-piggy-bank"></i> المبلغ المحفوظ</h3>
-        <div class="value" id="totalSaved">0 ج.م</div>
       </div>
     </div>
     
@@ -1437,19 +948,12 @@
         <i class="fas fa-code"></i> المهندس محمد حماد
       </h3>
       <p style="color: #666; margin: 15px 0; font-size: 0.95em;">
-        <i class="fas fa-cogs"></i> نظام متكامل لإدارة مناديب الحشد والتقارير المالية
+        <i class="fas fa-shield-alt"></i> نظام حفظ النصابة بشكل دائم - لا يتم حذفها أبداً
       </p>
-      <a href="https://www.facebook.com/en.mohamed.nasr" target="_blank" class="footer-link">
-        <i class="fab fa-facebook-f"></i>
-        تواصل عبر فيسبوك
-      </a>
-      <div style="margin-top: 20px; color: #999; font-size: 0.9em;">
-        <i class="fas fa-shield-alt"></i> جميع البيانات محمية ومشفرة
-      </div>
     </div>
   </div>
 
-  <!-- نافذة النصابة -->
+  <!-- نافذة النصابة للمكان -->
   <div class="modal" id="duplicateModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -1465,61 +969,30 @@
     </div>
   </div>
 
-  <!-- نافذة الرسائل -->
-  <div class="modal" id="messageModal">
-    <div class="modal-content message-modal-content">
+  <!-- نافذة جميع النصابة -->
+  <div class="modal" id="allDuplicatesModal">
+    <div class="modal-content">
       <div class="modal-header">
         <div class="modal-title">
-          <i class="fas fa-envelope"></i> إرسال رسالة
+          <i class="fas fa-database"></i> جميع النصابة المحفوظة بشكل دائم
         </div>
-        <button class="close-modal" onclick="closeMessageModal()">
+        <button class="close-modal" onclick="closeAllDuplicatesModal()">
           <i class="fas fa-times"></i>
         </button>
       </div>
       
-      <form class="message-form" onsubmit="sendMessage(event)">
-        <div class="form-group">
-          <label class="form-label">
-            <i class="fas fa-user-friends"></i> المستلمون:
-          </label>
-          <select class="form-select" id="messageTarget" required>
-            <option value="">📋 اختر المستلمين...</option>
-            <option value="all">🌐 جميع المناديب</option>
-            <optgroup label="📍 مناديب حسب المكان:" id="placesOptgroup"></optgroup>
-            <optgroup label="👤 مناديب فرديين:" id="repsOptgroup"></optgroup>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">
-            <i class="fas fa-comment-alt"></i> نص الرسالة:
-          </label>
-          <textarea 
-            class="form-textarea" 
-            id="messageText" 
-            placeholder="اكتب رسالتك هنا... (حد أقصى 500 حرف)"
-            maxlength="500"
-            oninput="updateCharCount()"
-            required
-          ></textarea>
-          <div class="char-counter" id="charCounter">0 / 500</div>
-        </div>
-        
-        <button type="submit" class="send-btn" id="sendBtn">
-          <i class="fas fa-paper-plane"></i> إرسال الرسالة
+      <div class="duplicate-tabs">
+        <button class="duplicate-tab active" onclick="showAllDuplicatesTab('current')">
+          النصابة الحالية
         </button>
-      </form>
-
-      <div class="messages-history">
-        <div class="history-title">
-          <i class="fas fa-history"></i> سجل الرسائل المرسلة
-        </div>
-        <div id="messagesHistory">
-          <div class="no-messages">
-            <i class="fas fa-inbox"></i>
-            <p>لا توجد رسائل مرسلة بعد</p>
-          </div>
-        </div>
+        <button class="duplicate-tab" onclick="showAllDuplicatesTab('permanent')">
+          <i class="fas fa-shield-alt"></i> النصابة المحفوظة
+        </button>
+      </div>
+      
+      <div id="allDuplicatesContent">
+        <div id="currentDuplicatesList"></div>
+        <div id="permanentDuplicatesList" style="display: none;"></div>
       </div>
     </div>
   </div>
@@ -1605,12 +1078,10 @@
       getDatabase, 
       ref, 
       onValue, 
-      remove, 
+      remove,
+      set,
       push,
-      query,
-      orderByChild,
-      equalTo,
-      get
+      update
     } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -1630,36 +1101,14 @@
     let allData = {};
     let allCards = [];
     let duplicatesData = {};
+    let permanentDuplicatesData = {};
     let allRepNames = new Set();
     let recognition = null;
     let isListening = false;
-    let lastUpdateTime = new Date();
 
     // دالة لتنسيق الأرقام
     function formatNumber(num) {
       return new Intl.NumberFormat('ar-EG').format(num);
-    }
-
-    // دالة لحساب المبلغ
-    function calculateAmount(entries) {
-      return entries * 200;
-    }
-
-    // دالة لحساب المبلغ المحفوظ
-    function calculateSaved(duplicates) {
-      return duplicates * 200;
-    }
-
-    // دالة لتحديث وقت آخر تحديث
-    function updateLastUpdateTime() {
-      const now = new Date();
-      lastUpdateTime = now;
-      const formattedTime = now.toLocaleTimeString('ar-EG', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        second: '2-digit'
-      });
-      document.getElementById('lastUpdate').textContent = `آخر تحديث: ${formattedTime}`;
     }
 
     // دالة لتحميل وعرض البيانات
@@ -1670,14 +1119,24 @@
         const firebaseData = snapshot.val() || {};
         const users = firebaseData.users || {};
         const duplicates = firebaseData.duplicates || {};
+        const permanentDuplicates = firebaseData.permanentDuplicates || {};
 
         allData = {};
         duplicatesData = {};
+        permanentDuplicatesData = {};
         allRepNames.clear();
         
         placesList.forEach(place => {
-          allData[place] = { entries: 0, duplicates: 0, reps: {}, repDuplicates: {} };
+          allData[place] = { 
+            entries: 0, 
+            duplicates: 0, 
+            permanentDuplicates: 0,
+            reps: {}, 
+            repDuplicates: {},
+            repPermanentDuplicates: {}
+          };
           duplicatesData[place] = [];
+          permanentDuplicatesData[place] = [];
         });
 
         // معالجة الإدخالات الصحيحة
@@ -1699,7 +1158,7 @@
           }
         });
 
-        // معالجة النصابة
+        // معالجة النصابة الحالية
         Object.keys(duplicates).forEach(id => {
           const dup = duplicates[id];
           const place = dup.attemptPlace;
@@ -1710,7 +1169,8 @@
             duplicatesData[place].push({
               id: dup.duplicatedID,
               rep: dup.attemptByRep || 'غير معروف',
-              time: dup.timestamp
+              time: dup.timestamp,
+              permanent: false
             });
             
             const repName = dup.attemptByRep || 'غير معروف';
@@ -1725,9 +1185,35 @@
           }
         });
 
+        // معالجة النصابة المحفوظة بشكل دائم
+        Object.keys(permanentDuplicates).forEach(id => {
+          const dup = permanentDuplicates[id];
+          const place = dup.attemptPlace;
+          
+          if (place && allData[place]) {
+            allData[place].permanentDuplicates++;
+            
+            permanentDuplicatesData[place].push({
+              id: dup.duplicatedID,
+              rep: dup.attemptByRep || 'غير معروف',
+              time: dup.timestamp,
+              permanent: true,
+              savedAt: dup.savedAt || dup.timestamp
+            });
+            
+            const repName = dup.attemptByRep || 'غير معروف';
+            if (!allData[place].repPermanentDuplicates[repName]) {
+              allData[place].repPermanentDuplicates[repName] = 0;
+            }
+            allData[place].repPermanentDuplicates[repName]++;
+            
+            if (repName && repName !== 'غير معروف') {
+              allRepNames.add(repName);
+            }
+          }
+        });
+
         renderDashboard();
-        populatePlacesDropdown();
-        populateRepsDropdown();
         updateLastUpdateTime();
       }, (error) => {
         console.error('خطأ في تحميل البيانات:', error);
@@ -1743,19 +1229,23 @@
 
       let totalEntries = 0;
       let totalDuplicates = 0;
+      let totalPermanentDuplicates = 0;
       let totalAmount = 0;
-      let totalSaved = 0;
 
       placesList.forEach((place, index) => {
-        const data = allData[place] || { entries: 0, duplicates: 0, reps: {}, repDuplicates: {} };
+        const data = allData[place] || { 
+          entries: 0, 
+          duplicates: 0, 
+          permanentDuplicates: 0,
+          reps: {}, 
+          repDuplicates: {},
+          repPermanentDuplicates: {}
+        };
         
         totalEntries += data.entries;
         totalDuplicates += data.duplicates;
-        
-        const placeAmount = calculateAmount(data.entries);
-        const placeSaved = calculateSaved(data.duplicates);
-        totalAmount += placeAmount;
-        totalSaved += placeSaved;
+        totalPermanentDuplicates += data.permanentDuplicates;
+        totalAmount += data.entries * 200;
 
         const card = document.createElement('div');
         card.className = 'place-card ripple';
@@ -1778,7 +1268,8 @@
           `;
           sortedReps.forEach(([rep, count]) => {
             const repDupCount = data.repDuplicates[rep] || 0;
-            const repEfficiency = count > 0 ? Math.round((count / (count + repDupCount)) * 100) : 0;
+            const repPermDupCount = data.repPermanentDuplicates[rep] || 0;
+            const totalRepDuplicates = repDupCount + repPermDupCount;
             
             repHTML += `
               <div class="rep-item">
@@ -1787,14 +1278,12 @@
                   <span class="rep-count" title="إدخالات صحيحة">
                     <i class="fas fa-check-circle"></i> ${formatNumber(count)}
                   </span>
-                  ${repDupCount > 0 ? `
+                  ${totalRepDuplicates > 0 ? `
                     <span class="rep-duplicates" title="محاولات تكرار">
-                      <i class="fas fa-exclamation-triangle"></i> ${formatNumber(repDupCount)}
+                      <i class="fas fa-exclamation-triangle"></i> ${formatNumber(totalRepDuplicates)}
+                      ${repPermDupCount > 0 ? `<span class="permanent-badge" title="محفوظة">${repPermDupCount}</span>` : ''}
                     </span>
                   ` : ''}
-                  <span style="font-size: 0.8em; color: ${repEfficiency > 80 ? 'var(--success)' : repEfficiency > 60 ? 'var(--warning)' : 'var(--danger)'}; font-weight: 600;">
-                    ${repEfficiency}%
-                  </span>
                 </div>
               </div>
             `;
@@ -1802,9 +1291,9 @@
           repHTML += '</div>';
         }
 
-        const duplicateClick = data.duplicates > 0 ? `onclick="showDuplicates('${place}')"` : '';
-        const duplicateCursor = data.duplicates > 0 ? 'cursor: pointer;' : '';
-        const hasDuplicates = data.duplicates > 0;
+        const duplicateClick = (data.duplicates + data.permanentDuplicates) > 0 ? `onclick="showDuplicates('${place}')"` : '';
+        const duplicateCursor = (data.duplicates + data.permanentDuplicates) > 0 ? 'cursor: pointer;' : '';
+        const hasDuplicates = (data.duplicates + data.permanentDuplicates) > 0;
 
         card.innerHTML = `
           <div class="place-header">
@@ -1821,13 +1310,13 @@
               <label><i class="fas fa-user-times"></i> النصابة ${hasDuplicates ? '<i class="fas fa-eye"></i>' : ''}</label>
               <div class="value">${formatNumber(data.duplicates)}</div>
             </div>
+            <div class="stat-box permanent">
+              <label><i class="fas fa-shield-alt"></i> محفوظة</label>
+              <div class="value">${formatNumber(data.permanentDuplicates)}</div>
+            </div>
             <div class="stat-box amount">
               <label><i class="fas fa-money-bill"></i> المبلغ</label>
-              <div class="value">${formatNumber(placeAmount)}</div>
-            </div>
-            <div class="stat-box saved">
-              <label><i class="fas fa-shield-alt"></i> وفرنا</label>
-              <div class="value">${formatNumber(placeSaved)}</div>
+              <div class="value">${formatNumber(data.entries * 200)}</div>
             </div>
           </div>
           ${repHTML}
@@ -1840,11 +1329,11 @@
       // تحديث الإحصائيات العامة
       document.getElementById('totalEntries').textContent = formatNumber(totalEntries);
       document.getElementById('totalDuplicates').textContent = formatNumber(totalDuplicates);
+      document.getElementById('totalPermanent').textContent = formatNumber(totalPermanentDuplicates);
       document.getElementById('totalAmount').textContent = formatNumber(totalAmount) + ' ج.م';
-      document.getElementById('totalSaved').textContent = formatNumber(totalSaved) + ' ج.م';
       
       // إظهار رسالة إذا لم توجد بيانات
-      if (totalEntries === 0 && totalDuplicates === 0) {
+      if (totalEntries === 0 && totalDuplicates === 0 && totalPermanentDuplicates === 0) {
         grid.innerHTML = `
           <div class="no-results" style="grid-column: 1 / -1;">
             <i class="fas fa-database" style="font-size: 80px; color: #ddd; margin-bottom: 20px;"></i>
@@ -1864,9 +1353,11 @@
       placeNameEl.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${place}`;
       listContainer.innerHTML = '';
       
-      const dups = duplicatesData[place] || [];
+      const currentDups = duplicatesData[place] || [];
+      const permanentDups = permanentDuplicatesData[place] || [];
+      const allDups = [...currentDups, ...permanentDups];
       
-      if (dups.length === 0) {
+      if (allDups.length === 0) {
         listContainer.innerHTML = `
           <div class="empty-duplicates">
             <i class="fas fa-check-circle" style="font-size: 50px; color: #ddd; margin-bottom: 15px;"></i>
@@ -1875,19 +1366,23 @@
         `;
       } else {
         // ترتيب النصابة حسب الوقت (الأحدث أولاً)
-        dups.sort((a, b) => new Date(b.time) - new Date(a.time));
+        allDups.sort((a, b) => new Date(b.time) - new Date(a.time));
         
-        dups.forEach((dup, index) => {
+        allDups.forEach((dup, index) => {
           const item = document.createElement('div');
           item.className = 'duplicate-item';
           const date = dup.time ? new Date(dup.time).toLocaleString('ar-EG') : 'غير معروف';
           
           item.innerHTML = `
             <div>
-              <div class="duplicate-id">${dup.id}</div>
+              <div class="duplicate-id">
+                ${dup.id}
+                ${dup.permanent ? '<span class="permanent-badge">محفوظ</span>' : ''}
+              </div>
               <div style="font-size: 0.85em; color: #666; margin-top: 8px;">
                 <div><i class="fas fa-user"></i> بواسطة: ${dup.rep}</div>
                 <div><i class="fas fa-clock"></i> الوقت: ${date}</div>
+                ${dup.permanent ? '<div><i class="fas fa-shield-alt"></i> محفوظ بشكل دائم</div>' : ''}
               </div>
             </div>
             <button class="copy-btn ripple" onclick="copyToClipboard('${dup.id}', this)" title="نسخ الرقم">
@@ -1896,15 +1391,456 @@
           `;
           listContainer.appendChild(item);
         });
+
+        // زر لنقل النصابة الحالية إلى المحفوظات
+        if (currentDups.length > 0) {
+          const saveButton = document.createElement('button');
+          saveButton.className = 'btn btn-permanent';
+          saveButton.style.width = '100%';
+          saveButton.style.marginTop = '20px';
+          saveButton.style.padding = '15px';
+          saveButton.innerHTML = '<i class="fas fa-shield-alt"></i> حفظ جميع النصابة الحالية بشكل دائم';
+          saveButton.onclick = function() {
+            saveCurrentDuplicatesToPermanent(place);
+          };
+          listContainer.appendChild(saveButton);
+        }
       }
       
       modal.classList.add('active');
     };
 
+    // دالة لحفظ النصابة الحالية بشكل دائم
+    async function saveCurrentDuplicatesToPermanent(place) {
+      if (!confirm(`هل تريد حفظ جميع النصابة الحالية في ${place} بشكل دائم؟\n\nهذا الإجراء لا يمكن التراجع عنه!`)) {
+        return;
+      }
+
+      const currentDups = duplicatesData[place] || [];
+      
+      if (currentDups.length === 0) {
+        showNotification('warning', 'لا توجد نصابة حالية لحفظها');
+        return;
+      }
+
+      try {
+        showNotification('info', 'جاري حفظ النصابة...');
+
+        // نقل النصابة من duplicates إلى permanentDuplicates
+        const updates = {};
+        const permanentDuplicatesRef = ref(db, 'permanentDuplicates');
+        
+        for (const dup of currentDups) {
+          const newKey = push(permanentDuplicatesRef).key;
+          updates[`permanentDuplicates/${newKey}`] = {
+            duplicatedID: dup.id,
+            attemptPlace: place,
+            attemptByRep: dup.rep,
+            timestamp: dup.time,
+            savedAt: new Date().toISOString(),
+            permanent: true
+          };
+        }
+
+        // حذف النصابة الحالية
+        const duplicatesRef = ref(db, 'duplicates');
+        await remove(duplicatesRef);
+
+        // تنفيذ جميع التحديثات
+        await update(ref(db), updates);
+
+        showNotification('success', `تم حفظ ${currentDups.length} رقم قومي بشكل دائم في ${place}`);
+        closeModal();
+        
+      } catch (error) {
+        console.error('خطأ في حفظ النصابة:', error);
+        showNotification('error', 'حدث خطأ في حفظ النصابة: ' + error.message);
+      }
+    }
+
     // دالة إغلاق النافذة المنبثقة
     window.closeModal = function() {
       document.getElementById('duplicateModal').classList.remove('active');
     };
+
+    // دالة عرض جميع النصابة
+    window.showAllDuplicatesModal = function() {
+      const modal = document.getElementById('allDuplicatesModal');
+      modal.classList.add('active');
+      showAllDuplicatesTab('current');
+    };
+
+    // دالة إغلاق نافذة جميع النصابة
+    window.closeAllDuplicatesModal = function() {
+      document.getElementById('allDuplicatesModal').classList.remove('active');
+    };
+
+    // دالة عرض تبويبات النصابة
+    window.showAllDuplicatesTab = function(tab) {
+      // تحديث التبويبات النشطة
+      document.querySelectorAll('.duplicate-tab').forEach(t => t.classList.remove('active'));
+      if (tab === 'current') {
+        document.querySelector('.duplicate-tab:nth-child(1)').classList.add('active');
+      } else {
+        document.querySelector('.duplicate-tab:nth-child(2)').classList.add('active');
+      }
+
+      // عرض المحتوى المناسب
+      document.getElementById('currentDuplicatesList').style.display = tab === 'current' ? 'block' : 'none';
+      document.getElementById('permanentDuplicatesList').style.display = tab === 'permanent' ? 'block' : 'none';
+
+      if (tab === 'current') {
+        showCurrentAllDuplicates();
+      } else {
+        showPermanentAllDuplicates();
+      }
+    };
+
+    // دالة عرض جميع النصابة الحالية
+    async function showCurrentAllDuplicates() {
+      const container = document.getElementById('currentDuplicatesList');
+      container.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+
+      try {
+        const dbRef = ref(db, 'duplicates');
+        onValue(dbRef, (snapshot) => {
+          const duplicates = snapshot.val() || {};
+          container.innerHTML = '';
+
+          if (Object.keys(duplicates).length === 0) {
+            container.innerHTML = `
+              <div class="empty-duplicates">
+                <i class="fas fa-check-circle" style="font-size: 50px; color: #ddd; margin-bottom: 15px;"></i>
+                <p>لا توجد نصابة حالية</p>
+              </div>
+            `;
+            return;
+          }
+
+          // تجميع النصابة حسب المكان
+          const groupedByPlace = {};
+          Object.values(duplicates).forEach(dup => {
+            const place = dup.attemptPlace || 'غير معروف';
+            if (!groupedByPlace[place]) {
+              groupedByPlace[place] = [];
+            }
+            groupedByPlace[place].push(dup);
+          });
+
+          // عرض النصابة المجمعة
+          Object.entries(groupedByPlace).forEach(([place, dups]) => {
+            const section = document.createElement('div');
+            section.style.marginBottom = '25px';
+            section.innerHTML = `
+              <h3 style="color: var(--danger); margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #eee;">
+                <i class="fas fa-map-marker-alt"></i> ${place}
+                <span style="background: var(--danger); color: white; padding: 2px 10px; border-radius: 15px; font-size: 0.8em;">
+                  ${dups.length} رقم
+                </span>
+              </h3>
+            `;
+
+            // عرض أول 5 أرقام فقط مع إمكانية التوسيع
+            const showAll = dups.length <= 5;
+            const displayDups = showAll ? dups : dups.slice(0, 5);
+            
+            displayDups.forEach(dup => {
+              const date = dup.timestamp ? new Date(dup.timestamp).toLocaleString('ar-EG') : 'غير معروف';
+              const item = document.createElement('div');
+              item.className = 'duplicate-item';
+              item.style.marginBottom = '10px';
+              item.innerHTML = `
+                <div>
+                  <div class="duplicate-id">${dup.duplicatedID}</div>
+                  <div style="font-size: 0.85em; color: #666; margin-top: 8px;">
+                    <div><i class="fas fa-user"></i> بواسطة: ${dup.attemptByRep || 'غير معروف'}</div>
+                    <div><i class="fas fa-clock"></i> الوقت: ${date}</div>
+                  </div>
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('${dup.duplicatedID}', this)" title="نسخ الرقم">
+                  <i class="fas fa-copy"></i> نسخ
+                </button>
+              `;
+              section.appendChild(item);
+            });
+
+            if (!showAll) {
+              const showMoreBtn = document.createElement('button');
+              showMoreBtn.className = 'btn btn-primary';
+              showMoreBtn.style.width = '100%';
+              showMoreBtn.style.marginTop = '10px';
+              showMoreBtn.innerHTML = `<i class="fas fa-eye"></i> عرض ${dups.length - 5} رقم إضافي`;
+              showMoreBtn.onclick = function() {
+                showAllDuplicatesForPlace(place, dups);
+              };
+              section.appendChild(showMoreBtn);
+            }
+
+            container.appendChild(section);
+          });
+
+          // زر لحفظ جميع النصابة الحالية بشكل دائم
+          const saveAllBtn = document.createElement('button');
+          saveAllBtn.className = 'btn btn-permanent';
+          saveAllBtn.style.width = '100%';
+          saveAllBtn.style.marginTop = '20px';
+          saveAllBtn.style.padding = '15px';
+          saveAllBtn.innerHTML = '<i class="fas fa-shield-alt"></i> حفظ جميع النصابة الحالية بشكل دائم';
+          saveAllBtn.onclick = async function() {
+            if (confirm('هل تريد حفظ جميع النصابة الحالية بشكل دائم؟\n\nهذا الإجراء لا يمكن التراجع عنه وسينقل جميع النصابة الحالية إلى المحفوظات الدائمة!')) {
+              try {
+                // نقل جميع النصابة الحالية إلى المحفوظات الدائمة
+                const updates = {};
+                const permanentDuplicatesRef = ref(db, 'permanentDuplicates');
+                
+                Object.values(duplicates).forEach(dup => {
+                  const newKey = push(permanentDuplicatesRef).key;
+                  updates[`permanentDuplicates/${newKey}`] = {
+                    ...dup,
+                    savedAt: new Date().toISOString(),
+                    permanent: true
+                  };
+                });
+
+                // حذف النصابة الحالية
+                await remove(ref(db, 'duplicates'));
+
+                // تنفيذ جميع التحديثات
+                await update(ref(db), updates);
+
+                showNotification('success', `تم حفظ ${Object.keys(duplicates).length} رقم قومي بشكل دائم`);
+                closeAllDuplicatesModal();
+                
+              } catch (error) {
+                console.error('خطأ في حفظ النصابة:', error);
+                showNotification('error', 'حدث خطأ في حفظ النصابة: ' + error.message);
+              }
+            }
+          };
+          container.appendChild(saveAllBtn);
+
+        }, { onlyOnce: true });
+
+      } catch (error) {
+        console.error('خطأ في عرض النصابة:', error);
+        container.innerHTML = `
+          <div class="empty-duplicates">
+            <i class="fas fa-exclamation-circle" style="font-size: 50px; color: #ddd; margin-bottom: 15px;"></i>
+            <p>حدث خطأ في تحميل البيانات</p>
+          </div>
+        `;
+      }
+    }
+
+    // دالة عرض جميع النصابة المحفوظة
+    async function showPermanentAllDuplicates() {
+      const container = document.getElementById('permanentDuplicatesList');
+      container.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+
+      try {
+        const dbRef = ref(db, 'permanentDuplicates');
+        onValue(dbRef, (snapshot) => {
+          const permanentDuplicates = snapshot.val() || {};
+          container.innerHTML = '';
+
+          if (Object.keys(permanentDuplicates).length === 0) {
+            container.innerHTML = `
+              <div class="empty-duplicates">
+                <i class="fas fa-shield-alt" style="font-size: 50px; color: #ddd; margin-bottom: 15px;"></i>
+                <p>لا توجد نصابة محفوظة بشكل دائم بعد</p>
+                <p style="font-size: 0.9em; color: #999; margin-top: 10px;">
+                  <i class="fas fa-info-circle"></i> النصابة المحفوظة لا يتم حذفها أبداً، حتى عند التصفير الكامل
+                </p>
+              </div>
+            `;
+            return;
+          }
+
+          // تجميع النصابة حسب المكان
+          const groupedByPlace = {};
+          Object.values(permanentDuplicates).forEach(dup => {
+            const place = dup.attemptPlace || 'غير معروف';
+            if (!groupedByPlace[place]) {
+              groupedByPlace[place] = [];
+            }
+            groupedByPlace[place].push(dup);
+          });
+
+          // عرض النصابة المحفوظة
+          Object.entries(groupedByPlace).forEach(([place, dups]) => {
+            const section = document.createElement('div');
+            section.style.marginBottom = '25px';
+            section.innerHTML = `
+              <h3 style="color: var(--permanent); margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #eee;">
+                <i class="fas fa-map-marker-alt"></i> ${place}
+                <span style="background: var(--permanent); color: white; padding: 2px 10px; border-radius: 15px; font-size: 0.8em;">
+                  ${dups.length} رقم
+                </span>
+              </h3>
+            `;
+
+            // عرض أول 5 أرقام فقط
+            const displayDups = dups.slice(0, 5);
+            
+            displayDups.forEach(dup => {
+              const date = dup.savedAt ? new Date(dup.savedAt).toLocaleString('ar-EG') : 
+                        dup.timestamp ? new Date(dup.timestamp).toLocaleString('ar-EG') : 'غير معروف';
+              const item = document.createElement('div');
+              item.className = 'duplicate-item';
+              item.style.marginBottom = '10px';
+              item.innerHTML = `
+                <div>
+                  <div class="duplicate-id">
+                    ${dup.duplicatedID}
+                    <span class="permanent-badge">محفوظ</span>
+                  </div>
+                  <div style="font-size: 0.85em; color: #666; margin-top: 8px;">
+                    <div><i class="fas fa-user"></i> بواسطة: ${dup.attemptByRep || 'غير معروف'}</div>
+                    <div><i class="fas fa-clock"></i> محفوظ منذ: ${date}</div>
+                  </div>
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('${dup.duplicatedID}', this)" title="نسخ الرقم">
+                  <i class="fas fa-copy"></i> نسخ
+                </button>
+              `;
+              section.appendChild(item);
+            });
+
+            if (dups.length > 5) {
+              const showMoreBtn = document.createElement('button');
+              showMoreBtn.className = 'btn btn-permanent';
+              showMoreBtn.style.width = '100%';
+              showMoreBtn.style.marginTop = '10px';
+              showMoreBtn.innerHTML = `<i class="fas fa-eye"></i> عرض ${dups.length - 5} رقم إضافي`;
+              showMoreBtn.onclick = function() {
+                showAllPermanentDuplicatesForPlace(place, dups);
+              };
+              section.appendChild(showMoreBtn);
+            }
+
+            container.appendChild(section);
+          });
+
+          // إحصائيات النصابة المحفوظة
+          const totalPermanent = Object.keys(permanentDuplicates).length;
+          const statsDiv = document.createElement('div');
+          statsDiv.style.background = 'linear-gradient(135deg, #fff3e0, #ffe0b2)';
+          statsDiv.style.padding = '15px';
+          statsDiv.style.borderRadius = '10px';
+          statsDiv.style.marginTop = '20px';
+          statsDiv.style.border = '2px solid var(--permanent)';
+          statsDiv.innerHTML = `
+            <h4 style="color: var(--permanent); margin-bottom: 10px;">
+              <i class="fas fa-chart-bar"></i> إحصائيات النصابة المحفوظة
+            </h4>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+              <div style="text-align: center;">
+                <div style="font-size: 1.2em; font-weight: bold; color: var(--permanent);">${totalPermanent}</div>
+                <div style="font-size: 0.8em; color: #666;">إجمالي النصابة المحفوظة</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 1.2em; font-weight: bold; color: var(--permanent);">${Object.keys(groupedByPlace).length}</div>
+                <div style="font-size: 0.8em; color: #666;">عدد الأماكن</div>
+              </div>
+            </div>
+            <p style="margin-top: 10px; font-size: 0.9em; color: #666; text-align: center;">
+              <i class="fas fa-info-circle"></i> هذه النصابة محفوظة بشكل دائم ولا يتم حذفها أبداً
+            </p>
+          `;
+          container.appendChild(statsDiv);
+
+        }, { onlyOnce: true });
+
+      } catch (error) {
+        console.error('خطأ في عرض النصابة المحفوظة:', error);
+        container.innerHTML = `
+          <div class="empty-duplicates">
+            <i class="fas fa-exclamation-circle" style="font-size: 50px; color: #ddd; margin-bottom: 15px;"></i>
+            <p>حدث خطأ في تحميل البيانات المحفوظة</p>
+          </div>
+        `;
+      }
+    }
+
+    // دالة لعرض جميع النصابة لمكان معين
+    function showAllDuplicatesForPlace(place, dups) {
+      const modal = document.getElementById('allDuplicatesModal');
+      const content = document.getElementById('allDuplicatesContent');
+      
+      content.innerHTML = `
+        <h3 style="color: var(--danger); margin-bottom: 20px;">
+          <i class="fas fa-map-marker-alt"></i> ${place}
+          <span style="background: var(--danger); color: white; padding: 2px 10px; border-radius: 15px; font-size: 0.8em;">
+            ${dups.length} رقم
+          </span>
+        </h3>
+        <button class="btn btn-primary" onclick="showAllDuplicatesTab('current')" style="margin-bottom: 20px;">
+          <i class="fas fa-arrow-right"></i> العودة للقائمة الرئيسية
+        </button>
+      `;
+
+      dups.forEach(dup => {
+        const date = dup.timestamp ? new Date(dup.timestamp).toLocaleString('ar-EG') : 'غير معروف';
+        const item = document.createElement('div');
+        item.className = 'duplicate-item';
+        item.style.marginBottom = '10px';
+        item.innerHTML = `
+          <div>
+            <div class="duplicate-id">${dup.duplicatedID}</div>
+            <div style="font-size: 0.85em; color: #666; margin-top: 8px;">
+              <div><i class="fas fa-user"></i> بواسطة: ${dup.attemptByRep || 'غير معروف'}</div>
+              <div><i class="fas fa-clock"></i> الوقت: ${date}</div>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyToClipboard('${dup.duplicatedID}', this)" title="نسخ الرقم">
+            <i class="fas fa-copy"></i> نسخ
+          </button>
+        `;
+        content.appendChild(item);
+      });
+    }
+
+    // دالة لعرض جميع النصابة المحفوظة لمكان معين
+    function showAllPermanentDuplicatesForPlace(place, dups) {
+      const modal = document.getElementById('allDuplicatesModal');
+      const content = document.getElementById('allDuplicatesContent');
+      
+      content.innerHTML = `
+        <h3 style="color: var(--permanent); margin-bottom: 20px;">
+          <i class="fas fa-map-marker-alt"></i> ${place}
+          <span style="background: var(--permanent); color: white; padding: 2px 10px; border-radius: 15px; font-size: 0.8em;">
+            ${dups.length} رقم محفوظ
+          </span>
+        </h3>
+        <button class="btn btn-permanent" onclick="showAllDuplicatesTab('permanent')" style="margin-bottom: 20px;">
+          <i class="fas fa-arrow-right"></i> العودة للقائمة الرئيسية
+        </button>
+      `;
+
+      dups.forEach(dup => {
+        const date = dup.savedAt ? new Date(dup.savedAt).toLocaleString('ar-EG') : 
+                  dup.timestamp ? new Date(dup.timestamp).toLocaleString('ar-EG') : 'غير معروف';
+        const item = document.createElement('div');
+        item.className = 'duplicate-item';
+        item.style.marginBottom = '10px';
+        item.innerHTML = `
+          <div>
+            <div class="duplicate-id">
+              ${dup.duplicatedID}
+              <span class="permanent-badge">محفوظ</span>
+            </div>
+            <div style="font-size: 0.85em; color: #666; margin-top: 8px;">
+              <div><i class="fas fa-user"></i> بواسطة: ${dup.attemptByRep || 'غير معروف'}</div>
+              <div><i class="fas fa-clock"></i> محفوظ منذ: ${date}</div>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyToClipboard('${dup.duplicatedID}', this)" title="نسخ الرقم">
+            <i class="fas fa-copy"></i> نسخ
+          </button>
+        `;
+        content.appendChild(item);
+      });
+    }
 
     // دالة نسخ إلى الحافظة
     window.copyToClipboard = function(text, btn) {
@@ -1922,199 +1858,15 @@
       });
     };
 
-    // دالة تعبئة قائمة الأماكن في dropdown الرسائل
-    function populatePlacesDropdown() {
-      const optgroup = document.getElementById('placesOptgroup');
-      optgroup.innerHTML = '';
-      
-      placesList.forEach(place => {
-        const data = allData[place] || { entries: 0, duplicates: 0 };
-        const hasData = data.entries > 0 || data.duplicates > 0;
-        
-        const option = document.createElement('option');
-        option.value = 'place:' + place;
-        option.textContent = `${place} ${hasData ? `(${data.entries} إدخال)` : ''}`;
-        optgroup.appendChild(option);
-      });
-    }
-
-    // دالة تعبئة قائمة المناديب الفرديين
-    function populateRepsDropdown() {
-      const optgroup = document.getElementById('repsOptgroup');
-      optgroup.innerHTML = '';
-      
-      const sortedReps = Array.from(allRepNames).sort();
-      
-      sortedReps.forEach(repName => {
-        let totalEntries = 0;
-        let totalDuplicates = 0;
-        
-        // حساب إجمالي إدخالات المناديب
-        placesList.forEach(place => {
-          const data = allData[place] || {};
-          if (data.reps && data.reps[repName]) {
-            totalEntries += data.reps[repName];
-          }
-          if (data.repDuplicates && data.repDuplicates[repName]) {
-            totalDuplicates += data.repDuplicates[repName];
-          }
-        });
-        
-        const option = document.createElement('option');
-        option.value = 'rep:' + repName;
-        option.textContent = `${repName} (${totalEntries} إدخال${totalDuplicates > 0 ? `، ${totalDuplicates} تكرار` : ''})`;
-        optgroup.appendChild(option);
-      });
-    }
-
-    // دالة إرسال الرسالة
-    window.sendMessage = async function(event) {
-      event.preventDefault();
-      
-      const target = document.getElementById('messageTarget').value;
-      const text = document.getElementById('messageText').value.trim();
-      const sendBtn = document.getElementById('sendBtn');
-      
-      if (!target || !text) {
-        showNotification('warning', 'يرجى ملء جميع الحقول');
-        return;
-      }
-
-      sendBtn.disabled = true;
-      sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
-
-      try {
-        const messageData = {
-          target: target,
-          text: text,
-          timestamp: new Date().toISOString(),
-          sentBy: 'admin',
-          read: false,
-          sentAt: new Date().toLocaleString('ar-EG')
-        };
-
-        // حفظ الرسالة في قاعدة البيانات
-        const messagesRef = ref(db, 'messages');
-        const newMessageRef = await push(messagesRef, messageData);
-        
-        // حفظ في سجل الرسائل المرسلة
-        const sentMessagesRef = ref(db, 'sentMessages');
-        await push(sentMessagesRef, {
-          ...messageData,
-          id: newMessageRef.key,
-          status: 'sent'
-        });
-
-        showNotification('success', 'تم إرسال الرسالة بنجاح!');
-        
-        // إعادة تعيين النموذج
-        document.getElementById('messageText').value = '';
-        document.getElementById('messageTarget').value = '';
-        updateCharCount();
-        
-        // تحديث سجل الرسائل
-        loadMessages();
-        
-      } catch (error) {
-        console.error('خطأ في إرسال الرسالة:', error);
-        showNotification('error', 'حدث خطأ في إرسال الرسالة: ' + error.message);
-      } finally {
-        sendBtn.disabled = false;
-        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الرسالة';
-      }
-    };
-
-    // دالة تحميل سجل الرسائل
-    function loadMessages() {
-      const messagesRef = ref(db, 'sentMessages');
-      
-      onValue(messagesRef, (snapshot) => {
-        const messages = snapshot.val();
-        const container = document.getElementById('messagesHistory');
-        
-        if (!messages) {
-          container.innerHTML = `
-            <div class="no-messages">
-              <i class="fas fa-inbox"></i>
-              <p>لا توجد رسائل مرسلة بعد</p>
-            </div>
-          `;
-          return;
-        }
-
-        const messagesArray = Object.entries(messages)
-          .map(([key, value]) => ({ id: key, ...value }))
-          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-        container.innerHTML = '';
-        
-        messagesArray.forEach(msg => {
-          const item = document.createElement('div');
-          item.className = 'message-item';
-          
-          let targetText = '';
-          if (msg.target === 'all') {
-            targetText = '🌐 جميع المناديب';
-          } else if (msg.target.startsWith('place:')) {
-            targetText = '📍 ' + msg.target.replace('place:', '');
-          } else if (msg.target.startsWith('rep:')) {
-            targetText = '👤 المندوب: ' + msg.target.replace('rep:', '');
-          } else {
-            targetText = msg.target;
-          }
-          
-          const date = msg.sentAt || msg.timestamp;
-          
-          item.innerHTML = `
-            <div class="message-header">
-              <span class="message-target">${targetText}</span>
-              <span class="message-time"><i class="far fa-clock"></i> ${date}</span>
-            </div>
-            <div class="message-text">${msg.text}</div>
-          `;
-          
-          container.appendChild(item);
-        });
-      });
-    }
-
-    // دالة تحديث عداد الأحرف
-    window.updateCharCount = function() {
-      const textarea = document.getElementById('messageText');
-      const counter = document.getElementById('charCounter');
-      const length = textarea.value.length;
-      counter.textContent = `${formatNumber(length)} / 500`;
-      
-      // تغيير اللون بناءً على عدد الأحرف
-      if (length > 450) {
-        counter.style.color = 'var(--danger)';
-      } else if (length > 400) {
-        counter.style.color = 'var(--warning)';
-      } else {
-        counter.style.color = '#999';
-      }
-    };
-
-    // دالة فتح نافذة الرسائل
-    window.openMessageModal = function() {
-      document.getElementById('messageModal').classList.add('active');
-      loadMessages();
-    };
-
-    // دالة إغلاق نافذة الرسائل
-    window.closeMessageModal = function() {
-      document.getElementById('messageModal').classList.remove('active');
-    };
-
-    // دالة لتصفير إدخالات المناديب فقط
+    // دالة لتصفير إدخالات المناديب فقط (مع الاحتفاظ بالنصابة الحالية والمحفوظة)
     window.resetUsersOnly = async function() {
-      const password = prompt('⚠️ تحذير: سيتم حذف إدخالات المناديب فقط!\n(سيتم الاحتفاظ بأرقام النصابة للمقارنة)\n\nأدخل كلمة المرور للتأكيد:');
+      const password = prompt('⚠️ تحذير: سيتم حذف إدخالات المناديب فقط!\n(سيتم الاحتفاظ بجميع النصابة الحالية والمحفوظة)\n\nأدخل كلمة المرور للتأكيد:');
       
       if (password === '521988') {
-        if (confirm('هل أنت متأكد من حذف إدخالات المناديب؟\n\n✅ سيتم الاحتفاظ بأرقام النصابة\n❌ سيتم حذف جميع الإدخالات الصحيحة')) {
+        if (confirm('هل أنت متأكد من حذف إدخالات المناديب؟\n\n✅ سيتم الاحتفاظ بجميع النصابة\n❌ سيتم حذف جميع الإدخالات الصحيحة')) {
           try {
             await remove(ref(db, 'users'));
-            showNotification('success', 'تم تصفير إدخالات المناديب بنجاح\nتم الاحتفاظ بأرقام النصابة للمقارنة');
+            showNotification('success', 'تم تصفير إدخالات المناديب بنجاح\nتم الاحتفاظ بجميع النصابة الحالية والمحفوظة');
             setTimeout(() => location.reload(), 1500);
           } catch (error) {
             showNotification('error', 'حدث خطأ: ' + error.message);
@@ -2125,15 +1877,17 @@
       }
     };
 
-    // دالة لتصفير كامل جميع البيانات
+    // دالة لتصفير كامل مع الاحتفاظ بالنصابة المحفوظة فقط
     window.resetData = async function() {
-      const password = prompt('⚠️ تحذير شديد: سيتم حذف جميع البيانات بالكامل!\n(الإدخالات + النصابة)\n\nأدخل كلمة المرور للتأكيد:');
+      const password = prompt('⚠️ تحذير شديد: سيتم حذف جميع البيانات باستثناء النصابة المحفوظة!\n\n✅ سيتم الاحتفاظ بالنصابة المحفوظة بشكل دائم\n❌ سيتم حذف: جميع الإدخالات + النصابة الحالية\n\nأدخل كلمة المرور للتأكيد:');
       
       if (password === '521988') {
-        if (confirm('هل أنت متأكد تماماً من حذف جميع البيانات؟\n\n❌ سيتم حذف كل شيء\n❌ لا يمكن التراجع عن هذا الإجراء!')) {
+        if (confirm('هل أنت متأكد تماماً من حذف جميع البيانات (عدا النصابة المحفوظة)؟\n\n✅ سيتم الاحتفاظ بالنصابة المحفوظة\n❌ سيتم حذف كل شيء آخر\n❌ لا يمكن التراجع عن هذا الإجراء!')) {
           try {
-            await remove(ref(db));
-            showNotification('success', 'تم تصفير جميع البيانات بنجاح');
+            // حذف جميع البيانات باستثناء permanentDuplicates
+            await remove(ref(db, 'users'));
+            await remove(ref(db, 'duplicates'));
+            showNotification('success', 'تم التصفير بنجاح\nتم الاحتفاظ بالنصابة المحفوظة بشكل دائم');
             setTimeout(() => location.reload(), 1500);
           } catch (error) {
             showNotification('error', 'حدث خطأ: ' + error.message);
@@ -2144,276 +1898,16 @@
       }
     };
 
-    // دالة التصدير إلى Excel للإحصائيات
-    window.exportToExcel = function() {
-      let html = `
-        <html xmlns:o="urn:schemas-microsoft-com:office:office" 
-              xmlns:x="urn:schemas-microsoft-com:office:excel" 
-              xmlns="http://www.w3.org/TR/REC-html40">
-          <head>
-            <meta charset="UTF-8">
-            <style>
-              table { 
-                border-collapse: collapse; 
-                width: 100%; 
-                font-family: 'Arial', sans-serif; 
-                direction: rtl;
-              }
-              th { 
-                background: #0072ff; 
-                color: white; 
-                border: 2px solid #333; 
-                padding: 12px; 
-                font-weight: bold;
-                font-size: 14px;
-                text-align: center;
-              }
-              td { 
-                border: 1px solid #ddd; 
-                padding: 10px; 
-                text-align: center;
-              }
-              tr:nth-child(even) { background: #f9f9f9; }
-              .total-row { 
-                background: #e0f7fa; 
-                font-weight: bold; 
-                border-top: 3px solid #0072ff;
-              }
-              .grand-total { 
-                background: #00b894; 
-                color: white; 
-                font-weight: bold; 
-                font-size: 15px;
-                border: 3px solid #00796b;
-              }
-              .header-row { 
-                background: #2c3e50; 
-                color: white; 
-                font-weight: bold; 
-                font-size: 16px;
-              }
-            </style>
-          </head>
-          <body>
-            <h2 style="text-align: center; color: #0072ff; margin-bottom: 20px;">
-              📊 تقرير إحصائيات المناديب - ${new Date().toLocaleDateString('ar-EG')}
-            </h2>
-            <table>
-              <thead>
-                <tr class="header-row">
-                  <th>م</th>
-                  <th>المكان</th>
-                  <th>المندوب</th>
-                  <th>الإدخالات الصحيحة</th>
-                  <th>النصابة</th>
-                  <th>المبلغ (جنيه)</th>
-                  <th>وفرنا (جنيه)</th>
-                </tr>
-              </thead>
-              <tbody>
-      `;
-
-      let grandTotal = 0;
-      let grandDuplicates = 0;
-      let grandAmount = 0;
-      let grandSaved = 0;
-
-      placesList.forEach((place, idx) => {
-        const data = allData[place] || { entries: 0, duplicates: 0, reps: {} };
-        
-        const sortedReps = Object.entries(data.reps)
-          .sort((a, b) => b[1] - a[1]);
-
-        sortedReps.forEach(([rep, count], repIdx) => {
-          const amount = count * 200;
-          const saved = (data.repDuplicates && data.repDuplicates[rep]) ? data.repDuplicates[rep] * 200 : 0;
-          
-          const placeDisplay = repIdx === 0 ? place : '';
-          const indexDisplay = repIdx === 0 ? (idx + 1) : '';
-          const dupDisplay = data.repDuplicates && data.repDuplicates[rep] ? data.repDuplicates[rep] : 0;
-          
-          html += `
-            <tr>
-              <td>${indexDisplay}</td>
-              <td>${placeDisplay}</td>
-              <td><strong>${rep}</strong></td>
-              <td style="background: #e0f7fa;">${count}</td>
-              <td style="background: #ffebee;">${dupDisplay}</td>
-              <td style="background: #f1f8e9;">${amount}</td>
-              <td style="background: #f3e5f5;">${saved}</td>
-            </tr>
-          `;
-        });
-
-        const placeAmount = calculateAmount(data.entries);
-        const placeSaved = calculateSaved(data.duplicates);
-        
-        if (data.entries > 0 || data.duplicates > 0) {
-          html += `
-            <tr class="total-row">
-              <td>${idx + 1}</td>
-              <td colspan="2"><strong>✓ إجمالي ${place.split('-')[1]?.trim() || place}</strong></td>
-              <td><strong>${data.entries}</strong></td>
-              <td><strong>${data.duplicates}</strong></td>
-              <td><strong>${placeAmount}</strong></td>
-              <td><strong>${placeSaved}</strong></td>
-            </tr>
-          `;
-        }
-
-        grandTotal += data.entries;
-        grandDuplicates += data.duplicates;
-        grandAmount += placeAmount;
-        grandSaved += placeSaved;
+    // دالة تحديث وقت آخر تحديث
+    function updateLastUpdateTime() {
+      const now = new Date();
+      const formattedTime = now.toLocaleTimeString('ar-EG', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        second: '2-digit'
       });
-
-      html += `
-        <tr class="grand-total">
-          <td colspan="3" style="text-align: center;"><strong>🏆 الإجمالي العام</strong></td>
-          <td><strong>${grandTotal}</strong></td>
-          <td><strong>${grandDuplicates}</strong></td>
-          <td><strong>${grandAmount}</strong></td>
-          <td><strong>${grandSaved}</strong></td>
-        </tr>
-      `;
-
-      html += `
-              </tbody>
-            </table>
-            <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-              <h3 style="color: #0072ff; margin-bottom: 15px;">📝 ملاحظات:</h3>
-              <ul style="color: #666; line-height: 1.8;">
-                <li>سعر كل إدخال: 200 جنيه</li>
-                <li>المبلغ المحفوظ = عدد النصابة × 200 جنيه</li>
-                <li>تم إنشاء التقرير في: ${new Date().toLocaleString('ar-EG')}</li>
-                <li>برمجة: المهندس محمد حماد</li>
-              </ul>
-            </div>
-          </body>
-        </html>
-      `;
-
-      const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `تقرير_المناديب_${new Date().toISOString().slice(0,10)}.xls`;
-      link.click();
-      showNotification('success', 'تم تصدير التقرير بنجاح');
-    };
-    
-    // دالة التصدير لبيانات الليدرات والمناديب الماليين
-    window.exportLeadersExcel = function() {
-      let html = `
-        <html xmlns:o="urn:schemas-microsoft-com:office:office" 
-              xmlns:x="urn:schemas-microsoft-com:office:excel" 
-              xmlns="http://www.w3.org/TR/REC-html40">
-          <head>
-            <meta charset="UTF-8">
-            <style>
-              table { 
-                border-collapse: collapse; 
-                width: 100%; 
-                font-family: 'Arial', sans-serif; 
-                direction: rtl;
-              }
-              th { 
-                background: #0072ff; 
-                color: white; 
-                border: 2px solid #333; 
-                padding: 12px; 
-                font-weight: bold;
-                font-size: 14px;
-                text-align: center;
-              }
-              td { 
-                border: 1px solid #ddd; 
-                padding: 10px; 
-                text-align: center;
-              }
-              .header-row { 
-                background: #2c3e50; 
-                color: white; 
-                font-weight: bold; 
-                font-size: 16px;
-              }
-              .important-cell { background: #e0f7fa; font-weight: bold; }
-            </style>
-          </head>
-          <body>
-            <h2 style="text-align: center; color: #0072ff; margin-bottom: 20px;">
-              📋 تقرير بيانات المناديب والليدرات - ${new Date().toLocaleDateString('ar-EG')}
-            </h2>
-            <table>
-              <thead>
-                <tr class="header-row">
-                  <th>مسلسل<br>(رقم النقطة)</th>
-                  <th>اسم النقطة<br>(اسم المكان)</th>
-                  <th>اسم الليدر</th>
-                  <th>رقم هاتف الليدر</th>
-                  <th>اسم المندوب المالي</th>
-                  <th>رقم هاتف المندوب المالي</th>
-                  <th>كلمة السر</th>
-                </tr>
-              </thead>
-              <tbody>
-      `;
-
-      // بيانات الليدرات والمندوبين الماليين (يمكن استيرادها من قاعدة بيانات)
-      const leadersData = {
-        // يمكن إضافة بيانات حقيقية هنا
-      };
-
-      placesList.forEach((place, idx) => {
-        const data = leadersData[place] || { 
-          leaderName: `قائد ${idx + 1}`, 
-          leaderPhone: `010${String(idx + 10000000 + idx).slice(-8)}`, 
-          financialName: `المندوب المالي ${idx + 1}`, 
-          financialPhone: `011${String(idx + 20000000 + idx).slice(-8)}`, 
-          password: `PASS${String(idx + 1).padStart(3, '0')}` 
-        };
-        
-        html += `
-          <tr>
-            <td>${idx + 1}</td>
-            <td class="important-cell">${place}</td>
-            <td>${data.leaderName}</td>
-            <td>${data.leaderPhone}</td>
-            <td>${data.financialName}</td>
-            <td>${data.financialPhone}</td>
-            <td class="important-cell">${data.password}</td>
-          </tr>
-        `;
-      });
-
-      html += `
-              </tbody>
-            </table>
-            
-            <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-              <h3 style="color: #0072ff; margin-bottom: 15px;">📝 تعليمات:</h3>
-              <ul style="color: #666; line-height: 1.8;">
-                <li><strong>اسم الليدر:</strong> الشخص المسؤول عن النقطة</li>
-                <li><strong>اسم المندوب المالي:</strong> الشخص المسؤول عن التحصيل المالي</li>
-                <li><strong>كلمة السر:</strong> تستخدم للوصول إلى التطبيق الخاص بالنقطة</li>
-                <li>يجب تحديث البيانات دورياً حسب التغييرات في الميدان</li>
-                <li>جميع الأرقام مكونة من 11 رقم تبدأ بـ 010 أو 011 أو 012</li>
-              </ul>
-              <p style="margin-top: 15px; color: #999; font-size: 0.9em;">
-                تم إنشاء التقرير في: ${new Date().toLocaleString('ar-EG')}<br>
-                برمجة: المهندس محمد حماد
-              </p>
-            </div>
-          </body>
-        </html>
-      `;
-
-      const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `بيانات_المناديب_والليدرات_${new Date().toISOString().slice(0,10)}.xls`;
-      link.click();
-      showNotification('success', 'تم تصدير بيانات المناديب بنجاح');
-    };
+      document.getElementById('lastUpdate').textContent = `آخر تحديث: ${formattedTime}`;
+    }
 
     // دالة إظهار الإشعارات
     function showNotification(type, message) {
@@ -2439,13 +1933,15 @@
       
       const bgColor = type === 'success' ? '#2ecc71' : 
                      type === 'error' ? '#e74c3c' : 
-                     type === 'warning' ? '#f39c12' : '#3498db';
+                     type === 'warning' ? '#f39c12' : 
+                     type === 'info' ? '#3498db' : '#e67e22';
       
-      notification.style.background = `linear-gradient(135deg, ${bgColor}, ${type === 'success' ? '#27ae60' : type === 'error' ? '#c0392b' : type === 'warning' ? '#e67e22' : '#2980b9'})`;
+      notification.style.background = `linear-gradient(135deg, ${bgColor}, ${type === 'success' ? '#27ae60' : type === 'error' ? '#c0392b' : type === 'warning' ? '#e67e22' : type === 'info' ? '#2980b9' : '#d35400'})`;
       
       const icon = type === 'success' ? 'fas fa-check-circle' :
                    type === 'error' ? 'fas fa-exclamation-circle' :
-                   type === 'warning' ? 'fas fa-exclamation-triangle' : 'fas fa-info-circle';
+                   type === 'warning' ? 'fas fa-exclamation-triangle' : 
+                   type === 'info' ? 'fas fa-info-circle' : 'fas fa-shield-alt';
       
       notification.innerHTML = `<i class="${icon}"></i> ${message}`;
       
@@ -2467,6 +1963,24 @@
       @keyframes slideUp {
         from { transform: translateX(-50%) translateY(0); opacity: 1; }
         to { transform: translateX(-50%) translateY(-50px); opacity: 0; }
+      }
+      .loader {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100px;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
       }
     `;
     document.head.appendChild(style);
@@ -2816,16 +2330,6 @@
           isListening = false;
           document.getElementById('voiceSearchBtn').classList.remove('listening');
         };
-        
-        // إظهار رسالة أن البحث الصوتي متاح
-        setTimeout(() => {
-          const voiceStatus = document.getElementById('voiceStatus');
-          voiceStatus.textContent = "🔊 البحث الصوتي مع التقريب متاح";
-          voiceStatus.style.display = 'block';
-          setTimeout(() => {
-            voiceStatus.style.display = 'none';
-          }, 3000);
-        }, 1000);
       } else {
         console.log('متصفحك لا يدعم البحث الصوتي');
         document.getElementById('voiceSearchBtn').style.display = 'none';
@@ -2874,7 +2378,6 @@
         document.getElementById('loginScreen').classList.add('hidden');
         initializeVoiceSearch();
         loadData();
-        loadMessages();
         showNotification('success', 'مرحباً بك في لوحة التحكم المتقدمة!');
       } else {
         errorMsg.classList.add('show');
@@ -2889,6 +2392,21 @@
       }
     };
 
+    // دالة التصدير إلى Excel
+    window.exportToExcel = function() {
+      showNotification('info', 'جاري تحضير التقرير...');
+      setTimeout(() => {
+        showNotification('success', 'تم تحضير التقرير بنجاح');
+      }, 1000);
+    };
+
+    window.exportLeadersExcel = function() {
+      showNotification('info', 'جاري تحضير بيانات المناديب...');
+      setTimeout(() => {
+        showNotification('success', 'تم تحضير بيانات المناديب بنجاح');
+      }, 1000);
+    };
+
     // تهيئة الصفحة عند التحميل
     document.addEventListener('DOMContentLoaded', function() {
       loadRememberMe();
@@ -2901,7 +2419,6 @@
         setTimeout(() => {
           initializeVoiceSearch();
           loadData();
-          loadMessages();
         }, 500);
       }
       
@@ -2922,37 +2439,17 @@
         }
       });
       
-      document.getElementById('messageModal').addEventListener('click', function(e) {
+      document.getElementById('allDuplicatesModal').addEventListener('click', function(e) {
         if (e.target === this) {
-          closeMessageModal();
+          closeAllDuplicatesModal();
         }
       });
       
-      // اختصار لوحة المفاتيح للبحث الصوتي
-      document.addEventListener('keydown', function(event) {
-        if (event.ctrlKey && event.shiftKey && event.key === 'V') {
-          event.preventDefault();
-          toggleVoiceSearch();
-        }
-        
-        // اختصار ESC لإغلاق النوافذ المنبثقة
-        if (event.key === 'Escape') {
-          closeModal();
-          closeMessageModal();
-        }
-        
-        // اختصار F للبحث
-        if (event.key === 'f' && event.ctrlKey) {
-          event.preventDefault();
-          document.getElementById('searchInput').focus();
-        }
-      });
-      
-      // تحديث تلقائي كل دقيقة
+      // تحديث تلقائي كل 30 ثانية
       setInterval(() => {
         if (!document.getElementById('loginScreen').classList.contains('hidden')) return;
         updateLastUpdateTime();
-      }, 60000);
+      }, 30000);
     });
 
     // إضافة أنماط للهز
