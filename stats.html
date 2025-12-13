@@ -1542,32 +1542,90 @@
       }
     }
     
-    // التحقق من كلمة المرور
+    // التحقق من كلمة المرور المعدلة لدعم المستخدم الزائر
     window.checkPassword = function() {
       const password = document.getElementById('passwordInput').value;
       const rememberMe = document.getElementById('rememberMe').checked;
       const errorMsg = document.getElementById('loginError');
       
+      // 1. كلمة مرور المشرف الكامل
       if (password === '521988') {
-        // حفظ حالة "تذكرني" إذا تم اختيارها
         if (rememberMe) {
           localStorage.setItem('dashboardPassword', password);
           localStorage.setItem('rememberDashboardLogin', 'true');
+          localStorage.setItem('userRole', 'admin'); // تخزين دور المشرف
         } else {
           localStorage.removeItem('dashboardPassword');
           localStorage.removeItem('rememberDashboardLogin');
         }
-        
+        localStorage.setItem('userRole', 'admin'); // تعيين الدور حتى بدون تذكرني
         document.getElementById('loginScreen').classList.add('hidden');
-        // تهيئة البحث الصوتي بعد الدخول
         initializeVoiceSearch();
-      } else {
+        applyUserPermissions(); // تطبيق الصلاحيات
+      }
+      // 2. كلمة مرور الزائر للعرض فقط
+      else if (password === '123456') {
+        // لا نسمح بخيار "تذكرني" للزائر لأسباب أمنية
+        localStorage.setItem('userRole', 'viewer'); // تخزين دور الزائر
+        document.getElementById('loginScreen').classList.add('hidden');
+        initializeVoiceSearch();
+        applyUserPermissions(); // تطبيق الصلاحيات للزائر
+      } 
+      else {
         errorMsg.classList.add('show');
         setTimeout(() => {
           errorMsg.classList.remove('show');
         }, 3000);
       }
     };
+    
+    // دالة لتطبيق صلاحيات المستخدم الزائر
+    function applyUserPermissions() {
+      const userRole = localStorage.getItem('userRole');
+      
+      if (userRole === 'viewer') {
+        // إخفاء أو تعطيل أزرار الإجراءات التي لا يسمح للزائر بها
+        const buttonsToHide = [
+          '.btn-message',   // زر إرسال رسالة جماعية
+          '.btn-info',      // زر تصفير الإدخالات
+          '.btn-warning',   // زر التصفير الكامل
+          '.btn-danger'     // قد تخفي زر العودة أو تغير لونه
+        ];
+        
+        buttonsToHide.forEach(selector => {
+          document.querySelectorAll(selector).forEach(btn => {
+            btn.style.display = 'none';
+          });
+        });
+        
+        // تعطيل أزرار Excel بدلاً من إخفائها (يمكنك اختيار الإخفاء أيضاً)
+        document.querySelectorAll('.btn-success').forEach(btn => {
+          btn.disabled = true;
+          btn.style.opacity = '0.6';
+          btn.style.cursor = 'not-allowed';
+          btn.title = 'غير مسموح للمستخدم الزائر';
+        });
+        
+        // تغيير عنوان الصفحة للإشارة إلى وضع العرض فقط
+        const headerTitle = document.querySelector('.header h1');
+        if (headerTitle) {
+          headerTitle.innerHTML += ' <small style="font-size:0.6em; color:var(--success);">(وضع العرض فقط)</small>';
+        }
+        
+        // إضافة تنبيه في أعلى الصفحة
+        const alertDiv = document.createElement('div');
+        alertDiv.style.cssText = 'background:#f39c12; color:white; padding:10px; text-align:center; font-weight:bold; border-radius:5px; margin:10px;';
+        alertDiv.textContent = '🔒 أنت في وضع العرض فقط - لا يمكنك إجراء أي تعديلات';
+        document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.summary-row'));
+        
+        // تعطيل النقر على إحصائيات النصابة (اختياري)
+        document.querySelectorAll('.stat-box.duplicates').forEach(box => {
+          box.style.cursor = 'not-allowed';
+          box.onclick = null;
+          box.title = 'الصلاحيات غير كافية لعرض التفاصيل';
+        });
+      }
+    }
     
     // البحث الصوتي
     let recognition = null;
@@ -1659,12 +1717,14 @@
       // التحقق من تسجيل الدخول المسبق
       const isLoggedIn = localStorage.getItem('rememberDashboardLogin') === 'true';
       const savedPassword = localStorage.getItem('dashboardPassword');
+      const userRole = localStorage.getItem('userRole');
       
-      if (isLoggedIn && savedPassword === '521988') {
+      if ((isLoggedIn && savedPassword === '521988') || userRole === 'viewer') {
         document.getElementById('loginScreen').classList.add('hidden');
         // تأخير تهيئة البحث الصوتي لضمان تحميل الصفحة بالكامل
         setTimeout(() => {
           initializeVoiceSearch();
+          applyUserPermissions(); // تطبيق الصلاحيات عند التحميل
         }, 500);
       }
       
@@ -1912,6 +1972,12 @@
     }
 
     window.showDuplicates = function(place) {
+      const userRole = localStorage.getItem('userRole');
+      if (userRole === 'viewer') {
+        alert('⚠️ عذراً، الصلاحيات غير كافية لعرض تفاصيل النصابة');
+        return;
+      }
+      
       const modal = document.getElementById('duplicateModal');
       const listContainer = document.getElementById('duplicateList');
       const placeNameEl = document.getElementById('modalPlaceName');
@@ -2070,6 +2136,11 @@
 
     // وظائف الرسائل
     window.openMessageModal = function() {
+      const userRole = localStorage.getItem('userRole');
+      if (userRole === 'viewer') {
+        alert('⚠️ عذراً، الصلاحيات غير كافية لإرسال الرسائل');
+        return;
+      }
       document.getElementById('messageModal').classList.add('active');
     };
 
@@ -2085,6 +2156,12 @@
 
     window.sendMessage = async function(event) {
       event.preventDefault();
+      
+      const userRole = localStorage.getItem('userRole');
+      if (userRole === 'viewer') {
+        alert('⚠️ عذراً، الصلاحيات غير كافية لإرسال الرسائل');
+        return;
+      }
       
       const target = document.getElementById('messageTarget').value;
       const text = document.getElementById('messageText').value.trim();
@@ -2189,6 +2266,12 @@
 
     // تصفير إدخالات المناديب فقط (الاحتفاظ بالنصابة)
     window.resetUsersOnly = async function() {
+      const userRole = localStorage.getItem('userRole');
+      if (userRole === 'viewer') {
+        alert('⚠️ عذراً، الصلاحيات غير كافية لإجراء هذه العملية');
+        return;
+      }
+      
       const password = prompt('⚠️ تحذير: سيتم حذف إدخالات المناديب فقط!\n(سيتم الاحتفاظ بأرقام النصابة للمقارنة)\n\nأدخل كلمة المرور للتأكيد:');
       
       if (password === '521988') {
@@ -2208,6 +2291,12 @@
 
     // تصفير كامل (جميع البيانات)
     window.resetData = async function() {
+      const userRole = localStorage.getItem('userRole');
+      if (userRole === 'viewer') {
+        alert('⚠️ عذراً، الصلاحيات غير كافية لإجراء هذه العملية');
+        return;
+      }
+      
       const password = prompt('⚠️ تحذير شديد: سيتم حذف جميع البيانات بالكامل!\n(الإدخالات + النصابة)\n\nأدخل كلمة المرور للتأكيد:');
       
       if (password === '521988') {
@@ -2238,6 +2327,12 @@
     });
 
     window.exportToExcel = function() {
+      const userRole = localStorage.getItem('userRole');
+      if (userRole === 'viewer') {
+        alert('⚠️ عذراً، الصلاحيات غير كافية لتصدير البيانات');
+        return;
+      }
+      
       let html = `
         <html xmlns:o="urn:schemas-microsoft-com:office:office" 
               xmlns:x="urn:schemas-microsoft-com:office:excel" 
@@ -2381,6 +2476,12 @@
     
     // دالة تصدير Excel للمناديب (الليدر والمندوب المالي)
     window.exportLeadersExcel = function() {
+      const userRole = localStorage.getItem('userRole');
+      if (userRole === 'viewer') {
+        alert('⚠️ عذراً، الصلاحيات غير كافية لتصدير البيانات');
+        return;
+      }
+      
       let html = `
         <html xmlns:o="urn:schemas-microsoft-com:office:office" 
               xmlns:x="urn:schemas-microsoft-com:office:excel" 
@@ -2508,8 +2609,11 @@
     };
     
     // تحميل البيانات إذا كان المستخدم مسجل الدخول بالفعل
-    if (localStorage.getItem('rememberDashboardLogin') === 'true' && 
-        localStorage.getItem('dashboardPassword') === '521988') {
+    const userRole = localStorage.getItem('userRole');
+    const isLoggedIn = localStorage.getItem('rememberDashboardLogin') === 'true';
+    const savedPassword = localStorage.getItem('dashboardPassword');
+    
+    if ((isLoggedIn && savedPassword === '521988') || userRole === 'viewer') {
       loadData();
       loadMessages();
     }
