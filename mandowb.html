@@ -453,9 +453,11 @@
                 </button>
             </div>
             
-            <div class="voice-status" id="voiceStatus"></div>
+            <!-- تم إخفاء هذا القسم -->
+            <div class="voice-status" id="voiceStatus" style="display: none;"></div>
             
-            <div class="voice-instructions">
+            <!-- تم إخفاء هذا القسم -->
+            <div class="voice-instructions" style="display: none;">
                 <div><i class="fas fa-microphone-alt"></i> <strong>أمثلة على الأوامر الصوتية:</strong></div>
                 <div class="voice-command-list">
                     <span class="voice-command">"لجنة خمسة عشر"</span>
@@ -486,10 +488,7 @@
         </a>
     </div>
 
-    <!-- زر تصحيح الأخطاء (للإختبار فقط) -->
-    <button class="debug-btn" onclick="checkData()" title="فحص البيانات">
-        <i class="fas fa-bug"></i>
-    </button>
+    <!-- تم إزالة زر فحص البيانات -->
 
     <!-- Firebase SDK -->
     <script type="module">
@@ -578,7 +577,8 @@
 
         // تحديث حالة الصوت
         function updateVoiceStatus(message) {
-            document.getElementById('voiceStatus').textContent = message;
+            // لا حاجة لتحديث الحالة لأن القسم مخفي
+            // document.getElementById('voiceStatus').textContent = message;
         }
 
         // معالجة الأمر الصوتي
