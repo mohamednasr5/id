@@ -3,906 +3,720 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام البحث عن المندوبين</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>دليل اللجان - إدارة المندوبين</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
         }
-
+        
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            direction: rtl;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .section {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 28px;
-        }
-
-        h2 {
-            text-align: center;
-            color: #764ba2;
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-
-        h3 {
-            color: #667eea;
-            margin: 20px 0 10px 0;
-            padding-bottom: 5px;
-            border-bottom: 2px solid #f0f0f0;
-            font-size: 20px;
-        }
-
-        .search-container {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
-        }
-
-        .search-box {
-            position: relative;
-            margin-bottom: 15px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 18px 55px 18px 20px;
-            border: 3px solid #667eea;
-            border-radius: 15px;
-            font-size: 18px;
-            transition: all 0.3s;
-            background: #f8f9fa;
-            padding-right: 120px;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #764ba2;
-            box-shadow: 0 0 20px rgba(102,126,234,0.4);
-            background: white;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 24px;
-            color: #667eea;
-        }
-
-        .voice-search-btn {
-            position: absolute;
-            left: 60px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            transition: all 0.3s;
-        }
-
-        .voice-search-btn:hover {
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .voice-search-btn.recording {
-            background: linear-gradient(135deg, #ff0000 0%, #ff6b6b 100%);
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { 
-                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
-            }
-            50% { 
-                box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
-            }
-        }
-
-        .search-hint {
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-
-        .results-count {
-            text-align: center;
-            color: #667eea;
-            font-weight: bold;
-            font-size: 16px;
-            margin-top: 10px;
-            padding: 10px;
-            background: #f0f8ff;
-            border-radius: 10px;
-        }
-
-        .voice-status {
-            text-align: center;
-            color: #764ba2;
-            font-weight: bold;
-            font-size: 14px;
-            margin-top: 5px;
-            min-height: 20px;
-        }
-
-        .delegate-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 15px 0;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.3s;
-            border-right: 5px solid #667eea;
-        }
-
-        .delegate-card.special {
-            border-right-color: #4CAF50;
-        }
-
-        .delegate-card.general {
-            border-right-color: #2196F3;
-        }
-
-        .delegate-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }
-
-        .delegate-info {
-            flex: 1;
-        }
-
-        .committee-number {
-            font-size: 28px;
-            font-weight: bold;
-            color: #667eea;
-            margin-left: 15px;
-            min-width: 50px;
-            text-align: center;
-        }
-
-        .delegate-card.special .committee-number {
-            color: #4CAF50;
-        }
-
-        .delegate-card.general .committee-number {
-            color: #2196F3;
-        }
-
-        .delegate-name {
-            font-size: 18px;
+            font-family: 'Cairo', 'Arial', sans-serif;
+            background-color: #f8f9fa;
             color: #333;
-            margin: 5px 0;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
         }
-
-        .delegate-type-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-left: 8px;
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 25px 0;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
-
-        .delegate-type-indicator.special {
-            background-color: #4CAF50;
+        
+        .committee-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-right: 5px solid var(--secondary-color);
         }
-
-        .delegate-type-indicator.general {
-            background-color: #2196F3;
+        
+        .committee-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.12);
         }
-
-        .delegate-phone {
-            font-size: 16px;
-            color: #666;
-            direction: ltr;
-            text-align: right;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .call-btn, .whatsapp-btn {
+        
+        .committee-number {
+            background: var(--primary-color);
+            color: white;
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            border: none;
-            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            transition: transform 0.2s;
-            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
         }
-
-        .call-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        
+        .delegate-name {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            min-height: 60px;
+        }
+        
+        .phone-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .phone-number {
+            direction: ltr;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .action-buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .btn-whatsapp {
+            background: #25D366;
             color: white;
         }
-
-        .whatsapp-btn {
-            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+        
+        .btn-call {
+            background: var(--secondary-color);
             color: white;
         }
-
-        .call-btn:hover, .whatsapp-btn:hover {
-            transform: scale(1.1);
+        
+        .btn-edit {
+            background: var(--accent-color);
+            color: white;
         }
-
-        .scroll-container {
-            max-height: 60vh;
-            overflow-y: auto;
-            padding: 10px;
+        
+        .btn-save {
+            background: #27ae60;
+            color: white;
         }
-
-        .scroll-container::-webkit-scrollbar {
-            width: 8px;
+        
+        .search-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
         }
-
-        .scroll-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
+        
+        .voice-search-btn {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
-
-        .scroll-container::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 10px;
+        
+        .voice-search-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
         }
-
+        
+        .voice-listening {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(155, 89, 182, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0); }
+        }
+        
+        .empty-committee {
+            background: linear-gradient(135deg, #f1c40f, #f39c12);
+            color: white;
+        }
+        
         .no-results {
             text-align: center;
             padding: 40px;
-            color: #999;
-            font-size: 18px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
         }
-
-        .voice-instructions {
-            text-align: center;
-            padding: 10px;
-            background: #f0f8ff;
-            border-radius: 10px;
-            margin: 10px 0;
-            border-right: 3px solid #667eea;
+        
+        .edit-mode .committee-card {
+            border: 2px dashed #3498db;
         }
-
-        .voice-command-list {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .voice-command {
-            background: #667eea;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-        }
-
-        .admin-link {
-            display: block;
-            text-align: center;
-            margin: 20px auto;
-            color: white;
-            background: rgba(255,255,255,0.2);
-            padding: 12px 30px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: bold;
-            max-width: 300px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.3);
-            transition: all 0.3s;
-        }
-
-        .admin-link:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-2px);
-        }
-
-        .loading {
-            text-align: center;
-            padding: 30px;
-            color: #667eea;
-            font-size: 18px;
-        }
-
-        .loading-spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .debug-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: #ff9800;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
+        
+        .editable {
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 1000;
+            border-bottom: 2px dotted #3498db;
+            padding: 2px 5px;
+            transition: background 0.3s ease;
         }
-
-        @media (max-width: 600px) {
-            .section {
-                padding: 20px;
-            }
-
-            h1 {
-                font-size: 22px;
-            }
-
-            h2 {
-                font-size: 20px;
-            }
-
-            .delegate-card {
-                flex-direction: column;
-                text-align: center;
+        
+        .editable:hover {
+            background: #e3f2fd;
+        }
+        
+        .edit-input {
+            width: 100%;
+            padding: 5px;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .stats-box {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        
+        .export-btn {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .committee-card {
                 padding: 15px;
             }
-
-            .committee-number {
-                margin: 0 0 10px 0;
-                font-size: 24px;
-            }
-
+            
             .action-buttons {
-                margin-top: 15px;
-            }
-
-            .search-input {
-                font-size: 16px;
-                padding-right: 100px;
-            }
-
-            .voice-search-btn {
-                left: 50px;
-            }
-
-            .voice-command-list {
                 flex-direction: column;
-                align-items: center;
             }
-
-            .call-btn, .whatsapp-btn {
-                width: 45px;
-                height: 45px;
-                font-size: 18px;
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 5px;
             }
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <!-- محرك البحث -->
-        <div class="search-container">
-            <h1><i class="fas fa-search"></i> نظام البحث عن المندوبين</h1>
-            <div class="search-box">
-                <input type="text" 
-                       id="searchInput" 
-                       class="search-input" 
-                       placeholder="ابحث برقم اللجنة أو الاسم أو أول 5 أرقام من الهاتف"
-                       oninput="searchDelegates()">
-                <span class="search-icon"><i class="fas fa-search"></i></span>
-                <button id="voiceSearchBtn" class="voice-search-btn" title="البحث الصوتي">
-                    <i class="fas fa-microphone"></i>
-                </button>
-            </div>
-            
-            <div class="voice-status" id="voiceStatus"></div>
-            
-            <div class="voice-instructions">
-                <div><i class="fas fa-microphone-alt"></i> <strong>أمثلة على الأوامر الصوتية:</strong></div>
-                <div class="voice-command-list">
-                    <span class="voice-command">"لجنة خمسة عشر"</span>
-                    <span class="voice-command">"محمود"</span>
-                    <span class="voice-command">"12345" (أول 5 أرقام هاتف)</span>
-                    <span class="voice-command">"مسح البحث"</span>
+    <!-- Header -->
+    <div class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-users me-3"></i>دليل اللجان - إدارة المندوبين</h1>
+                    <p class="lead mb-0">نظام متكامل لإدارة ومتابعة لجان الانتخابات والمندوبين</p>
                 </div>
-            </div>
-            
-            <div class="search-hint">يمكنك البحث باستخدام رقم اللجنة أو جزء من الاسم أو أول 5 أرقام من رقم الهاتف</div>
-            <div class="results-count" id="resultsCount"></div>
-        </div>
-
-        <!-- صفحة العرض -->
-        <div class="section">
-            <h2><i class="fas fa-list"></i> قائمة المندوبين</h2>
-            <div class="scroll-container" id="delegatesList">
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    جاري تحميل بيانات المندوبين...
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-lg btn-light" onclick="toggleEditMode()" id="editModeBtn">
+                        <i class="fas fa-edit me-2"></i>وضع التعديل
+                    </button>
                 </div>
             </div>
         </div>
-
-        <!-- رابط صفحة الإدخال (للأدمن فقط) -->
-        <a href="https://mohamednasr5.github.io/id/admin.html" class="admin-link" id="adminLink">
-            <i class="fas fa-cog"></i> الدخول إلى لوحة التحكم
-        </a>
     </div>
 
-    <!-- زر تصحيح الأخطاء (للإختبار فقط) -->
-    <button class="debug-btn" onclick="checkData()" title="فحص البيانات">
-        <i class="fas fa-bug"></i>
-    </button>
-
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-        
-      const firebaseConfig = {
-  apiKey: "AIzaSyDSeCdQEQ_GlPh2bHN_g1zY0uT5itZHjxg",
-  authDomain: "mandowb-9ce4d.firebaseapp.com",
-  projectId: "mandowb-9ce4d",
-  storageBucket: "mandowb-9ce4d.firebasestorage.app",
-  messagingSenderId: "19347263922",
-  appId: "1:19347263922:web:970047c58c5c250f7194ab",
-  measurementId: "G-JE6R74Q9Q7"
-};
-
-        // تهيئة Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-
-        // متغيرات عامة
-        window.allDelegates = [];
-        let recognition = null;
-        let isListening = false;
-
-        // تهيئة التعرف على الصوت
-        function initializeVoiceRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            
-            if (SpeechRecognition) {
-                recognition = new SpeechRecognition();
-                recognition.lang = 'ar-SA';
-                recognition.continuous = false;
-                recognition.interimResults = false;
-                
-                recognition.onstart = function() {
-                    isListening = true;
-                    updateVoiceStatus("🎙️ جاري الاستماع... تحدث الآن");
-                    document.getElementById('voiceSearchBtn').classList.add('recording');
-                };
-                
-                recognition.onresult = function(event) {
-                    const transcript = event.results[0][0].transcript;
-                    processVoiceCommand(transcript);
-                };
-                
-                recognition.onerror = function(event) {
-                    updateVoiceStatus("❌ حدث خطأ في التعرف على الصوت");
-                    stopListening();
-                };
-                
-                recognition.onend = function() {
-                    stopListening();
-                };
-                
-                return true;
-            } else {
-                updateVoiceStatus("❌ المتصفح لا يدعم البحث الصوتي");
-                return false;
-            }
-        }
-
-        // بدء الاستماع للصوت
-        function startListening() {
-            if (!recognition) {
-                if (!initializeVoiceRecognition()) {
-                    return;
-                }
-            }
-            
-            if (!isListening) {
-                try {
-                    recognition.start();
-                } catch (error) {
-                    updateVoiceStatus("❌ تعذر بدء التسجيل الصوتي");
-                }
-            }
-        }
-
-        // إيقاف الاستماع
-        function stopListening() {
-            isListening = false;
-            document.getElementById('voiceSearchBtn').classList.remove('recording');
-            updateVoiceStatus("انقر على زر الميكروفون للبحث الصوتي");
-        }
-
-        // تحديث حالة الصوت
-        function updateVoiceStatus(message) {
-            document.getElementById('voiceStatus').textContent = message;
-        }
-
-        // معالجة الأمر الصوتي
-        function processVoiceCommand(command) {
-            updateVoiceStatus(`🎤 تم التعرف على: "${command}"`);
-            
-            const processedCommand = normalizeArabicNumbers(command);
-            const numberCommand = convertTextToNumber(processedCommand);
-            
-            if (processedCommand.includes('مسح') || processedCommand.includes('إلغاء') || processedCommand.includes('حذف')) {
-                document.getElementById('searchInput').value = '';
-                searchDelegates();
-                return;
-            }
-            
-            document.getElementById('searchInput').value = numberCommand;
-            searchDelegates();
-        }
-
-        // تحويل الأرقام المكتوبة نصياً إلى أرقام
-        function convertTextToNumber(text) {
-            const numberMap = {
-                'واحد': '1', 'احد': '1',
-                'اثنين': '2', 'اثنان': '2',
-                'ثلاثة': '3', 'ثلاث': '3',
-                'أربعة': '4', 'اربعة': '4',
-                'خمسة': '5', 'خمس': '5',
-                'ستة': '6', 'ست': '6',
-                'سبعة': '7', 'سبع': '7',
-                'ثمانية': '8', 'ثمان': '8',
-                'تسعة': '9', 'تسع': '9',
-                'عشرة': '10',
-                'احدى عشر': '11', 'إحدى عشر': '11',
-                'اثنا عشر': '12', 'اثني عشر': '12',
-                'ثلاثة عشر': '13',
-                'أربعة عشر': '14', 'اربعة عشر': '14',
-                'خمسة عشر': '15', 'خمس عشر': '15',
-                'ستة عشر': '16',
-                'سبعة عشر': '17',
-                'ثمانية عشر': '18',
-                'تسعة عشر': '19',
-                'عشرين': '20',
-                'ثلاثين': '30',
-                'أربعين': '40', 'اربعين': '40',
-                'خمسين': '50',
-                'ستين': '60',
-                'سبعين': '70',
-                'ثمانين': '80',
-                'تسعين': '90'
-            };
-            
-            let result = text;
-            Object.keys(numberMap).forEach(word => {
-                const regex = new RegExp(word, 'gi');
-                result = result.replace(regex, numberMap[word]);
-            });
-            
-            return result;
-        }
-
-        // توحيد تنسيق الأرقام العربية
-        function normalizeArabicNumbers(text) {
-            const arabicNumbersMap = {
-                '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
-                '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
-            };
-            
-            let result = text;
-            Object.keys(arabicNumbersMap).forEach(num => {
-                const regex = new RegExp(num, 'g');
-                result = result.replace(regex, arabicNumbersMap[num]);
-            });
-            
-            return result;
-        }
-
-        // تحميل البيانات عند بدء التشغيل
-        window.addEventListener('load', async () => {
-            try {
-                // إظهار رابط الأدمن دائماً
-                document.getElementById('adminLink').style.display = 'block';
-                
-                // تهيئة نظام التعرف على الصوت
-                initializeVoiceRecognition();
-                
-                // إضافة حدث النقر على زر البحث الصوتي
-                document.getElementById('voiceSearchBtn').addEventListener('click', function() {
-                    if (isListening) {
-                        stopListening();
-                        if (recognition) {
-                            recognition.stop();
-                        }
-                    } else {
-                        startListening();
-                    }
-                });
-                
-                // تحديث حالة الصوت
-                updateVoiceStatus("انقر على زر الميكروفون للبحث الصوتي");
-                
-                // تحميل بيانات المندوبين
-                await loadDelegatesData();
-                
-            } catch (error) {
-                console.error('خطأ في التحميل:', error);
-                document.getElementById('delegatesList').innerHTML = 
-                    '<div class="no-results">❌ حدث خطأ في تحميل البيانات. يرجى تحديث الصفحة.</div>';
-            }
-        });
-
-        // تحميل بيانات المندوبين
-        async function loadDelegatesData() {
-            try {
-                console.log("🔄 جاري تحميل البيانات من Firebase...");
-                
-                const delegatesRef = ref(database, 'delegates');
-                const snapshot = await get(delegatesRef);
-                const committees = snapshot.val() || {};
-                
-                console.log("📊 البيانات المستلمة:", committees);
-                
-                window.allDelegates = [];
-                
-                // إذا لم تكن هناك بيانات
-                if (Object.keys(committees).length === 0) {
-                    displayDelegates([]);
-                    return;
-                }
-                
-                // تحويل البيانات إلى مصفوفة
-                Object.keys(committees).forEach(committeeKey => {
-                    const committeeNum = parseInt(committeeKey);
-                    const committeeData = committees[committeeKey];
-                    
-                    // المندوبين الخاصين
-                    if (committeeData.special && Array.isArray(committeeData.special)) {
-                        committeeData.special.forEach(delegate => {
-                            if (delegate && delegate.name && delegate.phone) {
-                                window.allDelegates.push({
-                                    committee: committeeNum,
-                                    name: delegate.name.trim(),
-                                    phone: delegate.phone.toString().trim(),
-                                    type: 'special'
-                                });
-                            }
-                        });
-                    }
-                    
-                    // المندوبين العامين
-                    if (committeeData.general && Array.isArray(committeeData.general)) {
-                        committeeData.general.forEach(delegate => {
-                            if (delegate && delegate.name && delegate.phone) {
-                                window.allDelegates.push({
-                                    committee: committeeNum,
-                                    name: delegate.name.trim(),
-                                    phone: delegate.phone.toString().trim(),
-                                    type: 'general'
-                                });
-                            }
-                        });
-                    }
-                });
-                
-                console.log(`✅ تم تحميل ${window.allDelegates.length} مندوب`);
-                
-                // ترتيب المندوبين حسب رقم اللجنة
-                window.allDelegates.sort((a, b) => a.committee - b.committee);
-                
-                displayDelegates(window.allDelegates);
-                
-            } catch (error) {
-                console.error('❌ خطأ في تحميل البيانات:', error);
-                document.getElementById('delegatesList').innerHTML = 
-                    '<div class="no-results">❌ حدث خطأ في تحميل البيانات. تأكد من اتصالك بالإنترنت.</div>';
-            }
-        }
-
-        // عرض المندوبين
-        function displayDelegates(delegates) {
-            const container = document.getElementById('delegatesList');
-            
-            if (delegates.length === 0) {
-                container.innerHTML = '<div class="no-results">لا توجد بيانات للمندوبين. قم بإضافة البيانات أولاً من صفحة الإدخال.</div>';
-                document.getElementById('resultsCount').textContent = '📊 لا توجد بيانات';
-                return;
-            }
-            
-            // تجميع المندوبين حسب اللجنة
-            const committeesMap = {};
-            
-            delegates.forEach(delegate => {
-                if (!committeesMap[delegate.committee]) {
-                    committeesMap[delegate.committee] = {
-                        special: [],
-                        general: []
-                    };
-                }
-                committeesMap[delegate.committee][delegate.type].push(delegate);
-            });
-            
-            // بناء HTML
-            let html = '';
-            
-            // فرز اللجان
-            const sortedCommittees = Object.keys(committeesMap).sort((a, b) => a - b);
-            
-            sortedCommittees.forEach(committeeNum => {
-                const committeeData = committeesMap[committeeNum];
-                const specialDelegates = committeeData.special;
-                const generalDelegates = committeeData.general;
-                
-                if (specialDelegates.length === 0 && generalDelegates.length === 0) {
-                    return;
-                }
-                
-                // عنوان اللجنة
-                html += `<h3>لجنة ${committeeNum}</h3>`;
-                
-                // المندوبين الخاصين
-                if (specialDelegates.length > 0) {
-                    specialDelegates.forEach(delegate => {
-                        html += createDelegateCardHTML(delegate);
-                    });
-                }
-                
-                // المندوبين العامين
-                if (generalDelegates.length > 0) {
-                    generalDelegates.forEach(delegate => {
-                        html += createDelegateCardHTML(delegate);
-                    });
-                }
-            });
-            
-            container.innerHTML = html;
-            
-            // تحديث عداد النتائج
-            const searchValue = document.getElementById('searchInput').value.trim();
-            if (searchValue) {
-                document.getElementById('resultsCount').innerHTML = 
-                    `<i class="fas fa-check-circle"></i> تم العثور على ${delegates.length} نتيجة`;
-            } else {
-                document.getElementById('resultsCount').innerHTML = 
-                    `<i class="fas fa-users"></i> إجمالي المندوبين: ${delegates.length}`;
-            }
-        }
-
-        // إنشاء كارد المندوب (HTML)
-        function createDelegateCardHTML(delegate) {
-            const phoneWithPrefix = '2' + delegate.phone;
-            const typeName = delegate.type === 'special' ? 'خاص' : 'عام';
-            const typeClass = delegate.type === 'special' ? 'special' : 'general';
-            const typeIcon = delegate.type === 'special' ? 'fas fa-star' : 'fas fa-user-friends';
-            
-            return `
-                <div class="delegate-card ${typeClass}">
-                    <div class="committee-number">${delegate.committee}</div>
-                    <div class="delegate-info">
-                        <div class="delegate-name">
-                            <i class="fas fa-user"></i> ${delegate.name}
-                            <span class="delegate-type-indicator ${typeClass}"></span>
-                            <small style="color: #666; margin-right: 10px;">(${typeName})</small>
-                        </div>
-                        <div class="delegate-phone">
-                            <i class="fas fa-phone"></i> ${delegate.phone}
-                        </div>
-                    </div>
-                    <div class="action-buttons">
-                        <a href="tel:${delegate.phone}" class="call-btn" title="اتصال">
-                            <i class="fas fa-phone"></i>
-                        </a>
-                        <a href="https://wa.me/${phoneWithPrefix}" class="whatsapp-btn" target="_blank" title="واتساب">
-                            <i class="fab fa-whatsapp"></i>
-                        </a>
+    <div class="container">
+        <!-- Search Section -->
+        <div class="search-box">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text bg-primary text-white">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control form-control-lg" 
+                               id="searchInput" placeholder="ابحث برقم اللجنة، اسم المندوب، أو رقم الهاتف...">
+                        <button class="btn btn-primary" onclick="clearSearch()">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                 </div>
-            `;
+                <div class="col-md-4">
+                    <button class="btn voice-search-btn w-100 h-100" id="voiceSearchBtn">
+                        <i class="fas fa-microphone me-2"></i>بحث صوتي
+                    </button>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="searchType" id="searchAll" value="all" checked>
+                        <label class="form-check-label" for="searchAll">بحث شامل</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="searchType" id="searchCommittee" value="committee">
+                        <label class="form-check-label" for="searchCommittee">رقم اللجنة</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="searchType" id="searchName" value="name">
+                        <label class="form-check-label" for="searchName">اسم المندوب</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="searchType" id="searchPhone" value="phone">
+                        <label class="form-check-label" for="searchPhone">رقم الهاتف</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-box">
+                    <h6>إجمالي اللجان</h6>
+                    <div class="stats-number" id="totalCommittees">60</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-box">
+                    <h6>المندوبين المسجلين</h6>
+                    <div class="stats-number" id="registeredDelegates">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-box">
+                    <h6>الأرقام المتاحة</h6>
+                    <div class="stats-number" id="availablePhones">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-box">
+                    <h6>اللجان الفارغة</h6>
+                    <div class="stats-number" id="emptyCommittees">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Committees Display -->
+        <div id="committeesContainer" class="row"></div>
+
+        <!-- No Results Message -->
+        <div id="noResults" class="no-results" style="display: none;">
+            <i class="fas fa-search fa-3x mb-3 text-muted"></i>
+            <h4>لا توجد نتائج</h4>
+            <p>لم يتم العثور على لجان تطابق بحثك</p>
+        </div>
+
+        <!-- Export Section -->
+        <div class="mt-5 text-center">
+            <button class="btn export-btn btn-lg" onclick="exportData()">
+                <i class="fas fa-download me-2"></i>تصدير البيانات
+            </button>
+            <button class="btn btn-success btn-lg ms-3" onclick="saveAllChanges()">
+                <i class="fas fa-save me-2"></i>حفظ جميع التغييرات
+            </button>
+        </div>
+    </div>
+
+    <!-- Voice Search Modal -->
+    <div class="modal fade" id="voiceModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-microphone me-2"></i>البحث الصوتي</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-microphone fa-4x text-primary" id="voiceIcon"></i>
+                    </div>
+                    <p id="voiceStatus" class="h5">انقر على الميكروفون وابدأ بالتحدث...</p>
+                    <p class="text-muted mt-3">مثال: "ابحث عن اللجنة رقم ١٠" أو "عبد الرحمن"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span id="toastMessage">تم الحفظ بنجاح!</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // البيانات الأصلية من ملف Excel
+        const originalData = [
+            {id: 1, name: "حسين فاروق السعيد اسماعيل الصياد", phone: "01229947322"},
+            {id: 2, name: "مي فتحي فوزي مسعد", phone: "01270402796"},
+            {id: 3, name: "عبد الرحمن طعيمي فهيم مسعد", phone: "01062729454"},
+            {id: 4, name: "محمود محمودعلي يوسف حجازي", phone: "01205959249"},
+            {id: 5, name: "", phone: ""},
+            {id: 6, name: "احمد علي محمد ضاحي", phone: "01094510458"},
+            {id: 7, name: "حسن السيد المتولي المتولي عبد", phone: "01026064949"},
+            {id: 8, name: "ابراهيم محمد الدمرداش عوض عوض", phone: "01201086629"},
+            {id: 9, name: "ناهد حلمي توفيق علي مشعل", phone: "01210596990"},
+            {id: 10, name: "محمد ابراهيم محمد اسماعيل", phone: "01285162791"},
+            {id: 11, name: "ايمن محمد ابراهيم العطار", phone: "1010165516"},
+            {id: 12, name: "الحسيني منصور سليمان علي حتاتة", phone: "01003949419"},
+            {id: 13, name: "هيام محمد محمد محمود شحاتة", phone: "01280237393"},
+            {id: 14, name: "رحمه حسن محمد حسن عمر", phone: "01288559320"},
+            {id: 15, name: "عفاف محمد ابو الفتوح علي بركات", phone: "01096934671"},
+            {id: 16, name: "محمد مصطفي مسعد محمد مصطفي", phone: "01067573215"},
+            {id: 17, name: "محمد محمد محمد عبد الرحمن", phone: "01139206506"},
+            {id: 18, name: "عاصم احمد الرفاعي محمد الرفاعي", phone: "01285055076"},
+            {id: 19, name: "طه محمد هلال محمد هلال", phone: "01228995690"},
+            {id: 20, name: "طاهر ابو زيد ابراهيم", phone: "01226211836"},
+            {id: 21, name: "ماجد السيد محمد السيد رخا", phone: "01283634594"},
+            {id: 22, name: "مجدي محمد عادل محمد عبد الناصر", phone: "01276033363"},
+            {id: 23, name: "محمد فاروق محمد سيد احمد", phone: "01016844359"},
+            {id: 24, name: "محمد محمد محمد شحاتة نجم", phone: "01274782363"},
+            {id: 25, name: "ايمان سلطان سعد سليمان ابو الخير", phone: "01012793995"},
+            {id: 26, name: "علي اسامه علي خليل البويسي", phone: "01288358624"},
+            {id: 27, name: "", phone: ""},
+            {id: 28, name: "", phone: ""},
+            {id: 29, name: "علي ابراهيم محمد علي فرحات", phone: "01282851985"},
+            {id: 30, name: "محمد رزق محمد رزق العزبي", phone: "01285298997"},
+            {id: 31, name: "محمد نصر محمد محمد نصر الشيخ", phone: "0124923523"},
+            {id: 32, name: "فاطمة احمد احمد نعمت الله حجازي", phone: ""},
+            {id: 33, name: "", phone: ""},
+            {id: 34, name: "سامي رضا شحاتة فرحات", phone: "01093104051"},
+            {id: 35, name: "السيد صالح السيد السيد البلاسي", phone: "01070705299"},
+            {id: 36, name: "احمد حسن محمد عبد الطيف", phone: "01281498664"},
+            {id: 37, name: "نجلاء علي علي ابراهيم علي", phone: "01206076581"},
+            {id: 38, name: "هبه مسعد محمد علي عبد الرازق", phone: "01275199841"},
+            {id: 39, name: "تهاني محمد محمد السيد احمد لواش", phone: "01002888755"},
+            {id: 40, name: "احمد كمالاحمد محمد الجيار", phone: "01283024308"},
+            {id: 41, name: "مني ناصر محمد ابراهيم عشري", phone: "01210574177"},
+            {id: 42, name: "سلمي ابراهيم رزق منصور شحاتة", phone: "01027871766"},
+            {id: 43, name: "لمياء حسني عبده الخياط", phone: "01280088398"},
+            {id: 44, name: "ميار نصر محمد ابراهيم عشري", phone: "01027860702"},
+            {id: 45, name: "احمد رشاد ابراهيم جودة", phone: "01554956677"},
+            {id: 46, name: "احمد محمد احمد محمد الجنيدي", phone: "01555930288"},
+            {id: 47, name: "علي السيد العربي علي ابوالورد", phone: "01224845705"},
+            {id: 48, name: "نادر الغالي محمد منصور", phone: "01016866206"},
+            {id: 49, name: "فاطمة محمد سراج الدين عبد الكريم", phone: "01009880471"},
+            {id: 50, name: "نورهان محمد احمد يوسف الجعرور", phone: "010224666"},
+            {id: 51, name: "محمد السيد محمود عبد السلام", phone: "01099940445"},
+            {id: 52, name: "عمرو حسن محمد عبد العال موسي", phone: "01007807497"},
+            {id: 53, name: "محمد علي محمد علي البحراوي", phone: "01067765329"},
+            {id: 54, name: "هايدي احمد كامل احمد الحريري", phone: "01027046095"},
+            {id: 55, name: "احمد السيد عبده ابو الريات", phone: "01030105321"},
+            {id: 56, name: "تامر علي حاتم محمد الشيخ", phone: "01011221010"},
+            {id: 57, name: "سارة مسعد احمد كمال عبد السميع", phone: "1024278425"},
+            {id: 58, name: "غادة محمد احمد احمد حجازي", phone: "01004560997"},
+            {id: 59, name: "هدير محمد عبده خضر", phone: "01026554696"},
+            {id: 60, name: "هانم محمد زكريا محمد ابو خضير", phone: "01065396035"}
+        ];
+
+        let committeesData = [...originalData];
+        let isEditMode = false;
+        let recognition = null;
+
+        // تحميل البيانات المحفوظة من localStorage
+        function loadSavedData() {
+            const savedData = localStorage.getItem('committeesData');
+            if (savedData) {
+                committeesData = JSON.parse(savedData);
+            }
         }
 
-        // البحث عن المندوبين
-        window.searchDelegates = function() {
-            const searchValue = document.getElementById('searchInput').value.trim().toLowerCase();
+        // حفظ البيانات إلى localStorage
+        function saveData() {
+            localStorage.setItem('committeesData', JSON.stringify(committeesData));
+        }
+
+        // تهيئة الصفحة
+        function initPage() {
+            loadSavedData();
+            updateStats();
+            displayCommittees();
+            setupVoiceSearch();
+            setupSearch();
+        }
+
+        // تحديث الإحصائيات
+        function updateStats() {
+            const registered = committeesData.filter(c => c.name && c.name.trim() !== '').length;
+            const availablePhones = committeesData.filter(c => c.phone && c.phone.trim() !== '').length;
+            const emptyCommittees = committeesData.filter(c => !c.name || c.name.trim() === '').length;
+
+            document.getElementById('registeredDelegates').textContent = registered;
+            document.getElementById('availablePhones').textContent = availablePhones;
+            document.getElementById('emptyCommittees').textContent = emptyCommittees;
+        }
+
+        // عرض اللجان
+        function displayCommittees(filteredData = null) {
+            const container = document.getElementById('committeesContainer');
+            const noResults = document.getElementById('noResults');
+            const dataToDisplay = filteredData || committeesData;
             
-            if (!searchValue) {
-                displayDelegates(window.allDelegates);
+            container.innerHTML = '';
+            
+            if (dataToDisplay.length === 0) {
+                noResults.style.display = 'block';
                 return;
             }
-
-            const filtered = window.allDelegates.filter(delegate => {
-                const committeeMatch = delegate.committee.toString() === searchValue;
-                const nameMatch = delegate.name.toLowerCase().includes(searchValue);
-                const phoneMatch = delegate.phone && delegate.phone.includes(searchValue);
+            
+            noResults.style.display = 'none';
+            
+            dataToDisplay.forEach(committee => {
+                const isEmpty = !committee.name || committee.name.trim() === '';
+                const phone = committee.phone || '';
+                const whatsappNumber = phone ? '2' + phone : '';
                 
-                return committeeMatch || nameMatch || phoneMatch;
+                const card = document.createElement('div');
+                card.className = `col-md-4 col-lg-3 committee-card ${isEmpty ? 'empty-committee' : ''}`;
+                card.innerHTML = `
+                    <div class="committee-number">${committee.id}</div>
+                    <div class="delegate-name" onclick="editField(${committee.id}, 'name')">
+                        ${committee.name || '<span class="text-muted">لا يوجد مندوب</span>'}
+                    </div>
+                    ${phone ? `
+                        <div class="phone-section">
+                            <div class="phone-number mb-2" onclick="editField(${committee.id}, 'phone')">
+                                <i class="fas fa-phone me-2"></i>${phone}
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn btn-call btn-sm" onclick="callNumber('${phone}')">
+                                    <i class="fas fa-phone-alt"></i> اتصال
+                                </button>
+                                <button class="btn btn-whatsapp btn-sm" onclick="openWhatsApp('${whatsappNumber}')">
+                                    <i class="fab fa-whatsapp"></i> واتساب
+                                </button>
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="phone-section text-center">
+                            <span class="text-muted">لا يوجد رقم هاتف</span>
+                        </div>
+                    `}
+                    ${isEditMode ? `
+                        <div class="mt-3 text-center">
+                            <button class="btn btn-edit btn-sm w-100" onclick="editCommittee(${committee.id})">
+                                <i class="fas fa-edit me-1"></i> تعديل
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
             });
+        }
 
-            displayDelegates(filtered);
-        };
+        // البحث
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', performSearch);
+        }
 
-        // دالة فحص البيانات
-        window.checkData = async function() {
-            try {
-                console.log("🔍 فحص البيانات من Firebase...");
-                
-                const delegatesRef = ref(database, 'delegates');
-                const snapshot = await get(delegatesRef);
-                const committees = snapshot.val() || {};
-                
-                const committeeCount = Object.keys(committees).length;
-                let delegateCount = 0;
-                
-                Object.values(committees).forEach(committee => {
-                    if (committee.special) delegateCount += committee.special.length;
-                    if (committee.general) delegateCount += committee.general.length;
-                });
-                
-                alert(`✅ فحص البيانات:\n\n• عدد اللجان: ${committeeCount}\n• عدد المندوبين: ${delegateCount}\n\nافتح وحدة التحكم (Console) للتفاصيل.`);
-                
-                console.log("📊 تفاصيل البيانات:", committees);
-                
-            } catch (error) {
-                alert('❌ خطأ في فحص البيانات: ' + error.message);
-                console.error('خطأ:', error);
+        function performSearch() {
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            const searchType = document.querySelector('input[name="searchType"]:checked').value;
+            
+            if (!searchTerm) {
+                displayCommittees();
+                return;
             }
-        };
+            
+            let filteredData = committeesData.filter(committee => {
+                if (searchType === 'all') {
+                    return (
+                        committee.id.toString().includes(searchTerm) ||
+                        (committee.name && committee.name.toLowerCase().includes(searchTerm)) ||
+                        (committee.phone && committee.phone.includes(searchTerm))
+                    );
+                } else if (searchType === 'committee') {
+                    return committee.id.toString().includes(searchTerm);
+                } else if (searchType === 'name') {
+                    return committee.name && committee.name.toLowerCase().includes(searchTerm);
+                } else if (searchType === 'phone') {
+                    return committee.phone && committee.phone.includes(searchTerm);
+                }
+                return false;
+            });
+            
+            displayCommittees(filteredData);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            displayCommittees();
+        }
+
+        // البحث الصوتي
+        function setupVoiceSearch() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.lang = 'ar-EG';
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                recognition.onstart = function() {
+                    document.getElementById('voiceIcon').className = 'fas fa-microphone-slash fa-4x text-danger';
+                    document.getElementById('voiceStatus').textContent = 'جاري الاستماع...';
+                    document.getElementById('voiceSearchBtn').classList.add('voice-listening');
+                };
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('searchInput').value = transcript;
+                    performSearch();
+                    document.getElementById('voiceModal').classList.remove('show');
+                    document.body.classList.remove('modal-open');
+                    document.querySelector('.modal-backdrop')?.remove();
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                };
+
+                recognition.onend = function() {
+                    document.getElementById('voiceIcon').className = 'fas fa-microphone fa-4x text-primary';
+                    document.getElementById('voiceStatus').textContent = 'انقر على الميكروفون وابدأ بالتحدث...';
+                    document.getElementById('voiceSearchBtn').classList.remove('voice-listening');
+                };
+            }
+        }
+
+        function startVoiceSearch() {
+            if (recognition) {
+                const modal = new bootstrap.Modal(document.getElementById('voiceModal'));
+                modal.show();
+                setTimeout(() => {
+                    recognition.start();
+                }, 500);
+            } else {
+                alert('متصفحك لا يدعم البحث الصوتي. يرجى استخدام Chrome أو Edge.');
+            }
+        }
+
+        // الاتصال والواتساب
+        function callNumber(phone) {
+            if (phone) {
+                window.open(`tel:${phone}`, '_blank');
+            }
+        }
+
+        function openWhatsApp(whatsappNumber) {
+            if (whatsappNumber && whatsappNumber !== '2') {
+                window.open(`https://wa.me/${whatsappNumber}`, '_blank');
+            }
+        }
+
+        // وضع التعديل
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const btn = document.getElementById('editModeBtn');
+            if (isEditMode) {
+                btn.innerHTML = '<i class="fas fa-times me-2"></i>إنهاء التعديل';
+                btn.className = 'btn btn-lg btn-danger';
+                document.body.classList.add('edit-mode');
+                showToast('تم تفعيل وضع التعديل');
+            } else {
+                btn.innerHTML = '<i class="fas fa-edit me-2"></i>وضع التعديل';
+                btn.className = 'btn btn-lg btn-light';
+                document.body.classList.remove('edit-mode');
+                saveAllChanges();
+            }
+            displayCommittees();
+        }
+
+        function editField(committeeId, field) {
+            if (!isEditMode) return;
+            
+            const committee = committeesData.find(c => c.id === committeeId);
+            const element = event.target;
+            const currentValue = committee[field] || '';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'edit-input';
+            input.value = currentValue;
+            
+            element.innerHTML = '';
+            element.appendChild(input);
+            input.focus();
+            
+            input.addEventListener('blur', function() {
+                saveField(committeeId, field, input.value);
+            });
+            
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    saveField(committeeId, field, input.value);
+                }
+            });
+        }
+
+        function saveField(committeeId, field, value) {
+            const committeeIndex = committeesData.findIndex(c => c.id === committeeId);
+            if (committeeIndex !== -1) {
+                committeesData[committeeIndex][field] = value;
+                saveData();
+                updateStats();
+                displayCommittees();
+            }
+        }
+
+        function editCommittee(committeeId) {
+            const committee = committeesData.find(c => c.id === committeeId);
+            const newName = prompt('أدخل اسم المندوب:', committee.name || '');
+            if (newName !== null) {
+                const newPhone = prompt('أدخل رقم الهاتف:', committee.phone || '');
+                if (newPhone !== null) {
+                    committee.name = newName;
+                    committee.phone = newPhone;
+                    saveData();
+                    updateStats();
+                    displayCommittees();
+                    showToast('تم تحديث بيانات اللجنة');
+                }
+            }
+        }
+
+        function saveAllChanges() {
+            saveData();
+            showToast('تم حفظ جميع التغييرات بنجاح');
+        }
+
+        function exportData() {
+            const csvContent = "data:text/csv;charset=utf-8,\uFEFF" +
+                "رقم الجنة,الاسم,رقم التليفون\n" +
+                committeesData.map(c => `${c.id},"${c.name}","${c.phone}"`).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "لجان_المندوبين.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast('تم تصدير البيانات بنجاح');
+        }
+
+        function showToast(message) {
+            document.getElementById('toastMessage').textContent = message;
+            const toast = new bootstrap.Toast(document.getElementById('successToast'));
+            toast.show();
+        }
+
+        // تهيئة الصفحة عند التحميل
+        window.onload = initPage;
+        document.getElementById('voiceSearchBtn').onclick = startVoiceSearch;
     </script>
 </body>
 </html>
