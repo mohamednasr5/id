@@ -16,6 +16,7 @@
             --accent-color: #e74c3c;
             --success-color: #27ae60;
             --info-color: #17a2b8;
+            --warning-color: #f39c12;
         }
         
         body {
@@ -136,6 +137,11 @@
             color: white;
         }
         
+        .btn-csv-import {
+            background: #2ecc71;
+            color: white;
+        }
+        
         .search-box {
             background: white;
             padding: 20px;
@@ -244,6 +250,47 @@
             margin-bottom: 25px;
         }
         
+        .csv-import-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            border: 2px dashed #3498db;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #3498db;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .file-upload-area:hover {
+            background: #f8f9fa;
+            border-color: #2980b9;
+        }
+        
+        .file-upload-area.dragover {
+            background: #e3f2fd;
+            border-color: #2ecc71;
+        }
+        
+        .preview-table {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        .progress-bar-custom {
+            height: 25px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
         @media (max-width: 768px) {
             .committee-card {
                 padding: 15px;
@@ -284,26 +331,81 @@
             <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
                 <span class="visually-hidden">جاري التحميل...</span>
             </div>
-            <p class="mt-3">جاري تحميل البيانات من قاعدة البيانات...</p>
+            <p class="mt-3" id="loadingMessage">جاري تحميل البيانات من قاعدة البيانات...</p>
+        </div>
+
+        <!-- CSV Import Section -->
+        <div class="csv-import-section">
+            <h4><i class="fas fa-file-import me-2"></i>استيراد البيانات من ملف CSV</h4>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById('csvFileInput').click()">
+                        <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                        <h5>انقر أو اسحب ملف CSV هنا</h5>
+                        <p class="text-muted">يمكنك تحميل ملف CSV بامتداد .csv أو .txt</p>
+                        <p class="text-muted small">تنسيق الملف: رقم_اللجنة,اسم_المندوب,رقم_الهاتف</p>
+                    </div>
+                    <input type="file" id="csvFileInput" accept=".csv,.txt" style="display: none;">
+                    
+                    <div id="filePreview" style="display: none;">
+                        <h5>معاينة البيانات</h5>
+                        <div class="preview-table">
+                            <table class="table table-bordered table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>رقم اللجنة</th>
+                                        <th>اسم المندوب</th>
+                                        <th>رقم الهاتف</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="previewTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div id="importProgress" style="display: none;">
+                            <div class="progress progress-bar-custom">
+                                <div id="importProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" style="width: 0%">0%</div>
+                            </div>
+                            <p class="text-center" id="importStatus">جاري الاستيراد...</p>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <button class="btn btn-success btn-lg" onclick="importCSVData()" id="importBtn">
+                                <i class="fas fa-database me-2"></i>استيراد وحفظ في قاعدة البيانات
+                            </button>
+                            <button class="btn btn-secondary btn-lg ms-3" onclick="clearCSVPreview()">
+                                <i class="fas fa-times me-2"></i>إلغاء
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Admin Panel -->
         <div class="admin-panel">
             <h4><i class="fas fa-cogs me-2"></i>لوحة التحكم</h4>
             <div class="row mt-3">
-                <div class="col-md-4 mb-2">
-                    <button class="btn btn-info-custom w-100" onclick="updateFromCSV()">
-                        <i class="fas fa-file-import me-2"></i>تحديث البيانات من CSV
+                <div class="col-md-3 mb-2">
+                    <button class="btn btn-info-custom w-100" onclick="updateFromDefaultCSV()">
+                        <i class="fas fa-sync me-2"></i>استخدام البيانات الافتراضية
                     </button>
                 </div>
-                <div class="col-md-4 mb-2">
+                <div class="col-md-3 mb-2">
                     <button class="btn btn-warning w-100" onclick="restoreOriginalData()">
                         <i class="fas fa-history me-2"></i>استعادة البيانات الأصلية
                     </button>
                 </div>
-                <div class="col-md-4 mb-2">
+                <div class="col-md-3 mb-2">
                     <button class="btn btn-success w-100" onclick="syncWithFirebase()">
                         <i class="fas fa-sync-alt me-2"></i>مزامنة مع قاعدة البيانات
+                    </button>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <button class="btn btn-danger w-100" onclick="clearAllData()">
+                        <i class="fas fa-trash me-2"></i>حذف جميع البيانات
                     </button>
                 </div>
             </div>
@@ -477,6 +579,19 @@
         </div>
     </div>
 
+    <!-- Info Toast -->
+    <div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 11">
+        <div id="infoToast" class="toast align-items-center text-white bg-info border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <span id="infoMessage">معلومة</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // تهيئة Firebase
@@ -505,8 +620,8 @@
             showError("حدث خطأ في الاتصال بقاعدة البيانات. سيتم استخدام التخزين المحلي.");
         }
 
-        // البيانات الأصلية من ملف CSV الجديد
-        const csvData = [
+        // البيانات الافتراضية من ملف CSV
+        const defaultCSVData = [
             {id: 1, name: "حسين فاروق السعيد اسماعيل الصياد", phone: "01229947322"},
             {id: 2, name: "مي فتحي فوزي مسعد", phone: "01270402796"},
             {id: 3, name: "عبد الرحمن طعيمي فهيم مسعد", phone: "01062729454"},
@@ -637,9 +752,9 @@
         function convertCSVToDelegatesFormat(csvData) {
             return csvData.map(item => {
                 return {
-                    id: item.id,
+                    id: parseInt(item.id) || 0,
                     delegates: item.name && item.name.trim() !== '' ? 
-                        [{ name: item.name, phone: item.phone || '' }] : []
+                        [{ name: item.name.trim(), phone: (item.phone || '').trim() }] : []
                 };
             });
         }
@@ -648,10 +763,11 @@
         let committeesData = [];
         let isEditMode = false;
         let recognition = null;
+        let importedCSVData = [];
 
         // تحميل البيانات المحفوظة من Firebase
         async function loadSavedData() {
-            showLoading(true);
+            showLoading(true, "جاري تحميل البيانات من قاعدة البيانات...");
             
             try {
                 if (!isFirebaseInitialized) {
@@ -661,9 +777,9 @@
                 const snapshot = await db.collection('committees').get();
                 
                 if (snapshot.empty) {
-                    // إذا لم تكن هناك بيانات في Firebase، نستخدم البيانات من CSV
-                    console.log("No data in Firebase, using CSV data");
-                    committeesData = convertCSVToDelegatesFormat(csvData);
+                    // إذا لم تكن هناك بيانات في Firebase، نستخدم البيانات الافتراضية
+                    console.log("No data in Firebase, using default data");
+                    committeesData = convertCSVToDelegatesFormat(defaultCSVData);
                     // نحفظ البيانات الجديدة في Firebase لأول مرة
                     await saveAllCommitteesToFirebase();
                 } else {
@@ -683,12 +799,10 @@
                     const committeeIds = committeesData.map(c => c.id);
                     for (let i = 1; i <= 60; i++) {
                         if (!committeeIds.includes(i)) {
-                            // نضيف اللجنة الفارغة من بيانات CSV
-                            const csvItem = csvData.find(item => item.id === i);
+                            // نضيف اللجنة الفارغة
                             committeesData.push({
                                 id: i,
-                                delegates: csvItem && csvItem.name && csvItem.name.trim() !== '' ? 
-                                    [{ name: csvItem.name, phone: csvItem.phone || '' }] : []
+                                delegates: []
                             });
                         }
                     }
@@ -710,10 +824,12 @@
                 if (backupData) {
                     committeesData = JSON.parse(backupData);
                     console.log("Loaded from backup");
+                    showInfo("تم تحميل البيانات من النسخة الاحتياطية المحلية");
                 } else {
-                    // إذا لم توجد نسخة احتياطية، نستخدم البيانات من CSV
-                    committeesData = convertCSVToDelegatesFormat(csvData);
-                    console.log("Using CSV data");
+                    // إذا لم توجد نسخة احتياطية، نستخدم البيانات الافتراضية
+                    committeesData = convertCSVToDelegatesFormat(defaultCSVData);
+                    console.log("Using default data");
+                    showInfo("تم تحميل البيانات الافتراضية");
                 }
                 
                 showError("تم تحميل البيانات من التخزين المحلي بسبب مشكلة في الاتصال");
@@ -746,7 +862,7 @@
         async function saveAllCommitteesToFirebase() {
             if (!isFirebaseInitialized) return false;
             
-            showLoading(true);
+            showLoading(true, "جاري حفظ البيانات في قاعدة البيانات...");
             
             try {
                 for (const committee of committeesData) {
@@ -766,17 +882,172 @@
             }
         }
 
-        // تحديث البيانات من ملف CSV
-        async function updateFromCSV() {
-            if (!confirm('هل تريد تحديث البيانات من ملف CSV؟ سيتم استبدال جميع البيانات الحالية.')) {
+        // تحليل ملف CSV
+        function parseCSVFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    try {
+                        const content = event.target.result;
+                        const lines = content.split('\n');
+                        const result = [];
+                        
+                        // نتخطى العنوان إذا كان موجوداً
+                        let startLine = 0;
+                        if (lines[0].includes('رقم') || lines[0].includes('اسم') || lines[0].includes('هاتف')) {
+                            startLine = 1;
+                        }
+                        
+                        for (let i = startLine; i < lines.length; i++) {
+                            const line = lines[i].trim();
+                            if (!line) continue;
+                            
+                            // تحليل السطر - يمكن أن يحتوي على فواصل تاب أو فاصلة
+                            let parts;
+                            if (line.includes('\t')) {
+                                parts = line.split('\t');
+                            } else {
+                                parts = line.split(',');
+                            }
+                            
+                            if (parts.length >= 3) {
+                                const id = parseInt(parts[0].trim());
+                                const name = parts[1].trim();
+                                const phone = parts[2].trim();
+                                
+                                if (!isNaN(id) && id >= 1 && id <= 60) {
+                                    result.push({
+                                        id: id,
+                                        name: name,
+                                        phone: phone
+                                    });
+                                }
+                            }
+                        }
+                        
+                        // نرتب النتائج حسب رقم اللجنة
+                        result.sort((a, b) => a.id - b.id);
+                        resolve(result);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                
+                reader.onerror = function() {
+                    reject(new Error("فشل قراءة الملف"));
+                };
+                
+                reader.readAsText(file, 'UTF-8');
+            });
+        }
+
+        // عرض معاينة البيانات المستوردة
+        function showCSVPreview(data) {
+            importedCSVData = data;
+            const previewBody = document.getElementById('previewTableBody');
+            previewBody.innerHTML = '';
+            
+            // نعرض أول 10 سطور فقط للمعاينة
+            const previewData = data.slice(0, 10);
+            
+            previewData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.id}</td>
+                    <td>${item.name || ''}</td>
+                    <td>${item.phone || ''}</td>
+                `;
+                previewBody.appendChild(row);
+            });
+            
+            if (data.length > 10) {
+                const moreRow = document.createElement('tr');
+                moreRow.innerHTML = `<td colspan="3" class="text-center text-muted">... و ${data.length - 10} سطر إضافي</td>`;
+                previewBody.appendChild(moreRow);
+            }
+            
+            document.getElementById('filePreview').style.display = 'block';
+        }
+
+        // استيراد البيانات من CSV إلى Firebase
+        async function importCSVData() {
+            if (importedCSVData.length === 0) {
+                showError("لا توجد بيانات للاستيراد");
                 return;
             }
             
-            showLoading(true);
+            if (!confirm(`هل تريد استيراد ${importedCSVData.length} سجل إلى قاعدة البيانات؟\nسيتم استبدال البيانات الحالية.`)) {
+                return;
+            }
+            
+            showLoading(true, "جاري استيراد البيانات...");
+            document.getElementById('importProgress').style.display = 'block';
+            document.getElementById('importBtn').disabled = true;
             
             try {
-                // تحويل بيانات CSV إلى التنسيق الجديد
-                committeesData = convertCSVToDelegatesFormat(csvData);
+                // تحويل البيانات إلى التنسيق المطلوب
+                committeesData = convertCSVToDelegatesFormat(importedCSVData);
+                
+                // تحديث شريط التقدم
+                const progressBar = document.getElementById('importProgressBar');
+                const importStatus = document.getElementById('importStatus');
+                
+                // حفظ في Firebase مع عرض التقدم
+                if (isFirebaseInitialized) {
+                    let savedCount = 0;
+                    const totalCount = committeesData.length;
+                    
+                    for (const committee of committeesData) {
+                        await db.collection('committees').doc(committee.id.toString()).set({
+                            id: committee.id,
+                            delegates: committee.delegates,
+                            lastUpdated: new Date().toISOString(),
+                            importedAt: new Date().toISOString()
+                        }, { merge: true });
+                        
+                        savedCount++;
+                        const progressPercent = Math.round((savedCount / totalCount) * 100);
+                        progressBar.style.width = `${progressPercent}%`;
+                        progressBar.textContent = `${progressPercent}%`;
+                        importStatus.textContent = `جاري الحفظ: ${savedCount}/${totalCount}`;
+                    }
+                }
+                
+                // حفظ نسخة احتياطية
+                localStorage.setItem('committeesDataBackup', JSON.stringify(committeesData));
+                localStorage.setItem('lastCSVImport', JSON.stringify({
+                    date: new Date().toISOString(),
+                    count: importedCSVData.length
+                }));
+                
+                // تحديث العرض
+                updateStats();
+                displayCommittees();
+                
+                showToast(`تم استيراد ${importedCSVData.length} سجل بنجاح`);
+                clearCSVPreview();
+                
+            } catch (error) {
+                console.error("Error importing CSV data:", error);
+                showError('حدث خطأ أثناء استيراد البيانات: ' + error.message);
+            } finally {
+                showLoading(false);
+                document.getElementById('importProgress').style.display = 'none';
+                document.getElementById('importBtn').disabled = false;
+            }
+        }
+
+        // استخدام البيانات الافتراضية
+        async function updateFromDefaultCSV() {
+            if (!confirm('هل تريد استخدام البيانات الافتراضية؟ سيتم استبدال جميع البيانات الحالية.')) {
+                return;
+            }
+            
+            showLoading(true, "جاري تحديث البيانات...");
+            
+            try {
+                committeesData = convertCSVToDelegatesFormat(defaultCSVData);
                 
                 // حفظ في Firebase
                 if (isFirebaseInitialized) {
@@ -790,9 +1061,9 @@
                 updateStats();
                 displayCommittees();
                 
-                showToast('تم تحديث البيانات بنجاح من ملف CSV');
+                showToast('تم تحديث البيانات بنجاح من البيانات الافتراضية');
             } catch (error) {
-                console.error("Error updating from CSV:", error);
+                console.error("Error updating from default CSV:", error);
                 showError('حدث خطأ أثناء تحديث البيانات');
             } finally {
                 showLoading(false);
@@ -805,7 +1076,7 @@
                 return;
             }
             
-            showLoading(true);
+            showLoading(true, "جاري استعادة البيانات الأصلية...");
             
             try {
                 committeesData = [...oldOriginalData];
@@ -831,9 +1102,54 @@
             }
         }
 
+        // حذف جميع البيانات
+        async function clearAllData() {
+            if (!confirm('تحذير: هل تريد حذف جميع البيانات من قاعدة البيانات؟\nهذا الإجراء لا يمكن التراجع عنه.')) {
+                return;
+            }
+            
+            showLoading(true, "جاري حذف جميع البيانات...");
+            
+            try {
+                if (isFirebaseInitialized) {
+                    // حذف جميع المستندات من المجموعة
+                    const snapshot = await db.collection('committees').get();
+                    const batch = db.batch();
+                    
+                    snapshot.forEach(doc => {
+                        batch.delete(doc.ref);
+                    });
+                    
+                    await batch.commit();
+                }
+                
+                // مسح البيانات المحلية
+                committeesData = [];
+                for (let i = 1; i <= 60; i++) {
+                    committeesData.push({
+                        id: i,
+                        delegates: []
+                    });
+                }
+                
+                localStorage.removeItem('committeesDataBackup');
+                
+                // تحديث العرض
+                updateStats();
+                displayCommittees();
+                
+                showToast('تم حذف جميع البيانات بنجاح');
+            } catch (error) {
+                console.error("Error clearing all data:", error);
+                showError('حدث خطأ أثناء حذف البيانات');
+            } finally {
+                showLoading(false);
+            }
+        }
+
         // مزامنة البيانات مع Firebase
         async function syncWithFirebase() {
-            showLoading(true);
+            showLoading(true, "جاري المزامنة مع قاعدة البيانات...");
             
             try {
                 const success = await saveAllCommitteesToFirebase();
@@ -850,7 +1166,7 @@
             }
         }
 
-        // حفظ البيانات (تستخدم Firebase إذا كان متاحاً، وإلا localStorage)
+        // حفظ البيانات
         async function saveData() {
             // حفظ نسخة محلية دائماً
             localStorage.setItem('committeesDataBackup', JSON.stringify(committeesData));
@@ -865,6 +1181,91 @@
             }
         }
 
+        // مسح معاينة CSV
+        function clearCSVPreview() {
+            document.getElementById('filePreview').style.display = 'none';
+            document.getElementById('previewTableBody').innerHTML = '';
+            document.getElementById('csvFileInput').value = '';
+            importedCSVData = [];
+        }
+
+        // إعدادات السحب والإفلات للملفات
+        function setupFileDrop() {
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const fileInput = document.getElementById('csvFileInput');
+            
+            // عند النقر على منطقة التحميل
+            fileUploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            // عند اختيار ملف
+            fileInput.addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    try {
+                        showLoading(true, "جاري تحليل ملف CSV...");
+                        const data = await parseCSVFile(file);
+                        showLoading(false);
+                        
+                        if (data.length > 0) {
+                            showCSVPreview(data);
+                        } else {
+                            showError("لم يتم العثور على بيانات صالحة في الملف");
+                        }
+                    } catch (error) {
+                        showLoading(false);
+                        showError("فشل تحليل الملف: " + error.message);
+                    }
+                }
+            });
+            
+            // إعداد السحب والإفلات
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                fileUploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                fileUploadArea.addEventListener(eventName, () => {
+                    fileUploadArea.classList.add('dragover');
+                }, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                fileUploadArea.addEventListener(eventName, () => {
+                    fileUploadArea.classList.remove('dragover');
+                }, false);
+            });
+            
+            // عند إسقاط الملف
+            fileUploadArea.addEventListener('drop', async (e) => {
+                const file = e.dataTransfer.files[0];
+                if (file && (file.name.endsWith('.csv') || file.name.endsWith('.txt'))) {
+                    try {
+                        showLoading(true, "جاري تحليل ملف CSV...");
+                        const data = await parseCSVFile(file);
+                        showLoading(false);
+                        
+                        if (data.length > 0) {
+                            showCSVPreview(data);
+                        } else {
+                            showError("لم يتم العثور على بيانات صالحة في الملف");
+                        }
+                    } catch (error) {
+                        showLoading(false);
+                        showError("فشل تحليل الملف: " + error.message);
+                    }
+                } else {
+                    showError("الرجاء تحميل ملف CSV أو TXT فقط");
+                }
+            }, false);
+        }
+
         // تهيئة الصفحة
         async function initPage() {
             await loadSavedData();
@@ -872,6 +1273,7 @@
             displayCommittees();
             setupVoiceSearch();
             setupSearch();
+            setupFileDrop();
         }
 
         // تحديث الإحصائيات
@@ -1214,7 +1616,7 @@
         }
 
         async function saveAllChanges() {
-            showLoading(true);
+            showLoading(true, "جاري حفظ جميع التغييرات...");
             
             try {
                 await saveData();
@@ -1263,8 +1665,18 @@
             toast.show();
         }
 
-        function showLoading(show) {
+        function showInfo(message) {
+            document.getElementById('infoMessage').textContent = message;
+            const toast = new bootstrap.Toast(document.getElementById('infoToast'));
+            toast.show();
+        }
+
+        function showLoading(show, message = "جاري التحميل...") {
             const spinner = document.getElementById('loadingSpinner');
+            const loadingMessage = document.getElementById('loadingMessage');
+            
+            loadingMessage.textContent = message;
+            
             if (show) {
                 spinner.style.display = 'block';
             } else {
