@@ -1,160 +1,722 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>إدارة اللجان والمندوبين</title>
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
-<style>
-body{background:#f4f6f9;font-family:Cairo,Arial}
-.committee-card{background:#fff;border-radius:12px;padding:15px;margin-bottom:15px;box-shadow:0 3px 10px rgba(0,0,0,.08)}
-.committee-number{font-size:22px;font-weight:bold;color:#0d6efd}
-.delegate{background:#f8f9fa;padding:10px;border-radius:8px;margin-top:8px}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دليل اللجان - إدارة المندوبين</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+        }
+        
+        body {
+            font-family: 'Cairo', 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 25px 0;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .committee-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-right: 5px solid var(--secondary-color);
+        }
+        
+        .committee-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+        }
+        
+        .committee-number {
+            background: var(--primary-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        
+        .delegate-name {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            min-height: 60px;
+        }
+        
+        .phone-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .phone-number {
+            direction: ltr;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .action-buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+        }
+        
+        .btn-call {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-edit {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-save {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .search-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .voice-search-btn {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .voice-search-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
+        }
+        
+        .voice-listening {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(155, 89, 182, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0); }
+        }
+        
+        .empty-committee {
+            background: linear-gradient(135deg, #f1c40f, #f39c12);
+            color: white;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+        
+        .edit-mode .committee-card {
+            border: 2px dashed #3498db;
+        }
+        
+        .editable {
+            cursor: pointer;
+            border-bottom: 2px dotted #3498db;
+            padding: 2px 5px;
+            transition: background 0.3s ease;
+        }
+        
+        .editable:hover {
+            background: #e3f2fd;
+        }
+        
+        .edit-input {
+            width: 100%;
+            padding: 5px;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .stats-box {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        
+        .export-btn {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .committee-card {
+                padding: 15px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-<div class="container mt-4">
+    <!-- Header -->
+    <div class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-users me-3"></i>دليل اللجان - إدارة المندوبين</h1>
+                    <p class="lead mb-0">نظام متكامل لإدارة ومتابعة لجان الانتخابات والمندوبين</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-lg btn-light" onclick="toggleEditMode()" id="editModeBtn">
+                        <i class="fas fa-edit me-2"></i>وضع التعديل
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-<h3><i class="fa fa-users"></i> إدارة اللجان</h3>
-<button class="btn btn-success" onclick="openAddCommittee()">
-<i class="fa fa-plus"></i> إضافة لجنة
-</button>
-</div>
+    <div class="container">
+        <!-- Search Section -->
+        <div class="search-box">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text bg-primary text-white">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control form-control-lg" 
+                               id="searchInput" placeholder="ابحث برقم اللجنة، اسم المندوب، أو رقم الهاتف...">
+                        <button class="btn btn-primary" onclick="clearSearch()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn voice-search-btn w-100 h-100" id="voiceSearchBtn">
+                        <i class="fas fa-microphone me-2"></i>بحث صوتي
+                    </button>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="searchType" id="searchAll" value="all" checked>
+                        <label class="form-check-label" for="searchAll">بحث شامل</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="searchType" id="searchCommittee" value="committee">
+                        <label class="form-check-label" for="searchCommittee">رقم اللجنة</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="searchType" id="searchName" value="name">
+                        <label class="form-check-label" for="searchName">اسم المندوب</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="searchType" id="searchPhone" value="phone">
+                        <label class="form-check-label" for="searchPhone">رقم الهاتف</label>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<div id="committees"></div>
+        <!-- Stats Section -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-box">
+                    <h6>إجمالي اللجان</h6>
+                    <div class="stats-number" id="totalCommittees">60</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-box">
+                    <h6>المندوبين المسجلين</h6>
+                    <div class="stats-number" id="registeredDelegates">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-box">
+                    <h6>الأرقام المتاحة</h6>
+                    <div class="stats-number" id="availablePhones">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-box">
+                    <h6>اللجان الفارغة</h6>
+                    <div class="stats-number" id="emptyCommittees">0</div>
+                </div>
+            </div>
+        </div>
 
-</div>
+        <!-- Committees Display -->
+        <div id="committeesContainer" class="row"></div>
 
-<!-- مودال إضافة لجنة -->
-<div class="modal fade" id="committeeModal">
-<div class="modal-dialog">
-<div class="modal-content">
-<div class="modal-header bg-primary text-white">
-<h5>إضافة لجنة جديدة</h5>
-<button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-</div>
-<div class="modal-body">
-<input type="number" id="newCommitteeId" class="form-control" placeholder="رقم اللجنة">
-</div>
-<div class="modal-footer">
-<button class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-<button class="btn btn-primary" onclick="addCommittee()">حفظ</button>
-</div>
-</div>
-</div>
-</div>
+        <!-- No Results Message -->
+        <div id="noResults" class="no-results" style="display: none;">
+            <i class="fas fa-search fa-3x mb-3 text-muted"></i>
+            <h4>لا توجد نتائج</h4>
+            <p>لم يتم العثور على لجان تطابق بحثك</p>
+        </div>
 
-<!-- مودال المندوب -->
-<div class="modal fade" id="delegateModal">
-<div class="modal-dialog">
-<div class="modal-content">
-<div class="modal-header bg-success text-white">
-<h5>إضافة مندوب</h5>
-<button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-</div>
-<div class="modal-body">
-<input type="hidden" id="currentCommittee">
-<input class="form-control mb-2" id="delegateName" placeholder="اسم المندوب">
-<input class="form-control" id="delegatePhone" placeholder="رقم الهاتف">
-</div>
-<div class="modal-footer">
-<button class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-<button class="btn btn-success" onclick="saveDelegate()">حفظ</button>
-</div>
-</div>
-</div>
-</div>
+        <!-- Export Section -->
+        <div class="mt-5 text-center">
+            <button class="btn export-btn btn-lg" onclick="exportData()">
+                <i class="fas fa-download me-2"></i>تصدير البيانات
+            </button>
+            <button class="btn btn-success btn-lg ms-3" onclick="saveAllChanges()">
+                <i class="fas fa-save me-2"></i>حفظ جميع التغييرات
+            </button>
+        </div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Voice Search Modal -->
+    <div class="modal fade" id="voiceModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-microphone me-2"></i>البحث الصوتي</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-microphone fa-4x text-primary" id="voiceIcon"></i>
+                    </div>
+                    <p id="voiceStatus" class="h5">انقر على الميكروفون وابدأ بالتحدث...</p>
+                    <p class="text-muted mt-3">مثال: "ابحث عن اللجنة رقم ١٠" أو "عبد الرحمن"</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<script>
-// Firebase Config
-firebase.initializeApp({
-apiKey: "AIzaSyDSeCdQEQ_GlPh2bHN_g1zY0uT5itZHjxg",
-authDomain: "mandowb-9ce4d.firebaseapp.com",
-projectId: "mandowb-9ce4d"
-});
-const db = firebase.firestore();
+    <!-- Success Toast -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span id="toastMessage">تم الحفظ بنجاح!</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
 
-let committeesData = [];
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // البيانات الأصلية من ملف Excel
+        const originalData = [
+            {id: 1, name: "حسين فاروق السعيد اسماعيل الصياد", phone: "01229947322"},
+            {id: 2, name: "مي فتحي فوزي مسعد", phone: "01270402796"},
+            {id: 3, name: "عبد الرحمن طعيمي فهيم مسعد", phone: "01062729454"},
+            {id: 4, name: "محمود محمودعلي يوسف حجازي", phone: "01205959249"},
+            {id: 5, name: "", phone: ""},
+            {id: 6, name: "احمد علي محمد ضاحي", phone: "01094510458"},
+            {id: 7, name: "حسن السيد المتولي المتولي عبد", phone: "01026064949"},
+            {id: 8, name: "ابراهيم محمد الدمرداش عوض عوض", phone: "01201086629"},
+            {id: 9, name: "ناهد حلمي توفيق علي مشعل", phone: "01210596990"},
+            {id: 10, name: "محمد ابراهيم محمد اسماعيل", phone: "01285162791"},
+            {id: 11, name: "ايمن محمد ابراهيم العطار", phone: "1010165516"},
+            {id: 12, name: "الحسيني منصور سليمان علي حتاتة", phone: "01003949419"},
+            {id: 13, name: "هيام محمد محمد محمود شحاتة", phone: "01280237393"},
+            {id: 14, name: "رحمه حسن محمد حسن عمر", phone: "01288559320"},
+            {id: 15, name: "عفاف محمد ابو الفتوح علي بركات", phone: "01096934671"},
+            {id: 16, name: "محمد مصطفي مسعد محمد مصطفي", phone: "01067573215"},
+            {id: 17, name: "محمد محمد محمد عبد الرحمن", phone: "01139206506"},
+            {id: 18, name: "عاصم احمد الرفاعي محمد الرفاعي", phone: "01285055076"},
+            {id: 19, name: "طه محمد هلال محمد هلال", phone: "01228995690"},
+            {id: 20, name: "طاهر ابو زيد ابراهيم", phone: "01226211836"},
+            {id: 21, name: "ماجد السيد محمد السيد رخا", phone: "01283634594"},
+            {id: 22, name: "مجدي محمد عادل محمد عبد الناصر", phone: "01276033363"},
+            {id: 23, name: "محمد فاروق محمد سيد احمد", phone: "01016844359"},
+            {id: 24, name: "محمد محمد محمد شحاتة نجم", phone: "01274782363"},
+            {id: 25, name: "ايمان سلطان سعد سليمان ابو الخير", phone: "01012793995"},
+            {id: 26, name: "علي اسامه علي خليل البويسي", phone: "01288358624"},
+            {id: 27, name: "", phone: ""},
+            {id: 28, name: "", phone: ""},
+            {id: 29, name: "علي ابراهيم محمد علي فرحات", phone: "01282851985"},
+            {id: 30, name: "محمد رزق محمد رزق العزبي", phone: "01285298997"},
+            {id: 31, name: "محمد نصر محمد محمد نصر الشيخ", phone: "0124923523"},
+            {id: 32, name: "فاطمة احمد احمد نعمت الله حجازي", phone: ""},
+            {id: 33, name: "", phone: ""},
+            {id: 34, name: "سامي رضا شحاتة فرحات", phone: "01093104051"},
+            {id: 35, name: "السيد صالح السيد السيد البلاسي", phone: "01070705299"},
+            {id: 36, name: "احمد حسن محمد عبد الطيف", phone: "01281498664"},
+            {id: 37, name: "نجلاء علي علي ابراهيم علي", phone: "01206076581"},
+            {id: 38, name: "هبه مسعد محمد علي عبد الرازق", phone: "01275199841"},
+            {id: 39, name: "تهاني محمد محمد السيد احمد لواش", phone: "01002888755"},
+            {id: 40, name: "احمد كمالاحمد محمد الجيار", phone: "01283024308"},
+            {id: 41, name: "مني ناصر محمد ابراهيم عشري", phone: "01210574177"},
+            {id: 42, name: "سلمي ابراهيم رزق منصور شحاتة", phone: "01027871766"},
+            {id: 43, name: "لمياء حسني عبده الخياط", phone: "01280088398"},
+            {id: 44, name: "ميار نصر محمد ابراهيم عشري", phone: "01027860702"},
+            {id: 45, name: "احمد رشاد ابراهيم جودة", phone: "01554956677"},
+            {id: 46, name: "احمد محمد احمد محمد الجنيدي", phone: "01555930288"},
+            {id: 47, name: "علي السيد العربي علي ابوالورد", phone: "01224845705"},
+            {id: 48, name: "نادر الغالي محمد منصور", phone: "01016866206"},
+            {id: 49, name: "فاطمة محمد سراج الدين عبد الكريم", phone: "01009880471"},
+            {id: 50, name: "نورهان محمد احمد يوسف الجعرور", phone: "010224666"},
+            {id: 51, name: "محمد السيد محمود عبد السلام", phone: "01099940445"},
+            {id: 52, name: "عمرو حسن محمد عبد العال موسي", phone: "01007807497"},
+            {id: 53, name: "محمد علي محمد علي البحراوي", phone: "01067765329"},
+            {id: 54, name: "هايدي احمد كامل احمد الحريري", phone: "01027046095"},
+            {id: 55, name: "احمد السيد عبده ابو الريات", phone: "01030105321"},
+            {id: 56, name: "تامر علي حاتم محمد الشيخ", phone: "01011221010"},
+            {id: 57, name: "سارة مسعد احمد كمال عبد السميع", phone: "1024278425"},
+            {id: 58, name: "غادة محمد احمد احمد حجازي", phone: "01004560997"},
+            {id: 59, name: "هدير محمد عبده خضر", phone: "01026554696"},
+            {id: 60, name: "هانم محمد زكريا محمد ابو خضير", phone: "01065396035"}
+        ];
 
-// تحميل البيانات
-async function loadData(){
-const snap = await db.collection("committees").get();
-committeesData = [];
-snap.forEach(d=>committeesData.push(d.data()));
-committeesData.sort((a,b)=>a.id-b.id);
-render();
-}
+        let committeesData = [...originalData];
+        let isEditMode = false;
+        let recognition = null;
 
-// رسم اللجان
-function render(){
-const box=document.getElementById("committees");
-box.innerHTML="";
-committeesData.forEach(c=>{
-box.innerHTML+=`
-<div class="committee-card">
-<div class="committee-number">لجنة ${c.id}</div>
-${c.delegates.map(d=>`
-<div class="delegate">
-<b>${d.name}</b><br>
-${d.phone||"بدون رقم"}
-</div>`).join("")}
-<button class="btn btn-sm btn-outline-success mt-2" onclick="openDelegate(${c.id})">
-<i class="fa fa-user-plus"></i> إضافة مندوب
-</button>
-</div>`;
-});
-}
+        // تحميل البيانات المحفوظة من localStorage
+        function loadSavedData() {
+            const savedData = localStorage.getItem('committeesData');
+            if (savedData) {
+                committeesData = JSON.parse(savedData);
+            }
+        }
 
-// إضافة لجنة
-function openAddCommittee(){
-new bootstrap.Modal(document.getElementById("committeeModal")).show();
-}
+        // حفظ البيانات إلى localStorage
+        function saveData() {
+            localStorage.setItem('committeesData', JSON.stringify(committeesData));
+        }
 
-async function addCommittee(){
-const id=parseInt(document.getElementById("newCommitteeId").value);
-if(!id) return alert("أدخل رقم اللجنة");
-await db.collection("committees").doc(id.toString()).set({
-id,delegates:[]
-});
-bootstrap.Modal.getInstance(document.getElementById("committeeModal")).hide();
-loadData();
-}
+        // تهيئة الصفحة
+        function initPage() {
+            loadSavedData();
+            updateStats();
+            displayCommittees();
+            setupVoiceSearch();
+            setupSearch();
+        }
 
-// إضافة مندوب
-function openDelegate(id){
-document.getElementById("currentCommittee").value=id;
-document.getElementById("delegateName").value="";
-document.getElementById("delegatePhone").value="";
-new bootstrap.Modal(document.getElementById("delegateModal")).show();
-}
+        // تحديث الإحصائيات
+        function updateStats() {
+            const registered = committeesData.filter(c => c.name && c.name.trim() !== '').length;
+            const availablePhones = committeesData.filter(c => c.phone && c.phone.trim() !== '').length;
+            const emptyCommittees = committeesData.filter(c => !c.name || c.name.trim() === '').length;
 
-async function saveDelegate(){
-const id=document.getElementById("currentCommittee").value;
-const name=document.getElementById("delegateName").value.trim();
-const phone=document.getElementById("delegatePhone").value.trim();
-if(!name) return alert("الاسم مطلوب");
+            document.getElementById('registeredDelegates').textContent = registered;
+            document.getElementById('availablePhones').textContent = availablePhones;
+            document.getElementById('emptyCommittees').textContent = emptyCommittees;
+        }
 
-const ref=db.collection("committees").doc(id.toString());
-const doc=await ref.get();
-const data=doc.data();
-data.delegates.push({name,phone});
-await ref.set(data);
+        // عرض اللجان
+        function displayCommittees(filteredData = null) {
+            const container = document.getElementById('committeesContainer');
+            const noResults = document.getElementById('noResults');
+            const dataToDisplay = filteredData || committeesData;
+            
+            container.innerHTML = '';
+            
+            if (dataToDisplay.length === 0) {
+                noResults.style.display = 'block';
+                return;
+            }
+            
+            noResults.style.display = 'none';
+            
+            dataToDisplay.forEach(committee => {
+                const isEmpty = !committee.name || committee.name.trim() === '';
+                const phone = committee.phone || '';
+                const whatsappNumber = phone ? '2' + phone : '';
+                
+                const card = document.createElement('div');
+                card.className = `col-md-4 col-lg-3 committee-card ${isEmpty ? 'empty-committee' : ''}`;
+                card.innerHTML = `
+                    <div class="committee-number">${committee.id}</div>
+                    <div class="delegate-name" onclick="editField(${committee.id}, 'name')">
+                        ${committee.name || '<span class="text-muted">لا يوجد مندوب</span>'}
+                    </div>
+                    ${phone ? `
+                        <div class="phone-section">
+                            <div class="phone-number mb-2" onclick="editField(${committee.id}, 'phone')">
+                                <i class="fas fa-phone me-2"></i>${phone}
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn btn-call btn-sm" onclick="callNumber('${phone}')">
+                                    <i class="fas fa-phone-alt"></i> اتصال
+                                </button>
+                                <button class="btn btn-whatsapp btn-sm" onclick="openWhatsApp('${whatsappNumber}')">
+                                    <i class="fab fa-whatsapp"></i> واتساب
+                                </button>
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="phone-section text-center">
+                            <span class="text-muted">لا يوجد رقم هاتف</span>
+                        </div>
+                    `}
+                    ${isEditMode ? `
+                        <div class="mt-3 text-center">
+                            <button class="btn btn-edit btn-sm w-100" onclick="editCommittee(${committee.id})">
+                                <i class="fas fa-edit me-1"></i> تعديل
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
 
-bootstrap.Modal.getInstance(document.getElementById("delegateModal")).hide();
-loadData();
-}
+        // البحث
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', performSearch);
+        }
 
-loadData();
-</script>
+        function performSearch() {
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            const searchType = document.querySelector('input[name="searchType"]:checked').value;
+            
+            if (!searchTerm) {
+                displayCommittees();
+                return;
+            }
+            
+            let filteredData = committeesData.filter(committee => {
+                if (searchType === 'all') {
+                    return (
+                        committee.id.toString().includes(searchTerm) ||
+                        (committee.name && committee.name.toLowerCase().includes(searchTerm)) ||
+                        (committee.phone && committee.phone.includes(searchTerm))
+                    );
+                } else if (searchType === 'committee') {
+                    return committee.id.toString().includes(searchTerm);
+                } else if (searchType === 'name') {
+                    return committee.name && committee.name.toLowerCase().includes(searchTerm);
+                } else if (searchType === 'phone') {
+                    return committee.phone && committee.phone.includes(searchTerm);
+                }
+                return false;
+            });
+            
+            displayCommittees(filteredData);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            displayCommittees();
+        }
+
+        // البحث الصوتي
+        function setupVoiceSearch() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.lang = 'ar-EG';
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                recognition.onstart = function() {
+                    document.getElementById('voiceIcon').className = 'fas fa-microphone-slash fa-4x text-danger';
+                    document.getElementById('voiceStatus').textContent = 'جاري الاستماع...';
+                    document.getElementById('voiceSearchBtn').classList.add('voice-listening');
+                };
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('searchInput').value = transcript;
+                    performSearch();
+                    document.getElementById('voiceModal').classList.remove('show');
+                    document.body.classList.remove('modal-open');
+                    document.querySelector('.modal-backdrop')?.remove();
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                };
+
+                recognition.onend = function() {
+                    document.getElementById('voiceIcon').className = 'fas fa-microphone fa-4x text-primary';
+                    document.getElementById('voiceStatus').textContent = 'انقر على الميكروفون وابدأ بالتحدث...';
+                    document.getElementById('voiceSearchBtn').classList.remove('voice-listening');
+                };
+            }
+        }
+
+        function startVoiceSearch() {
+            if (recognition) {
+                const modal = new bootstrap.Modal(document.getElementById('voiceModal'));
+                modal.show();
+                setTimeout(() => {
+                    recognition.start();
+                }, 500);
+            } else {
+                alert('متصفحك لا يدعم البحث الصوتي. يرجى استخدام Chrome أو Edge.');
+            }
+        }
+
+        // الاتصال والواتساب
+        function callNumber(phone) {
+            if (phone) {
+                window.open(`tel:${phone}`, '_blank');
+            }
+        }
+
+        function openWhatsApp(whatsappNumber) {
+            if (whatsappNumber && whatsappNumber !== '2') {
+                window.open(`https://wa.me/${whatsappNumber}`, '_blank');
+            }
+        }
+
+        // وضع التعديل
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const btn = document.getElementById('editModeBtn');
+            if (isEditMode) {
+                btn.innerHTML = '<i class="fas fa-times me-2"></i>إنهاء التعديل';
+                btn.className = 'btn btn-lg btn-danger';
+                document.body.classList.add('edit-mode');
+                showToast('تم تفعيل وضع التعديل');
+            } else {
+                btn.innerHTML = '<i class="fas fa-edit me-2"></i>وضع التعديل';
+                btn.className = 'btn btn-lg btn-light';
+                document.body.classList.remove('edit-mode');
+                saveAllChanges();
+            }
+            displayCommittees();
+        }
+
+        function editField(committeeId, field) {
+            if (!isEditMode) return;
+            
+            const committee = committeesData.find(c => c.id === committeeId);
+            const element = event.target;
+            const currentValue = committee[field] || '';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'edit-input';
+            input.value = currentValue;
+            
+            element.innerHTML = '';
+            element.appendChild(input);
+            input.focus();
+            
+            input.addEventListener('blur', function() {
+                saveField(committeeId, field, input.value);
+            });
+            
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    saveField(committeeId, field, input.value);
+                }
+            });
+        }
+
+        function saveField(committeeId, field, value) {
+            const committeeIndex = committeesData.findIndex(c => c.id === committeeId);
+            if (committeeIndex !== -1) {
+                committeesData[committeeIndex][field] = value;
+                saveData();
+                updateStats();
+                displayCommittees();
+            }
+        }
+
+        function editCommittee(committeeId) {
+            const committee = committeesData.find(c => c.id === committeeId);
+            const newName = prompt('أدخل اسم المندوب:', committee.name || '');
+            if (newName !== null) {
+                const newPhone = prompt('أدخل رقم الهاتف:', committee.phone || '');
+                if (newPhone !== null) {
+                    committee.name = newName;
+                    committee.phone = newPhone;
+                    saveData();
+                    updateStats();
+                    displayCommittees();
+                    showToast('تم تحديث بيانات اللجنة');
+                }
+            }
+        }
+
+        function saveAllChanges() {
+            saveData();
+            showToast('تم حفظ جميع التغييرات بنجاح');
+        }
+
+        function exportData() {
+            const csvContent = "data:text/csv;charset=utf-8,\uFEFF" +
+                "رقم الجنة,الاسم,رقم التليفون\n" +
+                committeesData.map(c => `${c.id},"${c.name}","${c.phone}"`).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "لجان_المندوبين.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast('تم تصدير البيانات بنجاح');
+        }
+
+        function showToast(message) {
+            document.getElementById('toastMessage').textContent = message;
+            const toast = new bootstrap.Toast(document.getElementById('successToast'));
+            toast.show();
+        }
+
+        // تهيئة الصفحة عند التحميل
+        window.onload = initPage;
+        document.getElementById('voiceSearchBtn').onclick = startVoiceSearch;
+    </script>
 </body>
 </html>
