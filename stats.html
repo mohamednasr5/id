@@ -602,6 +602,8 @@
       border-radius: 15px;
       font-size: 0.8em;
       font-weight: 700;
+      min-width: 50px;
+      text-align: center;
     }
     
     .rep-duplicates {
@@ -611,6 +613,8 @@
       border-radius: 15px;
       font-size: 0.8em;
       font-weight: 700;
+      min-width: 50px;
+      text-align: center;
     }
     
     /* Modal للنصابة */
@@ -914,7 +918,6 @@
       background: white;
       padding: 30px;
       border-radius: 20px;
-      text-align: center;
       margin-top: 40px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
@@ -1852,7 +1855,7 @@
                 <span class="rep-name">${rep}</span>
                 <div class="rep-stats">
                   <span class="rep-count" title="إدخالات صحيحة">✓ ${formatNumber(count)}</span>
-                  ${repDupCount > 0 ? `<span class="rep-duplicates" title="محاولات تكرار">⚠ ${formatNumber(repDupCount)}</span>` : ''}
+                  <span class="rep-duplicates" title="محاولات تكرار">⚠ ${formatNumber(repDupCount)}</span>
                 </div>
               </div>
             `;
