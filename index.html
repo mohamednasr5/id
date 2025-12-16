@@ -147,8 +147,6 @@
             margin-top: 5px;
         }
 
-        /* تمت إزالة أنماط زر الميكروفون الصوتي */
-
         /* خيار تذكرني */
         .remember-group {
             display: flex;
@@ -528,7 +526,6 @@
             <label class="input-label">كود الدخول (6 أرقام)</label>
             <div style="position: relative;">
                 <input type="tel" id="loginCode" class="input-field" placeholder="900901" maxlength="6" inputmode="numeric">
-                <!-- تمت إزالة زر الميكروفون الصوتي -->
             </div>
             <div class="input-hint">أدخل كود الدخول المكون من 6 أرقام</div>
         </div>
@@ -545,7 +542,6 @@
         
         <div class="alert" id="loginAlert"></div>
         
-        <!-- تم إزالة التذييل الذي يحتوي على النص المطلوب إزالته -->
         <div class="footer">
             <p>جميع الحقوق محفوظة © <span id="currentYear"></span></p>
         </div>
@@ -646,7 +642,6 @@
         
         <div class="input-group">
             <label class="input-label">كلمة المرور (6-7 أرقام)</label>
-            <!-- تم تعديل الحقل لقبول 6-7 أرقام فقط -->
             <input type="tel" id="adminPassword" class="input-field" placeholder="أدخل 6-7 أرقام سرية" 
                    maxlength="7" minlength="6" inputmode="numeric" pattern="[0-9]{6,7}">
             <div class="input-hint">كلمة المرور مكونة من 6 إلى 7 أرقام سرية فقط</div>
@@ -791,7 +786,6 @@
         // تم تعديل كلمة المرور لتكون أرقام فقط (6-7 أرقام)
         const SYSTEM_CONFIG = {
             adminPassword: "521988", // 6 أرقام - يمكن تغييرها لأي رقم بين 6-7 أرقام
-            maxSessionsPerCode: 3,
             sessionTimeout: 30 * 60 * 1000,
             entryPrice: 200
         };
@@ -943,7 +937,6 @@
             systemState.deviceId = getDeviceId();
             document.getElementById('deviceId').textContent = systemState.deviceId.substring(0, 8);
             
-            // تمت إزالة تهيئة التعرف الصوتي
             document.addEventListener('keydown', function(e) {
                 if (e.ctrlKey && e.key === 'Enter') {
                     const activePage = getActivePage();
@@ -980,8 +973,6 @@
                 now.toLocaleTimeString('ar-EG') + ' | ' + 
                 now.toLocaleDateString('ar-EG');
         }
-
-        // تمت إزالة وظائف البحث الصوتي
 
         // وظائف التنقل بين الصفحات
         window.showPage = function(pageId) {
