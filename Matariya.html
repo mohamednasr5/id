@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دليل المناطق الشامل</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary: #0d6efd;
+        --success: #198754;
+        --whatsapp: #25d366;
+        --bg: #f4f6f8;
+        --card-bg: #ffffff;
+        --text: #333;
+        --car-badge: #fd7e14;
+    }
+
+    body {
+        font-family: "Cairo", Tahoma, Arial;
+        background: var(--bg);
+        color: var(--text);
+        margin: 0;
+        padding: 10px;
+        padding-top: 80px; /* مساحة للبحث المثبت */
+    }
+
+    /* تنسيق رأس الصفحة والبحث */
+    header {
+        background: var(--primary);
+        color: #fff;
+        padding: 10px;
+        border-radius: 0 0 15px 15px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .search-container {
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        gap: 8px;
+    }
+
+    .search-box {
+        flex: 1;
+        position: relative;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 12px 15px;
+        border: none;
+        border-radius: 25px;
+        font-size: 16px;
+        font-family: "Cairo";
+        box-sizing: border-box;
+        outline: none;
+    }
+
+    .voice-btn {
+        background: var(--success);
+        border: none;
+        color: white;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .voice-btn.listening {
+        background: #dc3545;
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+
+    /* تنسيق المناطق والبطاقات */
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .section {
+        background: var(--card-bg);
+        border-radius: 12px;
+        margin-bottom: 20px;
+        padding: 5px;
+        box-shadow: 0 2px 6px rgba(0,0,0,.08);
+        border: 1px solid #e1e1e1;
+        overflow: hidden;
+    }
+
+    .section-header {
+        background: var(--primary);
+        background: linear-gradient(45deg, #0d6efd, #0a58ca);
+        color: #fff;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 18px;
+        margin: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .section-id {
+        background: rgba(255,255,255,0.2);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+    }
+
+    .category-title {
+        color: var(--primary);
+        font-size: 14px;
+        font-weight: bold;
+        margin: 10px 10px 5px 10px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 5px;
+    }
+
+    .card {
+        border-bottom: 1px solid #f0f0f0;
+        padding: 10px;
+        transition: background 0.2s;
+    }
+    
+    .card:last-child { border-bottom: none; }
+    .card:hover { background: #f9f9f9; }
+
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        justify-content: space-between;
+    }
+
+    .info-group {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .name {
+        font-weight: 700;
+        font-size: 16px;
+        margin-bottom: 2px;
+    }
+
+    .role-badge {
+        font-size: 12px;
+        color: #666;
+        background: #eee;
+        padding: 2px 6px;
+        border-radius: 4px;
+        width: fit-content;
+    }
+
+    .car-number {
+        background: var(--car-badge);
+        color: white;
+        font-size: 12px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-right: 5px;
+        white-space: nowrap;
+    }
+
+    .actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .number-display {
+        font-weight: bold;
+        font-family: sans-serif;
+        color: #444;
+        font-size: 15px;
+        letter-spacing: 0.5px;
+    }
+
+    .btn {
+        text-decoration: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+        transition: transform 0.1s;
+    }
+    
+    .btn:active { transform: scale(0.95); }
+    .btn-call { background: var(--primary); }
+    .btn-wa { background: var(--whatsapp); }
+
+    /* إخفاء العناصر عند البحث */
+    .hidden { display: none !important; }
+
+    @media(max-width: 400px) {
+        .row { flex-direction: column; align-items: flex-start; }
+        .actions { width: 100%; justify-content: space-between; margin-top: 8px; }
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="ابحث بالاسم، الرقم، أو المنطقة...">
+        </div>
+        <button class="voice-btn" onclick="startVoice()" title="بحث صوتي">🎤</button>
+    </div>
+</header>
+
+<div class="container" id="contentArea">
+
+    <div class="section">
+        <div class="section-header">
+            <span>مصنع وائل شحاته</span>
+            <span class="section-id">1</span>
+        </div>
+        
+        <div class="category-title">مسؤول</div>
+        <div class="card" data-search="محمود عرنوس 01004747044">
+            <div class="row">
+                <div class="info-group">
+                    <span class="name">محمود عرنوس</span>
+                    <span class="role-badge">مسؤول</span>
+                </div>
+                <div class="actions">
+                    <span class="number-display">01004747044</span>
+                    <a class="btn btn-wa" href="https://wa.me/201004747044" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01004747044">📞</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-title">اتوبيسات</div>
+        <div class="card" data-search="عبده بركات 01229200116 5217">
+            <div class="row">
+                <div class="info-group">
+                    <div class="name">عبده بركات <span class="car-number">سيارة 5217</span></div>
+                </div>
+                <div class="actions">
+                    <span class="number-display">01229200116</span>
+                    <a class="btn btn-wa" href="https://wa.me/201229200116" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01229200116">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="صابر 01273442739 9743">
+            <div class="row">
+                <div class="info-group">
+                    <div class="name">صابر <span class="car-number">سيارة 9743</span></div>
+                </div>
+                <div class="actions">
+                    <span class="number-display">01273442739</span>
+                    <a class="btn btn-wa" href="https://wa.me/201273442739" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01273442739">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="مهند 01285390168 9745">
+            <div class="row">
+                <div class="info-group">
+                    <div class="name">مهند <span class="car-number">سيارة 9745</span></div>
+                </div>
+                <div class="actions">
+                    <span class="number-display">01285390168</span>
+                    <a class="btn btn-wa" href="https://wa.me/201285390168" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01285390168">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="اسلام 01270117051 1170">
+            <div class="row">
+                <div class="info-group">
+                    <div class="name">اسلام <span class="car-number">سيارة 1170</span></div>
+                </div>
+                <div class="actions">
+                    <span class="number-display">01270117051</span>
+                    <a class="btn btn-wa" href="https://wa.me/201270117051" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01270117051">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="بركات 012818328874 4295">
+            <div class="row">
+                <div class="info-group">
+                    <div class="name">بركات <span class="car-number">سيارة 4295</span></div>
+                </div>
+                <div class="actions">
+                    <span class="number-display">012818328874</span>
+                    <a class="btn btn-wa" href="https://wa.me/2012818328874" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:012818328874">📞</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-title">مناديب</div>
+        <div class="card" data-search="محمود محمد عزام 01288636891">
+            <div class="row">
+                <div class="info-group"><span class="name">محمود محمد عزام</span></div>
+                <div class="actions">
+                    <span class="number-display">01288636891</span>
+                    <a class="btn btn-wa" href="https://wa.me/201288636891" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01288636891">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="باسم الريس 01503898388">
+            <div class="row">
+                <div class="info-group"><span class="name">باسم الريس</span></div>
+                <div class="actions">
+                    <span class="number-display">01503898388</span>
+                    <a class="btn btn-wa" href="https://wa.me/201503898388" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01503898388">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="هشام السعدني 01025291103">
+            <div class="row">
+                <div class="info-group"><span class="name">هشام السعدني</span></div>
+                <div class="actions">
+                    <span class="number-display">01025291103</span>
+                    <a class="btn btn-wa" href="https://wa.me/201025291103" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01025291103">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="محمد البيومي 01020653926">
+            <div class="row">
+                <div class="info-group"><span class="name">محمد البيومي</span></div>
+                <div class="actions">
+                    <span class="number-display">01020653926</span>
+                    <a class="btn btn-wa" href="https://wa.me/201020653926" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01020653926">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="محمد الجراوي 01205233215">
+            <div class="row">
+                <div class="info-group"><span class="name">محمد الجراوي</span></div>
+                <div class="actions">
+                    <span class="number-display">01205233215</span>
+                    <a class="btn btn-wa" href="https://wa.me/201205233215" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01205233215">📞</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span>منطقة سواربة بجوار فرن منسي</span>
+            <span class="section-id">2</span>
+        </div>
+        
+        <div class="category-title">مسؤول</div>
+        <div class="card" data-search="فاطمة الحوت 01009381062">
+            <div class="row">
+                <div class="info-group"><span class="name">فاطمة الحوت</span></div>
+                <div class="actions">
+                    <span class="number-display">01009381062</span>
+                    <a class="btn btn-wa" href="https://wa.me/201009381062" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01009381062">📞</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-title">اتوبيسات</div>
+        <div class="card" data-search="احمد زكريا 01226866431 6220">
+            <div class="row">
+                <div class="info-group"><div class="name">احمد زكريا <span class="car-number">سيارة 6220</span></div></div>
+                <div class="actions">
+                    <span class="number-display">01226866431</span>
+                    <a class="btn btn-wa" href="https://wa.me/201226866431" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01226866431">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="احمد شرشر 01275803192 6344">
+            <div class="row">
+                <div class="info-group"><div class="name">احمد شرشر <span class="car-number">سيارة 6344</span></div></div>
+                <div class="actions">
+                    <span class="number-display">01275803192</span>
+                    <a class="btn btn-wa" href="https://wa.me/201275803192" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01275803192">📞</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-title">مناديب</div>
+        <div class="card" data-search="ايمان موسى 01507827244">
+            <div class="row">
+                <div class="info-group"><span class="name">ايمان موسى</span></div>
+                <div class="actions">
+                    <span class="number-display">01507827244</span>
+                    <a class="btn btn-wa" href="https://wa.me/201507827244" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01507827244">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="جيهان عمرو 01201132872">
+            <div class="row">
+                <div class="info-group"><span class="name">جيهان عمرو</span></div>
+                <div class="actions">
+                    <span class="number-display">01201132872</span>
+                    <a class="btn btn-wa" href="https://wa.me/201201132872" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01201132872">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="سناء محمد 01220311515">
+            <div class="row">
+                <div class="info-group"><span class="name">سناء محمد</span></div>
+                <div class="actions">
+                    <span class="number-display">01220311515</span>
+                    <a class="btn btn-wa" href="https://wa.me/201220311515" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01220311515">📞</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span>الجسر الواقي كوبري الحباشة</span>
+            <span class="section-id">3</span>
+        </div>
+        
+        <div class="category-title">مسؤول</div>
+        <div class="card" data-search="محمود محمد ابو النجا 01069066671">
+            <div class="row">
+                <div class="info-group"><span class="name">محمود محمد ابو النجا</span></div>
+                <div class="actions">
+                    <span class="number-display">01069066671</span>
+                    <a class="btn btn-wa" href="https://wa.me/201069066671" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01069066671">📞</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-title">اتوبيسات</div>
+        <div class="card" data-search="طرف الليدر">
+            <div class="row">
+                <div class="info-group"><span class="name">طرف الليدر</span></div>
+                <div class="actions" style="justify-content:flex-end; color:#666; font-size:12px;">بدون رقم</div>
+            </div>
+        </div>
+
+        <div class="category-title">مناديب</div>
+        <div class="card" data-search="احمد محمد عاشور 01150897615">
+            <div class="row">
+                <div class="info-group"><span class="name">احمد محمد عاشور</span></div>
+                <div class="actions">
+                    <span class="number-display">01150897615</span>
+                    <a class="btn btn-wa" href="https://wa.me/201150897615" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01150897615">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="عمر السيد فوزي 01271557328">
+            <div class="row">
+                <div class="info-group"><span class="name">عمر السيد فوزي</span></div>
+                <div class="actions">
+                    <span class="number-display">01271557328</span>
+                    <a class="btn btn-wa" href="https://wa.me/201271557328" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01271557328">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="سيف ابراهيم عبدالرحمن 01552809595">
+            <div class="row">
+                <div class="info-group"><span class="name">سيف ابراهيم عبدالرحمن</span></div>
+                <div class="actions">
+                    <span class="number-display">01552809595</span>
+                    <a class="btn btn-wa" href="https://wa.me/201552809595" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01552809595">📞</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span>منطقة الحمايدة</span>
+            <span class="section-id">4</span>
+        </div>
+        
+        <div class="category-title">مسؤول</div>
+        <div class="card" data-search="مصطفى كمالو 01066000627">
+            <div class="row">
+                <div class="info-group"><span class="name">مصطفى كمالو</span></div>
+                <div class="actions">
+                    <span class="number-display">01066000627</span>
+                    <a class="btn btn-wa" href="https://wa.me/201066000627" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01066000627">📞</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-title">اتوبيسات</div>
+        <div class="card" data-search="ابو عايدة 01286173696 2434">
+            <div class="row">
+                <div class="info-group"><div class="name">ابو عايدة <span class="car-number">سيارة 2434</span></div></div>
+                <div class="actions">
+                    <span class="number-display">01286173696</span>
+                    <a class="btn btn-wa" href="https://wa.me/201286173696" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01286173696">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="ابو احمد 021281007170 5187">
+            <div class="row">
+                <div class="info-group"><div class="name">ابو احمد <span class="car-number">سيارة 5187</span></div></div>
+                <div class="actions">
+                    <span class="number-display">01281007170</span>
+                    <a class="btn btn-wa" href="https://wa.me/201281007170" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01281007170">📞</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-title">مناديب</div>
+        <div class="card" data-search="اسلام محمد صبري 01011128132">
+            <div class="row">
+                <div class="info-group"><span class="name">اسلام محمد صبري</span></div>
+                <div class="actions">
+                    <span class="number-display">01011128132</span>
+                    <a class="btn btn-wa" href="https://wa.me/201011128132" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01011128132">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="محمد نصر احمد 01229267192">
+            <div class="row">
+                <div class="info-group"><span class="name">محمد نصر احمد</span></div>
+                <div class="actions">
+                    <span class="number-display">01229267192</span>
+                    <a class="btn btn-wa" href="https://wa.me/201229267192" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01229267192">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="حازم السيد علي البلاسي 01064806840">
+            <div class="row">
+                <div class="info-group"><span class="name">حازم السيد علي البلاسي</span></div>
+                <div class="actions">
+                    <span class="number-display">01064806840</span>
+                    <a class="btn btn-wa" href="https://wa.me/201064806840" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01064806840">📞</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span>مدرسة ابو بكر الصديق</span>
+            <span class="section-id">5</span>
+        </div>
+        
+        <div class="category-title">مسؤول</div>
+        <div class="card" data-search="حسن فياض مكتبة فياض 01010272289">
+            <div class="row">
+                <div class="info-group">
+                    <span class="name">حسن فياض (مكتبة فياض)</span>
+                    <span class="number-display" style="font-size:12px; color:#666">01286992654</span>
+                </div>
+                <div class="actions">
+                    <span class="number-display">01010272289</span>
+                    <a class="btn btn-wa" href="https://wa.me/201010272289" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01010272289">📞</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-title">اتوبيسات</div>
+        <div class="card" data-search="ياسر الحمامي 01227127299 6354">
+            <div class="row">
+                <div class="info-group"><div class="name">ياسر الحمامي <span class="car-number">سيارة 6354</span></div></div>
+                <div class="actions">
+                    <span class="number-display">01227127299</span>
+                    <a class="btn btn-wa" href="https://wa.me/201227127299" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01227127299">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="حسن 01276328807 6597">
+            <div class="row">
+                <div class="info-group"><div class="name">حسن <span class="car-number">سيارة 6597</span></div></div>
+                <div class="actions">
+                    <span class="number-display">01276328807</span>
+                    <a class="btn btn-wa" href="https://wa.me/201276328807" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01276328807">📞</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-title">مناديب</div>
+        <div class="card" data-search="خالد علي السيد زغلول 01204398545">
+            <div class="row">
+                <div class="info-group"><span class="name">خالد علي السيد زغلول</span></div>
+                <div class="actions">
+                    <span class="number-display">01204398545</span>
+                    <a class="btn btn-wa" href="https://wa.me/201204398545" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01204398545">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="حمود محمد فتحي عثمان 01275691129">
+            <div class="row">
+                <div class="info-group"><span class="name">حمود محمد فتحي عثمان</span></div>
+                <div class="actions">
+                    <span class="number-display">01275691129</span>
+                    <a class="btn btn-wa" href="https://wa.me/201275691129" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01275691129">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="علي وليد محمد زكريا 01206947214">
+            <div class="row">
+                <div class="info-group"><span class="name">علي وليد محمد زكريا</span></div>
+                <div class="actions">
+                    <span class="number-display">01206947214</span>
+                    <a class="btn btn-wa" href="https://wa.me/201206947214" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01206947214">📞</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span>منطقة السحاروة المستشفى</span>
+            <span class="section-id">6</span>
+        </div>
+        
+        <div class="category-title">مسؤول</div>
+        <div class="card" data-search="ناصر السحراوي 01032350600">
+            <div class="row">
+                <div class="info-group"><span class="name">ناصر السحراوي</span></div>
+                <div class="actions">
+                    <span class="number-display">01032350600</span>
+                    <a class="btn btn-wa" href="https://wa.me/201032350600" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01032350600">📞</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-title">اتوبيسات</div>
+        <div class="card" data-search="الحمامي 01227127299 9467">
+            <div class="row">
+                <div class="info-group"><div class="name">الحمامي <span class="car-number">سيارة 9467</span></div></div>
+                <div class="actions">
+                    <span class="number-display">01227127299</span>
+                    <a class="btn btn-wa" href="https://wa.me/201227127299" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01227127299">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="ابراهيم 01021719488 2614">
+            <div class="row">
+                <div class="info-group"><div class="name">ابراهيم <span class="car-number">سيارة 2614</span></div></div>
+                <div class="actions">
+                    <span class="number-display">01021719488</span>
+                    <a class="btn btn-wa" href="https://wa.me/201021719488" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01021719488">📞</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-title">مناديب</div>
+        <div class="card" data-search="السيد محمد تمراز 01017080671">
+            <div class="row">
+                <div class="info-group"><span class="name">السيد محمد تمراز</span></div>
+                <div class="actions">
+                    <span class="number-display">01017080671</span>
+                    <a class="btn btn-wa" href="https://wa.me/201017080671" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01017080671">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="صابر محمد خليل 01065968678">
+            <div class="row">
+                <div class="info-group"><span class="name">صابر محمد خليل</span></div>
+                <div class="actions">
+                    <span class="number-display">01065968678</span>
+                    <a class="btn btn-wa" href="https://wa.me/201065968678" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01065968678">📞</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span>جمعية الشريفية العصافرة</span>
+            <span class="section-id">7</span>
+        </div>
+        
+        <div class="category-title">مسؤول</div>
+        <div class="card" data-search="محمود خليل 01228282227">
+            <div class="row">
+                <div class="info-group"><span class="name">محمود خليل</span></div>
+                <div class="actions">
+                    <span class="number-display">01228282227</span>
+                    <a class="btn btn-wa" href="https://wa.me/201228282227" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01228282227">📞</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-title">مناديب</div>
+        <div class="card" data-search="محمود الدسوقي خليل 01063335186">
+            <div class="row">
+                <div class="info-group"><span class="name">محمود الدسوقي خليل</span></div>
+                <div class="actions">
+                    <span class="number-display">01063335186</span>
+                    <a class="btn btn-wa" href="https://wa.me/201063335186" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01063335186">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="كريم احمد سلامه 01026214411">
+            <div class="row">
+                <div class="info-group"><span class="name">كريم احمد سلامه</span></div>
+                <div class="actions">
+                    <span class="number-display">01026214411</span>
+                    <a class="btn btn-wa" href="https://wa.me/201026214411" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01026214411">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="احمد محمد السيد رضا 01225660843">
+            <div class="row">
+                <div class="info-group"><span class="name">احمد محمد السيد رضا</span></div>
+                <div class="actions">
+                    <span class="number-display">01225660843</span>
+                    <a class="btn btn-wa" href="https://wa.me/201225660843" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01225660843">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="كريم السيد محمد الزيني 01225851360">
+            <div class="row">
+                <div class="info-group"><span class="name">كريم السيد محمد الزيني</span></div>
+                <div class="actions">
+                    <span class="number-display">01225851360</span>
+                    <a class="btn btn-wa" href="https://wa.me/201225851360" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01225851360">📞</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span>عصام شتا الظهير</span>
+            <span class="section-id">8</span>
+        </div>
+        
+        <div class="category-title">مسؤول</div>
+        <div class="card" data-search="عصام شتا 01208977765">
+            <div class="row">
+                <div class="info-group"><span class="name">عصام شتا</span></div>
+                <div class="actions">
+                    <span class="number-display">01208977765</span>
+                    <a class="btn btn-wa" href="https://wa.me/201208977765" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01208977765">📞</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span>المدينة الصناعية</span>
+            <span class="section-id">9</span>
+        </div>
+        
+        <div class="category-title">مسؤول</div>
+        <div class="card" data-search="جمال حامد 01062348693">
+            <div class="row">
+                <div class="info-group"><span class="name">جمال حامد</span></div>
+                <div class="actions">
+                    <span class="number-display">01062348693</span>
+                    <a class="btn btn-wa" href="https://wa.me/201062348693" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01062348693">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="السيد محمد حسن 01203064534">
+            <div class="row">
+                <div class="info-group"><span class="name">السيد محمد حسن</span></div>
+                <div class="actions">
+                    <span class="number-display">01203064534</span>
+                    <a class="btn btn-wa" href="https://wa.me/201203064534" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01203064534">📞</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-title">مناديب</div>
+        <div class="card" data-search="طه البيومي 01008245766">
+            <div class="row">
+                <div class="info-group"><span class="name">طه البيومي</span></div>
+                <div class="actions">
+                    <span class="number-display">01008245766</span>
+                    <a class="btn btn-wa" href="https://wa.me/201008245766" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01008245766">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="معتز الشناوي 01003989550">
+            <div class="row">
+                <div class="info-group"><span class="name">معتز الشناوي</span></div>
+                <div class="actions">
+                    <span class="number-display">01003989550</span>
+                    <a class="btn btn-wa" href="https://wa.me/201003989550" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01003989550">📞</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span>العقوبيين</span>
+            <span class="section-id">10</span>
+        </div>
+        
+        <div class="category-title">مسؤول</div>
+        <div class="card" data-search="حمادة حوالة 01063291600">
+            <div class="row">
+                <div class="info-group"><span class="name">حمادة حوالة</span></div>
+                <div class="actions">
+                    <span class="number-display">01063291600</span>
+                    <a class="btn btn-wa" href="https://wa.me/201063291600" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01063291600">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="طرف احمد بقشيش 01008631011">
+            <div class="row">
+                <div class="info-group"><span class="name">طرف احمد بقشيش</span></div>
+                <div class="actions">
+                    <span class="number-display">01008631011</span>
+                    <a class="btn btn-wa" href="https://wa.me/201008631011" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01008631011">📞</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-title">مناديب</div>
+        <div class="card" data-search="عمر صابر احمد هلهول 01206947214">
+            <div class="row">
+                <div class="info-group"><span class="name">عمر صابر احمد هلهول</span></div>
+                <div class="actions">
+                    <span class="number-display">01206947214</span>
+                    <a class="btn btn-wa" href="https://wa.me/201206947214" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01206947214">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="علي وليد زكريا عبدالعال 01201803295">
+            <div class="row">
+                <div class="info-group"><span class="name">علي وليد زكريا عبدالعال</span></div>
+                <div class="actions">
+                    <span class="number-display">01201803295</span>
+                    <a class="btn btn-wa" href="https://wa.me/201201803295" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01201803295">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="السيد محمد الخضيري 01010559987">
+            <div class="row">
+                <div class="info-group"><span class="name">السيد محمد الخضيري</span></div>
+                <div class="actions">
+                    <span class="number-display">01010559987</span>
+                    <a class="btn btn-wa" href="https://wa.me/201010559987" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01010559987">📞</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span>جمعية المنار</span>
+            <span class="section-id">11</span>
+        </div>
+        
+        <div class="category-title">مسؤول</div>
+        <div class="card" data-search="محمد فاروق 01090030091">
+            <div class="row">
+                <div class="info-group"><span class="name">محمد فاروق</span></div>
+                <div class="actions">
+                    <span class="number-display">01090030091</span>
+                    <a class="btn btn-wa" href="https://wa.me/201090030091" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01090030091">📞</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-title">مناديب</div>
+        <div class="card" data-search="هاني السيد البدوي 01210039345">
+            <div class="row">
+                <div class="info-group"><span class="name">هاني السيد البدوي</span></div>
+                <div class="actions">
+                    <span class="number-display">01210039345</span>
+                    <a class="btn btn-wa" href="https://wa.me/201210039345" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01210039345">📞</a>
+                </div>
+            </div>
+        </div>
+        <div class="card" data-search="محمد السيد الغصناوي 01202737497">
+            <div class="row">
+                <div class="info-group"><span class="name">محمد السيد الغصناوي</span></div>
+                <div class="actions">
+                    <span class="number-display">01202737497</span>
+                    <a class="btn btn-wa" href="https://wa.me/201202737497" target="_blank">💬</a>
+                    <a class="btn btn-call" href="tel:01202737497">📞</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// كود البحث الذكي
+const searchInput = document.getElementById("searchInput");
+const sections = document.querySelectorAll(".section");
+
+searchInput.addEventListener("keyup", performSearch);
+
+function performSearch() {
+    let filter = searchInput.value.toLowerCase().trim();
+    
+    sections.forEach(section => {
+        let hasVisibleCards = false;
+        let cards = section.querySelectorAll(".card");
+        let sectionTitle = section.querySelector(".section-header").innerText.toLowerCase();
+
+        // إذا كان البحث يطابق اسم المنطقة، اظهر كل الكروت فيها
+        let sectionMatch = sectionTitle.includes(filter);
+
+        cards.forEach(card => {
+            let searchData = card.getAttribute("data-search").toLowerCase();
+            
+            if (sectionMatch || searchData.includes(filter)) {
+                card.classList.remove("hidden");
+                hasVisibleCards = true;
+            } else {
+                card.classList.add("hidden");
+            }
+        });
+
+        // إخفاء المنطقة بالكامل إذا لم يكن بها كروت ظاهرة
+        if (hasVisibleCards) {
+            section.classList.remove("hidden");
+            // إعادة إظهار العناوين الفرعية (مسؤول/اتوبيس) إذا كان القسم ظاهراً
+            section.querySelectorAll(".category-title").forEach(t => t.classList.remove("hidden"));
+        } else {
+            section.classList.add("hidden");
+        }
+    });
+}
+
+// كود البحث الصوتي
+function startVoice() {
+    if(!('webkitSpeechRecognition' in window)) {
+        alert("عذراً، متصفحك لا يدعم البحث الصوتي. يرجى استخدام Google Chrome.");
+        return;
+    }
+    
+    let btn = document.querySelector(".voice-btn");
+    btn.classList.add("listening");
+    
+    let recognition = new webkitSpeechRecognition();
+    recognition.lang = "ar-EG";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = function() {
+        searchInput.placeholder = "تحدث الآن...";
+    };
+
+    recognition.onend = function() {
+        btn.classList.remove("listening");
+        searchInput.placeholder = "ابحث بالاسم، الرقم، أو المنطقة...";
+    };
+
+    recognition.onresult = function(event) {
+        let transcript = event.results[0][0].transcript;
+        // إزالة النقطة في آخر الكلام إن وجدت
+        if(transcript.endsWith('.')) transcript = transcript.slice(0, -1);
+        
+        searchInput.value = transcript;
+        performSearch(); // تفعيل البحث تلقائياً
+    };
+    
+    recognition.start();
+}
+</script>
+
+</body>
+</html>
