@@ -597,8 +597,9 @@
         
         <div class="alert" id="loginAlert"></div>
         
+        <!-- تم إزالة التذييل الذي يحتوي على النص المطلوب إزالته -->
         <div class="footer">
-            <p>نظام المناديب  3.0 | برمجة <a href="#" class="footer-link">المهندس محمد حماد</a></p>
+            <p>جميع الحقوق محفوظة © <span id="currentYear"></span></p>
         </div>
     </div>
 
@@ -696,9 +697,11 @@
         </div>
         
         <div class="input-group">
-            <label class="input-label">كلمة المرور</label>
-            <input type="password" id="adminPassword" class="input-field" placeholder="أدخل كلمة المرور">
-            <div class="input-hint">كلمة المرور مطلوبة للوصول للوحة التحكم</div>
+            <label class="input-label">كلمة المرور (6-7 أرقام)</label>
+            <!-- تم تعديل الحقل لقبول 6-7 أرقام فقط -->
+            <input type="tel" id="adminPassword" class="input-field" placeholder="أدخل 6-7 أرقام سرية" 
+                   maxlength="7" minlength="6" inputmode="numeric" pattern="[0-9]{6,7}">
+            <div class="input-hint">كلمة المرور مكونة من 6 إلى 7 أرقام سرية فقط</div>
         </div>
         
         <button class="btn btn-primary" onclick="verifyAdmin()">
@@ -837,8 +840,9 @@
         const db = getDatabase(app);
 
         // البيانات الأساسية للنظام
+        // تم تعديل كلمة المرور لتكون أرقام فقط (6-7 أرقام)
         const SYSTEM_CONFIG = {
-            adminPassword: "521988",
+            adminPassword: "521988", // 6 أرقام - يمكن تغييرها لأي رقم بين 6-7 أرقام
             maxSessionsPerCode: 3,
             sessionTimeout: 30 * 60 * 1000,
             entryPrice: 200
@@ -982,6 +986,9 @@
             loadRememberedData();
             updateTime();
             setInterval(updateTime, 1000);
+            
+            // تعيين السنة الحالية في التذييل
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
         });
 
         function initSystem() {
@@ -1675,9 +1682,16 @@
             showPage('adminLoginPage');
         };
 
+        // تم تعديل دالة التحقق من كلمة مرور المدير لقبول 6-7 أرقام فقط
         window.verifyAdmin = function() {
             const password = document.getElementById('adminPassword').value;
             const alertEl = document.getElementById('adminAlert');
+            
+            // التحقق من أن كلمة المرور تتكون من 6-7 أرقام فقط
+            if (!/^\d{6,7}$/.test(password)) {
+                showAlert(alertEl, 'كلمة المرور يجب أن تكون 6 إلى 7 أرقام فقط', 'error');
+                return;
+            }
             
             if (password === SYSTEM_CONFIG.adminPassword) {
                 showPage('adminPage');
