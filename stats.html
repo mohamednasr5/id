@@ -920,12 +920,14 @@
       border-radius: 20px;
       margin-top: 40px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      text-align: center;
     }
     
     .footer-content {
       font-size: 1.1em;
       color: #666;
       margin-bottom: 15px;
+      text-align: center;
     }
     
     .footer-heart {
@@ -943,6 +945,7 @@
     .footer-link {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 10px;
       background: linear-gradient(135deg, #1877f2, #0d5bc6);
       color: white;
@@ -952,11 +955,19 @@
       font-weight: 600;
       transition: all 0.3s ease;
       box-shadow: 0 4px 15px rgba(24, 119, 242, 0.3);
+      text-align: center;
+      margin: 0 auto;
     }
     
     .footer-link:hover {
       transform: translateY(-3px);
       box-shadow: 0 8px 25px rgba(24, 119, 242, 0.4);
+    }
+    
+    .footer h3 {
+      color: var(--primary);
+      margin-bottom: 15px;
+      text-align: center;
     }
     
     @media (max-width: 768px) {
@@ -1115,7 +1126,7 @@
       <div class="footer-content">
         تم برمجة هذه الصفحة بكل <span class="footer-heart">❤️</span> من
       </div>
-      <h3 style="color: var(--primary); margin-bottom: 15px;">المهندس محمد حماد</h3>
+      <h3>المهندس محمد حماد</h3>
       <a href="https://www.facebook.com/en.mohamed.nasr" target="_blank" class="footer-link">
         <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
           <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
