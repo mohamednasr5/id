@@ -125,12 +125,6 @@
       animation: shake 0.5s ease;
     }
     
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-10px); }
-      75% { transform: translateX(10px); }
-    }
-    
     .remember-me {
       display: flex;
       align-items: center;
@@ -176,12 +170,6 @@
       height: 10px;
       background: #2ecc71;
       border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
     }
     
     .search-container {
@@ -261,7 +249,6 @@
     
     .voice-search-btn.listening {
       background: var(--danger);
-      animation: pulse 1s infinite;
     }
     
     .voice-search-btn.listening:hover {
@@ -396,12 +383,6 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       text-align: center;
       border-top: 4px solid var(--primary);
-      animation: fadeIn 0.5s ease;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
     }
     
     .summary-card h3 {
@@ -440,12 +421,6 @@
       border-left: 5px solid var(--primary);
       transition: all 0.3s ease;
       overflow: hidden;
-      animation: slideIn 0.5s ease;
-    }
-    
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(-20px); }
-      to { opacity: 1; transform: translateX(0); }
     }
     
     .place-card:hover {
@@ -581,7 +556,6 @@
     
     .rep-item:hover {
       background: #e9ecef;
-      transform: translateX(-5px);
     }
     
     .rep-name {
@@ -646,12 +620,6 @@
       overflow-y: auto;
       position: relative;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      animation: modalSlideIn 0.3s ease;
-    }
-    
-    @keyframes modalSlideIn {
-      from { opacity: 0; transform: translateY(-50px); }
-      to { opacity: 1; transform: translateY(0); }
     }
     
     .modal-header {
@@ -702,7 +670,6 @@
     }
     
     .duplicate-item:hover {
-      transform: translateX(-5px);
       box-shadow: 0 4px 15px rgba(231, 76, 60, 0.2);
     }
     
@@ -845,7 +812,6 @@
 
     .message-item:hover {
       background: #e9ecef;
-      transform: translateX(-5px);
     }
 
     .message-header {
@@ -933,13 +899,6 @@
     .footer-heart {
       color: var(--danger);
       display: inline-block;
-      animation: heartbeat 1.5s infinite;
-    }
-    
-    @keyframes heartbeat {
-      0%, 100% { transform: scale(1); }
-      10%, 30% { transform: scale(1.2); }
-      20%, 40% { transform: scale(1); }
     }
     
     .footer-link {
@@ -968,6 +927,111 @@
       color: var(--primary);
       margin-bottom: 15px;
       text-align: center;
+    }
+    
+    /* زر التعديل للادمن */
+    .edit-btn {
+      background: linear-gradient(135deg, var(--warning), #e67e22);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.85em;
+      margin-top: 10px;
+      width: 100%;
+    }
+    
+    .edit-btn:hover {
+      background: #d35400;
+      transform: translateY(-2px);
+    }
+    
+    /* Modal التعديل */
+    .edit-modal-content {
+      max-width: 800px;
+    }
+    
+    .edit-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .edit-input {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 14px;
+      text-align: center;
+    }
+    
+    .edit-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(0, 114, 255, 0.2);
+    }
+    
+    .reps-edit-container {
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      background: #f8f9fa;
+    }
+    
+    .rep-edit-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      margin-bottom: 8px;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid #eee;
+    }
+    
+    .rep-edit-name {
+      font-weight: 600;
+      color: var(--dark);
+      flex: 1;
+    }
+    
+    .rep-edit-input {
+      width: 80px;
+      padding: 6px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      text-align: center;
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .delete-rep-btn {
+      background: var(--danger);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      margin-left: 8px;
+    }
+    
+    .delete-rep-btn:hover {
+      background: #c0392b;
+      transform: scale(1.1);
     }
     
     @media (max-width: 768px) {
@@ -1098,6 +1162,11 @@
       </div>
     </div>
     
+    <!-- رسالة حالة الادمن -->
+    <div id="adminStatus" style="display: none; background: #9b59b6; color: white; padding: 10px; border-radius: 10px; margin: 10px 0; text-align: center; font-weight: bold;">
+      🔧 وضع التعديل مفعل - يمكنك تعديل أي رقم فعلي في الإحصائيات
+    </div>
+    
     <div class="summary-row" id="summaryRow">
       <div class="summary-card">
         <h3>إجمالي الإدخالات</h3>
@@ -1194,110 +1263,146 @@
     </div>
   </div>
 
+  <!-- Modal تعديل الإحصائيات -->
+  <div class="modal" id="editModal">
+    <div class="modal-content edit-modal-content">
+      <div class="modal-header">
+        <div class="modal-title">✏️ تعديل الإحصائيات</div>
+        <button class="close-modal" onclick="closeEditModal()">×</button>
+      </div>
+      <div id="editPlaceName" style="font-size: 1.2em; color: var(--primary); margin-bottom: 20px; font-weight: 600;"></div>
+      
+      <div class="edit-controls">
+        <div style="flex: 1;">
+          <label style="display: block; font-size: 0.9em; color: #666; margin-bottom: 5px;">الإدخالات</label>
+          <input type="number" class="edit-input" id="editEntries" min="0" value="0">
+        </div>
+        <div style="flex: 1;">
+          <label style="display: block; font-size: 0.9em; color: #666; margin-bottom: 5px;">النصابة</label>
+          <input type="number" class="edit-input" id="editDuplicates" min="0" value="0">
+        </div>
+      </div>
+      
+      <div class="reps-edit-container" id="repsEditContainer">
+        <div style="font-weight: 600; color: var(--dark); margin-bottom: 10px;">إدخالات المناديب:</div>
+        <div id="repsEditList"></div>
+      </div>
+      
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-success" onclick="saveEditedStats()" style="flex: 1;">💾 حفظ التعديلات</button>
+        <button class="btn btn-danger" onclick="resetEditedStats()" style="flex: 1;">🗑️ حذف التعديلات</button>
+      </div>
+      
+      <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 0.9em; color: #666;">
+        <p><strong>ملاحظة:</strong> التعديلات هنا تغير الأرقام الظاهرة فقط ولا تؤثر على البيانات الأصلية في قاعدة البيانات.</p>
+      </div>
+    </div>
+  </div>
+
   <!-- JavaScript للبحث الصوتي وإدارة الدخول -->
   <script>
     // قائمة الأماكن المحددة (100 مكان)
     const placesList = [
       "1- شرين  - المطرية",
-            "2- حي الحمزاوي - حماده عبده مصباح",
-            "3- حي الجرن 1 - شارع المظلوم",
-            "4- حي الجرن 2 - إبراهيم فهيد",
-            "5- باهي الحديدي",
-            "6- حي الإعجام - حمادة أبو رشاد",
-            "7- حي العزبة - منشية ناصر",
-            "8- بحر البلد 2 - السعيد أبو أمين ",
-            "9- حي المنزلة الجديدة - كريم شقرف",
-            "10- حي المنزلة الجديدة 2 - شريف دبرياش",
-            "11- حي بحر البلد 3 - أخر شارع 10",
-            "12- حي بحر البلد 1 - شارع الكابتن",
-            "13- حي الفقاعي - إبراهيم غزل",
-            "14- حي السلموني - حسن المناخلي",
-            "15- حي الكفر 1 - الساحة",
-            "16- حي الكفر 3 - ملعب برشلونة",
-            "17- حي الكفر 2 - تحت السكة",
-            "18- حي الفداء 1 - حمادة الكيال",
-            "19- حي سوق الجملة - على البياع",
-            "20- حي نقطة الأمام على",
-            "21- حي البر التاني - حي السلام",
-            "22- حي البر التاني - الهاويس",
-            "23- حي مصنع البصل - وليد فهيد",
-            "24- حي مدرسة عبد العال شلباية",
-            "25- حي المزرعة - السيد الحديدي",
-            "26- حي أمن الدولة",
-            "27- قرية الفروسات",
-            "28- قرية أبو الأخضر",
-            "29- قرية جديدة المنزلة",
-            "30- قرية العامرة",
-            "31- قرية مصر الجديدة",
-            "32- قرية عرب زيدان",
-            "33- قرية الستايتة",
-            "34- قرية كفر حجاج",
-            "35- قرية ميت خضير",
-            "36- قرية المواجد",
-            "37- قرية البصراط",
-            "38- قرية ميت شريف",
-            "39- قرية الطوابرة",
-            "40- قرية العمارنة",
-            "41- قرية أولاد بانا",
-            "42- قرية أولاد حانا",
-            "43- بحر حادوث",
-            "44- قرية القزاقزة",
-            "45- قرية الحوتة",
-            "46- قرية أولاد نور",
-            "47- قرية الخلايفة",
-            "48- قرية القطشة",
-            "49- قرية الجماملة",
-            "50- قرية العزيزة",
-            "51- قرية الأحمدية",
-            "52- قرية العربان",
-            "53- قرية أولاد علم",
-            "54- قرية أولاد ناصر",
-            "55- قرية بني هلال",
-            "56- قرية الشبول",
-            "57- قرية الرودة",
-            "58- قرية النسايمة",
-            "59- قرية العصافرة",
-            "60- قرية الضهير",
-            "61- الجمعية - المطرية",
-            "62- مصنع وائل شحاته - محمود عروس",
-            "63- منطقة سواريه - فاطمة الحوت",
-            "64- الجسر الواقي - محمود محمد أبو النجا",
-            "65- منطقة الحمايدة- مصطفي كمال",
-            "66- مدرسة أبو بكر الصديق - حسن فياض",
-            "67- منطقة السحاروة - نصر السحاروي",
-            "68- جمعية الشريفية العصافرة -محمود خليل",
-            "69- عصام شتا الضهير",
-            "70- المدينة الصناعية - جمال حامد ",
-            "71- العقوبين - حمادة حواله",
-            "72- جمعية المنار - محمد فاروق",
-            "73- المطرية نقطة رقم 12",
-            "74- المطرية نقطة رقم 13",
-            "75- المطرية نقطة رقم 14",
-            "76- المطرية نقطة رقم 15",
-            "77- المطرية نقطة رقم 16",
-            "78- المطرية نقطة رقم 17",
-            "79- المطرية نقطة رقم 18",
-            "80- المطرية نقطة رقم 19",
-            "81- المطرية نقطة رقم 20",
-            "82- المطرية نقطة رقم 21",
-            "83- المطرية نقطة رقم 22",
-            "84- المطرية نقطة رقم 23",
-            "85- المطرية نقطة رقم 24",
-            "86- المطرية نقطة رقم 25",
-            "87- المطرية نقطة رقم 26",
-            "88- المطرية نقطة رقم 27",
-            "89- المطرية نقطة رقم 28",
-            "90- المطرية نقطة رقم 29",
-            "91- المطرية نقطة رقم 30",
-            "92- المطرية نقطة رقم 31",
-            "93- المطرية نقطة رقم 32",
-            "94- المطرية نقطة رقم 33",
-            "95- المطرية نقطة رقم 34",
-            "96- المطرية نقطة رقم 35",
-            "97- المطرية نقطة رقم 36",
-            "98- المطرية نقطة رقم 37",
-            "99- المطرية نقطة رقم 38",
-            "100- المطرية نقطة رقم 39"
+      "2- حي الحمزاوي - حماده عبده مصباح",
+      "3- حي الجرن 1 - شارع المظلوم",
+      "4- حي الجرن 2 - إبراهيم فهيد",
+      "5- باهي الحديدي",
+      "6- حي الإعجام - حمادة أبو رشاد",
+      "7- حي العزبة - منشية ناصر",
+      "8- بحر البلد 2 - السعيد أبو أمين ",
+      "9- حي المنزلة الجديدة - كريم شقرف",
+      "10- حي المنزلة الجديدة 2 - شريف دبرياش",
+      "11- حي بحر البلد 3 - أخر شارع 10",
+      "12- حي بحر البلد 1 - شارع الكابتن",
+      "13- حي الفقاعي - إبراهيم غزل",
+      "14- حي السلموني - حسن المناخلي",
+      "15- حي الكفر 1 - الساحة",
+      "16- حي الكفر 3 - ملعب برشلونة",
+      "17- حي الكفر 2 - تحت السكة",
+      "18- حي الفداء 1 - حمادة الكيال",
+      "19- حي سوق الجملة - على البياع",
+      "20- حي نقطة الأمام على",
+      "21- حي البر التاني - حي السلام",
+      "22- حي البر التاني - الهاويس",
+      "23- حي مصنع البصل - وليد فهيد",
+      "24- حي مدرسة عبد العال شلباية",
+      "25- حي المزرعة - السيد الحديدي",
+      "26- حي أمن الدولة",
+      "27- قرية الفروسات",
+      "28- قرية أبو الأخضر",
+      "29- قرية جديدة المنزلة",
+      "30- قرية العامرة",
+      "31- قرية مصر الجديدة",
+      "32- قرية عرب زيدان",
+      "33- قرية الستايتة",
+      "34- قرية كفر حجاج",
+      "35- قرية ميت خضير",
+      "36- قرية المواجد",
+      "37- قرية البصراط",
+      "38- قرية ميت شريف",
+      "39- قرية الطوابرة",
+      "40- قرية العمارنة",
+      "41- قرية أولاد بانا",
+      "42- قرية أولاد حانا",
+      "43- بحر حادوث",
+      "44- قرية القزاقزة",
+      "45- قرية الحوتة",
+      "46- قرية أولاد نور",
+      "47- قرية الخلايفة",
+      "48- قرية القطشة",
+      "49- قرية الجماملة",
+      "50- قرية العزيزة",
+      "51- قرية الأحمدية",
+      "52- قرية العربان",
+      "53- قرية أولاد علم",
+      "54- قرية أولاد ناصر",
+      "55- قرية بني هلال",
+      "56- قرية الشبول",
+      "57- قرية الرودة",
+      "58- قرية النسايمة",
+      "59- قرية العصافرة",
+      "60- قرية الضهير",
+      "61- الجمعية - المطرية",
+      "62- مصنع وائل شحاته - محمود عروس",
+      "63- منطقة سواريه - فاطمة الحوت",
+      "64- الجسر الواقي - محمود محمد أبو النجا",
+      "65- منطقة الحمايدة- مصطفي كمال",
+      "66- مدرسة أبو بكر الصديق - حسن فياض",
+      "67- منطقة السحاروة - نصر السحاروي",
+      "68- جمعية الشريفية العصافرة -محمود خليل",
+      "69- عصام شتا الضهير",
+      "70- المدينة الصناعية - جمال حامد ",
+      "71- العقوبين - حمادة حواله",
+      "72- جمعية المنار - محمد فاروق",
+      "73- المطرية نقطة رقم 12",
+      "74- المطرية نقطة رقم 13",
+      "75- المطرية نقطة رقم 14",
+      "76- المطرية نقطة رقم 15",
+      "77- المطرية نقطة رقم 16",
+      "78- المطرية نقطة رقم 17",
+      "79- المطرية نقطة رقم 18",
+      "80- المطرية نقطة رقم 19",
+      "81- المطرية نقطة رقم 20",
+      "82- المطرية نقطة رقم 21",
+      "83- المطرية نقطة رقم 22",
+      "84- المطرية نقطة رقم 23",
+      "85- المطرية نقطة رقم 24",
+      "86- المطرية نقطة رقم 25",
+      "87- المطرية نقطة رقم 26",
+      "88- المطرية نقطة رقم 27",
+      "89- المطرية نقطة رقم 28",
+      "90- المطرية نقطة رقم 29",
+      "91- المطرية نقطة رقم 30",
+      "92- المطرية نقطة رقم 31",
+      "93- المطرية نقطة رقم 32",
+      "94- المطرية نقطة رقم 33",
+      "95- المطرية نقطة رقم 34",
+      "96- المطرية نقطة رقم 35",
+      "97- المطرية نقطة رقم 36",
+      "98- المطرية نقطة رقم 37",
+      "99- المطرية نقطة رقم 38",
+      "100- المطرية نقطة رقم 39"
     ];
     
     // قائمة الكلمات البديلة والمرادفات
@@ -1579,7 +1684,7 @@
       }
     }
     
-    // التحقق من كلمة المرور المعدلة لدعم المستخدم الزائر
+    // التحقق من كلمة المرور المعدلة لدعم المستخدم الزائر والادمن
     window.checkPassword = function() {
       const password = document.getElementById('passwordInput').value;
       const rememberMe = document.getElementById('rememberMe').checked;
@@ -1608,6 +1713,21 @@
         initializeVoiceSearch();
         applyUserPermissions(); // تطبيق الصلاحيات للزائر
       } 
+      // 3. كلمة مرور الادمن للتعديل (742018)
+      else if (password === '742018') {
+        if (rememberMe) {
+          localStorage.setItem('dashboardPassword', password);
+          localStorage.setItem('rememberDashboardLogin', 'true');
+          localStorage.setItem('userRole', 'editor'); // تخزين دور الادمن للتعديل
+        } else {
+          localStorage.removeItem('dashboardPassword');
+          localStorage.removeItem('rememberDashboardLogin');
+        }
+        localStorage.setItem('userRole', 'editor'); // تعيين الدور حتى بدون تذكرني
+        document.getElementById('loginScreen').classList.add('hidden');
+        initializeVoiceSearch();
+        applyUserPermissions(); // تطبيق الصلاحيات
+      }
       else {
         errorMsg.classList.add('show');
         setTimeout(() => {
@@ -1616,9 +1736,10 @@
       }
     };
     
-    // دالة لتطبيق صلاحيات المستخدم الزائر
+    // دالة لتطبيق صلاحيات المستخدم الزائر والادمن
     function applyUserPermissions() {
       const userRole = localStorage.getItem('userRole');
+      const adminStatus = document.getElementById('adminStatus');
       
       if (userRole === 'viewer') {
         // إخفاء أو تعطيل أزرار الإجراءات التي لا يسمح للزائر بها
@@ -1650,10 +1771,11 @@
         }
         
         // إضافة تنبيه في أعلى الصفحة
-        const alertDiv = document.createElement('div');
-        alertDiv.style.cssText = 'background:#f39c12; color:white; padding:10px; text-align:center; font-weight:bold; border-radius:5px; margin:10px;';
-        alertDiv.textContent = '🔒 أنت في وضع العرض فقط - لا يمكنك إجراء أي تعديلات';
-        document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.summary-row'));
+        if (adminStatus) {
+          adminStatus.style.display = 'block';
+          adminStatus.style.background = '#f39c12';
+          adminStatus.textContent = '🔒 أنت في وضع العرض فقط - لا يمكنك إجراء أي تعديلات';
+        }
         
         // تعطيل النقر على إحصائيات النصابة (اختياري)
         document.querySelectorAll('.stat-box.duplicates').forEach(box => {
@@ -1661,6 +1783,35 @@
           box.onclick = null;
           box.title = 'الصلاحيات غير كافية لعرض التفاصيل';
         });
+      } else if (userRole === 'editor') {
+        // صلاحيات الادمن: يمكنه التعديل، ولا توجد قيود
+        // إضافة عنوان خاص لوضع التعديل
+        const headerTitle = document.querySelector('.header h1');
+        if (headerTitle) {
+          headerTitle.innerHTML += ' <small style="font-size:0.6em; color:var(--warning);">(وضع التعديل - 742018)</small>';
+        }
+        
+        // إظهار رسالة حالة الادمن
+        if (adminStatus) {
+          adminStatus.style.display = 'block';
+          adminStatus.style.background = '#9b59b6';
+          adminStatus.textContent = '🔧 وضع التعديل مفعل - يمكنك تعديل أي رقم فعلي في الإحصائيات';
+        }
+        
+        // إزالة تأثيرات الاهتزاز والرعشة
+        document.querySelectorAll('.place-card').forEach(card => {
+          card.style.animation = 'none';
+        });
+        
+        document.querySelectorAll('.summary-card').forEach(card => {
+          card.style.animation = 'none';
+        });
+        
+        // إزالة تأثير النبض من مؤشر البث المباشر
+        const liveDot = document.querySelector('.live-dot');
+        if (liveDot) {
+          liveDot.style.animation = 'none';
+        }
       }
     }
     
@@ -1756,7 +1907,7 @@
       const savedPassword = localStorage.getItem('dashboardPassword');
       const userRole = localStorage.getItem('userRole');
       
-      if ((isLoggedIn && savedPassword === '521988') || userRole === 'viewer') {
+      if ((isLoggedIn && savedPassword === '521988') || userRole === 'viewer' || userRole === 'editor') {
         document.getElementById('loginScreen').classList.add('hidden');
         // تأخير تهيئة البحث الصوتي لضمان تحميل الصفحة بالكامل
         setTimeout(() => {
@@ -1770,7 +1921,7 @@
         const suggestionsBox = document.getElementById('suggestionsBox');
         const searchInput = document.getElementById('searchInput');
         
-        if (!searchInput.contains(event.target) && !suggestionsBox.contains(event.target)) {
+        if (!searchInput.contains(event.target) && suggestionsBox && !suggestionsBox.contains(event.target)) {
           suggestionsBox.style.display = 'none';
         }
       });
@@ -1808,6 +1959,8 @@
     let allCards = [];
     let duplicatesData = {};
     let allRepNames = new Set();
+    let editedStats = {};
+    let currentEditingPlace = '';
 
     function formatNumber(num) {
       return new Intl.NumberFormat('ar-EG').format(num);
@@ -1831,8 +1984,20 @@
       let totalAmount = 0;
       let totalSaved = 0;
 
+      const userRole = localStorage.getItem('userRole');
+      const isEditor = userRole === 'editor';
+
       places.forEach((place, index) => {
-        const data = allData[place] || { entries: 0, duplicates: 0, reps: {}, repDuplicates: {} };
+        const originalData = allData[place] || { entries: 0, duplicates: 0, reps: {}, repDuplicates: {} };
+        const editedData = editedStats[place] || {};
+        
+        // دمج البيانات الأصلية مع التعديلات
+        const data = {
+          entries: editedData.entries !== undefined ? editedData.entries : originalData.entries,
+          duplicates: editedData.duplicates !== undefined ? editedData.duplicates : originalData.duplicates,
+          reps: editedData.reps || originalData.reps,
+          repDuplicates: originalData.repDuplicates
+        };
         
         totalEntries += data.entries;
         totalDuplicates += data.duplicates;
@@ -1877,6 +2042,14 @@
         const duplicateClick = data.duplicates > 0 ? `onclick="showDuplicates('${place}')"` : '';
         const duplicateCursor = data.duplicates > 0 ? 'cursor: pointer;' : '';
 
+        // إضافة زر التعديل إذا كان المستخدم editor
+        const editButton = isEditor ? 
+          `<button class="edit-btn" onclick="openEditModal('${place}')">✏️ تعديل الإحصائيات</button>` : 
+          '';
+
+        // إضافة مؤشر إذا كانت هناك تعديلات
+        const editIndicator = editedStats[place] ? '<div style="background: var(--warning); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7em; margin-top: 5px; display: inline-block;">🖊️ معدل</div>' : '';
+
         card.innerHTML = `
           <div class="place-header">
             <div class="place-number">${index + 1}</div>
@@ -1900,7 +2073,9 @@
               <div class="value">${formatNumber(placeSaved)}</div>
             </div>
           </div>
+          ${editIndicator}
           ${repHTML}
+          ${editButton}
         `;
         
         grid.appendChild(card);
@@ -1920,6 +2095,10 @@
         const firebaseData = snapshot.val() || {};
         const users = firebaseData.users || {};
         const duplicates = firebaseData.duplicates || {};
+        
+        // تحميل التعديلات المحفوظة
+        const savedEdits = firebaseData.editedStats || {};
+        editedStats = savedEdits;
 
         allData = {};
         duplicatesData = {};
@@ -2351,6 +2530,181 @@
       }
     };
 
+    // وظائف التعديل للادمن
+    window.openEditModal = function(place) {
+      const userRole = localStorage.getItem('userRole');
+      if (userRole !== 'editor') {
+        alert('⚠️ هذه الميزة متاحة فقط للادمن بكلمة المرور 742018');
+        return;
+      }
+      
+      currentEditingPlace = place;
+      const modal = document.getElementById('editModal');
+      const placeNameEl = document.getElementById('editPlaceName');
+      const entriesInput = document.getElementById('editEntries');
+      const duplicatesInput = document.getElementById('editDuplicates');
+      const repsList = document.getElementById('repsEditList');
+      
+      placeNameEl.textContent = place;
+      
+      // استخدام البيانات المعدلة إذا وجدت، وإلا البيانات الأصلية
+      const originalData = allData[place] || { entries: 0, duplicates: 0, reps: {} };
+      const editedData = editedStats[place] || {};
+      
+      entriesInput.value = editedData.entries !== undefined ? editedData.entries : originalData.entries;
+      duplicatesInput.value = editedData.duplicates !== undefined ? editedData.duplicates : originalData.duplicates;
+      
+      // عرض قائمة المناديب
+      repsList.innerHTML = '';
+      const reps = editedData.reps || originalData.reps || {};
+      
+      Object.entries(reps).forEach(([rep, count]) => {
+        const repItem = document.createElement('div');
+        repItem.className = 'rep-edit-item';
+        repItem.innerHTML = `
+          <div class="rep-edit-name">${rep}</div>
+          <input type="number" class="rep-edit-input" value="${count}" min="0" 
+                 onchange="updateRepCount('${rep}', this.value)">
+          <button class="delete-rep-btn" onclick="deleteRep('${rep}')">×</button>
+        `;
+        repsList.appendChild(repItem);
+      });
+      
+      // زر لإضافة مندوب جديد
+      const addRepBtn = document.createElement('button');
+      addRepBtn.textContent = '+ إضافة مندوب جديد';
+      addRepBtn.className = 'btn btn-primary';
+      addRepBtn.style.width = '100%';
+      addRepBtn.style.marginTop = '10px';
+      addRepBtn.onclick = function() {
+        const newRepName = prompt('أدخل اسم المندوب الجديد:');
+        if (newRepName && newRepName.trim()) {
+          const newRepItem = document.createElement('div');
+          newRepItem.className = 'rep-edit-item';
+          newRepItem.innerHTML = `
+            <div class="rep-edit-name">${newRepName}</div>
+            <input type="number" class="rep-edit-input" value="0" min="0" 
+                   onchange="updateRepCount('${newRepName}', this.value)">
+            <button class="delete-rep-btn" onclick="deleteRep('${newRepName}')">×</button>
+          `;
+          repsList.appendChild(newRepItem);
+        }
+      };
+      repsList.appendChild(addRepBtn);
+      
+      modal.classList.add('active');
+    };
+
+    window.updateRepCount = function(repName, count) {
+      // يتم التعامل مع البيانات في دالة الحفظ
+    };
+
+    window.deleteRep = function(repName) {
+      const userRole = localStorage.getItem('userRole');
+      if (userRole !== 'editor') {
+        alert('⚠️ هذه الميزة متاحة فقط للادمن بكلمة المرور 742018');
+        return;
+      }
+      
+      if (confirm(`هل تريد حذف المندوب "${repName}" من الإحصائيات؟`)) {
+        // إزالة العنصر من القائمة
+        const repsEditItems = document.querySelectorAll('#repsEditList .rep-edit-item');
+        repsEditItems.forEach(item => {
+          const nameSpan = item.querySelector('.rep-edit-name');
+          if (nameSpan && nameSpan.textContent === repName) {
+            item.remove();
+          }
+        });
+        
+        alert(`✅ تم حذف المندوب "${repName}" من القائمة`);
+      }
+    };
+
+    window.saveEditedStats = async function() {
+      const userRole = localStorage.getItem('userRole');
+      if (userRole !== 'editor') {
+        alert('⚠️ هذه الميزة متاحة فقط للادمن بكلمة المرور 742018');
+        return;
+      }
+      
+      const entries = parseInt(document.getElementById('editEntries').value) || 0;
+      const duplicates = parseInt(document.getElementById('editDuplicates').value) || 0;
+      const repsInputs = document.querySelectorAll('#repsEditList .rep-edit-input');
+      const repNames = document.querySelectorAll('#repsEditList .rep-edit-name');
+      
+      // تجميع بيانات المناديب
+      const reps = {};
+      repNames.forEach((span, index) => {
+        const repName = span.textContent;
+        const repCount = parseInt(repsInputs[index].value) || 0;
+        if (repName && repCount >= 0) {
+          reps[repName] = repCount;
+        }
+      });
+      
+      try {
+        // حفظ البيانات في Firebase تحت مسار editedStats
+        const editedRef = ref(db, `editedStats/${currentEditingPlace}`);
+        await set(editedRef, {
+          entries: entries,
+          duplicates: duplicates,
+          reps: reps,
+          lastEdited: new Date().toISOString(),
+          editedBy: 'editor'
+        });
+        
+        // تحديث البيانات المحلية
+        editedStats[currentEditingPlace] = {
+          entries: entries,
+          duplicates: duplicates,
+          reps: reps
+        };
+        
+        alert('✅ تم حفظ التعديلات بنجاح');
+        closeEditModal();
+        
+        // تحديث العرض
+        renderDashboard();
+        
+      } catch (error) {
+        console.error('خطأ في حفظ التعديلات:', error);
+        alert('❌ حدث خطأ في حفظ التعديلات: ' + error.message);
+      }
+    };
+
+    window.resetEditedStats = async function() {
+      const userRole = localStorage.getItem('userRole');
+      if (userRole !== 'editor') {
+        alert('⚠️ هذه الميزة متاحة فقط للادمن بكلمة المرور 742018');
+        return;
+      }
+      
+      if (!currentEditingPlace) return;
+      
+      if (confirm('هل تريد حذف التعديلات لهذا المكان والعودة للبيانات الأصلية؟')) {
+        try {
+          const editedRef = ref(db, `editedStats/${currentEditingPlace}`);
+          await remove(editedRef);
+          
+          // تحديث البيانات المحلية
+          delete editedStats[currentEditingPlace];
+          
+          alert('✅ تم حذف التعديلات');
+          closeEditModal();
+          
+          // تحديث العرض
+          renderDashboard();
+        } catch (error) {
+          alert('❌ حدث خطأ: ' + error.message);
+        }
+      }
+    };
+
+    window.closeEditModal = function() {
+      document.getElementById('editModal').classList.remove('active');
+      currentEditingPlace = '';
+    };
+
     document.getElementById('duplicateModal').addEventListener('click', function(e) {
       if (e.target === this) {
         closeModal();
@@ -2360,6 +2714,12 @@
     document.getElementById('messageModal').addEventListener('click', function(e) {
       if (e.target === this) {
         closeMessageModal();
+      }
+    });
+
+    document.getElementById('editModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeEditModal();
       }
     });
 
@@ -2435,7 +2795,14 @@
       let grandSaved = 0;
 
       places.forEach((place, idx) => {
-        const data = allData[place] || { entries: 0, duplicates: 0, reps: {} };
+        const originalData = allData[place] || { entries: 0, duplicates: 0, reps: {} };
+        const editedData = editedStats[place] || {};
+        
+        const data = {
+          entries: editedData.entries !== undefined ? editedData.entries : originalData.entries,
+          duplicates: editedData.duplicates !== undefined ? editedData.duplicates : originalData.duplicates,
+          reps: editedData.reps || originalData.reps
+        };
         
         if (data.entries === 0 && data.duplicates === 0) return;
 
@@ -2574,68 +2941,22 @@
               <tbody>
       `;
 
-      // قائمة بيانات الليدرات والمندوبين الماليين لكل مكان
-      const leadersData = {};
-      
       // توليد كلمات سر مكونة من 6 أرقام لكل مكان
       for (let i = 0; i < places.length; i++) {
         const password = `9009${String(i + 1).padStart(2, '0')}`;
-        leadersData[places[i]] = { 
-          leaderName: `قائد ${i + 1}`, 
-          leaderPhone: `010${String(i + 1).padStart(9, '0').slice(-9)}`, 
-          financialName: `المندوب المالي ${i + 1}`, 
-          financialPhone: `011${String(i + 1).padStart(9, '0').slice(-9)}`, 
-          password: password 
-        };
-      }
-      
-      // تحديث بيانات بعض الأماكن المحددة
-      leadersData["1- حي الحمزاوي - حماده عبده مصباح"] = { 
-        leaderName: "حماده عبده مصباح", 
-        leaderPhone: "01000000001", 
-        financialName: "المندوب المالي 1", 
-        financialPhone: "01000000002", 
-        password: "900901" 
-      };
-      
-      leadersData["61- الجمعية - المطرية"] = { 
-        leaderName: "قائد الجمعية المطرية", 
-        leaderPhone: "01000000061", 
-        financialName: "المندوب المالي 61", 
-        financialPhone: "01000000062", 
-        password: "900961" 
-      };
-      
-      leadersData["62- المطرية نقطة رقم 1"] = { 
-        leaderName: "قائد المطرية 1", 
-        leaderPhone: "01000000063", 
-        financialName: "المندوب المالي 62", 
-        financialPhone: "01000000064", 
-        password: "900962" 
-      };
-
-      places.forEach((place, idx) => {
-        // الحصول على البيانات من leadersData أو استخدام بيانات افتراضية
-        const data = leadersData[place] || { 
-          leaderName: `قائد ${idx + 1}`, 
-          leaderPhone: `010${String(idx + 1).padStart(9, '0').slice(-9)}`, 
-          financialName: `المندوب المالي ${idx + 1}`, 
-          financialPhone: `011${String(idx + 1).padStart(9, '0').slice(-9)}`, 
-          password: `9009${String(idx + 1).padStart(2, '0')}` 
-        };
         
         html += `
           <tr>
-            <td class="number-cell">${idx + 1}</td>
-            <td class="important-cell">${place}</td>
-            <td>${data.leaderName}</td>
-            <td>${data.leaderPhone}</td>
-            <td>${data.financialName}</td>
-            <td>${data.financialPhone}</td>
-            <td class="important-cell">${data.password}</td>
+            <td class="number-cell">${i + 1}</td>
+            <td class="important-cell">${places[i]}</td>
+            <td>قائد ${i + 1}</td>
+            <td>010${String(i + 1).padStart(9, '0').slice(-9)}</td>
+            <td>المندوب المالي ${i + 1}</td>
+            <td>011${String(i + 1).padStart(9, '0').slice(-9)}</td>
+            <td class="important-cell">${password}</td>
           </tr>
         `;
-      });
+      }
 
       html += `
               </tbody>
@@ -2673,7 +2994,7 @@
     const isLoggedIn = localStorage.getItem('rememberDashboardLogin') === 'true';
     const savedPassword = localStorage.getItem('dashboardPassword');
     
-    if ((isLoggedIn && savedPassword === '521988') || userRole === 'viewer') {
+    if ((isLoggedIn && savedPassword === '521988') || userRole === 'viewer' || userRole === 'editor') {
       loadData();
       loadMessages();
     }
