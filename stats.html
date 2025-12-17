@@ -1586,7 +1586,7 @@
       const errorMsg = document.getElementById('loginError');
       
       // 1. كلمة مرور المشرف الكامل
-      if (password === '521988') {
+      if (password === '202502') {
         if (rememberMe) {
           localStorage.setItem('dashboardPassword', password);
           localStorage.setItem('rememberDashboardLogin', 'true');
@@ -1756,7 +1756,7 @@
       const savedPassword = localStorage.getItem('dashboardPassword');
       const userRole = localStorage.getItem('userRole');
       
-      if ((isLoggedIn && savedPassword === '521988') || userRole === 'viewer') {
+      if ((isLoggedIn && savedPassword === '202502') || userRole === 'viewer') {
         document.getElementById('loginScreen').classList.add('hidden');
         // تأخير تهيئة البحث الصوتي لضمان تحميل الصفحة بالكامل
         setTimeout(() => {
@@ -2407,7 +2407,7 @@
       
       const password = prompt('⚠️ تحذير: سيتم حذف إدخالات المناديب فقط!\n(سيتم الاحتفاظ بأرقام النصابة للمقارنة)\n\nأدخل كلمة المرور للتأكيد:');
       
-      if (password === '521988') {
+      if (password === '202502') {
         if (confirm('هل أنت متأكد من حذف إدخالات المناديب؟\n\n✅ سيتم الاحتفاظ بأرقام النصابة\n❌ سيتم حذف جميع الإدخالات الصحيحة')) {
           try {
             await remove(ref(db, 'users'));
@@ -2432,7 +2432,7 @@
       
       const password = prompt('⚠️ تحذير شديد: سيتم حذف جميع البيانات بالكامل!\n(الإدخالات + النصابة)\n\nأدخل كلمة المرور للتأكيد:');
       
-      if (password === '521988') {
+      if (password === '202502') {
         if (confirm('هل أنت متأكد تماماً من حذف جميع البيانات؟\n\n❌ سيتم حذف كل شيء\n❌ لا يمكن التراجع عن هذا الإجراء!')) {
           try {
             await remove(ref(db));
@@ -2769,7 +2769,7 @@
     const isLoggedIn = localStorage.getItem('rememberDashboardLogin') === 'true';
     const savedPassword = localStorage.getItem('dashboardPassword');
     
-    if ((isLoggedIn && savedPassword === '521988') || userRole === 'viewer') {
+    if ((isLoggedIn && savedPassword === '202502') || userRole === 'viewer') {
       loadData();
       loadMessages();
     }
