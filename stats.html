@@ -1263,25 +1263,25 @@
             "63- منطقة سواريه - فاطمة الحوت",
             "64- الجسر الواقي - محمود محمد أبو النجا",
             "65- منطقة الحمايدة- مصطفي كمال",
-            "66- مدرسة أبو بكر الصديق - حسن فياض",
+            "66- مكتبة فياض - حسن فياض",
             "67- منطقة السحاروة - نصر السحاروي",
             "68- جمعية الشريفية العصافرة -محمود خليل",
             "69- عصام شتا الضهير",
             "70- المدينة الصناعية - جمال حامد ",
             "71- العقوبين - حمادة حواله",
             "72- جمعية المنار - محمد فاروق",
-            "73- المطرية نقطة رقم 12",
-            "74- المطرية نقطة رقم 13",
-            "75- المطرية نقطة رقم 14",
-            "76- المطرية نقطة رقم 15",
-            "77- المطرية نقطة رقم 16",
-            "78- المطرية نقطة رقم 17",
-            "79- المطرية نقطة رقم 18",
-            "80- المطرية نقطة رقم 19",
-            "81- المطرية نقطة رقم 20",
-            "82- المطرية نقطة رقم 21",
-            "83- المطرية نقطة رقم 22",
-            "84- المطرية نقطة رقم 23",
+            "73- المطرية - الثانوية بنات",
+            "74-المطرية - المعهد الديني",
+            "75- المطرية - أبو بكر الصديق",
+            "76- المطرية - أحمد ماهر",
+            "77- المطرية طارق بن زياد",
+            "78- المطرية عثمان بن عفان",
+            "79- المطرية - خالد بن الوليد",
+            "80- المطرية الإبتدائية",
+            "81- المطرية - على وليد ",
+            "82-المطرية - أحمد صيام ",
+            "83- المطرية - زياد حبشي",
+            "84- المطرية - مصطفى النجدي",
             "85- المطرية نقطة رقم 24",
             "86- المطرية نقطة رقم 25",
             "87- المطرية نقطة رقم 26",
@@ -1808,6 +1808,7 @@
     let allCards = [];
     let duplicatesData = {};
     let allRepNames = new Set();
+    let isInitialLoad = true;
 
     function formatNumber(num) {
       return new Intl.NumberFormat('ar-EG').format(num);
@@ -1821,27 +1822,28 @@
       return duplicates * 200;
     }
 
+    // النظام الأساسي بدون تعقيد
     function renderDashboard() {
+      updateSummaryCards();
+      
+      // إذا كان التحميل الأول، أنشئ البطاقات
+      if (isInitialLoad) {
+        createAllCards();
+        isInitialLoad = false;
+      } else {
+        // تحديث البطاقات الموجودة
+        updateAllCards();
+      }
+    }
+
+    function createAllCards() {
       const grid = document.getElementById('placeGrid');
       grid.innerHTML = '';
       allCards = [];
 
-      let totalEntries = 0;
-      let totalDuplicates = 0;
-      let totalAmount = 0;
-      let totalSaved = 0;
-
       places.forEach((place, index) => {
         const data = allData[place] || { entries: 0, duplicates: 0, reps: {}, repDuplicates: {} };
         
-        totalEntries += data.entries;
-        totalDuplicates += data.duplicates;
-        
-        const placeAmount = calculateAmount(data.entries);
-        const placeSaved = calculateSaved(data.duplicates);
-        totalAmount += placeAmount;
-        totalSaved += placeSaved;
-
         const card = document.createElement('div');
         card.className = 'place-card';
         card.dataset.place = place.toLowerCase();
@@ -1874,7 +1876,7 @@
           repHTML += '</div>';
         }
 
-        const duplicateClick = data.duplicates > 0 ? `onclick="showDuplicates('${place}')"` : '';
+        const duplicateClick = data.duplicates > 0 ? `onclick="showDuplicates('${place.replace(/'/g, "\\'")}')"` : '';
         const duplicateCursor = data.duplicates > 0 ? 'cursor: pointer;' : '';
 
         card.innerHTML = `
@@ -1893,11 +1895,11 @@
             </div>
             <div class="stat-box amount">
               <label>المبلغ</label>
-              <div class="value">${formatNumber(placeAmount)}</div>
+              <div class="value">${formatNumber(calculateAmount(data.entries))}</div>
             </div>
             <div class="stat-box saved">
               <label>وفرنا</label>
-              <div class="value">${formatNumber(placeSaved)}</div>
+              <div class="value">${formatNumber(calculateSaved(data.duplicates))}</div>
             </div>
           </div>
           ${repHTML}
@@ -1906,7 +1908,98 @@
         grid.appendChild(card);
         allCards.push(card);
       });
+    }
 
+    function updateAllCards() {
+      places.forEach((place, index) => {
+        const data = allData[place] || { entries: 0, duplicates: 0, reps: {}, repDuplicates: {} };
+        const card = allCards[index];
+        
+        if (card) {
+          // تحديث القيم في البطاقة
+          const entriesElement = card.querySelector('.stat-box.entries .value');
+          const duplicatesElement = card.querySelector('.stat-box.duplicates .value');
+          const amountElement = card.querySelector('.stat-box.amount .value');
+          const savedElement = card.querySelector('.stat-box.saved .value');
+          
+          if (entriesElement) entriesElement.textContent = formatNumber(data.entries);
+          if (duplicatesElement) duplicatesElement.textContent = formatNumber(data.duplicates);
+          if (amountElement) amountElement.textContent = formatNumber(calculateAmount(data.entries));
+          if (savedElement) savedElement.textContent = formatNumber(calculateSaved(data.duplicates));
+          
+          // تحديث تفاصيل المناديب
+          updateCardRepDetails(card, data);
+          
+          // تحديث حدث النقر على النصابة
+          const dupBox = card.querySelector('.stat-box.duplicates');
+          if (data.duplicates > 0) {
+            dupBox.style.cursor = 'pointer';
+            dupBox.onclick = () => showDuplicates(place);
+          } else {
+            dupBox.style.cursor = 'default';
+            dupBox.onclick = null;
+          }
+        }
+      });
+    }
+
+    function updateCardRepDetails(card, data) {
+      const repDetailsContainer = card.querySelector('.rep-details');
+      const sortedReps = Object.entries(data.reps)
+        .sort((a, b) => b[1] - a[1]);
+
+      if (sortedReps.length > 0) {
+        let repHTML = '<div class="rep-details-title">👥 تفاصيل المناديب:</div>';
+        
+        sortedReps.forEach(([rep, count]) => {
+          const repDupCount = data.repDuplicates[rep] || 0;
+          repHTML += `
+            <div class="rep-item">
+              <span class="rep-name">${rep}</span>
+              <div class="rep-stats">
+                <span class="rep-count" title="إدخالات صحيحة">✓ ${formatNumber(count)}</span>
+                <span class="rep-duplicates" title="محاولات تكرار">⚠ ${formatNumber(repDupCount)}</span>
+              </div>
+            </div>
+          `;
+        });
+        
+        if (repDetailsContainer) {
+          repDetailsContainer.innerHTML = repHTML;
+        } else {
+          // إذا لم يكن موجوداً، أنشئه
+          const newRepContainer = document.createElement('div');
+          newRepContainer.className = 'rep-details';
+          newRepContainer.innerHTML = repHTML;
+          card.appendChild(newRepContainer);
+        }
+      } else {
+        // إذا لم يكن هناك مناديب، أزل القسم
+        if (repDetailsContainer) {
+          repDetailsContainer.remove();
+        }
+      }
+    }
+
+    function updateSummaryCards() {
+      let totalEntries = 0;
+      let totalDuplicates = 0;
+      let totalAmount = 0;
+      let totalSaved = 0;
+
+      places.forEach(place => {
+        const data = allData[place] || { entries: 0, duplicates: 0, reps: {}, repDuplicates: {} };
+        
+        totalEntries += data.entries;
+        totalDuplicates += data.duplicates;
+        
+        const placeAmount = calculateAmount(data.entries);
+        const placeSaved = calculateSaved(data.duplicates);
+        totalAmount += placeAmount;
+        totalSaved += placeSaved;
+      });
+
+      // تحديث مباشر بدون تأثيرات معقدة
       document.getElementById('totalEntries').textContent = formatNumber(totalEntries);
       document.getElementById('totalDuplicates').textContent = formatNumber(totalDuplicates);
       document.getElementById('totalAmount').textContent = formatNumber(totalAmount) + ' ج.م';
@@ -1941,7 +2034,6 @@
             }
             allData[place].reps[repName]++;
             
-            // جمع أسماء المناديب
             if (repName && repName !== 'غير معروف') {
               allRepNames.add(repName);
             }
@@ -1966,7 +2058,6 @@
             }
             allData[place].repDuplicates[repName]++;
             
-            // جمع أسماء المناديب من النصابة
             if (repName && repName !== 'غير معروف') {
               allRepNames.add(repName);
             }
@@ -1976,6 +2067,12 @@
         renderDashboard();
         populatePlacesDropdown();
         populateRepsDropdown();
+        
+        // إخفاء المحمل بعد التحميل الأول
+        const loader = document.querySelector('.loader');
+        if (loader) {
+          loader.style.display = 'none';
+        }
       });
     }
 
@@ -1997,7 +2094,6 @@
       const optgroup = document.getElementById('repsOptgroup');
       optgroup.innerHTML = '';
       
-      // تحويل Set إلى Array وترتيبها أبجدياً
       const sortedReps = Array.from(allRepNames).sort();
       
       sortedReps.forEach(repName => {
@@ -2091,7 +2187,7 @@
       allCards.forEach(card => {
         const placeName = normalizeArabicText(card.dataset.place);
         const placeIndex = card.dataset.index;
-        const repNames = card.dataset.reps;
+        const repNames = card.dataset.reps || '';
         
         // البحث باستخدام خوارزمية تقريبية
         const matches = 
