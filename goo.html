@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة النقاط - النسخة المتقدمة</title>
+    <title>نظام إدارة النقاط - بيانات اليوم الأول محملة</title>
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
@@ -476,6 +476,16 @@
             box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
         }
 
+        .btn-info {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(155, 89, 182, 0.3);
+        }
+
         .loader {
             border: 5px solid #f3f3f3;
             border-top: 5px solid #3498db;
@@ -576,8 +586,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 نظام إدارة النقاط المتقدم</h1>
-            <p>أدخل بيانات اليوم الأول والثاني لكل نقطة - سيتم حساب الفرق وعدد الأصوات تلقائياً</p>
+            <h1>📊 نظام إدارة النقاط - بيانات اليوم الأول محملة</h1>
+            <p>بيانات اليوم الأول محملة مسبقاً - أدخل بيانات اليوم الثاني لحساب الفرق والأصوات تلقائياً</p>
             
             <div class="date-controls">
                 <div class="date-box">
@@ -636,6 +646,9 @@
         </div>
 
         <div class="action-buttons">
+            <button class="btn btn-info" onclick="loadDay1Data()">
+                📥 تحميل بيانات اليوم الأول
+            </button>
             <button class="btn btn-primary" onclick="saveAllData()">
                 💾 حفظ جميع البيانات
             </button>
@@ -767,6 +780,53 @@
             "100- المطرية نقطة رقم 39"
         ];
 
+        // بيانات اليوم الأول التي قدمتها
+        const day1Data = {
+            1: 83800,
+            2: 125600,
+            3: 55200,
+            4: 65800,
+            5: 217400,
+            6: 116400,
+            7: 125200,
+            8: 67200,
+            9: 136800,
+            10: 83600,
+            11: 167600,
+            12: 85800,
+            13: 86200,
+            14: 99200,
+            15: 128200,
+            16: 43000,
+            18: 116200,
+            19: 127400,
+            20: 54400,
+            21: 30000,
+            22: 60200,
+            23: 38000,
+            24: 67400,
+            25: 22600,
+            27: 100200,
+            28: 44400,
+            37: 82400,
+            46: 36200,
+            47: 4200,
+            50: 400,
+            54: 15400,
+            56: 1600,
+            58: 1400,
+            62: 205800,
+            63: 46800,
+            64: 180600,
+            65: 66400,
+            67: 55000,
+            68: 167600,
+            70: 38600,
+            71: 49000,
+            72: 296200,
+            86: 42400
+        };
+
         // تهيئة التطبيق
         document.addEventListener('DOMContentLoaded', function() {
             // تعيين التاريخ الحالي
@@ -776,8 +836,8 @@
             // إنشاء بطاقات النقاط
             createPointCards();
             
-            // تحميل البيانات المحفوظة
-            setTimeout(loadSavedData, 1000);
+            // تحميل بيانات اليوم الأول تلقائياً
+            setTimeout(loadDay1Data, 1500);
             
             // إضافة البحث الفوري
             document.getElementById('searchInput').addEventListener('input', filterSearch);
@@ -809,7 +869,7 @@
                             <input type="number" 
                                    class="day2-input" 
                                    data-point="${index + 1}"
-                                   placeholder="0.00" 
+                                   placeholder="أدخل قيمة اليوم الثاني" 
                                    step="0.01"
                                    oninput="calculatePointDifference(${index + 1}, this.value, 'day2')">
                         </div>
@@ -829,12 +889,39 @@
                     </div>
                     
                     <div class="point-status">
-                        <span class="last-updated" id="updated-${index + 1}">لم يتم التحديث</span>
+                        <span class="last-updated" id="updated-${index + 1}">في انتظار اليوم الثاني</span>
                         <div class="status-indicator" id="status-${index + 1}"></div>
                     </div>
                 `;
                 grid.appendChild(card);
             });
+        }
+
+        // تحميل بيانات اليوم الأول
+        function loadDay1Data() {
+            showNotification('جاري تحميل بيانات اليوم الأول...', 'success');
+            
+            // تعبئة بيانات اليوم الأول
+            Object.keys(day1Data).forEach(pointNumber => {
+                const card = document.getElementById(`point-${pointNumber}`);
+                if (card) {
+                    const day1Input = card.querySelector('.day1-input');
+                    day1Input.value = day1Data[pointNumber];
+                    
+                    // تحديث حالة النقطة
+                    const statusElement = document.getElementById(`status-${pointNumber}`);
+                    statusElement.classList.remove('pending');
+                    statusElement.classList.add('saved');
+                    
+                    document.getElementById(`updated-${pointNumber}`).textContent = 
+                        `بيانات اليوم الأول محملة - في انتظار اليوم الثاني`;
+                }
+            });
+            
+            // تحديث الإحصائيات
+            updateSummaryStatistics();
+            
+            showNotification('تم تحميل بيانات اليوم الأول بنجاح! أدخل الآن بيانات اليوم الثاني', 'success');
         }
 
         // حساب الفرق وعدد الأصوات للنقطة الواحدة
@@ -843,7 +930,7 @@
             const day1Input = card.querySelector('.day1-input');
             const day2Input = card.querySelector('.day2-input');
             const diffElement = document.getElementById(`diff-${pointNumber}`);
-            const votesElement = document.getElementById(`votes-${index + 1}`);
+            const votesElement = document.getElementById(`votes-${pointNumber}`);
             const statusElement = document.getElementById(`status-${pointNumber}`);
             
             // إضافة تأثير التغيير
@@ -890,8 +977,9 @@
             statusElement.classList.add('pending');
             
             // تحديث تاريخ التعديل
+            const now = new Date();
             document.getElementById(`updated-${pointNumber}`).textContent = 
-                `آخر تعديل: ${new Date().toLocaleTimeString('ar-EG')}`;
+                `آخر تعديل: ${now.toLocaleTimeString('ar-EG')}`;
             
             // حفظ تلقائي بعد ثانيتين من عدم التعديل
             clearTimeout(window.saveTimeout);
@@ -1198,7 +1286,7 @@
                         show = difference < 0;
                         break;
                     case 'empty':
-                        show = day1 === 0 && day2 === 0;
+                        show = day2 === 0 || day2 === '';
                         break;
                 }
                 
@@ -1261,6 +1349,11 @@
             if (e.ctrlKey && e.key === 'f') {
                 e.preventDefault();
                 document.getElementById('searchInput').focus();
+            }
+            
+            if (e.ctrlKey && e.key === 'l') {
+                e.preventDefault();
+                loadDay1Data();
             }
         });
 
