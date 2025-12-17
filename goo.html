@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة النقاط اليومية</title>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyCukelnhazTegzc77ACCTe5QtbILplz_z4",
+            authDomain: "embarh-e38da.firebaseapp.com",
+            databaseURL: "https://embarh-e38da-default-rtdb.firebaseio.com",
+            projectId: "embarh-e38da",
+            storageBucket: "embarh-e38da.firebasestorage.app",
+            messagingSenderId: "431984082366",
+            appId: "1:431984082366:web:faa10521ebfdeb20680def",
+            measurementId: "G-24MSESVMP5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        
+        window.firebaseDatabase = database;
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(to right, #2c3e50, #4a6491);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 5px solid #f39c12;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .input-section, .results-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+            font-size: 1.8rem;
+            position: relative;
+        }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100px;
+            height: 3px;
+            background: #f39c12;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        select, input[type="number"], input[type="date"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background: white;
+        }
+
+        select:focus, input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .amount-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .amount-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .amount-box label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(231, 76, 60, 0.3);
+        }
+
+        .results-grid {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .result-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #3498db;
+            transition: transform 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .result-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .amount-display {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .difference {
+            margin-top: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .positive {
+            color: #27ae60;
+        }
+
+        .negative {
+            color: #e74c3c;
+        }
+
+        .neutral {
+            color: #7f8c8d;
+        }
+
+        .saved-data {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .saved-data h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .data-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #3498db;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .notification.success {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+        }
+
+        .notification.error {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+        }
+
+        .notification.info {
+            background: linear-gradient(to right, #3498db, #2980b9);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .amount-inputs {
+                grid-template-columns: 1fr;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 نظام إدارة النقاط اليومية</h1>
+            <p>سجل بيانات النقاط وحلل الفروق بين الأيام المختلفة</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">إدخال البيانات</h2>
+                
+                <div class="form-group">
+                    <label for="pointSelect">اختر النقطة:</label>
+                    <select id="pointSelect">
+                        <option value="">-- اختر النقطة --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>تاريخ اليوم:</label>
+                    <input type="date" id="dateInput" class="date-input">
+                </div>
+
+                <div class="form-group">
+                    <label>المبالغ اليومية:</label>
+                    <div class="amount-inputs">
+                        <div class="amount-box">
+                            <label for="day1">اليوم الأول:</label>
+                            <input type="number" id="day1" placeholder="0.00" step="0.01">
+                        </div>
+                        <div class="amount-box">
+                            <label for="day2">اليوم الثاني:</label>
+                            <input type="number" id="day2" placeholder="0.00" step="0.01">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">ملاحظات:</label>
+                    <textarea id="notes" rows="3" style="width:100%; padding:12px; border-radius:8px; border:2px solid #ddd;"></textarea>
+                </div>
+
+                <div class="buttons">
+                    <button class="btn btn-primary" onclick="calculateDifference()">🔄 حساب الفرق</button>
+                    <button class="btn btn-secondary" onclick="saveData()">💾 حفظ البيانات</button>
+                    <button class="btn btn-danger" onclick="clearData()">🗑️ مسح الحقول</button>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <h2 class="section-title">النتائج</h2>
+                
+                <div id="resultsContainer" class="results-grid">
+                    <div class="result-card">
+                        <h3>💼 البيانات المدخلة</h3>
+                        <div class="amount-display">
+                            <span>اليوم الأول:</span>
+                            <span id="resultDay1">0.00</span>
+                        </div>
+                        <div class="amount-display">
+                            <span>اليوم الثاني:</span>
+                            <span id="resultDay2">0.00</span>
+                        </div>
+                        <div class="difference" id="differenceResult">
+                            الفرق: <span class="neutral">0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <h3>📈 إحصائيات</h3>
+                        <div class="amount-display">
+                            <span>المجموع الكلي:</span>
+                            <span id="totalSum">0.00</span>
+                        </div>
+                        <div class="amount-display">
+                            <span>متوسط اليوم:</span>
+                            <span id="dailyAverage">0.00</span>
+                        </div>
+                        <div class="amount-display">
+                            <span>آخر تحديث:</span>
+                            <span id="lastUpdate">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="saved-data">
+                    <h3>📋 البيانات المحفوظة</h3>
+                    <div class="loading" id="loadingData">جاري تحميل البيانات...</div>
+                    <div id="dataTableContainer">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>النقطة</th>
+                                    <th>اليوم الأول</th>
+                                    <th>اليوم الثاني</th>
+                                    <th>الفرق</th>
+                                    <th>التاريخ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataTableBody">
+                                <tr>
+                                    <td colspan="5" style="text-align:center;">لا توجد بيانات محفوظة</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-secondary" onclick="loadAllData()" style="margin-top:15px; width:100%;">
+                        🔄 تحديث البيانات
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // قائمة النقاط
+        const points = [
+            "1- شرين - المطرية",
+            "2- حي الحمزاوي - حماده عبده مصباح",
+            "3- حي الجرن 1 - شارع المظلوم",
+            "4- حي الجرن 2 - إبراهيم فهيد",
+            "5- باهي الحديدي",
+            "6- حي الإعجام - حمادة أبو رشاد",
+            "7- حي العزبة - منشية ناصر",
+            "8- بحر البلد 2 - السعيد أبو أمين",
+            "9- حي المنزلة الجديدة - كريم شقرف",
+            "10- حي المنزلة الجديدة 2 - شريف دبرياش",
+            "11- حي بحر البلد 3 - أخر شارع 10",
+            "12- حي بحر البلد 1 - شارع الكابتن",
+            "13- حي الفقاعي - إبراهيم غزل",
+            "14- حي السلموني - حسن المناخلي",
+            "15- حي الكفر 1 - الساحة",
+            "16- حي الكفر 3 - ملعب برشلونة",
+            "17- حي الكفر 2 - تحت السكة",
+            "18- حي الفداء 1 - حمادة الكيال",
+            "19- حي سوق الجملة - على البياع",
+            "20- حي نقطة الأمام على",
+            "21- حي البر التاني - حي السلام",
+            "22- حي البر التاني - الهاويس",
+            "23- حي مصنع البصل - وليد فهيد",
+            "24- حي مدرسة عبد العال شلباية",
+            "25- حي المزرعة - السيد الحديدي",
+            "26- حي أمن الدولة",
+            "27- قرية الفروسات",
+            "28- قرية أبو الأخضر",
+            "29- قرية جديدة المنزلة",
+            "30- قرية العامرة",
+            "31- قرية مصر الجديدة",
+            "32- قرية عرب زيدان",
+            "33- قرية الستايتة",
+            "34- قرية كفر حجاج",
+            "35- قرية ميت خضير",
+            "36- قرية المواجد",
+            "37- قرية البصراط",
+            "38- قرية ميت شريف",
+            "39- قرية الطوابرة",
+            "40- قرية العمارنة",
+            "41- قرية أولاد بانا",
+            "42- قرية أولاد حانا",
+            "43- بحر حادوث",
+            "44- قرية القزاقزة",
+            "45- قرية الحوتة",
+            "46- قرية أولاد نور",
+            "47- قرية الخلايفة",
+            "48- قرية القطشة",
+            "49- قرية الجماملة",
+            "50- قرية العزيزة",
+            "51- قرية الأحمدية",
+            "52- قرية العربان",
+            "53- قرية أولاد علم",
+            "54- قرية أولاد ناصر",
+            "55- قرية بني هلال",
+            "56- قرية الشبول",
+            "57- قرية الرودة",
+            "58- قرية النسايمة",
+            "59- قرية العصافرة",
+            "60- قرية الضهير",
+            "61- الجمعية - المطرية",
+            "62- مصنع وائل شحاته - محمود عروس",
+            "63- منطقة سواريه - فاطمة الحوت",
+            "64- الجسر الواقي - محمود محمد أبو النجا",
+            "65- منطقة الحمايدة- مصطفي كمال",
+            "66- مكتبة فياض - حسن فياض",
+            "67- منطقة السحاروة - نصر السحاروي",
+            "68- جمعية الشريفية العصافرة -محمود خليل",
+            "69- عصام شتا الضهير",
+            "70- المدينة الصناعية - جمال حامد",
+            "71- العقوبين - حمادة حواله",
+            "72- جمعية المنار - محمد فاروق",
+            "73- المطرية - الثانوية بنات",
+            "74- المطرية - المعهد الديني",
+            "75- المطرية - أبو بكر الصديق",
+            "76- المطرية - أحمد ماهر",
+            "77- المطرية طارق بن زياد",
+            "78- المطرية عثمان بن عفان",
+            "79- المطرية - خالد بن الوليد",
+            "80- المطرية الإبتدائية",
+            "81- المطرية - على وليد",
+            "82- المطرية - أحمد صيام",
+            "83- المطرية - زياد حبشي",
+            "84- المطرية - مصطفى النجدي",
+            "85- المطرية نقطة رقم 24",
+            "86- المطرية نقطة رقم 25",
+            "87- المطرية نقطة رقم 26",
+            "88- المطرية نقطة رقم 27",
+            "89- المطرية نقطة رقم 28",
+            "90- المطرية نقطة رقم 29",
+            "91- المطرية نقطة رقم 30",
+            "92- المطرية نقطة رقم 31",
+            "93- المطرية نقطة رقم 32",
+            "94- المطرية نقطة رقم 33",
+            "95- المطرية نقطة رقم 34",
+            "96- المطرية نقطة رقم 35",
+            "97- المطرية نقطة رقم 36",
+            "98- المطرية نقطة رقم 37",
+            "99- المطرية نقطة رقم 38",
+            "100- المطرية نقطة رقم 39"
+        ];
+
+        // تهيئة صفحة HTML
+        document.addEventListener('DOMContentLoaded', function() {
+            const pointSelect = document.getElementById('pointSelect');
+            points.forEach(point => {
+                const option = document.createElement('option');
+                option.value = point;
+                option.textContent = point;
+                pointSelect.appendChild(option);
+            });
+
+            // تعيين التاريخ الحالي افتراضيًا
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateInput').value = today;
+
+            // تحميل البيانات المحفوظة
+            loadAllData();
+        });
+
+        // دالة حساب الفرق
+        function calculateDifference() {
+            const day1 = parseFloat(document.getElementById('day1').value) || 0;
+            const day2 = parseFloat(document.getElementById('day2').value) || 0;
+            const difference = day2 - day1;
+
+            // عرض النتائج
+            document.getElementById('resultDay1').textContent = day1.toFixed(2);
+            document.getElementById('resultDay2').textContent = day2.toFixed(2);
+            
+            const differenceElement = document.querySelector('#differenceResult span');
+            differenceElement.textContent = Math.abs(difference).toFixed(2);
+            
+            // تغيير اللون حسب القيمة
+            if (difference > 0) {
+                differenceElement.className = 'positive';
+                document.getElementById('differenceResult').innerHTML = `الفرق (زيادة): <span class="positive">+${difference.toFixed(2)}</span>`;
+            } else if (difference < 0) {
+                differenceElement.className = 'negative';
+                document.getElementById('differenceResult').innerHTML = `الفرق (نقصان): <span class="negative">${difference.toFixed(2)}</span>`;
+            } else {
+                differenceElement.className = 'neutral';
+                document.getElementById('differenceResult').innerHTML = `الفرق: <span class="neutral">${difference.toFixed(2)}</span>`;
+            }
+
+            // حساب الإحصائيات
+            const totalSum = day1 + day2;
+            const dailyAverage = totalSum / 2;
+            
+            document.getElementById('totalSum').textContent = totalSum.toFixed(2);
+            document.getElementById('dailyAverage').textContent = dailyAverage.toFixed(2);
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ar-EG');
+
+            showNotification('تم حساب الفرق بنجاح!', 'success');
+        }
+
+        // دالة حفظ البيانات في Firebase
+        async function saveData() {
+            const point = document.getElementById('pointSelect').value;
+            const date = document.getElementById('dateInput').value;
+            const day1 = parseFloat(document.getElementById('day1').value) || 0;
+            const day2 = parseFloat(document.getElementById('day2').value) || 0;
+            const notes = document.getElementById('notes').value;
+
+            if (!point) {
+                showNotification('يرجى اختيار النقطة أولاً', 'error');
+                return;
+            }
+
+            if (!date) {
+                showNotification('يرجى إدخال التاريخ', 'error');
+                return;
+            }
+
+            try {
+                const database = window.firebaseDatabase;
+                const { ref, set } = await import('https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js');
+                
+                // إنشاء معرف فريد للسجل
+                const recordId = `record_${Date.now()}`;
+                const recordRef = ref(database, `points/${point.replace(/[.#$\/\[\]]/g, '_')}/${recordId}`);
+                
+                const recordData = {
+                    point: point,
+                    date: date,
+                    day1: day1,
+                    day2: day2,
+                    difference: day2 - day1,
+                    notes: notes,
+                    timestamp: new Date().toISOString()
+                };
+
+                await set(recordRef, recordData);
+                showNotification('تم حفظ البيانات بنجاح في قاعدة البيانات', 'success');
+                
+                // تحديث الجدول
+                loadAllData();
+                
+            } catch (error) {
+                console.error('Error saving data:', error);
+                showNotification('حدث خطأ في حفظ البيانات', 'error');
+            }
+        }
+
+        // دالة تحميل جميع البيانات
+        async function loadAllData() {
+            const loadingElement = document.getElementById('loadingData');
+            const tableBody = document.getElementById('dataTableBody');
+            
+            loadingElement.style.display = 'block';
+            tableBody.innerHTML = '';
+
+            try {
+                const database = window.firebaseDatabase;
+                const { ref, get, child } = await import('https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js');
+                
+                const dbRef = ref(database);
+                const snapshot = await get(child(dbRef, 'points'));
+                
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    let allRecords = [];
+
+                    // جمع جميع السجلات
+                    Object.values(data).forEach(pointRecords => {
+                        Object.values(pointRecords).forEach(record => {
+                            allRecords.push(record);
+                        });
+                    });
+
+                    // ترتيب السجلات حسب التاريخ
+                    allRecords.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                    // عرض السجلات
+                    allRecords.forEach(record => {
+                        const row = document.createElement('tr');
+                        const difference = record.day2 - record.day1;
+                        const differenceClass = difference > 0 ? 'positive' : difference < 0 ? 'negative' : 'neutral';
+                        
+                        row.innerHTML = `
+                            <td>${record.point}</td>
+                            <td>${record.day1.toFixed(2)}</td>
+                            <td>${record.day2.toFixed(2)}</td>
+                            <td class="${differenceClass}">${difference.toFixed(2)}</td>
+                            <td>${record.date}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align:center;">لا توجد بيانات محفوظة</td>
+                        </tr>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center; color: red;">حدث خطأ في تحميل البيانات</td>
+                    </tr>
+                `;
+            } finally {
+                loadingElement.style.display = 'none';
+            }
+        }
+
+        // دالة مسح الحقول
+        function clearData() {
+            document.getElementById('day1').value = '';
+            document.getElementById('day2').value = '';
+            document.getElementById('notes').value = '';
+            document.getElementById('resultDay1').textContent = '0.00';
+            document.getElementById('resultDay2').textContent = '0.00';
+            document.getElementById('differenceResult').innerHTML = 'الفرق: <span class="neutral">0.00</span>';
+            document.getElementById('totalSum').textContent = '0.00';
+            document.getElementById('dailyAverage').textContent = '0.00';
+            
+            showNotification('تم مسح الحقول بنجاح', 'info');
+        }
+
+        // دالة عرض الإشعارات
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // دوال لاستخدامها من الكونسول إذا لزم الأمر
+        window.calculateDifference = calculateDifference;
+        window.saveData = saveData;
+        window.clearData = clearData;
+        window.loadAllData = loadAllData;
+    </script>
+</body>
+</html>
