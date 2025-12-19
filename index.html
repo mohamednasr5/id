@@ -525,7 +525,7 @@
         <div class="input-group">
             <label class="input-label">كود الدخول (6 أرقام)</label>
             <div style="position: relative;">
-                <input type="tel" id="loginCode" class="input-field" placeholder="900901" maxlength="6" inputmode="numeric">
+                <input type="tel" id="loginCode" class="input-field" placeholder="900801" maxlength="6" inputmode="numeric">
             </div>
             <div class="input-hint">أدخل كود الدخول المكون من 6 أرقام</div>
         </div>
@@ -897,7 +897,7 @@
         // أكواد الدخول - كلمات السر المكونة من 6 أرقام
         const LOGIN_CODES = {};
         for (let i = 1; i <= 100; i++) {
-            const code = `9009${i.toString().padStart(2, '0')}`;
+            const code = `9008${i.toString().padStart(2, '0')}`;
             LOGIN_CODES[code] = {
                 place: PLACES[i - 1],
                 placeIdx: i
